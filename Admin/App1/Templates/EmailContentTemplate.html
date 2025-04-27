@@ -1,0 +1,24 @@
+﻿<html>
+    <body style='font-family: Arial, sans-serif;'>
+        <h1>Admin Report - {{ReportDate}}</h1>
+                
+        <h2>User Statistics</h2>
+        <ul>
+            <li>Active Users: {{ActiveUsersCount}}</li>
+            <li>Banned Users: {{BannedUsersCount}}</li>
+        </ul>
+                
+        <h2>Review Statistics</h2>
+        <ul>
+            <li>New Reviews (last 24h): {{NewReviewsCount}}</li>
+            <li>Average Rating: {{AverageRating}}/5</li>
+        </ul>
+                
+        <h2>Recent Reviews</h2>
+        {{RecentReviewsHtml}}
+                
+        <footer style='margin-top: 20px; color: #666;'>
+            Generated at {{GeneratedAt}}
+        </footer>
+    </body>
+</html>

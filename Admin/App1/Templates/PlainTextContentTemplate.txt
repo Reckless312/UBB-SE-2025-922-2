@@ -1,0 +1,11 @@
+﻿ADMIN REPORT - {{ReportDate}}
+
+User Statistics:
+- Active Users: {{ActiveUsersCount}}
+- Banned Users: {{BannedUsersCount}}
+
+Review Statistics:
+- New Reviews: {{NewReviewsCount}}
+- Average Rating: {{AverageRating}}
+
+Generated at {{GeneratedAt}}
