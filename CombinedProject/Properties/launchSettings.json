@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "DrinkDb_Auth (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "DrinkDb_Auth (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
