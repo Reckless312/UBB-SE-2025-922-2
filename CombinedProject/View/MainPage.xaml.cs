@@ -1,4 +1,4 @@
-namespace CombinedProject.Views
+namespace CombinedProject.View
 {
     using System;
     using System.ComponentModel;

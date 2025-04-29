@@ -12,9 +12,12 @@
 		<Nullable>enable</Nullable>
 		<PlatformTarget>x64</PlatformTarget>
 		<GenerateAppInstallerFile>False</GenerateAppInstallerFile>
-		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<!-- Disable self-contained for Debug, enable for others -->
+		<WindowsAppSDKSelfContained Condition="'$(Configuration)' == 'Debug'">false</WindowsAppSDKSelfContained>
+		<WindowsAppSDKSelfContained Condition="'$(Configuration)' != 'Debug'">true</WindowsAppSDKSelfContained>
 	</PropertyGroup>
+
 
 	<!-- Microsoft.ML specific configuration -->
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -29,7 +32,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Page Remove="View\MainPage.xaml" />
+		<Page Update="View\MainPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -76,11 +81,6 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-	</ItemGroup>
-	<ItemGroup>
-		<None Update="View\MainPage.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</None>
 	</ItemGroup>
 
 	<!--

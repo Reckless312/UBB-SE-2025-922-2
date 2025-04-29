@@ -1,9 +1,9 @@
 {
   "profiles": {
-    "DrinkDb_Auth (Package)": {
+    "CombinedProject (Package)": {
       "commandName": "MsixPackage"
     },
-    "DrinkDb_Auth (Unpackaged)": {
+    "CombinedProject (Unpackaged)": {
       "commandName": "Project"
     }
   }
