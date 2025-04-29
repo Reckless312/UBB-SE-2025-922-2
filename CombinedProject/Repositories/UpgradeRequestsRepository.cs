@@ -1,14 +1,10 @@
-﻿// <copyright file="UpgradeRequestsRepository.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace App1.Repositories
+﻿namespace CombinedProject.Repositories
 {
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using App1.Infrastructure;
-    using App1.Models;
+    using CombinedProject.Infrastructure;
+    using CombinedProject.Model;
     using Microsoft.Data.SqlClient;
 
     public class UpgradeRequestsRepository : IUpgradeRequestsRepository
@@ -34,7 +30,7 @@ namespace App1.Repositories
         {
             List<UpgradeRequest> upgradeRequestsList = new List<UpgradeRequest>();
 
-            using (var connection = this.connectionFactory.CreateConnection())
+            using (var connection = connectionFactory.CreateConnection())
             {
                 try
                 {
@@ -46,7 +42,7 @@ namespace App1.Repositories
                     {
                         UpgradeRequest upgradeRequest = new UpgradeRequest(
                             reader.GetInt32(0),
-                            reader.GetInt32(1),
+                            reader.GetGuid(1),
                             reader.GetString(2));
 
                         upgradeRequestsList.Add(upgradeRequest);
@@ -63,7 +59,7 @@ namespace App1.Repositories
 
         public void RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
         {
-            using (var connection = this.connectionFactory.CreateConnection())
+            using (var connection = connectionFactory.CreateConnection())
             {
                 try
                 {
@@ -83,7 +79,7 @@ namespace App1.Repositories
         {
             UpgradeRequest? retrievedUpgradeRequest = null;
 
-            using (var connection = this.connectionFactory.CreateConnection())
+            using (var connection = connectionFactory.CreateConnection())
             {
                 try
                 {
@@ -96,7 +92,7 @@ namespace App1.Repositories
                     {
                         retrievedUpgradeRequest = new UpgradeRequest(
                             reader.GetInt32(0),
-                            reader.GetInt32(1),
+                            reader.GetGuid(1),
                             reader.GetString(2));
                     }
                 }

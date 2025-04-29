@@ -1,8 +1,4 @@
-// <copyright file="MainPageViewModel.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace App1.ViewModels
+namespace CombinedProject.ViewModel
 {
     using System;
     using System.Collections.Generic;
@@ -11,12 +7,12 @@ namespace App1.ViewModels
     using System.Linq;
     using System.Runtime.CompilerServices;
     using System.Windows.Input;
-    using App1.AutoChecker;
-    using App1.Models;
-    using App1.Services;
+    using CombinedProject.AutoChecker;
+    using CombinedProject.Model;
     using LiveChartsCore;
     using LiveChartsCore.Kernel.Sketches;
     using LiveChartsCore.SkiaSharpView;
+    using CombinedProject.Service;
 
     /// <summary>
     /// View model for the main page that handles review moderation and user management.
@@ -63,13 +59,13 @@ namespace App1.ViewModels
         {
             this.reviewsService = reviewsService ?? throw new ArgumentNullException(nameof(reviewsService));
             this.userService = userService ?? throw new ArgumentNullException(nameof(userService));
-            this.requestsService = upgradeRequestsService ?? throw new ArgumentNullException(nameof(upgradeRequestsService));
+            requestsService = upgradeRequestsService ?? throw new ArgumentNullException(nameof(upgradeRequestsService));
             this.checkersService = checkersService ?? throw new ArgumentNullException(nameof(checkersService));
             this.autoCheck = autoCheck ?? throw new ArgumentNullException(nameof(autoCheck));
 
-            this.InitializeCommands();
+            InitializeCommands();
 
-            this.LoadAllData();
+            LoadAllData();
         }
 
         /// <summary>
@@ -142,11 +138,11 @@ namespace App1.ViewModels
         /// </summary>
         public ObservableCollection<Review> FlaggedReviews
         {
-            get => this.flaggedReviews;
+            get => flaggedReviews;
             set
             {
-                this.flaggedReviews = value;
-                this.OnPropertyChanged();
+                flaggedReviews = value;
+                OnPropertyChanged();
             }
         }
 
@@ -155,11 +151,11 @@ namespace App1.ViewModels
         /// </summary>
         public ObservableCollection<User> AppealsUsers
         {
-            get => this.appealsUsers;
+            get => appealsUsers;
             set
             {
-                this.appealsUsers = value;
-                this.OnPropertyChanged();
+                appealsUsers = value;
+                OnPropertyChanged();
             }
         }
 
@@ -168,11 +164,11 @@ namespace App1.ViewModels
         /// </summary>
         public ObservableCollection<UpgradeRequest> UpgradeRequests
         {
-            get => this.upgradeRequests;
+            get => upgradeRequests;
             set
             {
-                this.upgradeRequests = value;
-                this.OnPropertyChanged();
+                upgradeRequests = value;
+                OnPropertyChanged();
             }
         }
 
@@ -181,11 +177,11 @@ namespace App1.ViewModels
         /// </summary>
         public ObservableCollection<string> OffensiveWords
         {
-            get => this.offensiveWords;
+            get => offensiveWords;
             set
             {
-                this.offensiveWords = value;
-                this.OnPropertyChanged();
+                offensiveWords = value;
+                OnPropertyChanged();
             }
         }
 
@@ -194,11 +190,11 @@ namespace App1.ViewModels
         /// </summary>
         public ISeries[] PieChartSeries
         {
-            get => this.pieChartSeries;
+            get => pieChartSeries;
             set
             {
-                this.pieChartSeries = value;
-                this.OnPropertyChanged();
+                pieChartSeries = value;
+                OnPropertyChanged();
             }
         }
 
@@ -207,11 +203,11 @@ namespace App1.ViewModels
         /// </summary>
         public ISeries[] BarChartSeries
         {
-            get => this.barChartSeries;
+            get => barChartSeries;
             set
             {
-                this.barChartSeries = value;
-                this.OnPropertyChanged();
+                barChartSeries = value;
+                OnPropertyChanged();
             }
         }
 
@@ -220,11 +216,11 @@ namespace App1.ViewModels
         /// </summary>
         public IEnumerable<ICartesianAxis> BarChartXAxes
         {
-            get => this.barChartXAxes;
+            get => barChartXAxes;
             set
             {
-                this.barChartXAxes = value;
-                this.OnPropertyChanged();
+                barChartXAxes = value;
+                OnPropertyChanged();
             }
         }
 
@@ -233,11 +229,11 @@ namespace App1.ViewModels
         /// </summary>
         public IEnumerable<ICartesianAxis> BarChartYAxes
         {
-            get => this.barChartYAxes;
+            get => barChartYAxes;
             set
             {
-                this.barChartYAxes = value;
-                this.OnPropertyChanged();
+                barChartYAxes = value;
+                OnPropertyChanged();
             }
         }
 
@@ -246,16 +242,16 @@ namespace App1.ViewModels
         /// </summary>
         public User SelectedAppealUser
         {
-            get => this.selectedAppealUser;
+            get => selectedAppealUser;
             set
             {
-                this.selectedAppealUser = value;
+                selectedAppealUser = value;
                 if (value != null)
                 {
-                    this.LoadUserAppealDetails(value);
+                    LoadUserAppealDetails(value);
                 }
 
-                this.OnPropertyChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -264,16 +260,16 @@ namespace App1.ViewModels
         /// </summary>
         public UpgradeRequest SelectedUpgradeRequest
         {
-            get => this.selectedUpgradeRequest;
+            get => selectedUpgradeRequest;
             set
             {
-                this.selectedUpgradeRequest = value;
+                selectedUpgradeRequest = value;
                 if (value != null)
                 {
-                    this.LoadUpgradeRequestDetails(value);
+                    LoadUpgradeRequestDetails(value);
                 }
 
-                this.OnPropertyChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -282,11 +278,11 @@ namespace App1.ViewModels
         /// </summary>
         public ObservableCollection<string> UserReviewsFormatted
         {
-            get => this.userReviewsFormatted;
+            get => userReviewsFormatted;
             set
             {
-                this.userReviewsFormatted = value;
-                this.OnPropertyChanged();
+                userReviewsFormatted = value;
+                OnPropertyChanged();
             }
         }
 
@@ -295,11 +291,11 @@ namespace App1.ViewModels
         /// </summary>
         public ObservableCollection<string> UserReviewsWithFlags
         {
-            get => this.userReviewsWithFlags;
+            get => userReviewsWithFlags;
             set
             {
-                this.userReviewsWithFlags = value;
-                this.OnPropertyChanged();
+                userReviewsWithFlags = value;
+                OnPropertyChanged();
             }
         }
 
@@ -308,11 +304,11 @@ namespace App1.ViewModels
         /// </summary>
         public string UserStatusDisplay
         {
-            get => this.userStatusDisplay;
+            get => userStatusDisplay;
             set
             {
-                this.userStatusDisplay = value;
-                this.OnPropertyChanged();
+                userStatusDisplay = value;
+                OnPropertyChanged();
             }
         }
 
@@ -321,11 +317,11 @@ namespace App1.ViewModels
         /// </summary>
         public string UserUpgradeInfo
         {
-            get => this.userUpgradeInfo;
+            get => userUpgradeInfo;
             set
             {
-                this.userUpgradeInfo = value;
-                this.OnPropertyChanged();
+                userUpgradeInfo = value;
+                OnPropertyChanged();
             }
         }
 
@@ -334,12 +330,12 @@ namespace App1.ViewModels
         /// </summary>
         public bool IsAppealUserBanned
         {
-            get => this.isAppealUserBanned;
+            get => isAppealUserBanned;
             set
             {
-                this.isAppealUserBanned = value;
-                this.UserStatusDisplay = this.GetUserStatusDisplay(this.SelectedAppealUser, value);
-                this.OnPropertyChanged();
+                isAppealUserBanned = value;
+                UserStatusDisplay = GetUserStatusDisplay(SelectedAppealUser, value);
+                OnPropertyChanged();
             }
         }
 
@@ -348,11 +344,11 @@ namespace App1.ViewModels
         /// </summary>
         public bool IsWordListVisible
         {
-            get => this.isWordListVisible;
+            get => isWordListVisible;
             set
             {
-                this.isWordListVisible = value;
-                this.OnPropertyChanged();
+                isWordListVisible = value;
+                OnPropertyChanged();
             }
         }
 
@@ -361,11 +357,11 @@ namespace App1.ViewModels
         /// </summary>
         public void LoadAllData()
         {
-            this.LoadFlaggedReviews();
-            this.LoadAppeals();
-            this.LoadRoleRequests();
-            this.LoadStatistics();
-            this.LoadOffensiveWords();
+            LoadFlaggedReviews();
+            LoadAppeals();
+            LoadRoleRequests();
+            LoadStatistics();
+            LoadOffensiveWords();
         }
 
         /// <summary>
@@ -373,7 +369,7 @@ namespace App1.ViewModels
         /// </summary>
         public void LoadFlaggedReviews()
         {
-            this.FlaggedReviews = new ObservableCollection<Review>(this.reviewsService.GetFlaggedReviews());
+            FlaggedReviews = new ObservableCollection<Review>(reviewsService.GetFlaggedReviews());
         }
 
         /// <summary>
@@ -381,7 +377,7 @@ namespace App1.ViewModels
         /// </summary>
         public void LoadAppeals()
         {
-            this.AppealsUsers = new ObservableCollection<User>(this.userService.GetBannedUsersWhoHaveSubmittedAppeals());
+            AppealsUsers = new ObservableCollection<User>(userService.GetBannedUsersWhoHaveSubmittedAppeals());
         }
 
         /// <summary>
@@ -389,7 +385,7 @@ namespace App1.ViewModels
         /// </summary>
         public void LoadRoleRequests()
         {
-            this.UpgradeRequests = new ObservableCollection<UpgradeRequest>(this.requestsService.RetrieveAllUpgradeRequests());
+            UpgradeRequests = new ObservableCollection<UpgradeRequest>(requestsService.RetrieveAllUpgradeRequests());
         }
 
         /// <summary>
@@ -397,7 +393,7 @@ namespace App1.ViewModels
         /// </summary>
         public void LoadOffensiveWords()
         {
-            this.OffensiveWords = new ObservableCollection<string>(this.checkersService.GetOffensiveWordsList());
+            OffensiveWords = new ObservableCollection<string>(checkersService.GetOffensiveWordsList());
         }
 
         /// <summary>
@@ -405,8 +401,8 @@ namespace App1.ViewModels
         /// </summary>
         public void LoadStatistics()
         {
-            this.LoadPieChart();
-            this.LoadBarChart();
+            LoadPieChart();
+            LoadBarChart();
         }
 
         /// <summary>
@@ -415,8 +411,8 @@ namespace App1.ViewModels
         /// <param name="filter">The filter string to apply.</param>
         public void FilterReviews(string filter)
         {
-            this.FlaggedReviews = new ObservableCollection<Review>(
-                this.reviewsService.FilterReviewsByContent(filter));
+            FlaggedReviews = new ObservableCollection<Review>(
+                reviewsService.FilterReviewsByContent(filter));
         }
 
         /// <summary>
@@ -427,13 +423,13 @@ namespace App1.ViewModels
         {
             if (string.IsNullOrEmpty(filter))
             {
-                this.LoadAppeals();
+                LoadAppeals();
                 return;
             }
 
             filter = filter.ToLower();
-            this.AppealsUsers = new ObservableCollection<User>(
-                this.userService.GetBannedUsersWhoHaveSubmittedAppeals()
+            AppealsUsers = new ObservableCollection<User>(
+                userService.GetBannedUsersWhoHaveSubmittedAppeals()
                     .Where(user =>
                         user.EmailAddress.ToLower().Contains(filter) ||
                         user.FullName.ToLower().Contains(filter) ||
@@ -447,9 +443,9 @@ namespace App1.ViewModels
         /// <param name="reviewId">The ID of the review to reset.</param>
         public void ResetReviewFlags(int reviewId)
         {
-            this.reviewsService.ResetReviewFlags(reviewId);
-            this.LoadFlaggedReviews();
-            this.LoadStatistics();
+            reviewsService.ResetReviewFlags(reviewId);
+            LoadFlaggedReviews();
+            LoadStatistics();
         }
 
         /// <summary>
@@ -457,12 +453,12 @@ namespace App1.ViewModels
         /// </summary>
         /// <param name="userId">The ID of the user who owns the review.</param>
         /// <param name="reviewId">The ID of the review to hide.</param>
-        public void HideReview(int userId, int reviewId)
+        public void HideReview(Guid userId, int reviewId)
         {
-            this.reviewsService.HideReview(userId);
-            this.reviewsService.ResetReviewFlags(reviewId);
-            this.LoadFlaggedReviews();
-            this.LoadStatistics();
+            reviewsService.HideReview(reviewId);
+            reviewsService.ResetReviewFlags(reviewId);
+            LoadFlaggedReviews();
+            LoadStatistics();
         }
 
         /// <summary>
@@ -471,8 +467,8 @@ namespace App1.ViewModels
         /// <param name="review">The review to check.</param>
         public void RunAICheck(Review review)
         {
-            this.checkersService.RunAICheckForOneReview(review);
-            this.LoadFlaggedReviews();
+            checkersService.RunAICheckForOneReview(review);
+            LoadFlaggedReviews();
         }
 
         /// <summary>
@@ -481,10 +477,10 @@ namespace App1.ViewModels
         /// <returns>A list of messages from the checker.</returns>
         public List<string> RunAutoCheck()
         {
-            List<Review> reviews = this.reviewsService.GetFlaggedReviews();
-            List<string> messages = this.checkersService.RunAutoCheck(reviews);
-            this.LoadFlaggedReviews();
-            this.LoadStatistics();
+            List<Review> reviews = reviewsService.GetFlaggedReviews();
+            List<string> messages = checkersService.RunAutoCheck(reviews);
+            LoadFlaggedReviews();
+            LoadStatistics();
             return messages;
         }
 
@@ -496,8 +492,8 @@ namespace App1.ViewModels
         {
             if (!string.IsNullOrWhiteSpace(word))
             {
-                this.checkersService.AddOffensiveWord(word);
-                this.LoadOffensiveWords();
+                checkersService.AddOffensiveWord(word);
+                LoadOffensiveWords();
             }
         }
 
@@ -507,8 +503,8 @@ namespace App1.ViewModels
         /// <param name="word">The word to delete.</param>
         public void DeleteOffensiveWord(string word)
         {
-            this.checkersService.DeleteOffensiveWord(word);
-            this.LoadOffensiveWords();
+            checkersService.DeleteOffensiveWord(word);
+            LoadOffensiveWords();
         }
 
         /// <summary>
@@ -518,9 +514,9 @@ namespace App1.ViewModels
         /// <param name="requestId">The ID of the request.</param>
         public void HandleUpgradeRequest(bool approve, int requestId)
         {
-            this.requestsService.ProcessUpgradeRequest(approve, requestId);
-            this.LoadRoleRequests();
-            this.LoadStatistics();
+            requestsService.ProcessUpgradeRequest(approve, requestId);
+            LoadRoleRequests();
+            LoadStatistics();
         }
 
         /// <summary>
@@ -530,7 +526,7 @@ namespace App1.ViewModels
         public void CloseAppealCase(User user)
         {
             user.HasSubmittedAppeal = false;
-            this.LoadAppeals();
+            LoadAppeals();
         }
 
         /// <summary>
@@ -538,9 +534,9 @@ namespace App1.ViewModels
         /// </summary>
         /// <param name="userId">The ID of the user.</param>
         /// <returns>A list of reviews by the user.</returns>
-        public List<Review> GetUserReviews(int userId)
+        public List<Review> GetUserReviews(Guid userId)
         {
-            return this.reviewsService.GetReviewsByUser(userId);
+            return reviewsService.GetReviewsByUser(userId);
         }
 
         /// <summary>
@@ -548,9 +544,9 @@ namespace App1.ViewModels
         /// </summary>
         /// <param name="userId">The ID of the user.</param>
         /// <returns>The user object.</returns>
-        public User GetUserById(int userId)
+        public User GetUserById(Guid userId)
         {
-            return this.userService.GetUserById(userId);
+            return userService.GetUserById(userId);
         }
 
         /// <summary>
@@ -558,9 +554,9 @@ namespace App1.ViewModels
         /// </summary>
         /// <param name="userId">The ID of the user.</param>
         /// <returns>The highest role type.</returns>
-        public RoleType GetHighestRoleTypeForUser(int userId)
+        public RoleType GetHighestRoleTypeForUser(Guid userId)
         {
-            return this.userService.GetHighestRoleTypeForUser(userId);
+            return userService.GetHighestRoleTypeForUser(userId);
         }
 
         /// <summary>
@@ -570,7 +566,7 @@ namespace App1.ViewModels
         /// <returns>The role name.</returns>
         public string GetRoleNameBasedOnID(RoleType roleType)
         {
-            return this.requestsService.GetRoleNameBasedOnIdentifier(roleType);
+            return requestsService.GetRoleNameBasedOnIdentifier(roleType);
         }
 
         /// <summary>
@@ -579,13 +575,13 @@ namespace App1.ViewModels
         /// <param name="user">The user to load details for.</param>
         public void LoadUserAppealDetails(User user)
         {
-            this.SelectedAppealUser = user;
-            this.IsAppealUserBanned = true;
-            this.UserStatusDisplay = this.GetUserStatusDisplay(user, true);
+            SelectedAppealUser = user;
+            IsAppealUserBanned = true;
+            UserStatusDisplay = GetUserStatusDisplay(user, true);
 
             List<Review> reviews = this.GetUserReviews(user.UserId);
-            this.UserReviewsFormatted = new ObservableCollection<string>(
-                reviews.Select(r => this.FormatReviewContent(r)).ToList());
+            UserReviewsFormatted = new ObservableCollection<string>(
+                reviews.Select(r => FormatReviewContent(r)).ToList());
         }
 
         /// <summary>
@@ -599,10 +595,10 @@ namespace App1.ViewModels
                 return;
             }
 
-            this.UpdateUserRole(user, RoleType.Banned);
-            this.IsAppealUserBanned = true;
-            this.UserStatusDisplay = this.GetUserStatusDisplay(user, true);
-            this.LoadStatistics();
+            UpdateUserRole(user, RoleType.Banned);
+            IsAppealUserBanned = true;
+            UserStatusDisplay = GetUserStatusDisplay(user, true);
+            LoadStatistics();
         }
 
         /// <summary>
@@ -616,10 +612,10 @@ namespace App1.ViewModels
                 return;
             }
 
-            this.UpdateUserRole(user, RoleType.User);
-            this.IsAppealUserBanned = false;
-            this.UserStatusDisplay = this.GetUserStatusDisplay(user, false);
-            this.LoadStatistics();
+            UpdateUserRole(user, RoleType.User);
+            IsAppealUserBanned = false;
+            UserStatusDisplay = GetUserStatusDisplay(user, false);
+            LoadStatistics();
         }
 
         /// <summary>
@@ -628,19 +624,19 @@ namespace App1.ViewModels
         /// <param name="request">The upgrade request to load details for.</param>
         public void LoadUpgradeRequestDetails(UpgradeRequest request)
         {
-            this.SelectedUpgradeRequest = request;
+            SelectedUpgradeRequest = request;
 
-            int userId = request.RequestingUserIdentifier;
-            User selectedUser = this.GetUserById(userId);
+            Guid userId = request.RequestingUserIdentifier;
+            User selectedUser = GetUserById(userId);
             RoleType currentRoleID = this.GetHighestRoleTypeForUser(selectedUser.UserId);
-            string currentRoleName = this.GetRoleNameBasedOnID(currentRoleID);
-            string requiredRoleName = this.GetRoleNameBasedOnID(currentRoleID + 1);
+            string currentRoleName = GetRoleNameBasedOnID(currentRoleID);
+            string requiredRoleName = GetRoleNameBasedOnID(currentRoleID + 1);
 
-            this.UserUpgradeInfo = this.FormatUserUpgradeInfo(selectedUser, currentRoleName, requiredRoleName);
+            UserUpgradeInfo = FormatUserUpgradeInfo(selectedUser, currentRoleName, requiredRoleName);
 
             List<Review> reviews = this.GetUserReviews(selectedUser.UserId);
-            this.UserReviewsWithFlags = new ObservableCollection<string>(
-                reviews.Select(r => this.FormatReviewWithFlags(r)).ToList());
+            UserReviewsWithFlags = new ObservableCollection<string>(
+                reviews.Select(r => FormatReviewWithFlags(r)).ToList());
         }
 
         /// <summary>
@@ -711,7 +707,7 @@ namespace App1.ViewModels
         /// </summary>
         public void ShowWordListPopup()
         {
-            this.IsWordListVisible = true;
+            IsWordListVisible = true;
         }
 
         /// <summary>
@@ -719,7 +715,7 @@ namespace App1.ViewModels
         /// </summary>
         public void HideWordListPopup()
         {
-            this.IsWordListVisible = false;
+            IsWordListVisible = false;
         }
 
         /// <summary>
@@ -728,7 +724,7 @@ namespace App1.ViewModels
         /// <param name="propertyName">The name of the property that changed.</param>
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         /// <summary>
@@ -736,11 +732,11 @@ namespace App1.ViewModels
         /// </summary>
         private void LoadBarChart()
         {
-            int rejectedCount = this.reviewsService.GetHiddenReviews().Count;
-            int pendingCount = this.reviewsService.GetFlaggedReviews().Count;
-            int totalCount = this.reviewsService.GetAllReviews().Count;
+            int rejectedCount = reviewsService.GetHiddenReviews().Count;
+            int pendingCount = reviewsService.GetFlaggedReviews().Count;
+            int totalCount = reviewsService.GetAllReviews().Count;
 
-            this.BarChartSeries = new ISeries[]
+            BarChartSeries = new ISeries[]
             {
                 new ColumnSeries<double>
                 {
@@ -748,12 +744,12 @@ namespace App1.ViewModels
                 },
             };
 
-            this.BarChartXAxes = new[]
+            BarChartXAxes = new[]
             {
                 new Axis { Labels = new List<string> { "rejected", "pending", "total" } },
             };
 
-            this.BarChartYAxes = new[]
+            BarChartYAxes = new[]
             {
                 new Axis { Name = "Total", MinLimit = 0 },
             };
@@ -764,32 +760,32 @@ namespace App1.ViewModels
         /// </summary>
         private void InitializeCommands()
         {
-            this.KeepBanCommand = new RelayCommand(() => this.KeepBanForUser(this.SelectedAppealUser));
-            this.AcceptAppealCommand = new RelayCommand(() => this.AcceptAppealForUser(this.SelectedAppealUser));
-            this.CloseAppealCaseCommand = new RelayCommand(() => this.CloseAppealCase(this.SelectedAppealUser));
+            KeepBanCommand = new RelayCommand(() => KeepBanForUser(SelectedAppealUser));
+            AcceptAppealCommand = new RelayCommand(() => AcceptAppealForUser(SelectedAppealUser));
+            CloseAppealCaseCommand = new RelayCommand(() => CloseAppealCase(SelectedAppealUser));
 
-            this.HandleUpgradeRequestCommand = new RelayCommand<Tuple<bool, int>>(param =>
+            HandleUpgradeRequestCommand = new RelayCommand<Tuple<bool, int>>(param =>
                 this.HandleUpgradeRequest(param.Item1, param.Item2));
 
-            this.ResetReviewFlagsCommand = new RelayCommand<int>(reviewId =>
+            ResetReviewFlagsCommand = new RelayCommand<int>(reviewId =>
                 this.ResetReviewFlags(reviewId));
 
-            this.HideReviewCommand = new RelayCommand<Tuple<int, int>>(param =>
+            HideReviewCommand = new RelayCommand<Tuple<Guid, int>>(param =>
                 this.HideReview(param.Item1, param.Item2));
 
-            this.RunAICheckCommand = new RelayCommand<Review>(review =>
+            RunAICheckCommand = new RelayCommand<Review>(review =>
                 this.RunAICheck(review));
 
-            this.RunAutoCheckCommand = new RelayCommand(() => this.RunAutoCheck());
+            RunAutoCheckCommand = new RelayCommand(() => RunAutoCheck());
 
-            this.AddOffensiveWordCommand = new RelayCommand<string>(word =>
+            AddOffensiveWordCommand = new RelayCommand<string>(word =>
                 this.AddOffensiveWord(word));
 
-            this.DeleteOffensiveWordCommand = new RelayCommand<string>(word =>
+            DeleteOffensiveWordCommand = new RelayCommand<string>(word =>
                 this.DeleteOffensiveWord(word));
 
-            this.ShowWordListPopupCommand = new RelayCommand(() => this.ShowWordListPopup());
-            this.HideWordListPopupCommand = new RelayCommand(() => this.HideWordListPopup());
+            ShowWordListPopupCommand = new RelayCommand(() => ShowWordListPopup());
+            HideWordListPopupCommand = new RelayCommand(() => HideWordListPopup());
         }
 
         /// <summary>
@@ -802,7 +798,7 @@ namespace App1.ViewModels
             int adminsCount = 0;
             int managerCount = 0;
 
-            List<User> users = this.userService.GetAllUsers();
+            List<User> users = userService.GetAllUsers();
             foreach (User user in users)
             {
                 int count = user.AssignedRoles.Count;
@@ -823,7 +819,7 @@ namespace App1.ViewModels
                 }
             }
 
-            this.PieChartSeries = new ISeries[]
+            PieChartSeries = new ISeries[]
             {
                 new PieSeries<double> { Values = new double[] { bannedCount }, Name = "Banned" },
                 new PieSeries<double> { Values = new double[] { usersCount }, Name = "Users" },
@@ -839,7 +835,7 @@ namespace App1.ViewModels
         /// <param name="roleType">The role type to assign.</param>
         private void UpdateUserRole(User user, RoleType roleType)
         {
-            this.userService.UpdateUserRole(user.UserId, roleType);
+            userService.UpdateUserRole(user.UserId, roleType);
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+
 namespace CombinedProject.Model
 {
     public class Permission
@@ -9,4 +10,3 @@ namespace CombinedProject.Model
         public required string Action { get; set; }
     }
 }
-

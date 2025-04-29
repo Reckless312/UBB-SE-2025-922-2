@@ -3,7 +3,7 @@ using System.Windows.Input;
 
 namespace CombinedProject.ViewModel
 {
-    public class RelayCommand : ICommand
+    public partial class RelayCommand : ICommand
     {
         private readonly Action executableActions;
         private readonly Func<bool>? isExecutable;

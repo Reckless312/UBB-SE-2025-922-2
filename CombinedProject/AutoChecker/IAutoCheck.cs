@@ -1,8 +1,4 @@
-﻿// <copyright file="IAutoCheck.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace App1.AutoChecker
+﻿namespace CombinedProject.AutoChecker
 {
     using System;
     using System.Collections.Generic;

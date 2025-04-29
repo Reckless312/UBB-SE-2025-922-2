@@ -1,12 +1,8 @@
-﻿// <copyright file="IReviewService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace App1.Services
+﻿namespace CombinedProject.Service
 {
     using System;
     using System.Collections.Generic;
-    using App1.Models;
+    using CombinedProject.Model;
 
     /// <summary>
     /// Service interface for managing reviews in the application.
@@ -75,13 +71,13 @@ namespace App1.Services
         /// </summary>
         /// <param name="userId">The ID of the user.</param>
         /// <returns>A list of reviews created by the specified user.</returns>
-        List<Review> GetReviewsByUser(int userId);
+        List<Review> GetReviewsByUser(Guid userId);
 
         /// <summary>
         /// Resets the flag count for a review to zero.
         /// </summary>
-        /// <param name="userID">The ID of the user who created the review.</param>
-        void ResetReviewFlags(int userID);
+        /// <param name="revieId">The ID of the review.</param>
+        void ResetReviewFlags(int reviewId);
 
         // Add new filter methods
         public List<Review> FilterReviewsByContent(string content);

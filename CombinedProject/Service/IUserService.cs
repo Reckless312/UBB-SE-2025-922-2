@@ -1,11 +1,8 @@
-﻿// <copyright file="IUserService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace App1.Services
+﻿namespace CombinedProject.Service
 {
+    using System;
     using System.Collections.Generic;
-    using App1.Models;
+    using CombinedProject.Model;
 
     /// <summary>
     /// Provides user-related operations for retrieving and modifying user data.
@@ -67,27 +64,27 @@ namespace App1.Services
         /// </summary>
         /// <param name="id">The user ID.</param>
         /// <returns>The user with the specified ID, or null if not found.</returns>
-        User GetUserById(int id);
+        User GetUserById(Guid id);
 
         /// <summary>
         /// Gets the highest role type assigned to a user.
         /// </summary>
         /// <param name="id">The user ID.</param>
         /// <returns>The highest role type.</returns>
-        RoleType GetHighestRoleTypeForUser(int id);
+        RoleType GetHighestRoleTypeForUser(Guid id);
 
         /// <summary>
         /// Updates a user's role.
         /// </summary>
         /// <param name="userId">The ID of the user to update.</param>
         /// <param name="roleType">The new role type to assign.</param>
-        void UpdateUserRole(int userId, RoleType roleType);
+        void UpdateUserRole(Guid userId, RoleType roleType);
 
         /// <summary>
         /// Gets the full name of a user by their ID.
         /// </summary>
         /// <param name="userId">The user ID.</param>
         /// <returns>The full name of the user.</returns>
-        string GetUserFullNameById(int userId);
+        string GetUserFullNameById(Guid userId);
     }
 }

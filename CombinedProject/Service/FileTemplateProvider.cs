@@ -1,8 +1,4 @@
-﻿// <copyright file="FileTemplateProvider.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace App1.Services
+﻿namespace CombinedProject.Service
 {
     using System;
     using System.Collections.Generic;

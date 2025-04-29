@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Page
-    x:Class="App1.Views.MainPage"
+    x:Class="CombinedProject.Views.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:App1.Views"
+    xmlns:local="using:CombinedProject.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-    xmlns:models="using:App1.Models" 
+    xmlns:models="using:CombinedProject.Model" 
     xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
-    xmlns:converters="using:App1.Converters"
-    xmlns:viewmodels="using:App1.ViewModels"
+    xmlns:converters="using:CombinedProject.Converters"
+    xmlns:viewmodels="using:CombinedProject.ViewModel"
 >
 
     <Page.Resources>
@@ -135,7 +135,7 @@
                 </Grid.ColumnDefinitions>
                         
                 <Button 
-                    CornerRadius="8"
+                    CornerRadius="8"    
                     Background="{StaticResource AccentColor}"
                     Foreground="White"
                     Padding="12,8"

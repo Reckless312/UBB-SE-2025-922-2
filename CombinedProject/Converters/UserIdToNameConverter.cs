@@ -1,11 +1,8 @@
-// <copyright file="UserIdToNameConverter.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace App1.Converters
+namespace CombinedProject.Converters
 {
     using System;
-    using App1.Services;
+    using CombinedProject.Service;
+    using CombinedProject.Services;
     using Microsoft.UI.Xaml.Data;
 
     /// <summary>
@@ -35,7 +32,7 @@ namespace App1.Converters
         /// <returns>A string representation of the user name.</returns>
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            if (value is int userId && userService != null)
+            if (value is Guid userId && userService != null)
             {
                 try
                 {

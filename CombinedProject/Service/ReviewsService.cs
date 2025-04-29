@@ -1,14 +1,10 @@
-﻿// <copyright file="ReviewsService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace App1.Services
+﻿namespace CombinedProject.Service
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using App1.Models;
-    using App1.Repositories;
+    using CombinedProject.Repositories;
+    using CombinedProject.Model;
 
     public class ReviewsService : IReviewService
     {
@@ -64,7 +60,7 @@ namespace App1.Services
             return this.reviewsRepository.GetReviewCountAfterDate(date);
         }
 
-        public List<Review> GetReviewsByUser(int userId)
+        public List<Review> GetReviewsByUser(Guid userId)
         {
             return this.reviewsRepository.GetReviewsByUser(userId);
         }

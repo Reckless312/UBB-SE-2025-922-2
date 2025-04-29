@@ -1,8 +1,4 @@
-﻿// <copyright file="ReviewModelTrainer.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace App1.AiCheck
+﻿namespace CombinedProject.AiCheck
 {
     using System;
     using System.Collections.Generic;

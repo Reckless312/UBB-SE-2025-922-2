@@ -1,9 +1,10 @@
-﻿namespace App1.Services
+﻿namespace CombinedProject.Service
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
-    using App1.Models;
-    using App1.Repositories;
+    using CombinedProject.Model;
+    using CombinedProject.Repositories;
 
     public class UpgradeRequestsService : IUpgradeRequestsService
     {
@@ -29,7 +30,7 @@
             // Use a reversed loop or a copy of the list to safely remove items
             for (int i = pendingUpgradeRequests.Count - 1; i >= 0; i--)
             {
-                int requestingUserIdentifier = pendingUpgradeRequests[i].RequestingUserIdentifier;
+                Guid requestingUserIdentifier = pendingUpgradeRequests[i].RequestingUserIdentifier;
                 if (this.userRepository.GetHighestRoleTypeForUser(requestingUserIdentifier) == RoleType.Banned)
                 {
                     this.upgradeRequestsRepository.RemoveUpgradeRequestByIdentifier(pendingUpgradeRequests[i].UpgradeRequestId);
@@ -54,7 +55,7 @@
             if (isRequestAccepted)
             {
                 UpgradeRequest currentUpgradeRequest = this.upgradeRequestsRepository.RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
-                int requestingUserIdentifier = currentUpgradeRequest.RequestingUserIdentifier;
+                Guid requestingUserIdentifier = currentUpgradeRequest.RequestingUserIdentifier;
                 RoleType currentHighestRoleType = this.userRepository.GetHighestRoleTypeForUser(requestingUserIdentifier);
                 Role nextRoleLevel = this.rolesRepository.GetNextRoleInHierarchy(currentHighestRoleType);
                 this.userRepository.AddRoleToUser(requestingUserIdentifier, nextRoleLevel);

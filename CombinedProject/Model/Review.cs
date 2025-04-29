@@ -1,8 +1,4 @@
-﻿// <copyright file="Review.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace App1.Models
+﻿namespace CombinedProject.Model
 {
     using System;
 
@@ -16,13 +12,13 @@ namespace App1.Models
     /// <param name="createdDate">The date and time when the review was created.</param>
     /// <param name="numberOfFlags">The number of times this review has been flagged for inappropriate content.</param>
     /// <param name="isHidden">Indicates whether the review is hidden from public view.</param>
-    public class Review(int reviewId, int userId, int rating,
+    public class Review(int reviewId, Guid userId, int rating,
                  string content, DateTime createdDate, int numberOfFlags = 0,
                  bool isHidden = false)
     {
         public int ReviewId { get; } = reviewId;
 
-        public int UserId { get; } = userId;
+        public Guid UserId { get; } = userId;
 
         public int Rating { get; set; } = rating;
 

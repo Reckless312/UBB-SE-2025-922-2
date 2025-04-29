@@ -1,15 +1,11 @@
-﻿// <copyright file="ICheckersService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace App1.Services
+﻿namespace CombinedProject.Service
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using App1.Models;
+    using CombinedProject.Model;
 
     public interface ICheckersService
     {

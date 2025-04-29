@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using CombinedProject.Service;
 
 namespace CombinedProject.Model
@@ -11,6 +12,11 @@ namespace CombinedProject.Model
         public required string Username { get; set; }
         public required string PasswordHash { get; set; }
         public required string? TwoFASecret { get; set; }
+        public string EmailAddress { get; internal set; }
+        public List<Role> AssignedRoles { get; internal set; }
+        public bool HasSubmittedAppeal { get; internal set; }
+        public string FullName { get; internal set; }
+
         public bool ValidateAction(string resource, string action)
         {
             if (string.IsNullOrEmpty(resource))

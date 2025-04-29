@@ -1,15 +1,10 @@
-﻿// <copyright file="IUserRepository.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace App1.Repositories
+﻿namespace CombinedProject.Repositories
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using App1.Models;
     using CombinedProject.Model;
 
     public interface IUserRepository
@@ -23,9 +18,9 @@ namespace App1.Repositories
 
         public List<User> GetUsersByRoleType(RoleType roleType);
 
-        public RoleType GetHighestRoleTypeForUser(int userId);
+        public RoleType GetHighestRoleTypeForUser(Guid userId);
 
-        public void AddRoleToUser(int userID, Role roleToAdd);
+        public void AddRoleToUser(Guid userID, Role roleToAdd);
 
         public List<User> GetAllUsers();
     }

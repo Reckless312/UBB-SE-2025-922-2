@@ -1,4 +1,4 @@
-namespace App1.Infrastructure
+namespace CombinedProject.Infrastructure
 {
     using System;
     using System.Data;
@@ -20,7 +20,7 @@ namespace App1.Infrastructure
 
         public SqlConnection CreateConnection()
         {
-            return new SqlConnection(this.connectionString);
+            return new SqlConnection(connectionString);
         }
     }
 }

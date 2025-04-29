@@ -1,4 +1,4 @@
-﻿namespace App1.Services
+﻿namespace CombinedProject.Service
 {
     using System;
     using System.Collections.Generic;

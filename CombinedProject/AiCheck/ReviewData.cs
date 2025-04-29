@@ -1,8 +1,4 @@
-﻿// <copyright file="ReviewData.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace App1.AiCheck
+﻿namespace CombinedProject.AiCheck
 {
     using Microsoft.ML.Data;
 

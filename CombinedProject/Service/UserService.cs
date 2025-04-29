@@ -1,7 +1,6 @@
 ﻿using System;
 using CombinedProject.Adapter;
 using CombinedProject.Model;
-using CombinedProject.Service;
 
 namespace CombinedProject.Service
 {
@@ -60,25 +59,3 @@ namespace CombinedProject.Service
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

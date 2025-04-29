@@ -1,11 +1,10 @@
-﻿namespace App1.Repositories
+﻿namespace CombinedProject.Repositories
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using App1.Models;
     using CombinedProject.Model;
 
     public class RolesRepository : IRolesRepository
@@ -14,24 +13,24 @@
 
         public RolesRepository()
         {
-            this.roles = new List<Role>();
+            roles = new List<Role>();
 
-            this.roles.Add(new Role(RoleType.Banned, "Banned"));
-            this.roles.Add(new Role(RoleType.User, "User"));
-            this.roles.Add(new Role(RoleType.Admin, "Admin"));
-            this.roles.Add(new Role(RoleType.Manager, "Manager"));
+            roles.Add(new Role(RoleType.Banned, "Banned"));
+            roles.Add(new Role(RoleType.User, "User"));
+            roles.Add(new Role(RoleType.Admin, "Admin"));
+            roles.Add(new Role(RoleType.Manager, "Manager"));
         }
 
         public List<Role> GetAllRoles()
         {
-            return this.roles;
+            return roles;
         }
 
         public Role GetNextRoleInHierarchy(RoleType currentRoleType)
         {
             try
             {
-                Role nextRole = this.roles.First(role => role.RoleType == currentRoleType + 1);
+                Role nextRole = roles.First(role => role.RoleType == currentRoleType + 1);
                 return nextRole;
             }
             catch (InvalidOperationException)

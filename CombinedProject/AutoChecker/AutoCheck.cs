@@ -1,8 +1,5 @@
-﻿// <copyright file="AutoCheck.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace App1.AutoChecker
+﻿using CombinedProject.AutoChecker;
+namespace CombinedProject.AutoChecker
 {
     using System;
     using System.Collections.Generic;
@@ -24,7 +21,7 @@ namespace App1.AutoChecker
         public AutoCheck(IOffensiveWordsRepository repository)
         {
             this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
-            this.offensiveWords = this.repository.LoadOffensiveWords();
+            offensiveWords = this.repository.LoadOffensiveWords();
         }
 
         public bool AutoCheckReview(string reviewText)
@@ -35,7 +32,7 @@ namespace App1.AutoChecker
             }
 
             string[] words = reviewText.Split(WordDelimiters, StringSplitOptions.RemoveEmptyEntries);
-            return words.Any(word => this.offensiveWords.Contains(word, StringComparer.OrdinalIgnoreCase));
+            return words.Any(word => offensiveWords.Contains(word, StringComparer.OrdinalIgnoreCase));
         }
 
         public void AddOffensiveWord(string newWord)
@@ -45,13 +42,13 @@ namespace App1.AutoChecker
                 return;
             }
 
-            if (this.offensiveWords.Contains(newWord, StringComparer.OrdinalIgnoreCase))
+            if (offensiveWords.Contains(newWord, StringComparer.OrdinalIgnoreCase))
             {
                 return;
             }
 
-            this.repository.AddWord(newWord);
-            this.offensiveWords.Add(newWord);
+            repository.AddWord(newWord);
+            offensiveWords.Add(newWord);
         }
 
         public void DeleteOffensiveWord(string word)
@@ -61,18 +58,18 @@ namespace App1.AutoChecker
                 return;
             }
 
-            if (!this.offensiveWords.Contains(word, StringComparer.OrdinalIgnoreCase))
+            if (!offensiveWords.Contains(word, StringComparer.OrdinalIgnoreCase))
             {
                 return;
             }
 
-            this.repository.DeleteWord(word);
-            this.offensiveWords.Remove(word);
+            repository.DeleteWord(word);
+            offensiveWords.Remove(word);
         }
 
         public HashSet<string> GetOffensiveWordsList()
         {
-            return new HashSet<string>(this.offensiveWords, StringComparer.OrdinalIgnoreCase);
+            return new HashSet<string>(offensiveWords, StringComparer.OrdinalIgnoreCase);
         }
     }
 }

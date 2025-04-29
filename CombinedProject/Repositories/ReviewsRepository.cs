@@ -1,15 +1,11 @@
-﻿// <copyright file="ReviewsRepository.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace App1.Repositories
+﻿namespace CombinedProject.Repositories
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using App1.Models;
+    using CombinedProject.Model;
 
     public class ReviewsRepository : IReviewsRepository
     {
@@ -18,8 +14,8 @@ namespace App1.Repositories
 
         public ReviewsRepository()
         {
-            this.reviews = new List<Review>();
-            this.nextReviewId = 1;
+            reviews = new List<Review>();
+            nextReviewId = 1;
         }
 
         public void LoadReviews(IEnumerable<Review> reviewsToLoad)
@@ -32,18 +28,18 @@ namespace App1.Repositories
             foreach (var review in reviewsToLoad)
             {
                 // Ensure we maintain ID sequence by using the AddReview method
-                this.AddReview(review);
+                AddReview(review);
             }
         }
 
         public List<Review> GetAllReviews()
         {
-            return this.reviews.ToList();
+            return reviews.ToList();
         }
 
         public List<Review> GetReviewsSince(DateTime date)
         {
-            return this.reviews
+            return reviews
                 .Where(review => review.CreatedDate >= date && !review.IsHidden)
                 .OrderByDescending(review => review.CreatedDate)
                 .ToList();
@@ -51,12 +47,12 @@ namespace App1.Repositories
 
         public double GetAverageRatingForVisibleReviews()
         {
-            if (!this.reviews.Any(review => !review.IsHidden))
+            if (!reviews.Any(review => !review.IsHidden))
             {
                 return 0.0;
             }
 
-            double average = this.reviews
+            double average = reviews
                 .Where(review => !review.IsHidden)
                 .Average(r => r.Rating);
             return Math.Round(average, 1);
@@ -64,7 +60,7 @@ namespace App1.Repositories
 
         public List<Review> GetMostRecentReviews(int count)
         {
-            return this.reviews
+            return reviews
                 .Where(review => !review.IsHidden)
                 .OrderByDescending(review => review.CreatedDate)
                 .Take(count)
@@ -73,30 +69,30 @@ namespace App1.Repositories
 
         public int GetReviewCountAfterDate(DateTime date)
         {
-            return this.reviews
+            return reviews
                 .Count(review => review.CreatedDate >= date && !review.IsHidden);
         }
 
         public List<Review> GetFlaggedReviews(int minFlags)
         {
-            return this.reviews
+            return reviews
                 .Where(review => review.NumberOfFlags >= minFlags && !review.IsHidden)
                 .ToList();
         }
 
-        public List<Review> GetReviewsByUser(int userId)
+        public List<Review> GetReviewsByUser(Guid userId)
         {
-            return this.reviews.Where(review => review.UserId == userId && !review.IsHidden).OrderByDescending(review => review.CreatedDate).ToList();
+            return reviews.Where(review => review.UserId == userId && !review.IsHidden).OrderByDescending(review => review.CreatedDate).ToList();
         }
 
         public Review GetReviewById(int reviewId)
         {
-            return this.reviews.FirstOrDefault(review => review.ReviewId == reviewId);
+            return reviews.FirstOrDefault(review => review.ReviewId == reviewId);
         }
 
         public void UpdateReviewVisibility(int reviewId, bool isHidden)
         {
-            Review? currentReview = this.reviews.FirstOrDefault(review => review.ReviewId == reviewId);
+            Review? currentReview = reviews.FirstOrDefault(review => review.ReviewId == reviewId);
 
             if (currentReview != null)
             {
@@ -106,7 +102,7 @@ namespace App1.Repositories
 
         public void UpdateNumberOfFlagsForReview(int reviewId, int numberOfFlags)
         {
-            Review? currentReview = this.reviews.FirstOrDefault(review => review.ReviewId == reviewId);
+            Review? currentReview = reviews.FirstOrDefault(review => review.ReviewId == reviewId);
             if (currentReview != null)
             {
                 currentReview.NumberOfFlags = numberOfFlags;
@@ -116,7 +112,7 @@ namespace App1.Repositories
         public int AddReview(Review review)
         {
             // Normally, this would be handled by the database
-            int newId = this.nextReviewId++;
+            int newId = nextReviewId++;
             Review newReview = new Review(
                 reviewId: newId,
                 userId: review.UserId,
@@ -125,16 +121,16 @@ namespace App1.Repositories
                 createdDate: review.CreatedDate,
                 numberOfFlags: review.NumberOfFlags,
                 isHidden: review.IsHidden);
-            this.reviews.Add(newReview);
+            reviews.Add(newReview);
             return newId;
         }
 
         public bool RemoveReviewById(int reviewId)
         {
-            Review? reviewToRemove = this.reviews.FirstOrDefault(review => review.ReviewId == reviewId);
+            Review? reviewToRemove = reviews.FirstOrDefault(review => review.ReviewId == reviewId);
             if (reviewToRemove != null)
             {
-                this.reviews.Remove(reviewToRemove);
+                reviews.Remove(reviewToRemove);
                 return true;
             }
 
@@ -143,7 +139,7 @@ namespace App1.Repositories
 
         public List<Review> GetHiddenReviews()
         {
-            return this.reviews.Where(review => review.IsHidden).ToList();
+            return reviews.Where(review => review.IsHidden).ToList();
         }
     }
 }

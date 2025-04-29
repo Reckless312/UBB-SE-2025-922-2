@@ -1,8 +1,4 @@
-﻿// <copyright file="RoleType.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace App1.Models
+﻿namespace CombinedProject.Model
 {
     /// <summary>
     /// Represents the type of role assigned to a user.

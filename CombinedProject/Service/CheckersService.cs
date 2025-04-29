@@ -1,8 +1,4 @@
-﻿// <copyright file="CheckersService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace App1.Services
+﻿namespace CombinedProject.Services
 {
     using System;
     using System.Collections.Generic;
@@ -12,13 +8,13 @@ namespace App1.Services
     using System.Runtime.CompilerServices;
     using System.Text;
     using System.Threading.Tasks;
-    using App1.AiCheck;
-    using App1.AutoChecker;
-    using App1.Models;
-    using App1.Repositories;
-    using App1.Services;
+    using CombinedProject.AiCheck;
+    using CombinedProject.AutoChecker;
+    using CombinedProject.Repositories;
+    using CombinedProject.Model;
     using Microsoft.ML;
     using Newtonsoft.Json;
+    using CombinedProject.Service;
 
     public class CheckersService : ICheckersService
     {

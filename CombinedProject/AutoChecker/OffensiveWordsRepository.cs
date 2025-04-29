@@ -1,15 +1,11 @@
-﻿// <copyright file="OffensiveWordsRepository.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace App1.AutoChecker
+﻿namespace CombinedProject.AutoChecker
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using App1.Infrastructure;
+    using CombinedProject.Infrastructure;
     using Microsoft.Data.SqlClient;
 
     public class OffensiveWordsRepository : IOffensiveWordsRepository

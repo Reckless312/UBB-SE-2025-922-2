@@ -1,15 +1,11 @@
-﻿// <copyright file="IUpgradeRequestsRepository.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace App1.Repositories
+﻿namespace CombinedProject.Repositories
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using App1.Models;
+    using CombinedProject.Model;
 
     /// <summary>
     /// inteface for update requests.

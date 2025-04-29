@@ -1,27 +1,25 @@
-﻿// <copyright file="UpgradeRequest.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
+﻿using System;
 
-namespace App1.Models
+namespace CombinedProject.Model
 {
     public class UpgradeRequest
     {
-        public UpgradeRequest(int upgradeRequestId, int requestingUserIdentifier, string requestingUserDisplayName)
+        public UpgradeRequest(int upgradeRequestId, Guid requestingUserIdentifier, string requestingUserDisplayName)
         {
-            this.UpgradeRequestId = upgradeRequestId;
-            this.RequestingUserIdentifier = requestingUserIdentifier;
-            this.RequestingUserDisplayName = requestingUserDisplayName;
+            UpgradeRequestId = upgradeRequestId;
+            RequestingUserIdentifier = requestingUserIdentifier;
+            RequestingUserDisplayName = requestingUserDisplayName;
         }
 
         public int UpgradeRequestId { get; set; }
 
-        public int RequestingUserIdentifier { get; set; }
+        public Guid RequestingUserIdentifier { get; set; }
 
         public string RequestingUserDisplayName { get; set; }
 
         public override string ToString()
         {
-            return this.RequestingUserDisplayName;
+            return RequestingUserDisplayName;
         }
     }
 }

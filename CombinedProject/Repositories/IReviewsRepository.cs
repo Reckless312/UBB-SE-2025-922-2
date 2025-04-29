@@ -1,11 +1,11 @@
-﻿namespace App1.Repositories
+﻿namespace CombinedProject.Repositories
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using App1.Models;
+    using CombinedProject.Model;
 
     /// <summary>
     /// Interface for the Review repository that defines operations for managing reviews.
@@ -57,7 +57,7 @@
         /// </summary>
         /// <param name="userId">The ID of the user.</param>
         /// <returns>A list of reviews by the specified user.</returns>
-        List<Review> GetReviewsByUser(int userId);
+        List<Review> GetReviewsByUser(Guid userId);
 
         /// <summary>
         /// Gets a review by its ID.
