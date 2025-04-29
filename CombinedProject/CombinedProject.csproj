@@ -7,15 +7,16 @@
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<Platforms>x86;x64;ARM64</Platforms>
 		<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+		<PublishProfile>win-$(Platform).pubxml</PublishProfile>
 		<UseWinUI>true</UseWinUI>
+			<PackageCertificateKeyFile>true</PackageCertificateKeyFile>
+			<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<EnableMsixTooling>true</EnableMsixTooling>
 		<Nullable>enable</Nullable>
+		<WindowsSdkPackageVersion>10.0.19041.38</WindowsSdkPackageVersion>
 		<PlatformTarget>x64</PlatformTarget>
 		<GenerateAppInstallerFile>False</GenerateAppInstallerFile>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<!-- Disable self-contained for Debug, enable for others -->
-		<WindowsAppSDKSelfContained Condition="'$(Configuration)' == 'Debug'">false</WindowsAppSDKSelfContained>
-		<WindowsAppSDKSelfContained Condition="'$(Configuration)' != 'Debug'">true</WindowsAppSDKSelfContained>
 	</PropertyGroup>
 
 
@@ -101,4 +102,11 @@
 		<PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
 		<RunPostBuildEvent>Always</RunPostBuildEvent>
 	</PropertyGroup>
+
+	<!-- Uno.WinUI specific configuration -->
+	<ItemGroup>
+		<PackagingOutputs Include="$(MSBuildThisFileDirectory)obj\$(Configuration)\$(Platform)\*.pri">
+			<ProjectName>App1</ProjectName>
+		</PackagingOutputs>
+	</ItemGroup>
 </Project>
