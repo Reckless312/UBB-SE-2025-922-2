@@ -7,6 +7,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Platforms>x86;x64;ARM64</Platforms>
     <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+	<PublishProfile>win-$(Platform).pubxml</PublishProfile>
     <UseWinUI>true</UseWinUI>
 	<PackageCertificateKeyFile>true</PackageCertificateKeyFile>
 	<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
@@ -14,6 +15,8 @@
     <Nullable>enable</Nullable>
     <WindowsSdkPackageVersion>10.0.19041.38</WindowsSdkPackageVersion>
 	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	<PlatformTarget>x64</PlatformTarget>
+	<GenerateAppInstallerFile>False</GenerateAppInstallerFile>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="UserPage.xaml" />
