@@ -12,7 +12,7 @@ using DrinkDb_Auth.OAuthProviders;
 using DrinkDb_Auth.Repository.AdminDashboard;
 using SharedResources.Repository.AdminDashboard.Interfaces;
 using DrinkDb_Auth.Repository.Authentication;
-using DrinkDb_Auth.Repository.Authentication.Interfaces;
+using SharedResources.Repository.Authentication.Interfaces;
 using DrinkDb_Auth.Service.Authentication.Interfaces;
 using Microsoft.UI.Xaml;
 

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
@@ -69,8 +69,8 @@
 	  <PackageReference Include="CSharpMarkup.WinUI.LiveChartsCore.SkiaSharpView" Version="2.4.18" />
 	  <PackageReference Include="LightGBM" Version="4.6.0" />
 	  <PackageReference Include="MailKit" Version="4.11.0" />
-	  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.3" />
-	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.3" />
+	  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
+	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.4" />
 	  <PackageReference Include="Microsoft.ML" Version="4.0.2" />
 	  <PackageReference Include="Microsoft.ML.FastTree" Version="4.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="8.0.14" />
@@ -92,13 +92,9 @@
 	  <PackageReference Include="Uno.WinUI" Version="5.2.108" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Adapter\" />
     <Folder Include="Database\" />
     <Folder Include="View\AdminDashboard\" />
   </ItemGroup>
-	<ItemGroup>
-		<Folder Include="Logs\" />
-	</ItemGroup>
   <ItemGroup>
     <None Include="AuthProviders\AuthenticationResponse.cs" />
   </ItemGroup>
@@ -167,6 +163,27 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Adapter\**" />
+	  <Compile Remove="Logs\**" />
+	  <EmbeddedResource Remove="Adapter\**" />
+	  <EmbeddedResource Remove="Logs\**" />
+	  <None Remove="Adapter\**" />
+	  <None Remove="Logs\**" />
+	  <Page Remove="Adapter\**" />
+	  <Page Remove="Logs\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\ServerProject\Server.csproj" />
 	  <ProjectReference Include="..\SharedResources\SharedResources.csproj" />
+	  <ProjectReference Include="..\Tests\Tests.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PRIResource Remove="Adapter\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PRIResource Remove="Logs\**" />
 	</ItemGroup>
 </Project>

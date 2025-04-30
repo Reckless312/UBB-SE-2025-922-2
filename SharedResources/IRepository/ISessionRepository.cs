@@ -1,7 +1,7 @@
 ﻿using System;
 using SharedResources.Model.Authentication;
 
-namespace DrinkDb_Auth.Repository.Authentication.Interfaces
+namespace SharedResources.Repository.Authentication.Interfaces
 {
     public interface ISessionRepository
     {
