@@ -123,12 +123,6 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
-	<ItemGroup>
-		<Content Include="..\appSettings.json">
-			<Link>appSettings.json</Link>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<CodeAnalysisRuleSet>SE.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
@@ -174,9 +168,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\ServerProject\Server.csproj" />
+	  <ProjectReference Include="..\Server\Server.csproj" />
 	  <ProjectReference Include="..\SharedResources\SharedResources.csproj" />
-	  <ProjectReference Include="..\Tests\Tests.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

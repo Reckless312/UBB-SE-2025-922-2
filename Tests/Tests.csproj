@@ -21,8 +21,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include=".\DrinkDb_Auth.csproj" />
-		<ProjectReference Include=".\Server\Server.csproj" />
+		<ProjectReference Include="..\DrinkDb\DrinkDb_Auth.csproj" />
+		<ProjectReference Include="..\Server\Server.csproj" />
 		<ProjectReference Include="..\SharedResources\SharedResources.csproj" />
 	</ItemGroup>
 
