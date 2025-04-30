@@ -7,8 +7,8 @@ namespace DrinkDb_Auth.Repository.AdminDashboard
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using DrinkDb_Auth.Model.AdminDashboard;
-    using DrinkDb_Auth.Repository.AdminDashboard.Interfaces;
+    using SharedResources.Model.AdminDashboard;
+    using SharedResources.Repository.AdminDashboard.Interfaces;
     using Microsoft.Data.SqlClient;
 
     public class UpgradeRequestsRepository : IUpgradeRequestsRepository

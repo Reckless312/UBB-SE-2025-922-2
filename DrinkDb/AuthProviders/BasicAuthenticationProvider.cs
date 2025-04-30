@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using DrinkDb_Auth.Model.Authentication;
+using SharedResources.Model.Authentication;
 using DrinkDb_Auth.Repository.AdminDashboard;
-using DrinkDb_Auth.Repository.AdminDashboard.Interfaces;
+using SharedResources.Repository.AdminDashboard.Interfaces;
 
 namespace DrinkDb_Auth.AuthProviders
 {

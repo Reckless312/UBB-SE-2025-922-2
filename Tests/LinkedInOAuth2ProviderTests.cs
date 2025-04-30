@@ -5,7 +5,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using DrinkDb_Auth.Adapter;
-using DrinkDb_Auth.Model;
+using SharedResources.Model;
 using DrinkDb_Auth.OAuthProviders;
 using Moq;
 using Moq.Protected;

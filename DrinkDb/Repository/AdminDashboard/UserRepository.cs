@@ -4,9 +4,9 @@
     using System.Collections.Generic;
     using System.Data;
     using System.Linq;
-    using DrinkDb_Auth.Model.AdminDashboard;
-    using DrinkDb_Auth.Model.Authentication;
-    using DrinkDb_Auth.Repository.AdminDashboard.Interfaces;
+    using SharedResources.Model.AdminDashboard;
+    using SharedResources.Model.Authentication;
+    using SharedResources.Repository.AdminDashboard.Interfaces;
     using DrinkDb_Auth.Repository.Authentication;
     using Microsoft.Data.SqlClient;
 

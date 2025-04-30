@@ -1,5 +1,5 @@
 using System;
-using DrinkDb_Auth.Model.Authentication;
+using SharedResources.Model.Authentication;
 using DrinkDb_Auth.Service;
 using DrinkDb_Auth.Service.Authentication;
 using Microsoft.UI.Xaml;

@@ -1,7 +1,7 @@
 ﻿namespace DrinkDb_Auth.Service
 {
-    using DrinkDb_Auth.Model.AdminDashboard;
-    using DrinkDb_Auth.Repository.AdminDashboard.Interfaces;
+    using SharedResources.Model.AdminDashboard;
+    using SharedResources.Repository.AdminDashboard.Interfaces;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using System;
     using System.Collections.Generic;

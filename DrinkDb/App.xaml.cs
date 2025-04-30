@@ -13,7 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz.Spi;
 using Microsoft.Extensions.Hosting;
-using DrinkDb_Auth.Repository.AdminDashboard.Interfaces;
+using SharedResources.Repository.AdminDashboard.Interfaces;
 using DrinkDb_Auth.Repository.AdminDashboard;
 using DrinkDb_Auth.AutoChecker;
 using DrinkDb_Auth.Service.AdminDashboard.Interfaces;

@@ -4,7 +4,7 @@
 
 using System;
 
-namespace DrinkDb_Auth.Model.AdminDashboard
+namespace SharedResources.Model.AdminDashboard
 {
     public class UpgradeRequest
     {

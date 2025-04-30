@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
-using DrinkDb_Auth.Model.AdminDashboard;
-using DrinkDb_Auth.Service;
+using SharedResources.Model.AdminDashboard;
 
-namespace DrinkDb_Auth.Model.Authentication
+namespace SharedResources.Model.Authentication
 {
     public class User
     {

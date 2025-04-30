@@ -6,7 +6,7 @@ namespace DrinkDb_Auth.Service.AdminDashboard.Interfaces
 {
     using System;
     using System.Collections.Generic;
-    using DrinkDb_Auth.Model.AdminDashboard;
+    using SharedResources.Model.AdminDashboard;
 
     /// <summary>
     /// Service interface for managing reviews in the application.

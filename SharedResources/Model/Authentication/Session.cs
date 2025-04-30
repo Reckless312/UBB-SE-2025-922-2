@@ -1,6 +1,6 @@
 using System;
 
-namespace DrinkDb_Auth.Model.Authentication
+namespace SharedResources.Model.Authentication
 {
     public class Session
     {

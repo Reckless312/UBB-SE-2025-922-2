@@ -1,5 +1,5 @@
 using System;
-using DrinkDb_Auth.Model.Authentication;
+using SharedResources.Model.Authentication;
 using DrinkDb_Auth.Repository.Authentication;
 
 namespace DrinkDb_Auth.Service.Authentication

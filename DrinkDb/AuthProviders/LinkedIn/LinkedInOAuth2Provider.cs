@@ -3,10 +3,10 @@ using System.Configuration;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
-using DrinkDb_Auth.Model.Authentication;
+using SharedResources.Model.Authentication;
 using DrinkDb_Auth.OAuthProviders;
 using DrinkDb_Auth.Repository.AdminDashboard;
-using DrinkDb_Auth.Repository.AdminDashboard.Interfaces;
+using SharedResources.Repository.AdminDashboard.Interfaces;
 using DrinkDb_Auth.Repository.Authentication;
 using Microsoft.Data.SqlClient;
 

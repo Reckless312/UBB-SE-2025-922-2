@@ -13,9 +13,9 @@ using Microsoft.Web.WebView2.Core;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml;
 using DrinkDb_Auth.OAuthProviders;
-using DrinkDb_Auth.Model.Authentication;
+using SharedResources.Model.Authentication;
 using DrinkDb_Auth.Repository.Authentication;
-using DrinkDb_Auth.Repository.AdminDashboard.Interfaces;
+using SharedResources.Repository.AdminDashboard.Interfaces;
 using DrinkDb_Auth.Repository.AdminDashboard;
 
 namespace DrinkDb_Auth.AuthProviders.Twitter

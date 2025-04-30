@@ -165,4 +165,8 @@
 			<ProjectName>DrinkDb_Auth</ProjectName>
 		</PackagingOutputs>
 	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\SharedResources\SharedResources.csproj" />
+	</ItemGroup>
 </Project>

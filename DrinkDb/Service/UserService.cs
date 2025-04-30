@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using DrinkDb_Auth.Model.AdminDashboard;
-using DrinkDb_Auth.Model.Authentication;
+using SharedResources.Model.AdminDashboard;
+using SharedResources.Model.Authentication;
 using DrinkDb_Auth.Repository.AdminDashboard;
-using DrinkDb_Auth.Repository.AdminDashboard.Interfaces;
+using SharedResources.Repository.AdminDashboard.Interfaces;
 using DrinkDb_Auth.Service.AdminDashboard.Components;
 using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
 using DrinkDb_Auth.Service.Authentication;

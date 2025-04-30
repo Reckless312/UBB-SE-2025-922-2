@@ -1,6 +1,6 @@
 using System;
 using System.Data;
-using DrinkDb_Auth.Model.Authentication;
+using SharedResources.Model.Authentication;
 using DrinkDb_Auth.Repository.Authentication.Interfaces;
 using Microsoft.Data.SqlClient;
 

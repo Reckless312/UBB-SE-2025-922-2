@@ -12,8 +12,8 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
     using System.Runtime.CompilerServices;
     using System.Windows.Input;
     using DrinkDb_Auth.AutoChecker;
-    using DrinkDb_Auth.Model.AdminDashboard;
-    using DrinkDb_Auth.Model.Authentication;
+    using SharedResources.Model.AdminDashboard;
+    using SharedResources.Model.Authentication;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using DrinkDb_Auth.ViewModel.AdminDashboard.Components;
     using LiveChartsCore;
