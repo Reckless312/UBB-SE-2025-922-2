@@ -1,7 +1,7 @@
 ﻿using System;
-using DrinkDb_Auth.Model.Authentication;
+using DataAccess.Model.Authentication;
 
-namespace DrinkDb_Auth.Repository.Authentication.Interfaces
+namespace IRepository
 {
     public interface ISessionRepository
     {

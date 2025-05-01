@@ -1,12 +1,18 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DrinkDb_Auth.Model.Authentication
+namespace DataAccess.Model.Authentication
 {
     public class Session
     {
         public Guid SessionId { get; set; }
         public Guid UserId { get; set; }
-        public bool IsActive => UserId != Guid.Empty;
+
+        public bool IsActive()
+        {
+            return UserId != Guid.Empty;
+        }
+
 
         public Session()
         {

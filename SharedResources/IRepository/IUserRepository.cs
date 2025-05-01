@@ -2,15 +2,15 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace DrinkDb_Auth.Repository.AdminDashboard.Interfaces
+namespace IRepository
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using DrinkDb_Auth.Model.AdminDashboard;
-    using DrinkDb_Auth.Model.Authentication;
+    using DataAccess.Model.AdminDashboard;
+    using DataAccess.Model.Authentication;
 
     public interface IUserRepository
     {

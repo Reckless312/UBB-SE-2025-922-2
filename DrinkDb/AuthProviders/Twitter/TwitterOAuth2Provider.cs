@@ -1,25 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Linq;
-using System.Text.Json.Serialization;
-using System.Security.Cryptography;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Threading.Tasks;
-using System.Threading;
-using Microsoft.UI.Dispatching;
-using Microsoft.Web.WebView2.Core;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml;
-using DrinkDb_Auth.OAuthProviders;
-using DrinkDb_Auth.Model.Authentication;
-using DrinkDb_Auth.Repository.Authentication;
-using DrinkDb_Auth.Repository.AdminDashboard.Interfaces;
-using DrinkDb_Auth.Repository.AdminDashboard;
-
-namespace DrinkDb_Auth.AuthProviders.Twitter
+﻿namespace DrinkDb_Auth.AuthProviders.Twitter
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Net.Http;
+    using System.Net.Http.Json;
+    using System.Security.Cryptography;
+    using System.Text;
+    using System.Text.Json.Serialization;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using DataAccess.Model.Authentication;
+    using DrinkDb_Auth.OAuthProviders;
+    using DrinkDb_Auth.Repository.AdminDashboard;
+    using DrinkDb_Auth.Repository.Authentication;
+    using IRepository;
+    using Microsoft.UI.Dispatching;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+    using Microsoft.Web.WebView2.Core;
+
     /// <summary>
     /// A PKCE-based OAuth 2.0 flow for Twitter in a WinUI desktop app.
     /// </summary>

@@ -2,7 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace DrinkDb_Auth.Model.AdminDashboard
+namespace DataAccess.Model.AdminDashboard
 {
     /// <summary>
     /// Represents the type of role assigned to a user.

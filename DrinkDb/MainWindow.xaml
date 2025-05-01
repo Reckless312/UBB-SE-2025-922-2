@@ -9,7 +9,7 @@
     mc:Ignorable="d"
     xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
     Title="IMBD for Drinks - Admin"
-    xmlns:models="using:DrinkDb_Auth.Model.AdminDashboard" 
+    xmlns:models="using:DataAccess.Model.AdminDashboard" 
     xmlns:views="using:DrinkDb_Auth.View"
     >
 

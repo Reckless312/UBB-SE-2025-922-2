@@ -1,10 +1,9 @@
 using System;
-using DrinkDb_Auth.Model.Authentication;
+using DataAccess.Model.Authentication;
 using DrinkDb_Auth.OAuthProviders;
 using DrinkDb_Auth.Repository.AdminDashboard;
-using DrinkDb_Auth.Repository.AdminDashboard.Interfaces;
+using IRepository;
 using DrinkDb_Auth.Repository.Authentication;
-using DrinkDb_Auth.Repository.Authentication.Interfaces;
 
 namespace DrinkDb_Auth.AuthProviders.Github
 {

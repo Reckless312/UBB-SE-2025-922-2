@@ -11,9 +11,8 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.AspNetCore.Http;
 using DrinkDb_Auth.OAuthProviders;
-using DrinkDb_Auth.Model.Authentication;
-using DrinkDb_Auth.Repository.Authentication.Interfaces;
-using DrinkDb_Auth.Repository.AdminDashboard.Interfaces;
+using DataAccess.Model.Authentication;
+using IRepository;
 using DrinkDb_Auth.Repository.AdminDashboard;
 using DrinkDb_Auth.Repository.Authentication;
 

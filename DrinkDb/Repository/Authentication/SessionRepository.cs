@@ -1,11 +1,11 @@
-using System;
-using System.Data;
-using DrinkDb_Auth.Model.Authentication;
-using DrinkDb_Auth.Repository.Authentication.Interfaces;
-using Microsoft.Data.SqlClient;
-
 namespace DrinkDb_Auth.Repository.Authentication
 {
+    using System;
+    using System.Data;
+    using DataAccess.Model.Authentication;
+    using IRepository;
+    using Microsoft.Data.SqlClient;
+
     public class SessionRepository : ISessionRepository
     {
         public Session CreateSession(Guid userId)

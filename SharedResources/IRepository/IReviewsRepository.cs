@@ -1,11 +1,11 @@
-﻿namespace DrinkDb_Auth.Repository.AdminDashboard.Interfaces
+﻿namespace IRepository
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using DrinkDb_Auth.Model.AdminDashboard;
+    using DataAccess.Model.AdminDashboard;
 
     /// <summary>
     /// Interface for the Review repository that defines operations for managing reviews.

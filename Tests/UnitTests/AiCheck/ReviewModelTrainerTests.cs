@@ -1,16 +1,16 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+using DrinkDb_Auth.AiCheck;
+using Microsoft.ML;
+using Moq;
+using Xunit;
+
 namespace UnitTests.AiCheck
 {
-    using System;
-    using System.IO;
-    using System.Linq;
-    using System.Reflection;
-    using System.Text;
-    using System.Threading.Tasks;
-    using App1.AiCheck;
-    using Microsoft.ML;
-    using Moq;
-    using Xunit;
-
     public class ReviewModelTrainerTests
     {
         private static readonly string TestDataPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestData", "review_data.csv");
