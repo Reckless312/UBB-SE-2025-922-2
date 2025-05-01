@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using SharedResources.Model.Authentication;
+using DataAccess.Model.Authentication;
 using DrinkDb_Auth.Repository.AdminDashboard;
-using SharedResources.Repository.AdminDashboard.Interfaces;
+using DataAccess.Repository.AdminDashboard.Interfaces;
 using DrinkDb_Auth.Service.Authentication.Components;
 using DrinkDb_Auth.Service.Authentication.Interfaces;
 using DrinkDb_Auth.View;

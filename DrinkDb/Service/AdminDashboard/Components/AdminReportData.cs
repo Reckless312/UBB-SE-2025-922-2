@@ -4,8 +4,8 @@
 
 using System;
 using System.Collections.Generic;
-using SharedResources.Model.AdminDashboard;
-using SharedResources.Model.Authentication;
+using DataAccess.Model.AdminDashboard;
+using DataAccess.Model.Authentication;
 
 /// <summary>
 /// Represents a data structure containing administrative report information for a given date.

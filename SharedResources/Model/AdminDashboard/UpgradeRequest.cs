@@ -4,7 +4,7 @@
 
 using System;
 
-namespace SharedResources.Model.AdminDashboard
+namespace DataAccess.Model.AdminDashboard
 {
     public class UpgradeRequest
     {

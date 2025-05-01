@@ -5,7 +5,7 @@ using DrinkDb_Auth.AuthProviders.Github;
 using DrinkDb_Auth.AuthProviders.Google;
 using DrinkDb_Auth.AuthProviders.LinkedIn;
 using DrinkDb_Auth.AuthProviders.Twitter;
-using SharedResources.Model;
+using DataAccess.Model;
 using DrinkDb_Auth.OAuthProviders;
 using Microsoft.UI.Xaml;
 using System;

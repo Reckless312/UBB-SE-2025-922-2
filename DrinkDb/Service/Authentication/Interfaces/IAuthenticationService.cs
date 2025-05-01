@@ -1,5 +1,5 @@
 using System;
-using SharedResources.Model.Authentication;
+using DataAccess.Model.Authentication;
 
 namespace DrinkDb_Auth.Service.Authentication.Interfaces
 {

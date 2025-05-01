@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SharedResources.Model.Authentication;
-using SharedResources.Model.AdminDashboard;
+using DataAccess.Model.Authentication;
+using DataAccess.Model.AdminDashboard;
 
 namespace Server.Data
 {

@@ -7,8 +7,8 @@ namespace DrinkDb_Auth.Service.AdminDashboard
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using SharedResources.Model.AdminDashboard;
-    using SharedResources.Repository.AdminDashboard.Interfaces;
+    using DataAccess.Model.AdminDashboard;
+    using DataAccess.Repository.AdminDashboard.Interfaces;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
 
     public class ReviewsService : IReviewService

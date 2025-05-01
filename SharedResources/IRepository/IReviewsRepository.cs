@@ -1,11 +1,11 @@
-﻿namespace SharedResources.Repository.AdminDashboard.Interfaces
+﻿namespace DataAccess.Repository.AdminDashboard.Interfaces
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using SharedResources.Model.AdminDashboard;
+    using DataAccess.Model.AdminDashboard;
 
     /// <summary>
     /// Interface for the Review repository that defines operations for managing reviews.

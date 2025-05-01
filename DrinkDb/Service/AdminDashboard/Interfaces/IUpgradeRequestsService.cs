@@ -5,7 +5,7 @@
 namespace DrinkDb_Auth.Service.AdminDashboard.Interfaces
 {
     using System.Collections.Generic;
-    using SharedResources.Model.AdminDashboard;
+    using DataAccess.Model.AdminDashboard;
 
     public interface IUpgradeRequestsService
     {

@@ -1,7 +1,7 @@
 using System;
 using System.Data;
-using SharedResources.Model.Authentication;
-using SharedResources.Repository.Authentication.Interfaces;
+using DataAccess.Model.Authentication;
+using DataAccess.Repository.Authentication.Interfaces;
 using Microsoft.Data.SqlClient;
 
 namespace DrinkDb_Auth.Repository.Authentication

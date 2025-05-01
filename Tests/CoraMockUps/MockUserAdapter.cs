@@ -1,4 +1,4 @@
-﻿using SharedResources.Model;
+﻿using DataAccess.Model;
 using System;
 
 namespace Tests.CoraMockUps

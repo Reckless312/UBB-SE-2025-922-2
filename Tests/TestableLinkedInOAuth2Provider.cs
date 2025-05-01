@@ -2,7 +2,7 @@ using System;
 using System.Net.Http;
 using DrinkDb_Auth.Adapter;
 using DrinkDb_Auth.AuthProviders.LinkedIn;
-using SharedResources.Model;
+using DataAccess.Model;
 using DrinkDb_Auth.OAuthProviders;
 
 namespace DrinkDb_Auth.Tests

@@ -1,7 +1,7 @@
 ﻿using System;
-using SharedResources.Model.Authentication;
+using DataAccess.Model.Authentication;
 
-namespace SharedResources.Repository.Authentication.Interfaces
+namespace DataAccess.Repository.Authentication.Interfaces
 {
     public interface ISessionRepository
     {

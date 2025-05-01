@@ -9,7 +9,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using DrinkDb_Auth.OAuthProviders;
-using SharedResources.Model;
+using DataAccess.Model;
 using DrinkDb_Auth.AuthProviders.Twitter;
 using System.Collections.Generic;
 

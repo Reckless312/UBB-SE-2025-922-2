@@ -1,10 +1,10 @@
 ﻿using DrinkDb_Auth.Repository;
-using SharedResources.Model;
+using DataAccess.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using DrinkDb_Auth.Repository.AdminDashboard;
 using DrinkDb_Auth.Repository.Authentication;
-using SharedResources.Model.Authentication;
+using DataAccess.Model.Authentication;
 
 namespace Tests
 {

@@ -2,7 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace SharedResources.Model.AdminDashboard
+namespace DataAccess.Model.AdminDashboard
 {
     using System;
 

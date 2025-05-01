@@ -2,15 +2,15 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace SharedResources.Repository.AdminDashboard.Interfaces
+namespace DataAccess.Repository.AdminDashboard.Interfaces
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using SharedResources.Model.AdminDashboard;
-    using SharedResources.Model.Authentication;
+    using DataAccess.Model.AdminDashboard;
+    using DataAccess.Model.Authentication;
 
     public interface IUserRepository
     {

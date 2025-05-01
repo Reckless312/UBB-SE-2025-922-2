@@ -1,5 +1,5 @@
 ﻿using DrinkDb_Auth.Service;
-using SharedResources.Model;
+using DataAccess.Model;
 using Tests.CoraMockUps;
 using DrinkDb_Auth.View;
 using DrinkDb_Auth.ViewModel;

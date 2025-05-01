@@ -1,6 +1,6 @@
-using SharedResources.Model.AdminDashboard;
+using DataAccess.Model.AdminDashboard;
 
-namespace SharedResources.Model.Authentication
+namespace DataAccess.Model.Authentication
 {
     public class User
     {

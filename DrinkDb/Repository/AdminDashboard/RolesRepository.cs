@@ -5,8 +5,8 @@
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using SharedResources.Model.AdminDashboard;
-    using SharedResources.Repository.AdminDashboard.Interfaces;
+    using DataAccess.Model.AdminDashboard;
+    using DataAccess.Repository.AdminDashboard.Interfaces;
 
     public class RolesRepository : IRolesRepository
     {

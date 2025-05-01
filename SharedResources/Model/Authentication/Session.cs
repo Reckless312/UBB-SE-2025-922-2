@@ -1,6 +1,6 @@
 using System;
 
-namespace SharedResources.Model.Authentication
+namespace DataAccess.Model.Authentication
 {
     public class Session
     {

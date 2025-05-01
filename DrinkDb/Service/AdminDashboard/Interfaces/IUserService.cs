@@ -4,8 +4,8 @@
 
 namespace DrinkDb_Auth.Service.AdminDashboard.Interfaces
 {
-    using SharedResources.Model.AdminDashboard;
-    using SharedResources.Model.Authentication;
+    using DataAccess.Model.AdminDashboard;
+    using DataAccess.Model.Authentication;
     using System;
     using System.Collections.Generic;
 

@@ -169,7 +169,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Server\Server.csproj" />
-	  <ProjectReference Include="..\SharedResources\SharedResources.csproj" />
+	  <ProjectReference Include="..\SharedResources\DataAccess.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
