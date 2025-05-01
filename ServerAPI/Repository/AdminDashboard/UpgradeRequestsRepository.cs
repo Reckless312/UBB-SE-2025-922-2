@@ -7,8 +7,8 @@ namespace Repository.AdminDashboard
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using Model.AdminDashboard;
-    using Repository.AdminDashboard.Interfaces;
+    using DataAccess.Model.AdminDashboard;
+    using IRepository;
     using Microsoft.Data.SqlClient;
 
     public class UpgradeRequestsRepository : IUpgradeRequestsRepository

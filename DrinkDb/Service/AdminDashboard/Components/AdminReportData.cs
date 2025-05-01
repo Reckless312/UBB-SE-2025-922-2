@@ -4,8 +4,8 @@
 
 using System;
 using System.Collections.Generic;
-using DrinkDb_Auth.Model.AdminDashboard;
-using DrinkDb_Auth.Model.Authentication;
+using DataAccess.Model.AdminDashboard;
+using DataAccess.Model.Authentication;
 
 /// <summary>
 /// Represents a data structure containing administrative report information for a given date.

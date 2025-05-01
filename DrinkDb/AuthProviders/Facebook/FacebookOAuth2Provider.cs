@@ -3,9 +3,9 @@ using System.Net.Http;
 using System.Text.Json;
 using DrinkDb_Auth.OAuthProviders;
 using Windows.Networking.Sockets;
-using DrinkDb_Auth.Model.Authentication;
+using DataAccess.Model.Authentication;
 using DrinkDb_Auth.Repository.Authentication;
-using DrinkDb_Auth.Repository.AdminDashboard.Interfaces;
+using IRepository;
 using DrinkDb_Auth.Repository.AdminDashboard;
 
 namespace DrinkDb_Auth.AuthProviders.Facebook

@@ -1,5 +1,5 @@
 ﻿using DrinkDb_Auth.Adapter;
-using DrinkDb_Auth.Model;
+using DataAccess.Model;
 using DrinkDb_Auth.Service;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;

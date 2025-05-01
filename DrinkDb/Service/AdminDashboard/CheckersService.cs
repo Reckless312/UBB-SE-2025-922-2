@@ -15,7 +15,7 @@ namespace DrinkDb_Auth.Service.AdminDashboard
     using System.Text;
     using System.Threading.Tasks;
     using DrinkDb_Auth.AutoChecker;
-    using DrinkDb_Auth.Model.AdminDashboard;
+    using DataAccess.Model.AdminDashboard;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using Microsoft.ML;
     using Newtonsoft.Json;

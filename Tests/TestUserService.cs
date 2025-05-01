@@ -1,9 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Reflection;
-using DrinkDb_Auth.Model;
+using DataAccess.Model;
 using DrinkDb_Auth.Service;
-using DrinkDb_Auth.Adapter;
+using DataAccess.Adapter;
 using DrinkDb_Auth;
 
 namespace Tests

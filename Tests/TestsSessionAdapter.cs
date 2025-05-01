@@ -1,7 +1,10 @@
-﻿using DrinkDb_Auth.Adapter;
-using DrinkDb_Auth.Model;
+﻿using DrinkDb_Auth.Repository;
+using DataAccess.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using DrinkDb_Auth.Repository.AdminDashboard;
+using DrinkDb_Auth.Repository.Authentication;
+using DataAccess.Model.Authentication;
 
 namespace Tests
 {
@@ -9,8 +12,8 @@ namespace Tests
     public sealed class TestsSessionAdapter
     {
         private static readonly Guid TestUserId = new Guid("11111111-1111-1111-1111-111111111111");
-        private static UserAdapter userAdapter = new UserAdapter();
-        private static SessionAdapter sessionAdapter = new SessionAdapter();
+        private static UserRepository userAdapter = new UserRepository();
+        private static SessionRepository sessionAdapter = new SessionRepository();
         private Guid sessionId;
 
 
@@ -27,7 +30,7 @@ namespace Tests
         
         public void CreateSession()
         {
-            userAdapter.CreateUser(new DrinkDb_Auth.Model.User { UserId = TestUserId, PasswordHash = "passwordHash", TwoFASecret = "twoFactorSecret", Username = "username" });
+            userAdapter.CreateUser(new User { UserId = TestUserId, PasswordHash = "passwordHash", TwoFASecret = "twoFactorSecret", Username = "username" });
 
             sessionAdapter.CreateSession(TestUserId);
         }

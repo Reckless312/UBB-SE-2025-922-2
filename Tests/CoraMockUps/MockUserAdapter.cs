@@ -1,4 +1,4 @@
-﻿using DrinkDb_Auth.Model;
+﻿using DataAccess.Model;
 using System;
 
 namespace Tests.CoraMockUps

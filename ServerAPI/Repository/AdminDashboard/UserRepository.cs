@@ -4,9 +4,9 @@
     using System.Collections.Generic;
     using System.Data;
     using System.Linq;
-    using Model.AdminDashboard;
-    using Model.Authentication;
-    using Repository.AdminDashboard.Interfaces;
+    using DataAccess.Model.AdminDashboard;
+    using DataAccess.Model.Authentication;
+    using IRepository;
     using Microsoft.Data.SqlClient;
     using Repository.Authentication;
 

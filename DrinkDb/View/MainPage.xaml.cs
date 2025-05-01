@@ -7,8 +7,8 @@ namespace DrinkDb_Auth.View
     using System;
     using System.ComponentModel;
     using DrinkDb_Auth.AutoChecker;
-    using DrinkDb_Auth.Model.AdminDashboard;
-    using DrinkDb_Auth.Model.Authentication;
+    using DataAccess.Model.AdminDashboard;
+    using DataAccess.Model.Authentication;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using DrinkDb_Auth.ViewModel.AdminDashboard;
     using Microsoft.UI.Text;

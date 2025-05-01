@@ -4,8 +4,8 @@
 
 namespace DrinkDb_Auth.Service.AdminDashboard.Interfaces
 {
-    using DrinkDb_Auth.Model.AdminDashboard;
-    using DrinkDb_Auth.Model.Authentication;
+    using DataAccess.Model.AdminDashboard;
+    using DataAccess.Model.Authentication;
     using System;
     using System.Collections.Generic;
 

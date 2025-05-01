@@ -9,7 +9,7 @@ namespace DrinkDb_Auth.Service.AdminDashboard.Interfaces
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using DrinkDb_Auth.Model.AdminDashboard;
+    using DataAccess.Model.AdminDashboard;
 
     public interface ICheckersService
     {
