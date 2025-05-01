@@ -15,7 +15,7 @@ namespace DrinkDb_Auth.Repository.Authentication
         public static SqlConnection GetConnection()
         {
             // Get the connection string from App.config
-            string connectionString = "Data Source=CORA\\MSSQLSERVER01; Initial Catalog = DrinkDB_Dev; Integrated Security = True; Trust Server Certificate = True";
+            string connectionString = "Data Source=KYLIAN-MBAPPÉ-P; Initial Catalog = DrinkDB_Dev; Integrated Security = True; Trust Server Certificate = True";
 
             // Create and open a new SqlConnection
             SqlConnection connection = new (connectionString);
