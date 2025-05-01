@@ -6,7 +6,7 @@
     using System.Linq;
     using DataAccess.Model.AdminDashboard;
     using DataAccess.Model.Authentication;
-    using DataAccess.Repository.AdminDashboard.Interfaces;
+    using IRepository;
     using DrinkDb_Auth.Repository.Authentication;
     using Microsoft.Data.SqlClient;
 

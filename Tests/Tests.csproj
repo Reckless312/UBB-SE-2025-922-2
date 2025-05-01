@@ -22,7 +22,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\DrinkDb\DrinkDb_Auth.csproj" />
-		<ProjectReference Include="..\Server\Server.csproj" />
 		<ProjectReference Include="..\SharedResources\DataAccess.csproj" />
 	</ItemGroup>
 

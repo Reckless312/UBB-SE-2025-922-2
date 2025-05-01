@@ -1,31 +1,31 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.ApplicationModel;
-using Windows.ApplicationModel.Activation;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Quartz;
-using DrinkDb_Auth.Service;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Quartz.Spi;
-using Microsoft.Extensions.Hosting;
-using DataAccess.Repository.AdminDashboard.Interfaces;
-using DrinkDb_Auth.Repository.AdminDashboard;
-using DrinkDb_Auth.AutoChecker;
-using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
-using DrinkDb_Auth.Service.AdminDashboard;
-using DrinkDb_Auth.Converters;
-using Quartz.Impl;
-using DrinkDb_Auth.View;
-
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 namespace DrinkDb_Auth
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Runtime.InteropServices.WindowsRuntime;
+    using DrinkDb_Auth.AutoChecker;
+    using DrinkDb_Auth.Converters;
+    using DrinkDb_Auth.Repository.AdminDashboard;
+    using DrinkDb_Auth.Service;
+    using DrinkDb_Auth.Service.AdminDashboard;
+    using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
+    using DrinkDb_Auth.View;
+    using IRepository;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+    using Quartz;
+    using Quartz.Impl;
+    using Quartz.Spi;
+    using Windows.ApplicationModel;
+    using Windows.ApplicationModel.Activation;
+
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.
     /// </summary>

@@ -31,13 +31,13 @@ namespace DrinkDb_Auth.Service.Authentication
         public bool ValidateSession(Guid sessionId)
         {
             var session = GetSession(sessionId);
-            return session != null && session.IsActive;
+            return session != null && session.IsActive();
         }
 
         public bool AuthorizeAction(Guid sessionId, string resource, string action)
         {
             var session = GetSession(sessionId);
-            if (session == null || !session.IsActive)
+            if (session == null || !session.IsActive())
             {
                 return false;
             }

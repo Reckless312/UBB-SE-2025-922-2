@@ -9,8 +9,8 @@ namespace Repository.AdminDashboard
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using Model.AdminDashboard;
-    using Repository.AdminDashboard.Interfaces;
+    using DataAccess.Model.AdminDashboard;
+    using IRepository;
 
     public class ReviewsRepository : IReviewsRepository
     {

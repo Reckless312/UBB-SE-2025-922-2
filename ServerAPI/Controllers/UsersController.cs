@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Model.AdminDashboard;
-using Model.Authentication;
+using DataAccess.Model.AdminDashboard;
+using DataAccess.Model.Authentication;
 using Repository.AdminDashboard;
-using Repository.AdminDashboard.Interfaces;
+using IRepository;
 
 namespace ServerAPI.Controllers
 {

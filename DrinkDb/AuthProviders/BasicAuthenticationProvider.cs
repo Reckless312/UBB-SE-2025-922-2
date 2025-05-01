@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using DataAccess.Model.Authentication;
 using DrinkDb_Auth.Repository.AdminDashboard;
-using DataAccess.Repository.AdminDashboard.Interfaces;
+using IRepository;
 
 namespace DrinkDb_Auth.AuthProviders
 {

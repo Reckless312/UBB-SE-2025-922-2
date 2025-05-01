@@ -1,7 +1,7 @@
 ﻿using System;
 using DataAccess.Model.Authentication;
 
-namespace DataAccess.Repository.Authentication.Interfaces
+namespace IRepository
 {
     public interface ISessionRepository
     {

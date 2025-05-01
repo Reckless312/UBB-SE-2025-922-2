@@ -2,7 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace DataAccess.Repository.AdminDashboard.Interfaces
+namespace IRepository
 {
     using System;
     using System.Collections.Generic;

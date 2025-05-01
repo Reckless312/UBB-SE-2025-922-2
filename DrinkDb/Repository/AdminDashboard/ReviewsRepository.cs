@@ -10,8 +10,7 @@ namespace DrinkDb_Auth.Repository.AdminDashboard
     using System.Text;
     using System.Threading.Tasks;
     using DataAccess.Model.AdminDashboard;
-    using DataAccess.Repository.AdminDashboard.Interfaces;
-
+    using IRepository;
     public class ReviewsRepository : IReviewsRepository
     {
         private readonly List<Review> reviews;

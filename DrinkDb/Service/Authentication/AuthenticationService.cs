@@ -10,9 +10,8 @@ using DrinkDb_Auth.AuthProviders.Twitter;
 using DataAccess.Model.Authentication;
 using DrinkDb_Auth.OAuthProviders;
 using DrinkDb_Auth.Repository.AdminDashboard;
-using DataAccess.Repository.AdminDashboard.Interfaces;
+using IRepository;
 using DrinkDb_Auth.Repository.Authentication;
-using DataAccess.Repository.Authentication.Interfaces;
 using DrinkDb_Auth.Service.Authentication.Interfaces;
 using Microsoft.UI.Xaml;
 

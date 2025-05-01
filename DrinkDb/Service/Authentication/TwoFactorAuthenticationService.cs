@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DataAccess.Model.Authentication;
 using DrinkDb_Auth.Repository.AdminDashboard;
-using DataAccess.Repository.AdminDashboard.Interfaces;
+using IRepository;
 using DrinkDb_Auth.Service.Authentication.Components;
 using DrinkDb_Auth.Service.Authentication.Interfaces;
 using DrinkDb_Auth.View;

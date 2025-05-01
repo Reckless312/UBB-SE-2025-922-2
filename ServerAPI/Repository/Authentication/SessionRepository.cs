@@ -1,7 +1,7 @@
 using System;
 using System.Data;
-using Model.Authentication;
-using Repository.Authentication.Interfaces;
+using DataAccess.Model.Authentication;
+using IRepository;
 using Microsoft.Data.SqlClient;
 
 namespace Repository.Authentication

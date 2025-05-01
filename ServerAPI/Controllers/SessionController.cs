@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Model.Authentication;
+using DataAccess.Model.Authentication;
 using Repository.Authentication;
-using Repository.Authentication.Interfaces;
+using IRepository;
 
 namespace ServerAPI.Controllers
 {

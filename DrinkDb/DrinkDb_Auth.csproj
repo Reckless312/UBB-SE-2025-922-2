@@ -168,15 +168,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Server\Server.csproj" />
-	  <ProjectReference Include="..\SharedResources\DataAccess.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <PRIResource Remove="Adapter\**" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <PRIResource Remove="Logs\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\ServerAPI\ServerAPI.csproj" />
+	  <ProjectReference Include="..\SharedResources\DataAccess.csproj" />
 	</ItemGroup>
 </Project>

@@ -6,7 +6,7 @@
     using System.Text;
     using System.Threading.Tasks;
     using DataAccess.Model.AdminDashboard;
-    using DataAccess.Repository.AdminDashboard.Interfaces;
+    using IRepository;
 
     public class RolesRepository : IRolesRepository
     {

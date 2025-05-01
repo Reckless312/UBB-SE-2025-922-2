@@ -1,4 +1,4 @@
-﻿namespace DataAccess.Repository.AdminDashboard.Interfaces
+﻿namespace IRepository
 {
     using System;
     using System.Collections.Generic;
