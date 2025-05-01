@@ -1,10 +1,11 @@
 ﻿using DrinkDb_Auth.OAuthProviders;
 using DrinkDb_Auth.Service;
+using DrinkDb_Auth.Service.Authentication;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Threading.Tasks;
 
-namespace Tests
+namespace Tests.Authentication
 {
     [TestClass]
     public sealed class AuthenticationService_Tests

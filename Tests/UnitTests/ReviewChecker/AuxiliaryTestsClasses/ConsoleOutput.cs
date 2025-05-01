@@ -1,6 +1,7 @@
 ﻿namespace UnitTests.ReviewChecker.AuxiliaryTestsClasses
 {
     using System;
+    using System.IO;
 
     public class ConsoleOutput : IDisposable
     {

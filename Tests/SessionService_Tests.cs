@@ -1,6 +1,7 @@
-﻿using DrinkDb_Auth.Adapter;
-using DataAccess.Model;
+﻿using DataAccess.Model;
+using DataAccess.Model.Authentication;
 using DrinkDb_Auth.Service;
+using IRepository;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
@@ -120,11 +121,17 @@ namespace Tests
     // Modified SessionService to accept dependency injection for testing
     public class SessionService
     {
-        private readonly ISessionAdapter sessionRepository;
+        private readonly ISessionRepository sessionRepository;
+        private MockSessionAdapter mockSessionAdapter;
 
-        public SessionService(ISessionAdapter sessionAdapter)
+        public SessionService(ISessionRepository sessionAdapter)
         {
             sessionRepository = sessionAdapter ?? throw new ArgumentNullException(nameof(sessionAdapter));
+        }
+
+        public SessionService(MockSessionAdapter mockSessionAdapter)
+        {
+            this.mockSessionAdapter = mockSessionAdapter;
         }
 
         public Session CreateSession(Guid userId)

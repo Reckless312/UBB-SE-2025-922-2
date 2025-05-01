@@ -1,20 +1,22 @@
-﻿using DrinkDb_Auth.Adapter;
-using DrinkDb_Auth.AuthProviders;
+﻿using DrinkDb_Auth.AuthProviders;
 using DrinkDb_Auth.AuthProviders.Facebook;
 using DrinkDb_Auth.AuthProviders.Github;
 using DrinkDb_Auth.AuthProviders.Google;
 using DrinkDb_Auth.AuthProviders.LinkedIn;
 using DrinkDb_Auth.AuthProviders.Twitter;
-using DataAccess.Model;
 using DrinkDb_Auth.OAuthProviders;
 using Microsoft.UI.Xaml;
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using IRepository;
+using DataAccess.Model.Authentication;
+using System.Collections.Generic;
+using DataAccess.Model.AdminDashboard;
 
 namespace Tests
 {
-    public class MockSessionAdapter : ISessionAdapter
+    public class MockSessionAdapter : ISessionRepository
     {
         public Guid MockId { get; set; }
 
@@ -25,17 +27,17 @@ namespace Tests
 
         public bool EndSession(Guid sessionId)
         {
-            throw new NotImplementedException();
+            return true; // Assuming session ends successfully in the mock
         }
 
         public Session GetSession(Guid sessionId)
         {
-            throw new NotImplementedException();
+            return new Session { SessionId = sessionId, UserId = MockId }; // Mock implementation
         }
 
         public Session GetSessionByUserId(Guid userId)
         {
-            throw new NotImplementedException();
+            return new Session { SessionId = MockId, UserId = userId }; // Mock implementation
         }
     }
 
@@ -72,7 +74,7 @@ namespace Tests
         }
     }
 
-    public class MockUserAdapter : IUserAdapter
+    public class MockUserAdapter : IUserRepository
     {
         public bool Throws { get; set; } = false;
         public Guid MockId { get; set; }
@@ -105,6 +107,46 @@ namespace Tests
         public bool ValidateAction(Guid userId, string resource, string action)
         {
             return true;
+        }
+
+        public List<User> GetUsersWhoHaveSubmittedAppeals()
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<User> GetBannedUsersWhoHaveSubmittedAppeals()
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<User> GetUsersByRoleType(RoleType roleType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public RoleType GetHighestRoleTypeForUser(Guid userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddRoleToUser(Guid userID, Role roleToAdd)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<User> GetAllUsers()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void GetHighestRoleTypeForUser(int v)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddRoleToUser(int v, Role role)
+        {
+            throw new NotImplementedException();
         }
     }
 

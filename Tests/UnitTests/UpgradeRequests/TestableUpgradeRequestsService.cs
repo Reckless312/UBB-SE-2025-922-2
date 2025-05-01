@@ -1,9 +1,12 @@
 namespace UnitTests.UpgradeRequests
 {
-    using App1.Models;
-    using App1.Repositories;
-    using App1.Services;
+    using DataAccess.Model.AdminDashboard;
+    using DrinkDb_Auth.Service;
+    using IRepository;
     using Moq;
+    using System;
+    using System.Collections.Generic;
+    using Xunit;
 
     // Test subclass that exposes the protected method for testing
     public class TestableUpgradeRequestsService : UpgradeRequestsService
@@ -64,8 +67,8 @@ namespace UnitTests.UpgradeRequests
         {
             List<UpgradeRequest> expectedRequests = new List<UpgradeRequest>
             {
-                new UpgradeRequest(1, 100, "User 1"),
-                new UpgradeRequest(2, 101, "User 2"),
+                new UpgradeRequest(1, Guid.NewGuid(), "User 1"),
+                new UpgradeRequest(2, Guid.NewGuid(), "User 2"),
             };
             this.mockUpgradeRequestsRepository.Setup(r => r.RetrieveAllUpgradeRequests())
                 .Returns(expectedRequests);
@@ -89,7 +92,7 @@ namespace UnitTests.UpgradeRequests
         public void ProcessUpgradeRequest_WhenAccepted_UpgradesUserRole()
         {
             int upgradeRequestIdentifier = 1;
-            int requestingUserIdentifier = 100;
+            Guid requestingUserIdentifier = Guid.NewGuid();
             UpgradeRequest upgradeRequest = new UpgradeRequest(upgradeRequestIdentifier, requestingUserIdentifier, "Test User");
             Role nextRole = new Role(RoleType.Manager, "Manager");
             this.mockUpgradeRequestsRepository.Setup(r => r.RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier)).Returns(upgradeRequest);
@@ -120,20 +123,16 @@ namespace UnitTests.UpgradeRequests
         {
             List<UpgradeRequest> upgradeRequests = new List<UpgradeRequest>
             {
-                new UpgradeRequest(1, 100, "Regular User"),
-                new UpgradeRequest(2, 101, "Banned User"),
-                new UpgradeRequest(3, 102, "Another Regular User"),
-                new UpgradeRequest(4, 103, "Another Banned User"),
+                new UpgradeRequest(1, Guid.NewGuid(), "Regular User"),
+                new UpgradeRequest(2, Guid.NewGuid(), "Banned User"),
+                new UpgradeRequest(3, Guid.NewGuid(), "Another Regular User"),
+                new UpgradeRequest(4, Guid.NewGuid(), "Another Banned User"),
             };
             Mock<IUpgradeRequestsRepository> mockRepository = new Mock<IUpgradeRequestsRepository>();
             Mock<IRolesRepository> mockRoles = new Mock<IRolesRepository>();
             Mock<IUserRepository> mockUsers = new Mock<IUserRepository>();
             mockRepository.Setup(r => r.RetrieveAllUpgradeRequests()).Returns(upgradeRequests);
             mockRoles.Setup(r => r.GetAllRoles()).Returns(new List<Role> { new Role(RoleType.Banned, "Banned"), new Role(RoleType.User, "User") });
-            mockUsers.Setup(u => u.GetHighestRoleTypeForUser(101)).Returns(RoleType.Banned);
-            mockUsers.Setup(u => u.GetHighestRoleTypeForUser(103)).Returns(RoleType.Banned);
-            mockUsers.Setup(u => u.GetHighestRoleTypeForUser(100)).Returns(RoleType.User);
-            mockUsers.Setup(u => u.GetHighestRoleTypeForUser(102)).Returns(RoleType.User);
             TestableUpgradeRequestsService testableService = new TestableUpgradeRequestsService(
                 mockRepository.Object,
                 mockRoles.Object,

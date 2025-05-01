@@ -18,11 +18,16 @@
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250228001" />
 		<PackageReference Include="MSTest.TestAdapter" Version="3.1.1" />
 		<PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
+		<PackageReference Include="xunit.extensibility.core" Version="2.9.3" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\DrinkDb\DrinkDb_Auth.csproj" />
 		<ProjectReference Include="..\SharedResources\DataAccess.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="AdminDashboard\" />
 	</ItemGroup>
 
 </Project>

@@ -2,10 +2,12 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using DataAccess.Model.AdminDashboard;
+using System;
+using Xunit;
+
 namespace UnitTests.Reviews
 {
-    using App1.Models;
-
     public class ReviewsTests
     {
         [Fact]
@@ -13,7 +15,7 @@ namespace UnitTests.Reviews
         {
             // Arrange
             int reviewId = 1;
-            int userId = 2;
+            Guid userId = Guid.NewGuid();
             int rating = 4;
             string content = "Great drink!";
             DateTime createdDate = DateTime.Now;
@@ -46,7 +48,7 @@ namespace UnitTests.Reviews
             // Arrange
             Review review = new Review(
                 reviewId: 1,
-                userId: 2,
+                userId: Guid.NewGuid(),
                 rating: 4,
                 content: "Great drink!",
                 createdDate: DateTime.Now);
@@ -65,7 +67,7 @@ namespace UnitTests.Reviews
             // Arrange
             Review review = new Review(
                 reviewId: 1,
-                userId: 2,
+                userId: Guid.NewGuid(),
                 rating: 4,
                 content: "Great drink!",
                 createdDate: DateTime.Now);
@@ -84,7 +86,7 @@ namespace UnitTests.Reviews
             // Arrange
             Review review = new Review(
                 reviewId: 1,
-                userId: 2,
+                userId: Guid.NewGuid(),
                 rating: 4,
                 content: "Great drink!",
                 createdDate: DateTime.Now,
@@ -104,7 +106,7 @@ namespace UnitTests.Reviews
             // Arrange
             Review review = new Review(
                 reviewId: 1,
-                userId: 2,
+                userId: Guid.NewGuid(),
                 rating: 4,
                 content: "Great drink!",
                 createdDate: DateTime.Now,

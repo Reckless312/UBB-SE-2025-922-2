@@ -6,9 +6,6 @@
     using System.Reflection;
     using System.Text;
     using System.Threading.Tasks;
-    using App1.AutoChecker;
-    using App1.Models;
-    using App1.Services;
     using Moq;
 
     public class TestOffensiveContentDetector

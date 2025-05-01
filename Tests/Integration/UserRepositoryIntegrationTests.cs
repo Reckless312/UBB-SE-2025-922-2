@@ -1,15 +1,16 @@
 using System;
 using System.Transactions;
-using DrinkDb_Auth.Adapter;
-using DrinkDb_Auth.Model;
+using DataAccess.Model.Authentication;
+using DrinkDb_Auth.Repository.AdminDashboard;
+using DrinkDb_Auth.Repository.Authentication;
 using NUnit.Framework;
 
 namespace DrinkDb_Auth.Tests.Integration
 {
     [TestFixture]
-    public class UserAdapterIntegrationTests
+    public class UserRepositoryIntegrationTests
     {
-        private UserAdapter _userAdapter;
+        private UserRepository _userRepository;
         private TransactionScope _transactionScope;
         private bool _dbConnectionAvailable = false;
 
@@ -20,7 +21,7 @@ namespace DrinkDb_Auth.Tests.Integration
             {
                 // Use TransactionScope to rollback changes after each test
                 _transactionScope = new TransactionScope(TransactionScopeOption.Required);
-                _userAdapter = new UserAdapter();
+                _userRepository = new UserRepository();
 
                 // Verify the connection directly
                 using (var connection = DrinkDbConnectionHelper.GetConnection())
@@ -73,8 +74,8 @@ namespace DrinkDb_Auth.Tests.Integration
             };
 
             // Act
-            bool result = _userAdapter.CreateUser(newUser);
-            var retrievedUser = _userAdapter.GetUserById(newUser.UserId);
+            bool result = _userRepository.CreateUser(newUser);
+            var retrievedUser = _userRepository.GetUserById(newUser.UserId);
 
             // Assert
             Assert.IsTrue(result);
@@ -101,10 +102,10 @@ namespace DrinkDb_Auth.Tests.Integration
                 PasswordHash = "test_hash",
                 TwoFASecret = null
             };
-            _userAdapter.CreateUser(newUser);
+            _userRepository.CreateUser(newUser);
 
             // Act
-            var retrievedUser = _userAdapter.GetUserById(newUser.UserId);
+            var retrievedUser = _userRepository.GetUserById(newUser.UserId);
 
             // Assert
             Assert.IsNotNull(retrievedUser);
@@ -125,7 +126,7 @@ namespace DrinkDb_Auth.Tests.Integration
             Guid nonExistingId = Guid.NewGuid();
 
             // Act
-            var retrievedUser = _userAdapter.GetUserById(nonExistingId);
+            var retrievedUser = _userRepository.GetUserById(nonExistingId);
 
             // Assert
             Assert.IsNull(retrievedUser);
@@ -149,10 +150,10 @@ namespace DrinkDb_Auth.Tests.Integration
                 PasswordHash = "test_hash",
                 TwoFASecret = null
             };
-            _userAdapter.CreateUser(newUser);
+            _userRepository.CreateUser(newUser);
 
             // Act
-            var retrievedUser = _userAdapter.GetUserByUsername(uniqueUsername);
+            var retrievedUser = _userRepository.GetUserByUsername(uniqueUsername);
 
             // Assert
             Assert.IsNotNull(retrievedUser);
@@ -173,7 +174,7 @@ namespace DrinkDb_Auth.Tests.Integration
             string nonExistingUsername = $"non_existing_user_{Guid.NewGuid()}";
 
             // Act
-            var retrievedUser = _userAdapter.GetUserByUsername(nonExistingUsername);
+            var retrievedUser = _userRepository.GetUserByUsername(nonExistingUsername);
 
             // Assert
             Assert.IsNull(retrievedUser);
@@ -196,15 +197,15 @@ namespace DrinkDb_Auth.Tests.Integration
                 PasswordHash = "original_hash",
                 TwoFASecret = null
             };
-            _userAdapter.CreateUser(newUser);
+            _userRepository.CreateUser(newUser);
 
             // Update user properties
             newUser.PasswordHash = "updated_hash";
             newUser.TwoFASecret = "new_2fa_secret";
 
             // Act
-            bool updateResult = _userAdapter.UpdateUser(newUser);
-            var retrievedUser = _userAdapter.GetUserById(newUser.UserId);
+            bool updateResult = _userRepository.UpdateUser(newUser);
+            var retrievedUser = _userRepository.GetUserById(newUser.UserId);
 
             // Assert
             Assert.IsTrue(updateResult);
@@ -230,11 +231,11 @@ namespace DrinkDb_Auth.Tests.Integration
                 PasswordHash = "test_hash",
                 TwoFASecret = null
             };
-            _userAdapter.CreateUser(newUser);
+            _userRepository.CreateUser(newUser);
 
             // Act
-            bool deleteResult = _userAdapter.DeleteUser(newUser.UserId);
-            var retrievedUser = _userAdapter.GetUserById(newUser.UserId);
+            bool deleteResult = _userRepository.DeleteUser(newUser.UserId);
+            var retrievedUser = _userRepository.GetUserById(newUser.UserId);
 
             // Assert
             Assert.IsTrue(deleteResult);
@@ -258,13 +259,13 @@ namespace DrinkDb_Auth.Tests.Integration
                 PasswordHash = "test_hash",
                 TwoFASecret = null
             };
-            _userAdapter.CreateUser(newUser);
+            _userRepository.CreateUser(newUser);
             
             // Act & Assert
-            bool result = _userAdapter.ValidateAction(newUser.UserId, "test_resource", "read");
+            bool result = _userRepository.ValidateAction(newUser.UserId, "test_resource", "read");
 
             // Make sure it doesn't throw an exception:
-            Assert.DoesNotThrow(() => _userAdapter.ValidateAction(newUser.UserId, "test_resource", "read"));
+            Assert.DoesNotThrow(() => _userRepository.ValidateAction(newUser.UserId, "test_resource", "read"));
         }
     }
 } 

@@ -1,7 +1,7 @@
 namespace UnitTests.AiCheck
 {
+    using DrinkDb_Auth.AiCheck;
     using System.Linq;
-    using App1.AiCheck;
     using Xunit;
 
     public class ReviewFilterTests

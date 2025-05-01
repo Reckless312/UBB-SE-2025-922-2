@@ -2,7 +2,6 @@
 {
     using System;
     using System.IO;
-    using App1.Services;
     using Moq;
     using UnitTests.EmailJobs.AuxiliaryTestClasses;
     using Xunit;

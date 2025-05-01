@@ -4,8 +4,10 @@
 
 namespace UnitTests.Users
 {
+    using DataAccess.Model.AdminDashboard;
+    using DataAccess.Model.Authentication;
+    using System;
     using System.Collections.Generic;
-    using App1.Models;
     using Xunit;
 
     /// <summary>
@@ -19,7 +21,7 @@ namespace UnitTests.Users
         [Fact]
         public void Constructor_ShouldInitializePropertiesCorrectly()
         {
-            int userId = 1;
+            Guid userId = new Guid();
             string emailAddress = "test@example.com";
             string fullName = "Test User";
             int numberOfDeletedReviews = 2;
@@ -49,7 +51,10 @@ namespace UnitTests.Users
         {
             User user = new User
             {
-                UserId = 1,
+                Username = "testuser",
+                PasswordHash = "hashedpassword",
+                TwoFASecret = "",
+                UserId = new Guid(),
                 EmailAddress = "test@example.com",
             };
 

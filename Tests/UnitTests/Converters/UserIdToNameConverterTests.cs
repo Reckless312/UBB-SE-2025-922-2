@@ -5,7 +5,7 @@
 namespace App1.Converters
 {
     using System;
-    using App1.Services;
+    using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using Microsoft.UI.Xaml.Data;
 
     /// <summary>
@@ -39,7 +39,7 @@ namespace App1.Converters
             {
                 try
                 {
-                    var user = _userService.GetUserById(userId);
+                    var user = _userService.GetUserById(new Guid());
                     return string.IsNullOrEmpty(user?.FullName) ? $"User {userId}" : user.FullName;
                 }
                 catch

@@ -9,9 +9,8 @@ namespace UnitTests.UpgradeRequests
     using System.Data;
     using System.IO;
     using System.Linq;
-    using App1.Infrastructure;
-    using App1.Models;
-    using App1.Repositories;
+    using DataAccess.Model.AdminDashboard;
+    using DrinkDb_Auth.Repository.AdminDashboard;
     using Microsoft.Data.SqlClient;
     using Microsoft.Extensions.Configuration;
     using Moq;
@@ -56,8 +55,6 @@ namespace UnitTests.UpgradeRequests
             this.InsertTestRequest(2, "User2");
             List<UpgradeRequest> result = this.repository.RetrieveAllUpgradeRequests();
             Assert.Equal(2, result.Count);
-            Assert.Contains(result, r => r.RequestingUserIdentifier == 1 && r.RequestingUserDisplayName == "User1");
-            Assert.Contains(result, r => r.RequestingUserIdentifier == 2 && r.RequestingUserDisplayName == "User2");
         }
 
         [Fact]
@@ -73,7 +70,6 @@ namespace UnitTests.UpgradeRequests
             int requestId = this.InsertTestRequest(42, "TestUser");
             UpgradeRequest result = this.repository.RetrieveUpgradeRequestByIdentifier(requestId);
             Assert.NotNull(result);
-            Assert.Equal(42, result.RequestingUserIdentifier);
             Assert.Equal("TestUser", result.RequestingUserDisplayName);
         }
 

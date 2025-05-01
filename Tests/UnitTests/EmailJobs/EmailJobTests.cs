@@ -7,9 +7,11 @@
     using System.Reflection;
     using System.Text;
     using System.Threading.Tasks;
-    using App1.Models;
-    using App1.Repositories;
-    using App1.Services;
+    using DataAccess.Model.AdminDashboard;
+    using DataAccess.Model.Authentication;
+    using DrinkDb_Auth.Repository.AdminDashboard;
+    using DrinkDb_Auth.Service.AdminDashboard.Components;
+    using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using MailKit.Net.Smtp;
     using Microsoft.Extensions.Configuration;
     using MimeKit;
@@ -42,7 +44,7 @@
             new User(5, "banned@example.com", "Banned User", 3, true, UserRepository.BannedUserRoles),
         };
 
-        private readonly List<Review> reviews = new List<Review> { new Review(1, 3, 4, "Good product", DateTime.Now.AddDays(-1)), new Review(2, 4, 5, "Excellent service", DateTime.Now.AddDays(-2)) };
+        private readonly List<Review> reviews = new List<Review> { new Review(1, new Guid(), 4, "Good product", DateTime.Now.AddDays(-1)), new Review(2, new Guid(), 5, "Excellent service", DateTime.Now.AddDays(-2)) };
 
         public EmailJobTests()
         {

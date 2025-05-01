@@ -4,13 +4,12 @@
 
 namespace UnitTests.Roles
 {
+    using DataAccess.Model.AdminDashboard;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using App1.Models;
-    using App1.Repositories;
     using Xunit;
 
     public class RolesTests

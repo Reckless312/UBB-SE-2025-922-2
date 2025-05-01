@@ -32,5 +32,7 @@ namespace IRepository
         public User? GetUserById(Guid userId);
         public bool CreateUser(User user);
         public bool UpdateUser(User user);
+        void GetHighestRoleTypeForUser(int v);
+        void AddRoleToUser(int v, Role role);
     }
 }

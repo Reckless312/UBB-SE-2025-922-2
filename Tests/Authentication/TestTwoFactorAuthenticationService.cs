@@ -1,14 +1,15 @@
-﻿using DrinkDb_Auth.Service;
-using DataAccess.Model;
-using Tests.CoraMockUps;
-using DrinkDb_Auth.View;
-using DrinkDb_Auth.ViewModel;
+﻿using Tests.CoraMockUps;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 using System;
-using DrinkDb_Auth.Service.TwoFactor;
+using DrinkDb_Auth.Service.Authentication.Interfaces;
+using DrinkDb_Auth.ViewModel.Authentication.Interfaces;
+using DrinkDb_Auth.Service.Authentication.Components;
+using DrinkDb_Auth.Service.Authentication;
+using DrinkDb_Auth.View.Authentication.Interfaces;
+using DataAccess.Model.Authentication;
 
-namespace Tests
+namespace Tests.Authentication
 {
     [TestClass]
     public sealed class TestTwoFactorAuthenticationService
@@ -69,7 +70,7 @@ namespace Tests
 
             bool isFirstTimeSetup = true;
 
-            TwoFactorAuthenticationService injectedService = TwoFactorAuthenticationService.CreateInjectedInstance(null, TestUserId, isFirstTimeSetup, mockUpAdapter, keyGeneration, mockUpVerifier, mockSetup, mockView, mockDialog, mockDialog);
+            TwoFactorAuthenticationService injectedService = TwoFactorAuthenticationService.CreateInjectedInstance(null, TestUserId, isFirstTimeSetup, mockUpAdapter, keyGeneration, (IVerify?)mockUpVerifier, mockSetup, mockView, mockDialog, mockDialog);
 
             bool result = await injectedService.SetupOrVerifyTwoFactor();
 
@@ -88,7 +89,7 @@ namespace Tests
 
             bool isFirstTimeSetup = true;
 
-            TwoFactorAuthenticationService injectedService = TwoFactorAuthenticationService.CreateInjectedInstance(null, TestUserId, isFirstTimeSetup, mockUpAdapter, keyGeneration, mockUpVerifier, mockSetup, mockView, mockDialog, mockDialog);
+            TwoFactorAuthenticationService injectedService = TwoFactorAuthenticationService.CreateInjectedInstance(null, TestUserId, isFirstTimeSetup, mockUpAdapter, keyGeneration, (IVerify?)mockUpVerifier, mockSetup, mockView, mockDialog, mockDialog);
 
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(async () =>
             {
@@ -107,7 +108,7 @@ namespace Tests
 
             bool isFirstTimeSetup = false;
 
-            TwoFactorAuthenticationService injectedService = TwoFactorAuthenticationService.CreateInjectedInstance(null, TestUserId, isFirstTimeSetup, mockUpAdapter, keyGeneration, mockUpVerifier, mockSetup, mockView, mockDialog, mockDialog);
+            TwoFactorAuthenticationService injectedService = TwoFactorAuthenticationService.CreateInjectedInstance(null, TestUserId, isFirstTimeSetup, mockUpAdapter, keyGeneration, (IVerify?)mockUpVerifier, mockSetup, mockView, mockDialog, mockDialog);
 
             bool result = await injectedService.SetupOrVerifyTwoFactor();
 
@@ -125,7 +126,7 @@ namespace Tests
 
             bool isFirstTimeSetup = false;
 
-            TwoFactorAuthenticationService injectedService = TwoFactorAuthenticationService.CreateInjectedInstance(null, TestUserId, isFirstTimeSetup, mockUpAdapter, keyGeneration, mockUpVerifier, mockSetup, mockView, mockDialog, mockDialog);
+            TwoFactorAuthenticationService injectedService = TwoFactorAuthenticationService.CreateInjectedInstance(null, TestUserId, isFirstTimeSetup, mockUpAdapter, keyGeneration, (IVerify?)mockUpVerifier, mockSetup, mockView, mockDialog, mockDialog);
 
             bool result = await injectedService.SetupOrVerifyTwoFactor();
 

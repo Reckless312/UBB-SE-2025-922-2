@@ -1,9 +1,10 @@
-﻿using DrinkDb_Auth.Adapter;
-using DataAccess.Model;
+﻿using DataAccess.Model;
+using DataAccess.Model.Authentication;
+using IRepository;
 
 namespace Tests.CoraMockUps
 {
-    public interface IMockUpUserAdapter : IUserAdapter
+    public interface IMockUpUserAdapter : IUserRepository
     {
         public bool CreatedUser { get; set; }
         public User? User { get; set; }

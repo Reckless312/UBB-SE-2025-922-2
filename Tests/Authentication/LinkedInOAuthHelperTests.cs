@@ -1,17 +1,17 @@
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
-using DrinkDb_Auth.Adapter;
 using DrinkDb_Auth.AuthProviders.LinkedIn;
+using IRepository;
 using Moq;
 using NUnit.Framework;
 
-namespace DrinkDb_Auth.Tests
+namespace Tests.Authentication
 {
     [TestFixture]
     public class LinkedInOAuthHelperTests
     {
-        private Mock<IUserAdapter> _mockUserAdapter;
+        private Mock<IUserRepository> _mockUserRepository;
         private const string ClientId = "test_client_id";
         private const string ClientSecret = "test_client_secret";
         private const string RedirectUri = "http://localhost:8891/auth";
@@ -20,7 +20,7 @@ namespace DrinkDb_Auth.Tests
         [SetUp]
         public void Setup()
         {
-            _mockUserAdapter = new Mock<IUserAdapter>();
+            _mockUserRepository = new Mock<IUserRepository>();
         }
 
         [Test]

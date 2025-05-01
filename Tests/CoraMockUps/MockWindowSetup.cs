@@ -1,4 +1,5 @@
 ﻿using DrinkDb_Auth.ViewModel;
+using DrinkDb_Auth.ViewModel.Authentication.Interfaces;
 
 
 namespace Tests.CoraMockUps

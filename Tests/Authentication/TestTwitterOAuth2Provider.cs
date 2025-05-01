@@ -13,7 +13,7 @@ using DataAccess.Model;
 using DrinkDb_Auth.AuthProviders.Twitter;
 using System.Collections.Generic;
 
-namespace Tests
+namespace Tests.Authentication
 {
     [TestClass]
     public class TestTwitterOAuth2Provider
@@ -97,7 +97,7 @@ namespace Tests
                 .GetMethod("GeneratePkceData", BindingFlags.NonPublic | BindingFlags.Instance);
 
             // Fix: Cast to ValueTuple<string, string> instead of using 'as'
-            var result = ((ValueTuple<string, string>)method!.Invoke(provider, null!));
+            var result = (ValueTuple<string, string>)method!.Invoke(provider, null!);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(string.IsNullOrEmpty(result.Item1)); // codeVerifier
@@ -114,8 +114,8 @@ namespace Tests
                 .GetMethod("GeneratePkceData", BindingFlags.NonPublic | BindingFlags.Instance);
 
             // Fix: Cast to ValueTuple<string, string> instead of using 'as'
-            var result1 = ((ValueTuple<string, string>)method!.Invoke(provider, null!));
-            var result2 = ((ValueTuple<string, string>)method!.Invoke(provider, null!));
+            var result1 = (ValueTuple<string, string>)method!.Invoke(provider, null!);
+            var result2 = (ValueTuple<string, string>)method!.Invoke(provider, null!);
 
             Assert.AreNotEqual(result1.Item1, result2.Item1); // codeVerifier
             Assert.AreNotEqual(result1.Item2, result2.Item2); // codeChallenge

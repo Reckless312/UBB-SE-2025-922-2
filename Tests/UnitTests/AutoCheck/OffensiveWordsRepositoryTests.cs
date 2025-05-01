@@ -2,8 +2,8 @@
 {
     using System;
     using System.IO;
-    using App1.AutoChecker;
-    using App1.Infrastructure;
+    using DrinkDb_Auth.AutoChecker;
+    using DrinkDb_Auth.Repository.AdminDashboard;
     using Microsoft.Data.SqlClient;
     using Microsoft.Extensions.Configuration;
     using Xunit;

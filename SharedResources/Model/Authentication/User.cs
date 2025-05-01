@@ -19,6 +19,12 @@ namespace DataAccess.Model.Authentication
         public bool HasSubmittedAppeal { get; set; }
 
         public List<Role> AssignedRoles { get; set; }
+        public string FullName { get; set; }
+
+        public void Returns(User user)
+        {
+            throw new NotImplementedException();
+        }
 
         public override string ToString()
         {

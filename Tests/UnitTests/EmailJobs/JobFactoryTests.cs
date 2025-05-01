@@ -4,6 +4,8 @@
     using Moq;
     using Quartz;
     using Quartz.Spi;
+    using System;
+    using Xunit;
 
     public partial class JobFactoryTests
     {

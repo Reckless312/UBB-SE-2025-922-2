@@ -4,13 +4,14 @@
 
 namespace UnitTests.EmailJobs
 {
+    using DataAccess.Model.AdminDashboard;
+    using DataAccess.Model.Authentication;
+    using DrinkDb_Auth.Repository.AdminDashboard;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using App1.Models;
-    using App1.Repositories;
     using Xunit;
     
     /// <summary>
@@ -51,7 +52,7 @@ namespace UnitTests.EmailJobs
         {
             List<User> adminUsers = new List<User> { new User(1, "admin@example.com", "Admin User", 0, false, UserRepository.AdminRoles) };
 
-            List<Review> recentReviews = new List<Review> { new Review(1, 1, 4, "Great product", DateTime.Now) };
+            List<Review> recentReviews = new List<Review> { new Review(1, new Guid(), 4, "Great product", DateTime.Now) };
 
             this.reportData = new AdminReportData(this.reportDate, this.adminUsers, 10, 5, 3, 4.2, this.recentReviews);
 
@@ -75,7 +76,7 @@ namespace UnitTests.EmailJobs
 
             DateTime newDate = DateTime.Now.AddDays(1);
             List<User> newUsers = new List<User> { new User(2, "new@example.com", "New User", 0, false, new List<Role>()) };
-            List<Review> newReviews = new List<Review> { new Review(3, 2, 5, "New review", DateTime.Now) };
+            List<Review> newReviews = new List<Review> { new Review(3, new Guid(), 5, "New review", DateTime.Now) };
 
             this.reportData.ReportDate = newDate;
             this.reportData.AdminUsers = newUsers;

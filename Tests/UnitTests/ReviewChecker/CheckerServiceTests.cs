@@ -10,11 +10,14 @@ namespace UnitTests.ReviewChecker
     using System.Reflection;
     using System.Text;
     using System.Threading.Tasks;
-    using App1.AutoChecker;
-    using App1.Models;
-    using App1.Services;
+    using DataAccess.Model.AdminDashboard;
+    using DrinkDb_Auth.AutoChecker;
+    using DrinkDb_Auth.Service.AdminDashboard;
+    using DrinkDb_Auth.Service.AdminDashboard.Components;
+    using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using Moq;
     using UnitTests.ReviewChecker.AuxiliaryTestsClasses;
+    using Xunit;
 
     public class CheckerServiceTests
     {
@@ -38,7 +41,7 @@ namespace UnitTests.ReviewChecker
         [Fact]
         public void RunAutoCheck_WithOffensiveReviews_HidesOffensiveReviews()
         {
-            List<Review> reviews = new List<Review> { new Review(1, 1, 4, "Offensive Content", DateTime.Now), new Review(2, 1, 3, "Normal Content", DateTime.Now) };
+            List<Review> reviews = new List<Review> { new Review(1, new Guid(), 4, "Offensive Content", DateTime.Now), new Review(2, new Guid(), 3, "Normal Content", DateTime.Now) };
 
             this.mockAutoCheck.Setup(mockCheckAutomatically => mockCheckAutomatically.AutoCheckReview("Offensive Content")).Returns(true);
             this.mockAutoCheck.Setup(mockAutomaticallyCheck => mockAutomaticallyCheck.AutoCheckReview("Normal Content")).Returns(false);

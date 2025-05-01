@@ -1,10 +1,10 @@
 ﻿namespace UnitTests.Reviews
 {
+    using DataAccess.Model.AdminDashboard;
+    using DrinkDb_Auth.Repository.AdminDashboard;
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using App1.Models;
-    using App1.Repositories;
     using Xunit;
 
     public class ReviewsRepositoryTests
@@ -100,7 +100,7 @@
         public void GetReviewsByUser_ReturnsCorrectReviews()
         {
             ReviewsRepository repository = this.CreateRepositoryWithTestData();
-            int userId = 1;
+            Guid userId = new Guid();
             List<Review> allReviews = repository.GetAllReviews();
             List<Review> expectedReviews = allReviews.Where(review => review.UserId == userId && !review.IsHidden).ToList();
             List<Review> reviews = repository.GetReviewsByUser(userId);
@@ -167,7 +167,7 @@
             ReviewsRepository repository = this.CreateRepositoryWithTestData();
             List<Review> allReviews = repository.GetAllReviews();
             int maxId = allReviews.Max(review => review.ReviewId);
-            Review newReview = new Review(reviewId: 0, userId: 5, rating: 4, content: "New review", createdDate: DateTime.Now);
+            Review newReview = new Review(reviewId: 0, userId: new Guid(), rating: 4, content: "New review", createdDate: DateTime.Now);
             int newId = repository.AddReview(newReview);
             Assert.True(newId > maxId);
             Review addedReview = repository.GetReviewById(newId);
@@ -217,7 +217,7 @@
             {
                 new Review(
                     reviewId: 0,
-                    userId: 1,
+                    userId: new Guid(),
                     rating: 5,
                     content: "Terrible mix, a complete mess dick ass taste",
                     createdDate: DateTime.Now.AddHours(-1),
@@ -225,14 +225,14 @@
                     isHidden: false),
                 new Review(
                     reviewId: 0,
-                    userId: 3,
+                    userId: new Guid(),
                     rating: 4,
                     content: "Good experience",
                     createdDate: DateTime.Now.AddHours(-5),
                     isHidden: false),
                 new Review(
                     reviewId: 0,
-                    userId: 1,
+                    userId: new Guid(),
                     rating: 2,
                     content: "Such a bitter aftertaste",
                     createdDate: DateTime.Now.AddDays(-1),
@@ -240,7 +240,7 @@
                     isHidden: false),
                 new Review(
                     reviewId: 0,
-                    userId: 2,
+                    userId: new Guid(),
                     rating: 5,
                     content: "Excellent!",
                     createdDate: DateTime.Now.AddDays(-2),
@@ -248,7 +248,7 @@
                     isHidden: false),
                 new Review(
                     reviewId: 0,
-                    userId: 3,
+                    userId: new Guid(),
                     rating: 5,
                     content: "dunce",
                     createdDate: DateTime.Now.AddDays(-2),
@@ -256,14 +256,14 @@
                     isHidden: false),
                 new Review(
                     reviewId: 0,
-                    userId: 2,
+                    userId: new Guid(),
                     rating: 5,
                     content: "Amazing",
                     createdDate: DateTime.Now.AddDays(-2),
                     isHidden: false),
                 new Review(
                     reviewId: 0,
-                    userId: 2,
+                    userId: new Guid(),
                     rating: 5,
                     content: "My favorite!",
                     createdDate: DateTime.Now.AddDays(-2),

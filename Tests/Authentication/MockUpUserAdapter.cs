@@ -1,17 +1,22 @@
-﻿namespace DrinkDb_Auth.ProxyRepository.AdminDashboard
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using DataAccess.Model.AdminDashboard;
-    using DataAccess.Model.Authentication;
-    using IRepository;
+﻿using DataAccess.Model.AdminDashboard;
+using DataAccess.Model.Authentication;
+using System;
+using System.Collections.Generic;
 
-    internal class UserProxyRepository : IUserRepository
+namespace Tests.Authentication
+{
+    internal class MockUpUserAdapter : IMockUpUserAdapter
     {
+        public MockUpUserAdapter() { }
+        public bool UpdatedUser { get; set; } = false;
+        User IMockUpUserAdapter.User { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+
         public void AddRoleToUser(Guid userID, Role roleToAdd)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddRoleToUser(int v, Role role)
         {
             throw new NotImplementedException();
         }
@@ -32,6 +37,11 @@
         }
 
         public RoleType GetHighestRoleTypeForUser(Guid userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void GetHighestRoleTypeForUser(int v)
         {
             throw new NotImplementedException();
         }
@@ -62,16 +72,6 @@
         }
 
         public bool ValidateAction(Guid userId, string resource, string action)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void GetHighestRoleTypeForUser(int v)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void AddRoleToUser(int v, Role role)
         {
             throw new NotImplementedException();
         }

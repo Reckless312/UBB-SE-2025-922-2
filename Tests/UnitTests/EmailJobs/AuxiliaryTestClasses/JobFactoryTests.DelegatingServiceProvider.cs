@@ -1,4 +1,6 @@
-﻿namespace YourNamespace.Tests
+﻿using System;
+
+namespace YourNamespace.Tests
 {
     public partial class JobFactoryTests
     {
@@ -6,6 +8,7 @@
         private class DelegatingServiceProvider : IServiceProvider
         {
             private readonly IServiceProvider innerProvider;
+            private IServiceProvider @object;
 
             public DelegatingServiceProvider(IServiceProvider innerProvider)
             {

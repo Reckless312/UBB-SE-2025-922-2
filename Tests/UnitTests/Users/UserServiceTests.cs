@@ -6,12 +6,14 @@ namespace UnitTests.Users
 {
     using System;
     using System.Collections.Generic;
-    using App1.Models;
-    using App1.Repositories;
-    using App1.Services;
+    using DataAccess.Model.AdminDashboard;
+    using DataAccess.Model.Authentication;
+    using DrinkDb_Auth.Service;
+    using DrinkDb_Auth.Service.AdminDashboard.Components;
+    using IRepository;
     using Moq;
     using Xunit;
-    using static App1.Repositories.UserRepository;
+    using static DrinkDb_Auth.Repository.AdminDashboard.UserRepository;
 
     /// <summary>
     /// Unit tests for the <see cref="UserService"/> class.
@@ -58,7 +60,7 @@ namespace UnitTests.Users
         [Fact]
         public void GetAllUsers_ShouldReturnAllUsers()
         {
-            List<User> users = new List<User> { new User { UserId = 1, FullName = "User One" }, new User { UserId = 2, FullName = "User Two" } };
+            List<User> users = new List<User> { new User { Username =  "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), FullName = "User One" }, new User { Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), FullName = "User Two" } };
             this.mockUserRepository.Setup(repo => repo.GetAllUsers()).Returns(users);
             List<User> result = this.userService.GetAllUsers();
             Assert.NotNull(result);
@@ -96,7 +98,7 @@ namespace UnitTests.Users
         [Fact]
         public void GetActiveUsersByRoleType_ShouldReturnCorrectUsers()
         {
-            List<User> users = new List<User> { new User { UserId = 1, FullName = "Active User" } };
+            List<User> users = new List<User> { new User { Username = "", PasswordHash = "", TwoFASecret = "" ,UserId = new Guid(), FullName = "Active User" } };
             this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.User)).Returns(users);
             List<User> result = this.userService.GetActiveUsersByRoleType(RoleType.User);
             Assert.NotNull(result);
@@ -132,11 +134,10 @@ namespace UnitTests.Users
         [Fact]
         public void GetUserById_ShouldReturnCorrectUser()
         {
-            User user = new User { UserId = 1, FullName = "User One" };
-            this.mockUserRepository.Setup(repository => repository.GetUserByID(1)).Returns(user);
-            User result = this.userService.GetUserById(1);
+            User user = new User {Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), FullName = "User One" };
+            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid()).Returns(user));
+            User result = userService.GetUserById(new Guid());
             Assert.NotNull(result);
-            Assert.Equal(1, result.UserId);
             Assert.Equal("User One", result.FullName);
         }
 
@@ -146,8 +147,8 @@ namespace UnitTests.Users
         [Fact]
         public void GetUserById_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
         {
-            this.mockUserRepository.Setup(repository => repository.GetUserByID(1)).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetUserById(1));
+            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
+            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetUserById(new Guid()));
             Assert.Equal("Failed to retrieve user with ID 1.", exception.Message);
             Assert.IsType<RepositoryException>(exception.InnerException);
         }
@@ -158,8 +159,8 @@ namespace UnitTests.Users
         [Fact]
         public void GetUserById_ShouldThrowUserServiceException_WhenRepositoryReturnsNull()
         {
-            this.mockUserRepository.Setup(repository => repository.GetUserByID(1)).Returns((User)null);
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetUserById(1));
+            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Returns((User)null);
+            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetUserById(new Guid()));
             Assert.Equal("Failed to retrieve user with ID 1.", exception.Message);
         }
 
@@ -169,7 +170,7 @@ namespace UnitTests.Users
         [Fact]
         public void GetBannedUsers_ShouldReturnBannedUsers()
         {
-            List<User> users = new List<User> { new User { UserId = 1, FullName = "Banned User" } };
+            List<User> users = new List<User> { new User { Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), FullName = "Banned User" } };
             this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.Banned)).Returns(users);
             List<User> result = this.userService.GetBannedUsers();
             Assert.NotNull(result);
@@ -208,8 +209,8 @@ namespace UnitTests.Users
         [Fact]
         public void GetHighestRoleTypeForUser_ShouldReturnCorrectRoleType()
         {
-            this.mockUserRepository.Setup(repository => repository.GetHighestRoleTypeForUser(1)).Returns(RoleType.Admin);
-            RoleType result = this.userService.GetHighestRoleTypeForUser(1);
+            this.mockUserRepository.Setup(repository => repository.GetHighestRoleTypeForUser(new Guid())).Returns(RoleType.Admin);
+            RoleType result = this.userService.GetHighestRoleTypeForUser(new Guid());
             Assert.Equal(RoleType.Admin, result);
         }
 
@@ -219,9 +220,9 @@ namespace UnitTests.Users
         [Fact]
         public void GetHighestRoleTypeForUser_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
         {
-            this.mockUserRepository.Setup(repo => repo.GetHighestRoleTypeForUser(1)).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
+            this.mockUserRepository.Setup(repo => repo.GetHighestRoleTypeForUser(new Guid())).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
 
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetHighestRoleTypeForUser(1));
+            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetHighestRoleTypeForUser(new Guid()));
             Assert.Equal("Failed to retrieve the highest role type for user with ID 1.", exception.Message);
             Assert.IsType<RepositoryException>(exception.InnerException);
         }
@@ -232,8 +233,8 @@ namespace UnitTests.Users
         [Fact]
         public void GetHighestRoleTypeForUser_ShouldReturnDefaultRole_WhenRepositoryReturnsDefault()
         {
-            this.mockUserRepository.Setup(repository => repository.GetHighestRoleTypeForUser(1)).Returns(RoleType.Banned);
-            RoleType result = this.userService.GetHighestRoleTypeForUser(1);
+            this.mockUserRepository.Setup(repository => repository.GetHighestRoleTypeForUser(new Guid())).Returns(RoleType.Banned);
+            RoleType result = this.userService.GetHighestRoleTypeForUser(new Guid());
             Assert.Equal(RoleType.Banned, result);
         }
 
@@ -243,7 +244,7 @@ namespace UnitTests.Users
         [Fact]
         public void GetUsersByRoleType_ShouldReturnCorrectUsers()
         {
-            List<User> users = new List<User> { new User { UserId = 1, FullName = "User One" } };
+            List<User> users = new List<User> { new User { Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), FullName = "User One" } };
             this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.User)).Returns(users);
             List<User> result = this.userService.GetUsersByRoleType(RoleType.User);
             Assert.NotNull(result);
@@ -282,7 +283,7 @@ namespace UnitTests.Users
         [Fact]
         public void GetAdminUsers_ShouldReturnCorrectUsers()
         {
-            List<User> users = new List<User> { new User { UserId = 1, FullName = "Admin One" } };
+            List<User> users = new List<User> { new User { Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), FullName = "Admin One" } };
             this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.Admin)).Returns(users);
             List<User> result = this.userService.GetAdminUsers();
             Assert.NotNull(result);
@@ -308,7 +309,7 @@ namespace UnitTests.Users
         [Fact]
         public void GetRegularUsers_ShouldReturnCorrectUsers()
         {
-            List<User> users = new List<User> { new User { UserId = 1, FullName = "Regular User" } };
+            List<User> users = new List<User> { new User { Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), FullName = "Regular User" } };
             this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.User)).Returns(users);
             List<User> result = this.userService.GetRegularUsers();
             Assert.NotNull(result);
@@ -334,7 +335,7 @@ namespace UnitTests.Users
         [Fact]
         public void GetManagers_ShouldReturnCorrectUsers()
         {
-            var users = new List<User> { new User { UserId = 1, FullName = "Manager User" } };
+            var users = new List<User> { new User {Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), FullName = "Manager User" } };
             this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.Manager)).Returns(users);
             List<User> result = this.userService.GetManagers();
             Assert.NotNull(result);
@@ -360,7 +361,7 @@ namespace UnitTests.Users
         [Fact]
         public void GetBannedUsersWhoHaveSubmittedAppeals_ShouldReturnCorrectUsers()
         {
-            List<User> users = new List<User> { new User { UserId = 1, FullName = "Banned User", HasSubmittedAppeal = true } };
+            List<User> users = new List<User> { new User { Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), FullName = "Banned User", HasSubmittedAppeal = true } };
             this.mockUserRepository.Setup(repo => repo.GetBannedUsersWhoHaveSubmittedAppeals()).Returns(users);
             List<User> result = this.userService.GetBannedUsersWhoHaveSubmittedAppeals();
             Assert.NotNull(result);
@@ -398,9 +399,9 @@ namespace UnitTests.Users
         [Fact]
         public void GetUserFullNameById_ShouldReturnCorrectFullName()
         {
-            User user = new User { UserId = 1, FullName = "User One" };
-            this.mockUserRepository.Setup(repository => repository.GetUserByID(1)).Returns(user);
-            string result = this.userService.GetUserFullNameById(1);
+            User user = new User { Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), FullName = "User One" };
+            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Returns(user);
+            string result = this.userService.GetUserFullNameById(new Guid());
             Assert.Equal("User One", result);
         }
 
@@ -410,8 +411,8 @@ namespace UnitTests.Users
         [Fact]
         public void GetUserFullNameById_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
         {
-            this.mockUserRepository.Setup(repository => repository.GetUserByID(1)).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetUserFullNameById(1));
+            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
+            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetUserFullNameById(new Guid()));
             Assert.Equal("Failed to retrieve the full name of the user with ID 1.", exception.Message);
             Assert.IsType<RepositoryException>(exception.InnerException);
         }
@@ -422,8 +423,8 @@ namespace UnitTests.Users
         [Fact]
         public void GetUserFullNameById_ShouldThrowUserServiceException_WhenRepositoryReturnsNull()
         {
-            this.mockUserRepository.Setup(repository => repository.GetUserByID(1)).Returns((User)null);
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetUserFullNameById(1));
+            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Returns((User)null);
+            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetUserFullNameById(new Guid()));
             Assert.Equal("Failed to retrieve the full name of the user with ID 1.", exception.Message);
         }
 
@@ -433,9 +434,9 @@ namespace UnitTests.Users
         [Fact]
         public void UpdateUserRole_ShouldDoNothing_WhenUserDoesNotExist()
         {
-            this.mockUserRepository.Setup(repository => repository.GetUserByID(1)).Returns((User)null);
+            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Returns((User)null);
 
-            this.userService.UpdateUserRole(1, RoleType.Banned);
+            this.userService.UpdateUserRole(new Guid(), RoleType.Banned);
 
             this.mockUserRepository.Verify(repository => repository.AddRoleToUser(It.IsAny<int>(), It.IsAny<Role>()), Times.Never);
         }
@@ -446,9 +447,9 @@ namespace UnitTests.Users
         [Fact]
         public void UpdateUserRole_ShouldNotAddBannedRole_WhenUserAlreadyHasBannedRole()
         {
-            User user = new User { UserId = 1, AssignedRoles = new List<Role> { new Role(RoleType.Banned, "Banned") } };
-            this.mockUserRepository.Setup(repository => repository.GetUserByID(1)).Returns(user);
-            this.userService.UpdateUserRole(1, RoleType.Banned);
+            User user = new User { Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), AssignedRoles = new List<Role> { new Role(RoleType.Banned, "Banned") } };
+            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Returns(user);
+            this.userService.UpdateUserRole(new Guid(), RoleType.Banned);
             Assert.Single(user.AssignedRoles);
             Assert.Equal(RoleType.Banned, user.AssignedRoles[0].RoleType);
             this.mockUserRepository.Verify(repository => repository.AddRoleToUser(It.IsAny<int>(), It.IsAny<Role>()), Times.Never);
@@ -460,10 +461,10 @@ namespace UnitTests.Users
         [Fact]
         public void UpdateUserRole_ShouldSetRoleToBanned_WhenUserDoesNotHaveBannedRole()
         {
-            User user = new User { UserId = 1, AssignedRoles = new List<Role> { new Role(RoleType.User, "User") } };
-            this.mockUserRepository.Setup(repository => repository.GetUserByID(1)).Returns(user);
-            this.userService.UpdateUserRole(1, RoleType.Banned);
-            this.mockUserRepository.Verify(repository => repository.AddRoleToUser(1, It.Is<Role>(r => r.RoleType == RoleType.Banned && r.RoleName == "Banned")), Times.Once);
+            User user = new User { Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), AssignedRoles = new List<Role> { new Role(RoleType.User, "User") } };
+            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Returns(user);
+            this.userService.UpdateUserRole(new Guid(), RoleType.Banned);
+            this.mockUserRepository.Verify(repository => repository.AddRoleToUser(new Guid(), It.Is<Role>(r => r.RoleType == RoleType.Banned && r.RoleName == "Banned")), Times.Once);
         }
 
         /// <summary>
@@ -472,10 +473,10 @@ namespace UnitTests.Users
         [Fact]
         public void UpdateUserRole_ShouldSetRoleToUser_WhenRoleTypeIsUser()
         {
-            User user = new User { UserId = 1, AssignedRoles = new List<Role> { new Role(RoleType.Banned, "Banned") } };
-            this.mockUserRepository.Setup(repository => repository.GetUserByID(1)).Returns(user);
-            this.userService.UpdateUserRole(1, RoleType.User);
-            this.mockUserRepository.Verify(repo => repo.AddRoleToUser(1, It.Is<Role>(r => r.RoleType == RoleType.User && r.RoleName == "User")), Times.Once);
+            User user = new User { Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), AssignedRoles = new List<Role> { new Role(RoleType.Banned, "Banned") } };
+            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Returns(user);
+            this.userService.UpdateUserRole(new Guid(), RoleType.User);
+            this.mockUserRepository.Verify(repo => repo.AddRoleToUser(new Guid(), It.Is<Role>(r => r.RoleType == RoleType.User && r.RoleName == "User")), Times.Once);
         }
 
         /// <summary>
@@ -484,8 +485,8 @@ namespace UnitTests.Users
         [Fact]
         public void UpdateUserRole_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
         {
-            this.mockUserRepository.Setup(repo => repo.GetUserByID(1)).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.UpdateUserRole(1, RoleType.Banned));
+            this.mockUserRepository.Setup(repo => repo.GetUserById(new Guid())).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
+            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.UpdateUserRole(new Guid(), RoleType.Banned));
             Assert.Equal("Failed to update user role", exception.Message);
             Assert.IsType<RepositoryException>(exception.InnerException);
         }

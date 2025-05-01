@@ -6,7 +6,7 @@ using DrinkDb_Auth.AuthProviders.Google;
 using DrinkDb_Auth.OAuthProviders;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Tests
+namespace Tests.Authentication
 {
     [TestClass]
     public sealed class TestGoogleAuth

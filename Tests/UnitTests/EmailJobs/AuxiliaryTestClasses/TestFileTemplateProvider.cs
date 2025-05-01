@@ -1,6 +1,7 @@
 ﻿namespace UnitTests.EmailJobs.AuxiliaryTestClasses
 {
-    using App1.Services;
+    using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
+    using System.IO;
 
     public class TestFileTemplateProvider : ITemplateProvider
     {

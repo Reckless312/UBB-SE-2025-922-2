@@ -4,20 +4,21 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using DrinkDb_Auth.Adapter;
 using DataAccess.Model;
+using DataAccess.Model.Authentication;
 using DrinkDb_Auth.OAuthProviders;
+using IRepository;
 using Moq;
 using Moq.Protected;
 using NUnit.Framework;
 
-namespace DrinkDb_Auth.Tests
+namespace Tests.Authentication
 {
     [TestFixture]
     public class LinkedInOAuth2ProviderTests
     {
-        private Mock<IUserAdapter> _mockUserAdapter;
-        private Mock<ISessionAdapter> _mockSessionAdapter;
+        private Mock<IUserRepository> _mockUserRepository;
+        private Mock<ISessionRepository> _mockSessionRepository;
         private Mock<HttpMessageHandler> _mockHttpMessageHandler;
         private TestableLinkedInOAuth2Provider _provider;
         private const string TestToken = "test_token";
@@ -27,8 +28,8 @@ namespace DrinkDb_Auth.Tests
         [SetUp]
         public void Setup()
         {
-            _mockUserAdapter = new Mock<IUserAdapter>();
-            _mockSessionAdapter = new Mock<ISessionAdapter>();
+            _mockUserRepository = new Mock<IUserRepository>();
+            _mockSessionRepository = new Mock<ISessionRepository>();
             _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
 
             // Create HttpClient with mock handler
@@ -37,8 +38,8 @@ namespace DrinkDb_Auth.Tests
             // Use our testable provider that accepts mock dependencies
             _provider = new TestableLinkedInOAuth2Provider(
                 httpClient,
-                _mockUserAdapter.Object,
-                _mockSessionAdapter.Object);
+                _mockUserRepository.Object,
+                _mockSessionRepository.Object);
         }
 
         [Test]
@@ -52,13 +53,13 @@ namespace DrinkDb_Auth.Tests
             SetupMockHttpResponse("{\"sub\":\"" + userId + "\",\"name\":\"" + userName + "\"}");
             
             // Setup mock for user not existing
-            _mockUserAdapter.Setup(m => m.GetUserByUsername(userName)).Returns((User)null);
+            _mockUserRepository.Setup(m => m.GetUserByUsername(userName)).Returns((User)null);
             
             // Setup mock for creating new user
-            _mockUserAdapter.Setup(m => m.CreateUser(It.IsAny<User>())).Returns(true);
+            _mockUserRepository.Setup(m => m.CreateUser(It.IsAny<User>())).Returns(true);
             
             // Setup mock for creating session
-            _mockSessionAdapter.Setup(m => m.CreateSession(It.IsAny<Guid>())).Returns(new Session
+            _mockSessionRepository.Setup(m => m.CreateSession(It.IsAny<Guid>())).Returns(new Session
             {
                 SessionId = _testSessionId,
                 UserId = _testUserId
@@ -92,10 +93,10 @@ namespace DrinkDb_Auth.Tests
                 TwoFASecret = null
             };
             
-            _mockUserAdapter.Setup(m => m.GetUserByUsername(userName)).Returns(existingUser);
+            _mockUserRepository.Setup(m => m.GetUserByUsername(userName)).Returns(existingUser);
             
             // Setup mock for creating session
-            _mockSessionAdapter.Setup(m => m.CreateSession(_testUserId)).Returns(new Session
+            _mockSessionRepository.Setup(m => m.CreateSession(_testUserId)).Returns(new Session
             {
                 SessionId = _testSessionId,
                 UserId = _testUserId
@@ -124,9 +125,9 @@ namespace DrinkDb_Auth.Tests
                 .ThrowsAsync(new HttpRequestException("API call failed"));
             
             // We still need basic setup for user and session adapters
-            _mockUserAdapter.Setup(m => m.GetUserByUsername(It.IsAny<string>())).Returns((User)null);
-            _mockUserAdapter.Setup(m => m.CreateUser(It.IsAny<User>())).Returns(true);
-            _mockSessionAdapter.Setup(m => m.CreateSession(It.IsAny<Guid>())).Returns(new Session
+            _mockUserRepository.Setup(m => m.GetUserByUsername(It.IsAny<string>())).Returns((User)null);
+            _mockUserRepository.Setup(m => m.CreateUser(It.IsAny<User>())).Returns(true);
+            _mockSessionRepository.Setup(m => m.CreateSession(It.IsAny<Guid>())).Returns(new Session
             {
                 SessionId = _testSessionId,
                 UserId = _testUserId
@@ -158,9 +159,9 @@ namespace DrinkDb_Auth.Tests
             SetupMockHttpResponse("{\"sub\":\"\",\"name\":\"John Doe\"}");
             
             // We still need basic setup for user and session adapters
-            _mockUserAdapter.Setup(m => m.GetUserByUsername(It.IsAny<string>())).Returns((User)null);
-            _mockUserAdapter.Setup(m => m.CreateUser(It.IsAny<User>())).Returns(true);
-            _mockSessionAdapter.Setup(m => m.CreateSession(It.IsAny<Guid>())).Returns(new Session
+            _mockUserRepository.Setup(m => m.GetUserByUsername(It.IsAny<string>())).Returns((User)null);
+            _mockUserRepository.Setup(m => m.CreateUser(It.IsAny<User>())).Returns(true);
+            _mockSessionRepository.Setup(m => m.CreateSession(It.IsAny<Guid>())).Returns(new Session
             {
                 SessionId = _testSessionId,
                 UserId = _testUserId

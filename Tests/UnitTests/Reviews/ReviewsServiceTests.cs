@@ -3,9 +3,9 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using App1.Models;
-    using App1.Repositories;
-    using App1.Services;
+    using DataAccess.Model.AdminDashboard;
+    using DrinkDb_Auth.Service.AdminDashboard;
+    using IRepository;
     using Moq;
     using Xunit;
 
@@ -27,7 +27,7 @@
             int reviewId = 1;
             var review = new Review(
                 reviewId: reviewId,
-                userId: 2,
+                userId: new Guid(),
                 rating: 4,
                 content: "Great drink!",
                 createdDate: DateTime.Now,
@@ -60,9 +60,9 @@
             // Arrange
             var reviews = new List<Review>
             {
-                new Review(1, 2, 4, "Great drink!", DateTime.Now, 1),
-                new Review(2, 3, 5, "Amazing drink!", DateTime.Now, 0),
-                new Review(3, 4, 3, "Good drink!", DateTime.Now, 2),
+                new Review(1, new Guid(), 4, "Great drink!", DateTime.Now, 1),
+                new Review(2, new Guid(), 5, "Amazing drink!", DateTime.Now, 0),
+                new Review(3, new Guid(), 3, "Good drink!", DateTime.Now, 2),
             };
             this.mockRepository.Setup(review => review.GetAllReviews()).Returns(reviews);
 
@@ -80,9 +80,9 @@
             // Arrange
             var reviews = new List<Review>
             {
-                new Review(1, 2, 4, "Great drink!", DateTime.Now, 0, true),
-                new Review(2, 3, 5, "Amazing drink!", DateTime.Now, 0, false),
-                new Review(3, 4, 3, "Good drink!", DateTime.Now, 0, true),
+                new Review(1, new Guid(), 4, "Great drink!", DateTime.Now, 0, true),
+                new Review(2, new Guid(), 5, "Amazing drink!", DateTime.Now, 0, false),
+                new Review(3, new Guid(), 3, "Good drink!", DateTime.Now, 0, true),
             };
             this.mockRepository.Setup(review => review.GetAllReviews()).Returns(reviews);
 
@@ -100,9 +100,9 @@
             // Arrange
             var reviews = new List<Review>
             {
-                new Review(1, 2, 4, "Great drink!", DateTime.Now),
-                new Review(2, 3, 5, "Amazing drink!", DateTime.Now),
-                new Review(3, 4, 3, "Good drink!", DateTime.Now),
+                new Review(1, new Guid(), 4, "Great drink!", DateTime.Now),
+                new Review(2, new Guid(), 5, "Amazing drink!", DateTime.Now),
+                new Review(3, new Guid(), 3, "Good drink!", DateTime.Now),
             };
             this.mockRepository.Setup(review => review.GetAllReviews()).Returns(reviews);
 
@@ -121,9 +121,9 @@
             var date = DateTime.Now.AddDays(-2);
             var reviews = new List<Review>
             {
-                new Review(1, 2, 4, "Great drink!", DateTime.Now.AddDays(-1)),
-                new Review(2, 3, 5, "Amazing drink!", DateTime.Now.AddDays(-3)),
-                new Review(3, 4, 3, "Good drink!", DateTime.Now),
+                new Review(1, new Guid(), 4, "Great drink!", DateTime.Now.AddDays(-1)),
+                new Review(2, new Guid(), 5, "Amazing drink!", DateTime.Now.AddDays(-3)),
+                new Review(3, new Guid(), 3, "Good drink!", DateTime.Now),
             };
             this.mockRepository.Setup(review => review.GetReviewsSince(date)).Returns(reviews.Where(review => review.CreatedDate >= date && !review.IsHidden).ToList());
 
@@ -158,9 +158,9 @@
             int count = 2;
             var reviews = new List<Review>
             {
-                new Review(1, 2, 4, "Great drink!", DateTime.Now.AddDays(-1)),
-                new Review(2, 3, 5, "Amazing drink!", DateTime.Now),
-                new Review(3, 4, 3, "Good drink!", DateTime.Now.AddDays(-2)),
+                new Review(1, new Guid(), 4, "Great drink!", DateTime.Now.AddDays(-1)),
+                new Review(2, new Guid(), 5, "Amazing drink!", DateTime.Now),
+                new Review(3, new Guid(), 3, "Good drink!", DateTime.Now.AddDays(-2)),
             };
             this.mockRepository.Setup(review => review.GetMostRecentReviews(count)).Returns(reviews.OrderByDescending(review => review.CreatedDate).Take(count).ToList());
 
@@ -194,12 +194,12 @@
         public void GetReviewsByUser_ReturnsCorrectReviews()
         {
             // Arrange
-            int userId = 2;
+            Guid userId = new Guid();
             var reviews = new List<Review>
             {
-                new Review(1, 2, 4, "Great drink!", DateTime.Now),
-                new Review(2, 3, 5, "Amazing drink!", DateTime.Now),
-                new Review(3, 2, 3, "Good drink!", DateTime.Now),
+                new Review(1, new Guid(), 4, "Great drink!", DateTime.Now),
+                new Review(2, new Guid(), 5, "Amazing drink!", DateTime.Now),
+                new Review(3, new Guid(), 3, "Good drink!", DateTime.Now),
             };
             this.mockRepository.Setup(review => review.GetReviewsByUser(userId)).Returns(reviews.Where(review => review.UserId == userId && !review.IsHidden).OrderByDescending(review => review.CreatedDate).ToList());
 
@@ -219,9 +219,9 @@
             var date = DateTime.Now.AddDays(-1);
             var reviews = new List<Review>
             {
-                new Review(1, 2, 4, "Great drink!", DateTime.Now), // Should be MORE recent
-                new Review(2, 3, 5, "Amazing drink!", DateTime.Now.AddMinutes(-5)), // Should be LESS recent
-                new Review(3, 4, 3, "Good drink!", DateTime.Now.AddDays(-2)),
+                new Review(1, new Guid(), 4, "Great drink!", DateTime.Now), // Should be MORE recent
+                new Review(2, new Guid(), 5, "Amazing drink!", DateTime.Now.AddMinutes(-5)), // Should be LESS recent
+                new Review(3, new Guid(), 3, "Good drink!", DateTime.Now.AddDays(-2)),
             };
 
             this.mockRepository.Setup(review =>
@@ -247,9 +247,9 @@
             string content = "great";
             var reviews = new List<Review>
             {
-                new Review(1, 2, 4, "Great drink!", DateTime.Now, 1, true),
-                new Review(2, 3, 5, "Not bad", DateTime.Now, 1, true),
-                new Review(3, 4, 3, "Really great service", DateTime.Now, 1, true),
+                new Review(1, new Guid(), 4, "Great drink!", DateTime.Now, 1, true),
+                new Review(2, new Guid(), 5, "Not bad", DateTime.Now, 1, true),
+                new Review(3, new Guid(), 3, "Really great service", DateTime.Now, 1, true),
             };
 
             this.mockRepository.Setup(repo => repo.GetAllReviews()).Returns(reviews);
@@ -269,9 +269,9 @@
             // Arrange
             var reviews = new List<Review>
             {
-                new Review(1, 2, 4, "Great drink!", DateTime.Now, 1, true),
-                new Review(2, 3, 5, "Not bad", DateTime.Now, 1, true),
-                new Review(3, 4, 3, "Really great service", DateTime.Now, 1, true),
+                new Review(1, new Guid(), 4, "Great drink!", DateTime.Now, 1, true),
+                new Review(2, new Guid(), 5, "Not bad", DateTime.Now, 1, true),
+                new Review(3, new Guid(), 3, "Really great service", DateTime.Now, 1, true),
             };
 
             this.mockRepository.Setup(repo => repo.GetAllReviews()).Returns(reviews);
@@ -312,9 +312,9 @@
             string content = "GREAT";
             var reviews = new List<Review>
             {
-                new Review(1, 2, 4, "Great drink!", DateTime.Now, 1, true),
-                new Review(2, 3, 5, "Not bad", DateTime.Now, 1, true),
-                new Review(3, 4, 3, "Really great service", DateTime.Now, 1, true),
+                new Review(1, new Guid(), 4, "Great drink!", DateTime.Now, 1, true),
+                new Review(2, new Guid(), 5, "Not bad", DateTime.Now, 1, true),
+                new Review(3, new Guid(), 3, "Really great service", DateTime.Now, 1, true),
             };
 
             this.mockRepository.Setup(repo => repo.GetAllReviews()).Returns(reviews);
@@ -384,9 +384,9 @@
             var date = DateTime.Now.AddDays(-2);
             var reviews = new List<Review>
             {
-                new Review(1, 2, 4, "Great drink!", DateTime.Now.AddDays(-1), 0, true),
-                new Review(2, 3, 5, "Amazing drink!", DateTime.Now.AddDays(-3), 0, false),
-                new Review(3, 4, 3, "Good drink!", DateTime.Now, 0, false),
+                new Review(1, new Guid(), 4, "Great drink!", DateTime.Now.AddDays(-1), 0, true),
+                new Review(2, new Guid(), 5, "Amazing drink!", DateTime.Now.AddDays(-3), 0, false),
+                new Review(3, new Guid(), 3, "Good drink!", DateTime.Now, 0, false),
             };
             this.mockRepository.Setup(review => review.GetReviewsSince(date)).Returns(reviews);
 
@@ -402,12 +402,12 @@
         public void GetReviewsByUser_WithHiddenReviews_ReturnsOnlyVisibleReviews()
         {
             // Arrange
-            int userId = 2;
+            Guid userId = new Guid();
             var reviews = new List<Review>
             {
-                new Review(1, 2, 4, "Great drink!", DateTime.Now, 0, true),
-                new Review(2, 3, 5, "Amazing drink!", DateTime.Now, 0, false),
-                new Review(3, 2, 3, "Good drink!", DateTime.Now, 0, true),
+                new Review(1, new Guid(), 4, "Great drink!", DateTime.Now, 0, true),
+                new Review(2, new Guid(), 5, "Amazing drink!", DateTime.Now, 0, false),
+                new Review(3, new Guid(), 3, "Good drink!", DateTime.Now, 0, true),
             };
             this.mockRepository.Setup(review => review.GetReviewsByUser(userId)).Returns(reviews.Where(review => review.UserId == userId && !review.IsHidden).OrderByDescending(review => review.CreatedDate).ToList());
 
@@ -423,7 +423,7 @@
         public void GetReviewsByUser_NoReviews_ReturnsEmptyList()
         {
             // Arrange
-            int userId = 999;
+            Guid userId = new Guid();
             this.mockRepository.Setup(review => review.GetReviewsByUser(userId)).Returns(new List<Review>());
 
             // Act

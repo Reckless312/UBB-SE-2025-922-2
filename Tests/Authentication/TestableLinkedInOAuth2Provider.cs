@@ -1,11 +1,12 @@
 using System;
 using System.Net.Http;
-using DrinkDb_Auth.Adapter;
 using DrinkDb_Auth.AuthProviders.LinkedIn;
 using DataAccess.Model;
 using DrinkDb_Auth.OAuthProviders;
+using IRepository;
+using DataAccess.Model.Authentication;
 
-namespace DrinkDb_Auth.Tests
+namespace Tests.Authentication
 {
     /// <summary>
     /// A testable version of LinkedInOAuth2Provider that allows injecting dependencies
@@ -13,17 +14,16 @@ namespace DrinkDb_Auth.Tests
     public class TestableLinkedInOAuth2Provider : LinkedInOAuth2Provider
     {
         private readonly HttpClient _httpClient;
-        private readonly IUserAdapter _userAdapter;
-        private readonly ISessionAdapter _sessionAdapter;
+        private readonly IUserRepository _userRepository;
+        private readonly ISessionRepository _sessionRepository;
+        private IUserRepository object1;
+        private ISessionRepository object2;
 
-        public TestableLinkedInOAuth2Provider(
-            HttpClient httpClient, 
-            IUserAdapter userAdapter = null, 
-            ISessionAdapter sessionAdapter = null)
+        public TestableLinkedInOAuth2Provider(HttpClient httpClient, IUserRepository object1, ISessionRepository object2)
         {
-            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-            _userAdapter = userAdapter;
-            _sessionAdapter = sessionAdapter;
+            _httpClient = httpClient;
+            this.object1 = object1;
+            this.object2 = object2;
         }
 
         // Override the Authenticate method to use our mocked HttpClient instead of creating a new one
@@ -89,7 +89,7 @@ namespace DrinkDb_Auth.Tests
                 }
 
                 // If userAdapter is null, return a fake response
-                if (_userAdapter == null)
+                if (_userRepository == null)
                 {
                     return new AuthenticationResponse
                     {
@@ -100,7 +100,7 @@ namespace DrinkDb_Auth.Tests
                     };
                 }
 
-                var user = _userAdapter.GetUserByUsername(name);
+                var user = _userRepository.GetUserByUsername(name);
                 if (user == null)
                 {
                     // Create a new user since none exists
@@ -113,16 +113,16 @@ namespace DrinkDb_Auth.Tests
                     };
                     
                     bool userCreated = true;
-                    if (_userAdapter != null)
+                    if (_userRepository != null)
                     {
-                        userCreated = _userAdapter.CreateUser(newUser);
+                        userCreated = _userRepository.CreateUser(newUser);
                     }
                     
                     // Create a session for the new user
                     Guid sessionId = Guid.NewGuid();
-                    if (_sessionAdapter != null && userCreated)
+                    if (_sessionRepository != null && userCreated)
                     {
-                        var session = _sessionAdapter.CreateSession(newUser.UserId);
+                        var session = _sessionRepository.CreateSession(newUser.UserId);
                         if (session != null)
                         {
                             sessionId = session.SessionId;
@@ -141,9 +141,9 @@ namespace DrinkDb_Auth.Tests
                 {
                     // User exists, create a session for them
                     Guid sessionId = Guid.NewGuid();
-                    if (_sessionAdapter != null)
+                    if (_sessionRepository != null)
                     {
-                        var session = _sessionAdapter.CreateSession(user.UserId);
+                        var session = _sessionRepository.CreateSession(user.UserId);
                         if (session != null)
                         {
                             sessionId = session.SessionId;

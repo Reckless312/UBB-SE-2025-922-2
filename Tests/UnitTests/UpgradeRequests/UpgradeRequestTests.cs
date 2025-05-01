@@ -2,17 +2,19 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using DataAccess.Model.AdminDashboard;
+using System;
+using Xunit;
+
 namespace UnitTests.UpgradeRequests
 {
-    using App1.Models;
-
     public class UpgradeRequestTests
     {
         [Fact]
         public void Constructor_WithValidParameters_CreatesUpgradeRequestWithCorrectProperties()
         {
             int expectedUpgradeRequestId = 1;
-            int expectedRequestingUserIdentifier = 100;
+            Guid expectedRequestingUserIdentifier = Guid.NewGuid();
             string expectedRequestingUserDisplayName = "Test User";
             UpgradeRequest upgradeRequest = new UpgradeRequest(
                 expectedUpgradeRequestId,
@@ -27,7 +29,7 @@ namespace UnitTests.UpgradeRequests
         public void ToString_ReturnsRequestingUserDisplayName()
         {
             int upgradeRequestId = 1;
-            int requestingUserIdentifier = 100;
+            Guid requestingUserIdentifier = Guid.NewGuid();
             string expectedDisplayName = "Test User";
             UpgradeRequest upgradeRequest = new UpgradeRequest(
                 upgradeRequestId,

@@ -1,5 +1,7 @@
 ﻿using DrinkDb_Auth.View;
+using DrinkDb_Auth.View.Authentication.Interfaces;
 using DrinkDb_Auth.ViewModel;
+using DrinkDb_Auth.ViewModel.AdminDashboard.Components;
 using Microsoft.UI.Xaml.Controls;
 using System;
 namespace Tests.CoraMockUps

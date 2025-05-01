@@ -95,5 +95,6 @@ namespace DrinkDb_Auth.Service.AdminDashboard.Interfaces
         /// <param name="userId">The user ID.</param>
         /// <returns>The full name of the user.</returns>
         string GetUserFullNameById(Guid userId);
+        void GetUserById(int v);
     }
 }

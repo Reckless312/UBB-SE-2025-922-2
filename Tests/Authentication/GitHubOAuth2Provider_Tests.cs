@@ -3,7 +3,7 @@ using DrinkDb_Auth.AuthProviders.Github;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace Tests
+namespace Tests.Authentication
 {
     [TestClass]
     public class GitHubOAuth2Provider_Tests

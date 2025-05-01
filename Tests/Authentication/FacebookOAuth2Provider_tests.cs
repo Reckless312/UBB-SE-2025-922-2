@@ -5,14 +5,15 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using DrinkDb_Auth.Adapter;
 using DrinkDb_Auth.AuthProviders.Facebook;
+using DrinkDb_Auth.Repository.AdminDashboard;
+using DrinkDb_Auth.Repository.Authentication;
 using Moq;
 using Moq.Protected;
 using NUnit.Framework;
 using Tests;
 
-namespace DrinkDb_Auth.Tests
+namespace Tests.Authentication
 {
     [TestFixture]
     public class FacebookOAuth2ProviderTests
@@ -51,11 +52,11 @@ namespace DrinkDb_Auth.Tests
 
             var userAdapterField = typeof(FacebookOAuth2Provider)
                 .GetField("UserAdapter", BindingFlags.NonPublic | BindingFlags.Static);
-            userAdapterField.SetValue(null, new UserAdapter());
+            userAdapterField.SetValue(null, new UserRepository());
 
             var sessionAdapterField = typeof(FacebookOAuth2Provider)
                 .GetField("SessionAdapter", BindingFlags.NonPublic | BindingFlags.Static);
-            sessionAdapterField.SetValue(null, new SessionAdapter());
+            sessionAdapterField.SetValue(null, new SessionRepository());
         }
 
         [Test]
