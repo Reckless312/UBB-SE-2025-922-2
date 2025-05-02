@@ -7,7 +7,6 @@ namespace DrinkDb_Auth
     using System.IO;
     using System.Linq;
     using System.Runtime.InteropServices.WindowsRuntime;
-    using DataAccess.Model.AdminDashboard;
     using DrinkDb_Auth.AutoChecker;
     using DrinkDb_Auth.Converters;
     using DrinkDb_Auth.Repository.AdminDashboard;
@@ -76,7 +75,6 @@ namespace DrinkDb_Auth
                     services.AddSingleton<IReviewsRepository, ReviewsRepository>(provider =>
                     {
                         ReviewsRepository repository = new ReviewsRepository();
-                        repository.LoadReviews(ReviewsSampleData.GetSampleReviews());
                         return repository;
                     });
                     services.AddSingleton<IOffensiveWordsRepository>(provider =>
@@ -114,38 +112,6 @@ namespace DrinkDb_Auth
                     services.AddTransient<MainWindow>();
                 })
                 .Build();
-            }
-            public static class ReviewsSampleData
-        {
-            public static IEnumerable<Review> GetSampleReviews()
-            {
-                return new List<Review>
-                {
-                    new Review(
-                        reviewId: 0,
-                        userId: Guid.Parse("FD6795AB-5445-4296-9F12-23CBC0943564"),
-                        rating: 5,
-                        content: "Terrible mix, a complete mess",
-                        createdDate: DateTime.Now.AddHours(-1),
-                        numberOfFlags: 1,
-                        isHidden: false),
-                    new Review(
-                        reviewId: 0,
-                        userId: Guid.Parse("FD6795AB-5445-4296-9F12-23CBC0943564"),
-                        rating: 4,
-                        content: "Good experience",
-                        createdDate: DateTime.Now.AddHours(-5),
-                        isHidden: false),
-                    new Review(
-                        reviewId: 0,
-                        userId: Guid.Parse("FD6795AB-5445-4296-9F12-23CBC0943564"),
-                        rating: 2,
-                        content: "Such a bitter aftertaste",
-                        createdDate: DateTime.Now.AddDays(-1),
-                        numberOfFlags: 3,
-                        isHidden: false),
-                };
-            }
         }
     }
 }
