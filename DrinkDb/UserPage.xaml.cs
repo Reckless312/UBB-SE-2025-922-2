@@ -6,6 +6,8 @@ using DrinkDb_Auth.View;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
+using System.Linq;
 
 namespace DrinkDb_Auth
 {
@@ -18,6 +20,7 @@ namespace DrinkDb_Auth
         {
             this.InitializeComponent();
             LoadUserData();
+            LoadUserReviews();
         }
 
         private void LoadUserData()
@@ -150,6 +153,57 @@ namespace DrinkDb_Auth
             if (this.Frame != null)
             {
                 this.Frame.Navigate(typeof(MainPage));
+            }
+        }
+
+        private void LoadUserReviews()
+        {
+            // Get the review service from DI
+            var reviewService = (IReviewService)App.Host.Services.GetService(typeof(IReviewService));
+            Guid currentUserId = App.CurrentUserId;
+            if (currentUserId == Guid.Empty || reviewService == null)
+            {
+                return;
+            }
+            var userReviews = reviewService.GetReviewsByUser(currentUserId)
+                .Where(r => !r.IsHidden)
+                .OrderByDescending(r => r.CreatedDate)
+                .ToList();
+            ReviewsItemsControl.Items.Clear();
+            foreach (var review in userReviews)
+            {
+                var border = new Border
+                {
+                    BorderBrush = new SolidColorBrush(Microsoft.UI.Colors.Black),
+                    BorderThickness = new Thickness(1),
+                    CornerRadius = new CornerRadius(8),
+                    Margin = new Thickness(0, 0, 0, 10),
+                    Padding = new Thickness(12)
+                };
+                var reviewStack = new StackPanel { Spacing = 4 };
+                string stars = new string('★', review.Rating) + new string('☆', 5 - review.Rating);
+                var starsText = new TextBlock
+                {
+                    Text = stars,
+                    FontSize = 20,
+                    Foreground = new SolidColorBrush(Microsoft.UI.Colors.Gold)
+                };
+                reviewStack.Children.Add(starsText);
+                var dateText = new TextBlock
+                {
+                    Text = review.CreatedDate.ToShortDateString(),
+                    FontSize = 12,
+                    Foreground = new SolidColorBrush(Microsoft.UI.Colors.Gray)
+                };
+                reviewStack.Children.Add(dateText);
+                var commentText = new TextBlock
+                {
+                    Text = review.Content,
+                    FontSize = 14
+                };
+                reviewStack.Children.Add(commentText);
+                border.Child = reviewStack;
+                ReviewsItemsControl.Items.Add(border);
             }
         }
     }
