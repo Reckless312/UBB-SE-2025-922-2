@@ -9,6 +9,7 @@ namespace DrinkDb_Auth
     using System.Runtime.InteropServices.WindowsRuntime;
     using DrinkDb_Auth.AutoChecker;
     using DrinkDb_Auth.Converters;
+    using DrinkDb_Auth.ProxyRepository.AdminDashboard;
     using DrinkDb_Auth.Service;
     using DrinkDb_Auth.Service.AdminDashboard;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
@@ -71,10 +72,17 @@ namespace DrinkDb_Auth
                     IConfiguration config = new ConfigurationBuilder().AddUserSecrets<App>().AddEnvironmentVariables().AddJsonFile("appSettings.json", optional: false, reloadOnChange: true).Build();
                     services.AddSingleton<IConfiguration>(config);
                     string connectionString = config.GetConnectionString("DefaultConnection");
-                    services.AddSingleton<IUserRepository, UserRepository>();
-                    services.AddSingleton<IReviewsRepository, ReviewsRepository>(provider =>
+
+                    string apiRoute = "https://localhost:7167";
+
+                    services.AddSingleton<IUserRepository, UserProxyRepository>(provider =>
                     {
-                        ReviewsRepository repository = new ReviewsRepository();
+                        UserProxyRepository repository = new UserProxyRepository(apiRoute);
+                        return repository;
+                    });
+                    services.AddSingleton<IReviewsRepository, ReviewsProxyRepository>(provider =>
+                    {
+                        ReviewsProxyRepository repository = new ReviewsProxyRepository(apiRoute);
                         return repository;
                     });
                     services.AddSingleton<IOffensiveWordsRepository>(provider =>
@@ -83,11 +91,14 @@ namespace DrinkDb_Auth
                     });
                     services.AddSingleton<IAutoCheck, AutoCheck>();
                     services.AddSingleton<ICheckersService, CheckersService>();
-                    services.AddSingleton<IUpgradeRequestsRepository, UpgradeRequestsRepository>(provider =>
+                    services.AddSingleton<IUpgradeRequestsRepository, UpgradeRequestProxyRepository>(provider =>
                     {
-                        return new UpgradeRequestsRepository(new SqlConnectionFactory(connectionString));
+                        return new UpgradeRequestProxyRepository(apiRoute);
                     });
-                    services.AddSingleton<IRolesRepository, RolesRepository>();
+                    services.AddSingleton<IRolesRepository, RolesProxyRepository>(provider =>
+                    {
+                        return new RolesProxyRepository(apiRoute);
+                    });
                     services.AddSingleton<IUserService, UserService>();
                     services.AddSingleton<IReviewService, ReviewsService>();
                     services.AddSingleton<IUpgradeRequestsService, UpgradeRequestsService>();

@@ -1,6 +1,7 @@
 using System;
 using DataAccess.Model.Authentication;
 using DrinkDb_Auth.OAuthProviders;
+using DrinkDb_Auth.ProxyRepository.Authentification;
 using IRepository;
 using Repository.AdminDashboard;
 using Repository.Authentication;
@@ -16,7 +17,7 @@ namespace DrinkDb_Auth.AuthProviders.Github
         public GitHubOAuth2Provider()
         {
             userRepository = new UserRepository();
-            sessionRepository = new SessionRepository();
+            sessionRepository = new SessionProxyRepository("https://localhost:7167");
             gitHubHttpHelper = new GitHubHttpHelper();
         }
 

@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Text.Json;
 using DataAccess.Model.Authentication;
 using DrinkDb_Auth.OAuthProviders;
+using DrinkDb_Auth.ProxyRepository.Authentification;
 using IRepository;
 using Microsoft.Data.SqlClient;
 using Repository.AdminDashboard;
@@ -15,7 +16,7 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
     public class LinkedInOAuth2Provider : GenericOAuth2Provider
     {
         private readonly static IUserRepository UserRepository = new UserRepository();
-        private readonly static SessionRepository SessionAdapter = new ();
+        private readonly static SessionProxyRepository SessionAdapter = new ("https://localhost:7167");
 
         /// <summary>
         /// Performs authentication using the access token, fetches user info via OpenID Connect, and stores/updates the user.
@@ -67,7 +68,7 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
                     AuthenticationSuccessful = true,
                     OAuthToken = token,
                     SessionId = session.SessionId,
-                    NewAccount = true
+                    NewAccount = true,
                 };
             }
             else
@@ -78,7 +79,7 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
                     AuthenticationSuccessful = true,
                     OAuthToken = token,
                     SessionId = session.SessionId,
-                    NewAccount = false
+                    NewAccount = false,
                 };
             }
         }

@@ -15,6 +15,7 @@ using DataAccess.Model.Authentication;
 using IRepository;
 using Repository.Authentication;
 using Repository.AdminDashboard;
+using DrinkDb_Auth.ProxyRepository.Authentification;
 
 namespace DrinkDb_Auth.AuthProviders.Google
 {
@@ -39,7 +40,7 @@ namespace DrinkDb_Auth.AuthProviders.Google
 
         private readonly string[] userResourcesScope = { "profile", "email" };
         private HttpClient httpClient;
-        private static readonly ISessionRepository SessionRepository = new SessionRepository();
+        private static readonly ISessionRepository SessionRepository = new SessionProxyRepository("https://localhost:7167");
         private static readonly IUserRepository UserRepository = new UserRepository();
         private async Task<Guid> EnsureUserExists(string identifier, string email, string name)
         {

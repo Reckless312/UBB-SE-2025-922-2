@@ -14,7 +14,7 @@ builder.Services.AddSwaggerGen();
 
 // Add database context to server
 builder.Services.AddDbContext<DatabaseContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer("Data Source=DESKTOP-KEB351O\\SQLEXPRESS;Initial Catalog=DrinkDB_Dev;Integrated Security=True;Trust Server Certificate=True"));
 
 var app = builder.Build();
 

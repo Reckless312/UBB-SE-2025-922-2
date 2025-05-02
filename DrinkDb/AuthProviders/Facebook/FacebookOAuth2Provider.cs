@@ -7,12 +7,13 @@ using DataAccess.Model.Authentication;
 using IRepository;
 using Repository.AdminDashboard;
 using Repository.Authentication;
+using DrinkDb_Auth.ProxyRepository.Authentification;
 
 namespace DrinkDb_Auth.AuthProviders.Facebook
 {
     public class FacebookOAuth2Provider : GenericOAuth2Provider
     {
-        private static readonly SessionRepository SessionAdapter = new ();
+        private static readonly SessionProxyRepository SessionAdapter = new ("https://localhost:7167");
         public AuthenticationResponse Authenticate(string userId, string token)
         {
             try
