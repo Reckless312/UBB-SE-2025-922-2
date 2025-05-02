@@ -2,6 +2,7 @@ using System;
 using DataAccess.Model.Authentication;
 using DrinkDb_Auth.Service;
 using DrinkDb_Auth.Service.Authentication;
+using DrinkDb_Auth.View;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -57,7 +58,7 @@ namespace DrinkDb_Auth
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
             AuthenticationService.Logout();
-            App.Window?.Close();
+            App.MainWindow.Close();
         }
 
         public void LoadMockUserData()
@@ -144,19 +145,12 @@ namespace DrinkDb_Auth
             }
         }
 
-        private async void EditAccountButton_Click(object sender, RoutedEventArgs e)
+        private void EditAccountButton_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new ContentDialog
+            if (this.Frame != null)
             {
-                Title = "Edit Account",
-                Content = "Account editing is not implemented yet.",
-                CloseButtonText = "OK",
-                XamlRoot = this.Content.XamlRoot,
-                Background = new SolidColorBrush(Microsoft.UI.Colors.White),
-                Foreground = new SolidColorBrush(Microsoft.UI.Colors.Black)
-            };
-
-            await dialog.ShowAsync();
+                this.Frame.Navigate(typeof(MainPage));
+            }
         }
     }
 

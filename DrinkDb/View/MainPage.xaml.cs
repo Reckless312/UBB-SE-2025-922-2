@@ -15,6 +15,7 @@ namespace DrinkDb_Auth.View
     using Microsoft.UI.Xaml;
     using Microsoft.UI.Xaml.Controls;
     using Microsoft.UI.Xaml.Controls.Primitives;
+    using Microsoft.Extensions.DependencyInjection;
 
     /// <summary>
     /// a page.
@@ -34,9 +35,15 @@ namespace DrinkDb_Auth.View
         /// <param name="upgradeRequestsService">given update request service.</param>
         /// <param name="checkersService">given checker service.</param>
         /// <param name="autoCheck">given auto check.</param>
-        public MainPage(IReviewService reviewsService, IUserService userService, IUpgradeRequestsService upgradeRequestsService, ICheckersService checkersService, IAutoCheck autoCheck)
+        public MainPage()
         {
             this.InitializeComponent();
+
+            IReviewService reviewsService = App.Host.Services.GetRequiredService<IReviewService>();
+            IUserService userService = App.Host.Services.GetRequiredService<IUserService>();
+            IUpgradeRequestsService upgradeRequestsService = App.Host.Services.GetRequiredService<IUpgradeRequestsService>();
+            ICheckersService checkersService = App.Host.Services.GetRequiredService<ICheckersService>();
+            IAutoCheck autoCheck = App.Host.Services.GetRequiredService<IAutoCheck>();
 
             ViewModel = new MainPageViewModel(
                 reviewsService,
@@ -256,6 +263,14 @@ namespace DrinkDb_Auth.View
             {
                 string newWord = input.Text.Trim();
                 ViewModel.AddOffensiveWord(newWord);
+            }
+        }
+
+        private void GoBackButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.Frame != null)
+            {
+                this.Frame.Navigate(typeof(UserPage));
             }
         }
     }

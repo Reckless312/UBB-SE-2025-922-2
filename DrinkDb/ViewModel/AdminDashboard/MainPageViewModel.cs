@@ -581,7 +581,6 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// <param name="user">The user to load details for.</param>
         public void LoadUserAppealDetails(User user)
         {
-            SelectedAppealUser = user;
             IsAppealUserBanned = true;
             UserStatusDisplay = GetUserStatusDisplay(user, true);
 

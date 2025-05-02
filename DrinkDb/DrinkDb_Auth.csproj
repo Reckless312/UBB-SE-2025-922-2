@@ -93,6 +93,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Database\" />
+    <Folder Include="Logs\" />
     <Folder Include="View\AdminDashboard\" />
   </ItemGroup>
   <ItemGroup>
@@ -158,21 +159,13 @@
 
 	<ItemGroup>
 	  <Compile Remove="Adapter\**" />
-	  <Compile Remove="Logs\**" />
 	  <EmbeddedResource Remove="Adapter\**" />
-	  <EmbeddedResource Remove="Logs\**" />
 	  <None Remove="Adapter\**" />
-	  <None Remove="Logs\**" />
 	  <Page Remove="Adapter\**" />
-	  <Page Remove="Logs\**" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <PRIResource Remove="Adapter\**" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <PRIResource Remove="Logs\**" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -31,8 +31,6 @@ namespace DrinkDb_Auth
     /// </summary>
     sealed partial class App : Application
     {
-        public static Window? Window;
-
         public static Guid CurrentUserId { get; set; } = Guid.Empty;
         public static Guid CurrentSessionId { get; set; } = Guid.Empty;
 
