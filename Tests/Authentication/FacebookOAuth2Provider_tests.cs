@@ -75,10 +75,10 @@ namespace Tests.Authentication
 
             var response = _provider.Authenticate("", TestToken);
 
-            Assert.IsTrue(response.AuthenticationSuccessful);
-            Assert.IsTrue(response.NewAccount);
-            Assert.AreEqual(TestToken, response.OAuthToken);
-            Assert.AreEqual(_testSessionId, response.SessionId);
+            Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsTrue(response.AuthenticationSuccessful);
+            Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsTrue(response.NewAccount);
+            Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(TestToken, response.OAuthToken);
+            Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(_testSessionId, response.SessionId);
         }
 
         [Test]
@@ -99,10 +99,10 @@ namespace Tests.Authentication
             var response = _provider.Authenticate("", TestToken);
 
 
-            Assert.IsTrue(response.AuthenticationSuccessful);
-            Assert.IsFalse(response.NewAccount);
-            Assert.AreEqual(TestToken, response.OAuthToken);
-            Assert.AreEqual(_testSessionId, response.SessionId);
+            Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsTrue(response.AuthenticationSuccessful);
+            Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsFalse(response.NewAccount);
+            Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(TestToken, response.OAuthToken);
+            Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(_testSessionId, response.SessionId);
         }
 
         [Test]
@@ -121,8 +121,8 @@ namespace Tests.Authentication
             var response = _provider.Authenticate("", "invalid_token");
 
 
-            Assert.IsFalse(response.AuthenticationSuccessful);
-            Assert.AreEqual(Guid.Empty, response.SessionId);
+            Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsFalse(response.AuthenticationSuccessful);
+            Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(Guid.Empty, response.SessionId);
         }
 
         private void SetupMockHttpResponse(string jsonContent)

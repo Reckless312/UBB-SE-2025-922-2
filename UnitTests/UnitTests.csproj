@@ -36,14 +36,12 @@
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.3" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.3" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.4" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\App1\App1.csproj" />
-  </ItemGroup>
+
 
   <ItemGroup>
     <Using Include="Xunit" />
@@ -60,5 +58,10 @@
       <Link>appSettings.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+	  <ProjectReference Include="..\DrinkDb\DrinkDb_Auth.csproj" />
+	  <ProjectReference Include="..\SharedResources\DataAccess.csproj" />
   </ItemGroup>
 </Project>

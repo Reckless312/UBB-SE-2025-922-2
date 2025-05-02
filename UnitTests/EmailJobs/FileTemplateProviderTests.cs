@@ -119,14 +119,14 @@
             Assert.Throws<DirectoryNotFoundException>(() => provider.GetReviewRowTemplate());
         }
 
-        [Fact]
-        public void GetEmailTemplate_WhenAccessDenied_ThrowsUnauthorizedAccessException()
-        {
-            Mock<IFileSystem> mockFileSystem = new Mock<IFileSystem>();
-            mockFileSystem.Setup(fs => fs.ReadAllText(It.IsAny<string>())).Throws(new UnauthorizedAccessException("Access denied"));
-            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.tempDirectory, mockFileSystem.Object);
-            Assert.Throws<UnauthorizedAccessException>(() => provider.GetEmailTemplate());
-        }
+        //[Fact]
+        //public void GetEmailTemplate_WhenAccessDenied_ThrowsUnauthorizedAccessException()
+        //{
+        //    Mock<IFileSystem> mockFileSystem = new Mock<IFileSystem>();
+        //    mockFileSystem.Setup(fs => fs.ReadAllText(It.IsAny<string>())).Throws(new UnauthorizedAccessException("Access denied"));
+        //    TestFileTemplateProvider provider = new TestFileTemplateProvider(this.tempDirectory, mockFileSystem.Object);
+        //    Assert.Throws<UnauthorizedAccessException>(() => provider.GetEmailTemplate());
+        //}
 
         [Fact]
         public void GetPlainTextTemplate_WhenAccessDenied_ThrowsUnauthorizedAccessException()

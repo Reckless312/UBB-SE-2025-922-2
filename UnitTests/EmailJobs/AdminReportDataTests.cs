@@ -50,7 +50,7 @@ namespace UnitTests.EmailJobs
         [Fact]
         public void AdminReportData_WithNonEmptyCollections_InitializesCorrectly()
         {
-            List<User> adminUsers = new List<User> { new User(1, "admin@example.com", "Admin User", 0, false, UserRepository.AdminRoles) };
+            List<User> adminUsers = new List<User> { new User { UserId = new Guid(), EmailAddress = "admin@example.com",Username = "Admin User", NumberOfDeletedReviews = 0, HasSubmittedAppeal = false, AssignedRoles = UserRepository.AdminRoles, PasswordHash = String.Empty, TwoFASecret = String.Empty } };
 
             List<Review> recentReviews = new List<Review> { new Review(1, new Guid(), 4, "Great product", DateTime.Now) };
 
@@ -75,7 +75,7 @@ namespace UnitTests.EmailJobs
             this.reportData = new AdminReportData(this.reportDate, this.adminUsers, this.activeUsersCount, this.bannedUsersCount, this.newReviewsCount, this.averageRating, this.recentReviews);
 
             DateTime newDate = DateTime.Now.AddDays(1);
-            List<User> newUsers = new List<User> { new User(2, "new@example.com", "New User", 0, false, new List<Role>()) };
+            List<User> newUsers = new List<User> { new User { UserId = new Guid(), EmailAddress = "email@adress.com", Username = "username", NumberOfDeletedReviews = 0, AssignedRoles = new List<Role> (), PasswordHash = String.Empty, TwoFASecret = String.Empty } };
             List<Review> newReviews = new List<Review> { new Review(3, new Guid(), 5, "New review", DateTime.Now) };
 
             this.reportData.ReportDate = newDate;

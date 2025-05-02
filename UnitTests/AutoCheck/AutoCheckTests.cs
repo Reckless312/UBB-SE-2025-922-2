@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using DrinkDb_Auth.AutoChecker;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Xunit;
 
@@ -26,28 +25,28 @@ namespace UnitTests.Autocheck
         [Fact]
         public void Constructor_NullRepository_ThrowsArgumentNullException()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => new AutoCheck(null));
+            Assert.Throws<ArgumentNullException>(() => new AutoCheck(null));
         }
 
         [Fact]
         public void AutoCheckReview_NullReviewText_ReturnsFalse()
         {
             bool result = this.autoCheck.AutoCheckReview(null);
-            Assert.IsFalse(result);
+            Assert.False(result);
         }
 
         [Fact]
         public void AutoCheckReview_EmptyReviewText_ReturnsFalse()
         {
             bool result = this.autoCheck.AutoCheckReview(string.Empty);
-            Assert.IsFalse(result);
+            Assert.False(result);
         }
 
         [Fact]
         public void AutoCheckReview_WhitespaceReviewText_ReturnsFalse()
         {
             bool result = this.autoCheck.AutoCheckReview("   ");
-            Assert.IsFalse(result);
+            Assert.False(result);
         }
 
         [Fact]
@@ -55,7 +54,7 @@ namespace UnitTests.Autocheck
         {
             string reviewText = "This review contains an offensive word.";
             bool result = this.autoCheck.AutoCheckReview(reviewText);
-            Assert.IsTrue(result);
+            Assert.True(result);
         }
 
         [Fact]
@@ -63,7 +62,7 @@ namespace UnitTests.Autocheck
         {
             string reviewText = "This review contains an OFFENSIVE word.";
             bool result = this.autoCheck.AutoCheckReview(reviewText);
-            Assert.IsTrue(result);
+            Assert.True(result);
         }
 
         [Fact]
@@ -71,7 +70,7 @@ namespace UnitTests.Autocheck
         {
             string reviewText = "This review is perfectly fine and acceptable.";
             bool result = this.autoCheck.AutoCheckReview(reviewText);
-            Assert.IsFalse(result);
+            Assert.False(result);
         }
 
         [Fact]
@@ -79,7 +78,7 @@ namespace UnitTests.Autocheck
         {
             string reviewText = "This review has!bad,punctuation.";
             bool result = this.autoCheck.AutoCheckReview(reviewText);
-            Assert.IsTrue(result);
+            Assert.True(result);
         }
 
         [Fact]

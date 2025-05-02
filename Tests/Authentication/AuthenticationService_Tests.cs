@@ -10,7 +10,7 @@ namespace Tests.Authentication
     [TestClass]
     public sealed class AuthenticationService_Tests
     {
-
+        
         [TestMethod]
         public async Task AuthWithOAuth_Google()
         {
@@ -22,7 +22,7 @@ namespace Tests.Authentication
 
             AuthenticationResponse authResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = id };
 
-            Assert.AreEqual(response, authResponse);
+            Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(response, authResponse);
         }
 
         [TestMethod]
@@ -36,7 +36,7 @@ namespace Tests.Authentication
 
             var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = id };
 
-            Assert.AreEqual(response, expectedResponse);
+            Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(response, expectedResponse);
         }
 
         [TestMethod]
@@ -50,7 +50,7 @@ namespace Tests.Authentication
 
             var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = id };
 
-            Assert.AreEqual(response, expectedResponse);
+            Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(response, expectedResponse);
         }
 
         [TestMethod]
@@ -64,7 +64,7 @@ namespace Tests.Authentication
 
             var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = id };
 
-            Assert.AreEqual(response, expectedResponse);
+            Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(response, expectedResponse);
         }
 
         [TestMethod]
@@ -78,7 +78,7 @@ namespace Tests.Authentication
 
             var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = id };
 
-            Assert.AreEqual(response, expectedResponse);
+            Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(response, expectedResponse);
         }
 
         [TestMethod]
@@ -98,7 +98,7 @@ namespace Tests.Authentication
             var response = service.AuthWithUserPass(userAdapter.MockUsername, "");
 
             var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = true, NewAccount = false, OAuthToken = string.Empty, SessionId = userAdapter.MockId };
-            Assert.AreEqual(expectedResponse, response);
+            Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(expectedResponse, response);
         }
 
         [TestMethod]
@@ -112,7 +112,7 @@ namespace Tests.Authentication
             var response = service.AuthWithUserPass("", "");
 
             var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = Guid.Empty };
-            Assert.AreEqual(expectedResponse, response);
+            Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(expectedResponse, response);
         }
 
         [TestMethod]
@@ -133,7 +133,7 @@ namespace Tests.Authentication
 
             var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = true, NewAccount = true, OAuthToken = string.Empty, SessionId = mockId };
         
-            Assert.AreEqual(expectedResponse, response);
+            Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(expectedResponse, response);
         }
     }
 }
