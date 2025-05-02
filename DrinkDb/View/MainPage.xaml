@@ -46,6 +46,12 @@
             <Image Margin="24,0,0,0" HorizontalAlignment="Left" Source="Assets/beers-logo.png" Width="32" Height="32"/>
             <TextBlock Text="Admin Dashboard" Foreground="White" FontSize="18" FontWeight="SemiBold" 
                      VerticalAlignment="Center" Margin="68,0,0,0"/>
+                <Button 
+        x:Name="GoBackButton"
+        Content="Go Back"
+        Click="GoBackButton_Click"
+        Background="White"
+        Foreground="Black"/>
         </Grid>
 
         <!-- Left Column - Reviews -->
@@ -208,12 +214,6 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <lvc:PieChart x:Name="AllUsersPieChart" Grid.Column="0" Margin="0,12"
-                                      Series="{x:Bind ViewModel.PieChartSeries, Mode=OneWay}"/>
-                        <lvc:CartesianChart x:Name="TotalDataBarChart" Grid.Column="1" Margin="0,12"
-                                           Series="{x:Bind ViewModel.BarChartSeries, Mode=OneWay}"
-                                           XAxes="{x:Bind ViewModel.BarChartXAxes, Mode=OneWay}"
-                                           YAxes="{x:Bind ViewModel.BarChartYAxes, Mode=OneWay}"/>
                     </Grid>
                 </Grid>
             </Border>
