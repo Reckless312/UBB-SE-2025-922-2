@@ -2,149 +2,200 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace Repository.AdminDashboard
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using DataAccess.Model.AdminDashboard;
-    using IRepository;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using DataAccess.Model.AdminDashboard;
 
+using IRepository;
+using Microsoft.Data.SqlClient;
+using Repository.Authentication;
+
+namespace DrinkDb_Auth.Repository.AdminDashboard
+{
     public class ReviewsRepository : IReviewsRepository
     {
-        private readonly List<Review> reviews;
-        private int nextReviewId;
-
-        public ReviewsRepository()
-        {
-            reviews = new List<Review>();
-            nextReviewId = 1;
-        }
-
-        public void LoadReviews(IEnumerable<Review> reviewsToLoad)
-        {
-            if (reviewsToLoad == null)
-            {
-                throw new ArgumentNullException(nameof(reviewsToLoad));
-            }
-
-            foreach (var review in reviewsToLoad)
-            {
-                // Ensure we maintain ID sequence by using the AddReview method
-                AddReview(review);
-            }
-        }
-
         public List<Review> GetAllReviews()
         {
-            return reviews.ToList();
+            List<Review> reviews = new();
+            using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
+            using SqlCommand cmd = new("SELECT * FROM Reviews", connection);
+            using SqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                reviews.Add(ReadReview(reader));
+            }
+
+            return reviews;
         }
+
 
         public List<Review> GetReviewsSince(DateTime date)
         {
-            return reviews
-                .Where(review => review.CreatedDate >= date && !review.IsHidden)
-                .OrderByDescending(review => review.CreatedDate)
-                .ToList();
+            List<Review> reviews = new();
+            using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
+            using SqlCommand cmd = new("SELECT * FROM Reviews WHERE CreatedDate >= @date AND IsHidden = 0 ORDER BY CreatedDate DESC", connection);
+            cmd.Parameters.Add("@date", SqlDbType.DateTime2).Value = date;
+            using SqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                reviews.Add(ReadReview(reader));
+            }
+
+            return reviews;
         }
 
         public double GetAverageRatingForVisibleReviews()
         {
-            if (!reviews.Any(review => !review.IsHidden))
-            {
-                return 0.0;
-            }
+            using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
+            using SqlCommand cmd = new("SELECT AVG(CAST(Rating AS FLOAT)) FROM Reviews WHERE IsHidden = 0", connection);
+            object result = cmd.ExecuteScalar();
 
-            double average = reviews
-                .Where(review => !review.IsHidden)
-                .Average(r => r.Rating);
-            return Math.Round(average, 1);
+            return result == DBNull.Value ? 0.0 : Math.Round(Convert.ToDouble(result), 1);
         }
 
         public List<Review> GetMostRecentReviews(int count)
         {
-            return reviews
-                .Where(review => !review.IsHidden)
-                .OrderByDescending(review => review.CreatedDate)
-                .Take(count)
-                .ToList();
+            List<Review> reviews = new();
+            using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
+            using SqlCommand cmd = new("SELECT TOP (@count) * FROM Reviews WHERE IsHidden = 0 ORDER BY CreatedDate DESC", connection);
+            cmd.Parameters.Add("@count", SqlDbType.Int).Value = count;
+            using SqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                reviews.Add(ReadReview(reader));
+            }
+
+            return reviews;
         }
 
         public int GetReviewCountAfterDate(DateTime date)
         {
-            return reviews
-                .Count(review => review.CreatedDate >= date && !review.IsHidden);
+            using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
+            using SqlCommand cmd = new("SELECT COUNT(*) FROM Reviews WHERE CreatedDate >= @date AND IsHidden = 0", connection);
+            cmd.Parameters.Add("@date", SqlDbType.DateTime2).Value = date;
+            return (int)cmd.ExecuteScalar();
         }
 
         public List<Review> GetFlaggedReviews(int minFlags)
         {
-            return reviews
-                .Where(review => review.NumberOfFlags >= minFlags && !review.IsHidden)
-                .ToList();
+            List<Review> reviews = new();
+            using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
+            using SqlCommand cmd = new("SELECT * FROM Reviews WHERE NumberOfFlags >= @minFlags AND IsHidden = 0", connection);
+            cmd.Parameters.Add("@minFlags", SqlDbType.Int).Value = minFlags;
+            using SqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                reviews.Add(ReadReview(reader));
+            }
+
+            return reviews;
         }
 
         public List<Review> GetReviewsByUser(Guid userId)
         {
-            return reviews.Where(review => review.UserId == userId && !review.IsHidden).OrderByDescending(review => review.CreatedDate).ToList();
+            List<Review> reviews = new();
+            using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
+            using SqlCommand cmd = new("SELECT * FROM Reviews WHERE UserId = @userId AND IsHidden = 0 ORDER BY CreatedDate DESC", connection);
+            cmd.Parameters.Add("@userId", SqlDbType.UniqueIdentifier).Value = userId;
+            using SqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                reviews.Add(ReadReview(reader));
+            }
+
+            return reviews;
         }
 
         public Review GetReviewById(int reviewId)
         {
-            return reviews.FirstOrDefault(review => review.ReviewId == reviewId);
+            using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
+            using SqlCommand cmd = new("SELECT * FROM Reviews WHERE ReviewId = @reviewId", connection);
+            cmd.Parameters.Add("@reviewId", SqlDbType.Int).Value = reviewId;
+            using SqlDataReader reader = cmd.ExecuteReader();
+
+            if (reader.Read())
+            {
+                return ReadReview(reader);
+            }
+
+            return null;
         }
 
         public void UpdateReviewVisibility(int reviewId, bool isHidden)
         {
-            Review? currentReview = reviews.FirstOrDefault(review => review.ReviewId == reviewId);
-
-            if (currentReview != null)
-            {
-                currentReview.IsHidden = isHidden;
-            }
+            using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
+            using SqlCommand cmd = new("UPDATE Reviews SET IsHidden = @isHidden WHERE ReviewId = @reviewId", connection);
+            cmd.Parameters.Add("@isHidden", SqlDbType.Bit).Value = isHidden;
+            cmd.Parameters.Add("@reviewId", SqlDbType.Int).Value = reviewId;
+            cmd.ExecuteNonQuery();
         }
 
         public void UpdateNumberOfFlagsForReview(int reviewId, int numberOfFlags)
         {
-            Review? currentReview = reviews.FirstOrDefault(review => review.ReviewId == reviewId);
-            if (currentReview != null)
-            {
-                currentReview.NumberOfFlags = numberOfFlags;
-            }
+            using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
+            using SqlCommand cmd = new("UPDATE Reviews SET NumberOfFlags = @numberOfFlags WHERE ReviewId = @reviewId", connection);
+            cmd.Parameters.Add("@numberOfFlags", SqlDbType.Int).Value = numberOfFlags;
+            cmd.Parameters.Add("@reviewId", SqlDbType.Int).Value = reviewId;
+            cmd.ExecuteNonQuery();
         }
 
         public int AddReview(Review review)
         {
-            // Normally, this would be handled by the database
-            int newId = nextReviewId++;
-            Review newReview = new Review(
-                reviewId: newId,
-                userId: review.UserId,
-                rating: review.Rating,
-                content: review.Content,
-                createdDate: review.CreatedDate,
-                numberOfFlags: review.NumberOfFlags,
-                isHidden: review.IsHidden);
-            reviews.Add(newReview);
-            return newId;
+            using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
+            using SqlCommand cmd = new("INSERT INTO Reviews (UserId, Rating, Content, CreatedDate, NumberOfFlags, IsHidden) OUTPUT INSERTED.ReviewId VALUES (@userId, @rating, @content, @createdDate, @numberOfFlags, @isHidden)", connection);
+
+            cmd.Parameters.Add("@userId", SqlDbType.UniqueIdentifier).Value = review.UserId;
+            cmd.Parameters.Add("@rating", SqlDbType.Int).Value = review.Rating;
+            cmd.Parameters.Add("@content", SqlDbType.NVarChar).Value = review.Content;
+            cmd.Parameters.Add("@createdDate", SqlDbType.DateTime2).Value = review.CreatedDate;
+            cmd.Parameters.Add("@numberOfFlags", SqlDbType.Int).Value = review.NumberOfFlags;
+            cmd.Parameters.Add("@isHidden", SqlDbType.Bit).Value = review.IsHidden;
+
+            return (int)cmd.ExecuteScalar();
         }
 
         public bool RemoveReviewById(int reviewId)
         {
-            Review? reviewToRemove = reviews.FirstOrDefault(review => review.ReviewId == reviewId);
-            if (reviewToRemove != null)
-            {
-                reviews.Remove(reviewToRemove);
-                return true;
-            }
-
-            return false;
+            using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
+            using SqlCommand cmd = new("DELETE FROM Reviews WHERE ReviewId = @reviewId", connection);
+            cmd.Parameters.Add("@reviewId", SqlDbType.Int).Value = reviewId;
+            return cmd.ExecuteNonQuery() > 0;
         }
 
         public List<Review> GetHiddenReviews()
         {
-            return reviews.Where(review => review.IsHidden).ToList();
+            List<Review> reviews = new();
+            using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
+            using SqlCommand cmd = new("SELECT * FROM Reviews WHERE IsHidden = 1", connection);
+            using SqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                reviews.Add(ReadReview(reader));
+            }
+
+            return reviews;
         }
+
+        private Review ReadReview(SqlDataReader reader)
+        {
+            return new Review(
+                reviewId: reader.GetInt32(reader.GetOrdinal("ReviewId")),
+                userId: reader.GetGuid(reader.GetOrdinal("UserId")),
+                rating: reader.GetInt32(reader.GetOrdinal("Rating")),
+                content: reader.GetString(reader.GetOrdinal("Content")),
+                createdDate: reader.GetDateTime(reader.GetOrdinal("CreatedDate")),
+                numberOfFlags: reader.GetInt32(reader.GetOrdinal("NumberOfFlags")),
+                isHidden: reader.GetBoolean(reader.GetOrdinal("IsHidden"))
+            );
+        }
+
     }
 }
