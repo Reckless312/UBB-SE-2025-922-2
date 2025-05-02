@@ -5,8 +5,8 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using DrinkDb_Auth.OAuthProviders;
-using DrinkDb_Auth.Repository.AdminDashboard;
 using IRepository;
+using Repository.AdminDashboard;
 
 namespace DrinkDb_Auth.AuthProviders.LinkedIn
 {

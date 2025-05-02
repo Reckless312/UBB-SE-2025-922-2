@@ -9,8 +9,8 @@ namespace DrinkDb_Auth.AutoChecker
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using DrinkDb_Auth.Repository.AdminDashboard;
     using Microsoft.Data.SqlClient;
+    using Repository.AdminDashboard;
 
     public class OffensiveWordsRepository : IOffensiveWordsRepository
     {

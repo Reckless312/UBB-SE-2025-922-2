@@ -22,12 +22,12 @@
             roles.Add(new Role(RoleType.Manager, "Manager"));
         }
 
-        public List<Role> GetAllRoles()
+        public async Task<List<Role>> GetAllRoles()
         {
             return roles;
         }
 
-        public Role GetNextRoleInHierarchy(RoleType currentRoleType)
+        public async Task<Role> GetNextRoleInHierarchy(RoleType currentRoleType)
         {
             try
             {

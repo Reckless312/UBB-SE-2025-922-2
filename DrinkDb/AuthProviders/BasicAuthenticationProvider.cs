@@ -3,8 +3,8 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using DataAccess.Model.Authentication;
-using DrinkDb_Auth.Repository.AdminDashboard;
 using IRepository;
+using Repository.AdminDashboard;
 
 namespace DrinkDb_Auth.AuthProviders
 {
@@ -20,7 +20,7 @@ namespace DrinkDb_Auth.AuthProviders
 
         public bool Authenticate(string username, string password)
         {
-            User? user = UserRepository.GetUserByUsername(username) ?? throw new UserNotFoundException("User not found");
+            User? user = UserRepository.GetUserByUsername(username).Result ?? throw new UserNotFoundException("User not found");
             byte[] passwordInBytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
             string passwordHash = Convert.ToBase64String(passwordInBytes);
             return user.PasswordHash.SequenceEqual(passwordHash);

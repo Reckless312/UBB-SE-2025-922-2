@@ -16,6 +16,7 @@ using Microsoft.UI;
 using Quartz.Impl;
 using DrinkDb_Auth.Service.Authentication.Interfaces;
 using DrinkDb_Auth.Service.Authentication;
+using DataAccess.Model.Authentication;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -96,7 +97,7 @@ namespace DrinkDb_Auth
         {
             if (res.AuthenticationSuccessful)
             {
-                var user = authenticationService.GetUser(res.SessionId);
+                User user = authenticationService.GetUser(res.SessionId).Result;
                 bool twoFAresponse = false;
                 if (!user.TwoFASecret.IsNullOrEmpty())
                 {
@@ -139,7 +140,7 @@ namespace DrinkDb_Auth
             string username = UsernameTextBox.Text;
             string password = PasswordBox.Password;
 
-            AuthenticationResponse response = authenticationService.AuthWithUserPass(username, password);
+            AuthenticationResponse response = authenticationService.AuthWithUserPass(username, password).Result;
             _ = AuthenticationComplete(response);
         }
 

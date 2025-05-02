@@ -15,22 +15,21 @@ namespace IRepository
     public interface IUserRepository
     {
         // public void UpdateRole(int userID, int permissionID);
-        public List<User> GetUsersWhoHaveSubmittedAppeals();
+        public Task<List<User>> GetUsersWhoHaveSubmittedAppeals();
 
-        List<User> GetBannedUsersWhoHaveSubmittedAppeals();
+        Task<List<User>> GetBannedUsersWhoHaveSubmittedAppeals();
 
-        public List<User> GetUsersByRoleType(RoleType roleType);
+        public Task<List<User>> GetUsersByRoleType(RoleType roleType);
 
-        public RoleType GetHighestRoleTypeForUser(Guid userId);
+        public Task<RoleType> GetHighestRoleTypeForUser(Guid userId);
 
-        public void AddRoleToUser(Guid userID, Role roleToAdd);
+        public Task AddRoleToUser(Guid userID, Role roleToAdd);
 
-        public List<User> GetAllUsers();
-
-        public bool ValidateAction(Guid userId, string resource, string action);
-        public User? GetUserByUsername(string username);
-        public User? GetUserById(Guid userId);
-        public bool CreateUser(User user);
-        public bool UpdateUser(User user);
+        public Task<List<User>> GetAllUsers();
+        public Task<bool> ValidateAction(Guid userId, string resource, string action);
+        public Task<User?> GetUserByUsername(string username);
+        public Task<User?> GetUserById(Guid userId);
+        public Task<bool> CreateUser(User user);
+        public Task<bool> UpdateUser(User user);
     }
 }

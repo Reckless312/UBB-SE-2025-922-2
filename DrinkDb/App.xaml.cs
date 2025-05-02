@@ -9,7 +9,6 @@ namespace DrinkDb_Auth
     using System.Runtime.InteropServices.WindowsRuntime;
     using DrinkDb_Auth.AutoChecker;
     using DrinkDb_Auth.Converters;
-    using DrinkDb_Auth.Repository.AdminDashboard;
     using DrinkDb_Auth.Service;
     using DrinkDb_Auth.Service.AdminDashboard;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
@@ -23,6 +22,7 @@ namespace DrinkDb_Auth
     using Quartz;
     using Quartz.Impl;
     using Quartz.Spi;
+    using Repository.AdminDashboard;
     using Windows.ApplicationModel;
     using Windows.ApplicationModel.Activation;
 

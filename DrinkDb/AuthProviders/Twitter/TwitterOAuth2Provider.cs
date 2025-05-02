@@ -12,13 +12,13 @@
     using System.Threading.Tasks;
     using DataAccess.Model.Authentication;
     using DrinkDb_Auth.OAuthProviders;
-    using DrinkDb_Auth.Repository.AdminDashboard;
-    using DrinkDb_Auth.Repository.Authentication;
     using IRepository;
     using Microsoft.UI.Dispatching;
     using Microsoft.UI.Xaml;
     using Microsoft.UI.Xaml.Controls;
     using Microsoft.Web.WebView2.Core;
+    using Repository.AdminDashboard;
+    using Repository.Authentication;
 
     /// <summary>
     /// A PKCE-based OAuth 2.0 flow for Twitter in a WinUI desktop app.
@@ -202,7 +202,7 @@
 
                     var twitterUserInfoObject = System.Text.Json.JsonSerializer.Deserialize<TwitterUserInfoResponse>(userInfoResponseBody);
                     System.Diagnostics.Debug.WriteLine($"Authenticated user: {twitterUserInfoObject?.Data.Id} ({twitterUserInfoObject?.Data.Username})");
-                    User? user = UserRepository.GetUserByUsername(twitterUserInfoObject?.Data.Username ?? throw new Exception("user not found in json response payload for Twitter authentication"));
+                    User? user = UserRepository.GetUserByUsername(twitterUserInfoObject?.Data.Username ?? throw new Exception("user not found in json response payload for Twitter authentication")).Result;
                     if (user == null)
                     {
                         // Create a new user
@@ -221,7 +221,7 @@
                         UserRepository.UpdateUser(user);
                     }
 
-                    Session userSession = SessionAdapter.CreateSession(user.UserId);
+                    Session userSession = SessionAdapter.CreateSession(user.UserId).Result;
                     return new AuthenticationResponse
                     {
                         OAuthToken = twitterTokenResult.AccessToken,

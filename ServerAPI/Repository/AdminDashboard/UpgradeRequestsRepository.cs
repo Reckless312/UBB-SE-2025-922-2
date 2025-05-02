@@ -30,7 +30,7 @@ namespace Repository.AdminDashboard
         {
         }
 
-        public List<UpgradeRequest> RetrieveAllUpgradeRequests()
+        public async Task<List<UpgradeRequest>> RetrieveAllUpgradeRequests()
         {
             List<UpgradeRequest> upgradeRequestsList = new List<UpgradeRequest>();
 
@@ -61,7 +61,7 @@ namespace Repository.AdminDashboard
             return upgradeRequestsList;
         }
 
-        public void RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
+        public async Task RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
         {
             using (var connection = connectionFactory.CreateConnection())
             {
@@ -79,7 +79,7 @@ namespace Repository.AdminDashboard
             }
         }
 
-        public UpgradeRequest RetrieveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
+        public async Task<UpgradeRequest> RetrieveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
         {
             UpgradeRequest? retrievedUpgradeRequest = null;
 

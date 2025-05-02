@@ -9,11 +9,11 @@ using DrinkDb_Auth.AuthProviders.LinkedIn;
 using DrinkDb_Auth.AuthProviders.Twitter;
 using DataAccess.Model.Authentication;
 using DrinkDb_Auth.OAuthProviders;
-using DrinkDb_Auth.Repository.AdminDashboard;
 using IRepository;
-using DrinkDb_Auth.Repository.Authentication;
 using DrinkDb_Auth.Service.Authentication.Interfaces;
 using Microsoft.UI.Xaml;
+using Repository.Authentication;
+using Repository.AdminDashboard;
 
 namespace DrinkDb_Auth.Service.Authentication
 {
@@ -81,7 +81,7 @@ namespace DrinkDb_Auth.Service.Authentication
             if (authResponse.AuthenticationSuccessful)
             {
                 App.CurrentSessionId = authResponse.SessionId;
-                Session session = sessionRepository.GetSession(App.CurrentSessionId);
+                Session session = sessionRepository.GetSession(App.CurrentSessionId).Result;
                 App.CurrentUserId = session.UserId;
             }
 
@@ -95,20 +95,20 @@ namespace DrinkDb_Auth.Service.Authentication
             App.CurrentUserId = Guid.Empty;
         }
 
-        public virtual User GetUser(Guid sessionId)
+        public virtual async Task<User> GetUser(Guid sessionId)
         {
-            Session session = sessionRepository.GetSession(sessionId);
-            return userRepository.GetUserById(session.UserId) ?? throw new UserNotFoundException("User not found");
+            Session session = sessionRepository.GetSession(sessionId).Result;
+            return await userRepository.GetUserById(session.UserId) ?? throw new UserNotFoundException("User not found");
         }
 
-        public AuthenticationResponse AuthWithUserPass(string username, string password)
+        public async Task<AuthenticationResponse> AuthWithUserPass(string username, string password)
         {
             try
             {
                 if (basicAuthenticationProvider.Authenticate(username, password))
                 {
-                    User user = userRepository.GetUserByUsername(username) ?? throw new UserNotFoundException("User not found");
-                    Session session = sessionRepository.CreateSession(user.UserId);
+                    User user = await userRepository.GetUserByUsername(username) ?? throw new UserNotFoundException("User not found");
+                    Session session = sessionRepository.CreateSession(user.UserId).Result;
                     return new AuthenticationResponse
                     {
                         AuthenticationSuccessful = true,
@@ -139,7 +139,7 @@ namespace DrinkDb_Auth.Service.Authentication
                     TwoFASecret = string.Empty
                 };
                 userRepository.CreateUser(user);
-                Session session = sessionRepository.CreateSession(user.UserId);
+                Session session = sessionRepository.CreateSession(user.UserId).Result;
                 return new AuthenticationResponse
                 {
                     AuthenticationSuccessful = true,

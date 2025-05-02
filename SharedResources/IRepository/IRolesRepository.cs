@@ -21,12 +21,12 @@ namespace IRepository
         /// </summary>
         /// <param name="currentRoleType"current role>the current role.</param>
         /// <returns>next role.</returns>
-        public Role GetNextRoleInHierarchy(RoleType currentRoleType);
+        public Task<Role> GetNextRoleInHierarchy(RoleType currentRoleType);
 
         /// <summary>
         /// gets all the roles.
         /// </summary>
         /// <returns>list of all the roles.</returns>
-        public List<Role> GetAllRoles();
+        public Task<List<Role>> GetAllRoles();
     }
 }

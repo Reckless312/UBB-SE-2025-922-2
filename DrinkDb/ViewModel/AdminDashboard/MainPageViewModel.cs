@@ -375,7 +375,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// </summary>
         public void LoadFlaggedReviews()
         {
-            FlaggedReviews = new ObservableCollection<Review>(reviewsService.GetFlaggedReviews());
+            FlaggedReviews = new ObservableCollection<Review>(reviewsService.GetFlaggedReviews().Result);
         }
 
         /// <summary>
@@ -383,7 +383,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// </summary>
         public void LoadAppeals()
         {
-            AppealsUsers = new ObservableCollection<User>(userService.GetBannedUsersWhoHaveSubmittedAppeals());
+            AppealsUsers = new ObservableCollection<User>(userService.GetBannedUsersWhoHaveSubmittedAppeals().Result);
         }
 
         /// <summary>
@@ -391,7 +391,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// </summary>
         public void LoadRoleRequests()
         {
-            UpgradeRequests = new ObservableCollection<UpgradeRequest>(requestsService.RetrieveAllUpgradeRequests());
+            UpgradeRequests = new ObservableCollection<UpgradeRequest>(requestsService.RetrieveAllUpgradeRequests().Result);
         }
 
         /// <summary>
@@ -418,7 +418,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         public void FilterReviews(string filter)
         {
             FlaggedReviews = new ObservableCollection<Review>(
-                reviewsService.FilterReviewsByContent(filter));
+                reviewsService.FilterReviewsByContent(filter).Result);
         }
 
         /// <summary>
@@ -435,7 +435,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
 
             filter = filter.ToLower();
             AppealsUsers = new ObservableCollection<User>(
-                userService.GetBannedUsersWhoHaveSubmittedAppeals()
+                userService.GetBannedUsersWhoHaveSubmittedAppeals().Result
                     .Where(user =>
                         user.EmailAddress.ToLower().Contains(filter) ||
                         user.Username.ToLower().Contains(filter) ||
@@ -483,7 +483,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// <returns>A list of messages from the checker.</returns>
         public List<string> RunAutoCheck()
         {
-            List<Review> reviews = reviewsService.GetFlaggedReviews();
+            List<Review> reviews = reviewsService.GetFlaggedReviews().Result;
             List<string> messages = checkersService.RunAutoCheck(reviews);
             LoadFlaggedReviews();
             LoadStatistics();
@@ -542,7 +542,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// <returns>A list of reviews by the user.</returns>
         public List<Review> GetUserReviews(Guid userId)
         {
-            return reviewsService.GetReviewsByUser(userId);
+            return reviewsService.GetReviewsByUser(userId).Result;
         }
 
         /// <summary>
@@ -552,7 +552,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// <returns>The user object.</returns>
         public User GetUserById(Guid userId)
         {
-            return userService.GetUserById(userId);
+            return userService.GetUserById(userId).Result;
         }
 
         /// <summary>
@@ -562,7 +562,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// <returns>The highest role type.</returns>
         public RoleType GetHighestRoleTypeForUser(Guid userId)
         {
-            return userService.GetHighestRoleTypeForUser(userId);
+            return userService.GetHighestRoleTypeForUser(userId).Result;
         }
 
         /// <summary>
@@ -572,7 +572,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// <returns>The role name.</returns>
         public string GetRoleNameBasedOnID(RoleType roleType)
         {
-            return requestsService.GetRoleNameBasedOnIdentifier(roleType);
+            return requestsService.GetRoleNameBasedOnIdentifier(roleType).Result;
         }
 
         /// <summary>
@@ -737,9 +737,9 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// </summary>
         private void LoadBarChart()
         {
-            int rejectedCount = reviewsService.GetHiddenReviews().Count;
-            int pendingCount = reviewsService.GetFlaggedReviews().Count;
-            int totalCount = reviewsService.GetAllReviews().Count;
+            int rejectedCount = reviewsService.GetHiddenReviews().Result.Count;
+            int pendingCount = reviewsService.GetFlaggedReviews().Result.Count;
+            int totalCount = reviewsService.GetAllReviews().Result.Count;
 
             BarChartSeries = new ISeries[]
             {
@@ -803,7 +803,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             int adminsCount = 0;
             int managerCount = 0;
 
-            List<User> users = userService.GetAllUsers();
+            List<User> users = userService.GetAllUsers().Result;
             foreach (User user in users)
             {
                 int count = user.AssignedRoles.Count;

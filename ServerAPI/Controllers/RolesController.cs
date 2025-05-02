@@ -12,15 +12,15 @@ namespace ServerAPI.Controllers
     {
         private IRolesRepository repository = new RolesRepository();
         [HttpGet]
-        public IEnumerable<Role> GetAll()
+        public async Task<IEnumerable<Role>> GetAll()
         {
-            return repository.GetAllRoles();
+            return await repository.GetAllRoles();
         }
 
         [HttpGet("next")]
-        public Role GetNextRoleInHierarchy([FromQuery] RoleType currentRoleType)
+        public async Task<Role> GetNextRoleInHierarchy([FromQuery] RoleType currentRoleType)
         {
-            return repository.GetNextRoleInHierarchy(currentRoleType);
+            return await repository.GetNextRoleInHierarchy(currentRoleType);
         }
     }
 }

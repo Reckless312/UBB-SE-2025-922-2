@@ -23,7 +23,7 @@ namespace Repository.AdminDashboard
             nextReviewId = 1;
         }
 
-        public void LoadReviews(IEnumerable<Review> reviewsToLoad)
+        public async Task LoadReviews(IEnumerable<Review> reviewsToLoad)
         {
             if (reviewsToLoad == null)
             {
@@ -37,12 +37,12 @@ namespace Repository.AdminDashboard
             }
         }
 
-        public List<Review> GetAllReviews()
+        public async Task<List<Review>> GetAllReviews()
         {
             return reviews.ToList();
         }
 
-        public List<Review> GetReviewsSince(DateTime date)
+        public async Task<List<Review>> GetReviewsSince(DateTime date)
         {
             return reviews
                 .Where(review => review.CreatedDate >= date && !review.IsHidden)
@@ -50,7 +50,7 @@ namespace Repository.AdminDashboard
                 .ToList();
         }
 
-        public double GetAverageRatingForVisibleReviews()
+        public async Task<double> GetAverageRatingForVisibleReviews()
         {
             if (!reviews.Any(review => !review.IsHidden))
             {
@@ -63,7 +63,7 @@ namespace Repository.AdminDashboard
             return Math.Round(average, 1);
         }
 
-        public List<Review> GetMostRecentReviews(int count)
+        public async Task<List<Review>> GetMostRecentReviews(int count)
         {
             return reviews
                 .Where(review => !review.IsHidden)
@@ -72,30 +72,30 @@ namespace Repository.AdminDashboard
                 .ToList();
         }
 
-        public int GetReviewCountAfterDate(DateTime date)
+        public async Task<int> GetReviewCountAfterDate(DateTime date)
         {
             return reviews
                 .Count(review => review.CreatedDate >= date && !review.IsHidden);
         }
 
-        public List<Review> GetFlaggedReviews(int minFlags)
+        public async Task<List<Review>> GetFlaggedReviews(int minFlags)
         {
             return reviews
                 .Where(review => review.NumberOfFlags >= minFlags && !review.IsHidden)
                 .ToList();
         }
 
-        public List<Review> GetReviewsByUser(Guid userId)
+        public async Task<List<Review>> GetReviewsByUser(Guid userId)
         {
             return reviews.Where(review => review.UserId == userId && !review.IsHidden).OrderByDescending(review => review.CreatedDate).ToList();
         }
 
-        public Review GetReviewById(int reviewId)
+        public async Task<Review> GetReviewById(int reviewId)
         {
             return reviews.FirstOrDefault(review => review.ReviewId == reviewId);
         }
 
-        public void UpdateReviewVisibility(int reviewId, bool isHidden)
+        public async Task UpdateReviewVisibility(int reviewId, bool isHidden)
         {
             Review? currentReview = reviews.FirstOrDefault(review => review.ReviewId == reviewId);
 
@@ -105,7 +105,7 @@ namespace Repository.AdminDashboard
             }
         }
 
-        public void UpdateNumberOfFlagsForReview(int reviewId, int numberOfFlags)
+        public async Task UpdateNumberOfFlagsForReview(int reviewId, int numberOfFlags)
         {
             Review? currentReview = reviews.FirstOrDefault(review => review.ReviewId == reviewId);
             if (currentReview != null)
@@ -114,7 +114,7 @@ namespace Repository.AdminDashboard
             }
         }
 
-        public int AddReview(Review review)
+        public async Task<int> AddReview(Review review)
         {
             // Normally, this would be handled by the database
             int newId = nextReviewId++;
@@ -130,7 +130,7 @@ namespace Repository.AdminDashboard
             return newId;
         }
 
-        public bool RemoveReviewById(int reviewId)
+        public async Task<bool> RemoveReviewById(int reviewId)
         {
             Review? reviewToRemove = reviews.FirstOrDefault(review => review.ReviewId == reviewId);
             if (reviewToRemove != null)
@@ -142,7 +142,7 @@ namespace Repository.AdminDashboard
             return false;
         }
 
-        public List<Review> GetHiddenReviews()
+        public async Task<List<Review>> GetHiddenReviews()
         {
             return reviews.Where(review => review.IsHidden).ToList();
         }

@@ -1,33 +1,50 @@
 ﻿namespace DrinkDb_Auth.ProxyRepository.Authentification
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
+    using System.Net.Http;
+    using System.Net.Http.Json;
     using System.Threading.Tasks;
     using DataAccess.Model.Authentication;
     using IRepository;
 
-    internal class SessionProxyRepository : ISessionRepository
+    public class SessionProxyRepository : ISessionRepository
     {
-        public Session CreateSession(Guid userId)
+        private const string ApiBaseRoute = "api/sessions";
+        private readonly HttpClient httpClient;
+
+        public SessionProxyRepository(string baseApiUrl)
         {
-            throw new NotImplementedException();
+            this.httpClient = new HttpClient
+            {
+                BaseAddress = new Uri(baseApiUrl)
+            };
         }
 
-        public bool EndSession(Guid sessionId)
+        public async Task<Session> CreateSession(Guid userId)
         {
-            throw new NotImplementedException();
+            var response = await this.httpClient.PostAsJsonAsync(ApiBaseRoute, new { UserId = userId });
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<Session>();
         }
 
-        public Session GetSession(Guid sessionId)
+        public async Task<bool> EndSession(Guid sessionId)
         {
-            throw new NotImplementedException();
+            var response = await this.httpClient.DeleteAsync($"{ApiBaseRoute}/{sessionId}");
+            return response.IsSuccessStatusCode;
         }
 
-        public Session GetSessionByUserId(Guid userId)
+        public async Task<Session> GetSession(Guid sessionId)
         {
-            throw new NotImplementedException();
+            var response = await this.httpClient.GetAsync($"{ApiBaseRoute}/{sessionId}");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<Session>();
+        }
+
+        public async Task<Session> GetSessionByUserId(Guid userId)
+        {
+            var response = await this.httpClient.GetAsync($"{ApiBaseRoute}/by-user/{userId}");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<Session>();
         }
     }
 }

@@ -4,9 +4,9 @@ using System.Text.Json;
 using DrinkDb_Auth.OAuthProviders;
 using Windows.Networking.Sockets;
 using DataAccess.Model.Authentication;
-using DrinkDb_Auth.Repository.Authentication;
 using IRepository;
-using DrinkDb_Auth.Repository.AdminDashboard;
+using Repository.AdminDashboard;
+using Repository.Authentication;
 
 namespace DrinkDb_Auth.AuthProviders.Facebook
 {
@@ -34,9 +34,9 @@ namespace DrinkDb_Auth.AuthProviders.Facebook
                             // store or update user in DB - UserService
                             bool isNewAccount = StoreOrUpdateUserInDb(fbId, fbName);
 
-                            User user = UserRepository.GetUserByUsername(fbName) ?? throw new Exception("User not found");
+                            User user = UserRepository.GetUserByUsername(fbName).Result ?? throw new Exception("User not found");
 
-                            Session session = SessionAdapter.CreateSession(user.UserId);
+                            Session session = SessionAdapter.CreateSession(user.UserId).Result;
 
                             return new AuthenticationResponse
                             {
@@ -71,7 +71,7 @@ namespace DrinkDb_Auth.AuthProviders.Facebook
         private static readonly IUserRepository UserRepository = new UserRepository();
         private bool StoreOrUpdateUserInDb(string fbId, string fbName)
         {
-            var user = UserRepository.GetUserByUsername(fbName);
+            User user = UserRepository.GetUserByUsername(fbName).Result;
 
             if (user == null)
             {

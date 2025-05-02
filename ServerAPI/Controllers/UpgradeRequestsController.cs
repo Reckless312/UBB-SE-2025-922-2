@@ -11,21 +11,21 @@ namespace ServerAPI.Controllers
     {
         IUpgradeRequestsRepository repository = new UpgradeRequestsRepository(new SqlConnectionFactory("Data Source=CORA\\MSSQLSERVER01; Initial Catalog = DrinkDB_Dev; Integrated Security = True; Trust Server Certificate = True"));
         [HttpGet]
-        public IEnumerable<UpgradeRequest> GetAll()
+        public async Task<IEnumerable<UpgradeRequest>> GetAll()
         {
-            return repository.RetrieveAllUpgradeRequests();
+            return await repository.RetrieveAllUpgradeRequests();
         }
 
         [HttpDelete("{id}/delete")]
-        public void Delete(int id)
+        public async Task Delete(int id)
         {
-            repository.RemoveUpgradeRequestByIdentifier(id);
+            await repository.RemoveUpgradeRequestByIdentifier(id);
         }
 
         [HttpGet("{id}")]
-        public UpgradeRequest Get(int id)
+        public async Task<UpgradeRequest> Get(int id)
         {
-            return repository.RetrieveUpgradeRequestByIdentifier(id);
+            return await repository.RetrieveUpgradeRequestByIdentifier(id);
         }
     }
 }

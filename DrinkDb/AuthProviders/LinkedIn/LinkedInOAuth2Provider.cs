@@ -5,10 +5,10 @@ using System.Net.Http;
 using System.Text.Json;
 using DataAccess.Model.Authentication;
 using DrinkDb_Auth.OAuthProviders;
-using DrinkDb_Auth.Repository.AdminDashboard;
 using IRepository;
-using DrinkDb_Auth.Repository.Authentication;
 using Microsoft.Data.SqlClient;
+using Repository.AdminDashboard;
+using Repository.Authentication;
 
 namespace DrinkDb_Auth.AuthProviders.LinkedIn
 {
@@ -50,7 +50,7 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
                 };
             }
 
-            var user = UserRepository.GetUserByUsername(name);
+            User user = UserRepository.GetUserByUsername(name).Result;
             if (user == null)
             {
                 User newUser = new User
@@ -61,7 +61,7 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
                     TwoFASecret = string.Empty,
                 };
                 UserRepository.CreateUser(newUser);
-                Session session = SessionAdapter.CreateSession(newUser.UserId);
+                Session session = SessionAdapter.CreateSession(newUser.UserId).Result;
                 return new AuthenticationResponse
                 {
                     AuthenticationSuccessful = true,
@@ -72,7 +72,7 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
             }
             else
             {
-                Session session = SessionAdapter.CreateSession(user.UserId);
+                Session session = SessionAdapter.CreateSession(user.UserId).Result;
                 return new AuthenticationResponse
                 {
                     AuthenticationSuccessful = true,

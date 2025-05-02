@@ -29,14 +29,14 @@
         /// <summary>
         /// Internal list of users managed by the repository.
         /// </summary>
-        private readonly List<User> _usersList;
+        private readonly List<User> usersList;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserRepository"/> class with default user data.
         /// </summary>
         public UserRepository()
         {
-            _usersList = new List<User>();
+            usersList = new List<User>();
         }
 
         /// <summary>
@@ -44,16 +44,16 @@
         /// </summary>
         /// <returns>A list of users who have submitted appeals.</returns>
         /// <exception cref="RepositoryException">Thrown when an error occurs while retrieving users.</exception>
-        public List<User> GetUsersWhoHaveSubmittedAppeals()
+        public async Task<List<User>> GetUsersWhoHaveSubmittedAppeals()
         {
             try
             {
-                if (_usersList == null)
+                if (usersList == null)
                 {
                     throw new NullReferenceException("_usersList is null.");
                 }
 
-                return _usersList.Where(user => user.HasSubmittedAppeal).ToList();
+                return usersList.Where(user => user.HasSubmittedAppeal).ToList();
             }
             catch (Exception ex)
             {
@@ -67,16 +67,16 @@
         /// <param name="roleType">The role type to filter users by.</param>
         /// <returns>A list of users with the specified role type.</returns>
         /// <exception cref="RepositoryException">Thrown when an error occurs while retrieving users.</exception>
-        public List<User> GetUsersByRoleType(RoleType roleType)
+        public async Task<List<User>> GetUsersByRoleType(RoleType roleType)
         {
             try
             {
-                if (_usersList == null)
+                if (usersList == null)
                 {
                     throw new NullReferenceException("_usersList is null.");
                 }
 
-                return _usersList.Where(user => user.AssignedRoles != null && user.AssignedRoles.Any(role => role.RoleType == roleType)).ToList();
+                return usersList.Where(user => user.AssignedRoles != null && user.AssignedRoles.Any(role => role.RoleType == roleType)).ToList();
             }
             catch (Exception ex)
             {
@@ -90,11 +90,11 @@
         /// <param name="userId">The ID of the user.</param>
         /// <returns>The highest role type assigned to the user.</returns>
         /// <exception cref="RepositoryException">Thrown when the user has no roles or does not exist.</exception>
-        public RoleType GetHighestRoleTypeForUser(Guid userId)
+        public async Task<RoleType> GetHighestRoleTypeForUser(Guid userId)
         {
             try
             {
-                User user = GetUserById(userId);
+                User user = await GetUserById(userId);
                 if (user.AssignedRoles == null || !user.AssignedRoles.Any())
                 {
                     throw new ArgumentException($"No roles found for user with ID {userId}");
@@ -117,16 +117,16 @@
         /// </summary>
         /// <returns>A list of banned users who have submitted appeals.</returns>
         /// <exception cref="RepositoryException">Thrown when an error occurs while retrieving users.</exception>
-        public List<User> GetBannedUsersWhoHaveSubmittedAppeals()
+        public async Task<List<User>> GetBannedUsersWhoHaveSubmittedAppeals()
         {
             try
             {
-                if (_usersList == null)
+                if (usersList == null)
                 {
                     throw new NullReferenceException("_usersList is null.");
                 }
 
-                return _usersList.Where(user =>
+                return usersList.Where(user =>
                     user.HasSubmittedAppeal &&
                     user.AssignedRoles != null &&
                     user.AssignedRoles.Any(role => role.RoleType == RoleType.Banned)
@@ -144,11 +144,11 @@
         /// <param name="userId">The ID of the user to add the role to.</param>
         /// <param name="roleToAdd">The role to add to the user.</param>
         /// <exception cref="RepositoryException">Thrown when the user does not exist or an error occurs.</exception>
-        public void AddRoleToUser(Guid userId, Role roleToAdd)
+        public async Task AddRoleToUser(Guid userId, Role roleToAdd)
         {
             try
             {
-                User? user = _usersList.FirstOrDefault(u => u.UserId == userId);
+                User? user = usersList.FirstOrDefault(u => u.UserId == userId);
                 if (user == null)
                 {
                     throw new ArgumentException($"No user found with ID {userId}");
@@ -167,16 +167,16 @@
         /// </summary>
         /// <returns>A list of all users.</returns>
         /// <exception cref="RepositoryException">Thrown when an error occurs while retrieving users.</exception>
-        public List<User> GetAllUsers()
+        public async Task<List<User>> GetAllUsers()
         {
             try
             {
-                if (_usersList == null)
+                if (usersList == null)
                 {
                     throw new NullReferenceException("_usersList is null.");
                 }
 
-                return _usersList;
+                return usersList;
             }
             catch (Exception ex)
             {
@@ -200,7 +200,7 @@
             }
         }
 
-        public virtual User? GetUserById(Guid userId)
+        public virtual async Task<User?> GetUserById(Guid userId)
         {
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
             string sql = "SELECT * FROM Users WHERE userId = @userId;";
@@ -221,7 +221,7 @@
             return null;
         }
 
-        public virtual User? GetUserByUsername(string username)
+        public virtual async Task<User?> GetUserByUsername(string username)
         {
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
             string sql = "SELECT * FROM Users WHERE userName = @username;";
@@ -241,7 +241,7 @@
             return null;
         }
 
-        public bool UpdateUser(User user)
+        public async Task<bool> UpdateUser(User user)
         {
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
             string sql = "UPDATE Users SET userName = @username, passwordHash = @passwordHash, twoFASecret = @twoFASecret WHERE userId = @userId;";
@@ -254,7 +254,7 @@
                 return command.ExecuteNonQuery() > 0;
             }
         }
-        public bool DeleteUser(Guid userId)
+        public async Task<bool> DeleteUser(Guid userId)
         {
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
             string sql = "DELETE FROM Users WHERE userId = @userId;";
@@ -263,7 +263,7 @@
             return command.ExecuteNonQuery() > 0;
         }
 
-        public bool CreateUser(User user)
+        public async Task<bool> CreateUser(User user)
         {
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
             string sql = "INSERT INTO Users (userId, userName, passwordHash, twoFASecret) VALUES (@userId, @username, @passwordHash, @twoFASecret);";
@@ -275,7 +275,7 @@
             return command.ExecuteNonQuery() > 0;
         }
 
-        public virtual bool ValidateAction(Guid userId, string resource, string action)
+        public virtual async Task<bool> ValidateAction(Guid userId, string resource, string action)
         {
             bool result = false;
             string sql = "SELECT dbo.fnValidateAction(@userId, @resource, @action)";
@@ -297,5 +297,6 @@
 
             return result;
         }
+
     }
 }

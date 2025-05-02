@@ -96,12 +96,12 @@ public class EmailJob : IJob
     {
         DateTime reportDate = DateTime.Now;
         DateTime yesterday = reportDate.AddDays(-1);
-        List<User> adminUsers = this.userService.GetAdminUsers();
-        int activeUsersCount = this.userService.GetAdminUsers().Count() + this.userService.GetRegularUsers().Count();
-        int bannedUsersCount = this.userService.GetBannedUsers().Count();
-        int numberOfNewReviews = this.reviewService.GetReviewsSince(yesterday).Count;
-        double averageRating = this.reviewService.GetAverageRatingForVisibleReviews();
-        List<Review> recentReviews = this.reviewService.GetReviewsForReport();
+        List<User> adminUsers = this.userService.GetAdminUsers().Result;
+        int activeUsersCount = this.userService.GetAdminUsers().Result.Count() + this.userService.GetRegularUsers().Result.Count();
+        int bannedUsersCount = this.userService.GetBannedUsers().Result.Count();
+        int numberOfNewReviews = this.reviewService.GetReviewsSince(yesterday).Result.Count;
+        double averageRating = this.reviewService.GetAverageRatingForVisibleReviews().Result;
+        List<Review> recentReviews = this.reviewService.GetReviewsForReport().Result;
 
         return new AdminReportData(reportDate, adminUsers, activeUsersCount, bannedUsersCount, numberOfNewReviews, averageRating, recentReviews);
     }
@@ -130,7 +130,7 @@ public class EmailJob : IJob
         foreach (var review in reviews)
         {
             string row = this.templateProvider.GetReviewRowTemplate();
-            string userName = this.userService.GetUserById(review.UserId).Username;
+            string userName = this.userService.GetUserById(review.UserId).Result.Username;
             row = row.Replace("{{userName}}", userName)
                      .Replace("{{rating}}", review.Rating.ToString())
                      .Replace("{{creationDate}}", review.CreatedDate.ToString("yyyy-MM-dd"));

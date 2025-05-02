@@ -8,7 +8,7 @@ namespace Repository.Authentication
 {
     public class SessionRepository : ISessionRepository
     {
-        public Session CreateSession(Guid userId)
+        public async Task<Session> CreateSession(Guid userId)
         {
             using SqlConnection databaseConnection = DrinkDbConnectionHelper.GetConnection();
             using SqlCommand createSessionCommand = new SqlCommand("create_session", databaseConnection);
@@ -24,7 +24,7 @@ namespace Repository.Authentication
             return Session.CreateSessionWithIds(sessionId, userId);
         }
 
-        public bool EndSession(Guid sessionId)
+        public async Task<bool> EndSession(Guid sessionId)
         {
             using SqlConnection databaseConnection = DrinkDbConnectionHelper.GetConnection();
             using SqlCommand endSessionCommand = new SqlCommand("end_session", databaseConnection);
@@ -37,7 +37,7 @@ namespace Repository.Authentication
             return (int)returnValue.Value > 0;
         }
 
-        public Session GetSession(Guid sessionId)
+        public async Task<Session> GetSession(Guid sessionId)
         {
             using SqlConnection databaseConnection = DrinkDbConnectionHelper.GetConnection();
             using SqlCommand getSessionCommand = new SqlCommand("SELECT userId FROM Sessions WHERE sessionId = @sessionId", databaseConnection);
@@ -51,7 +51,7 @@ namespace Repository.Authentication
             throw new Exception("Session not found.");
         }
 
-        public Session GetSessionByUserId(Guid userId)
+        public async Task<Session> GetSessionByUserId(Guid userId)
         {
             using SqlConnection databaseConnection = DrinkDbConnectionHelper.GetConnection();
             using SqlCommand getSessionCommand = new SqlCommand("SELECT sessionId FROM Sessions WHERE userId = @userId", databaseConnection);

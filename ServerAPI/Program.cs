@@ -1,6 +1,8 @@
 ﻿using ServerAPI.Controllers;
 using ServerAPI.Data;
 using Microsoft.EntityFrameworkCore;
+using IRepository;
+using Repository.AdminDashboard;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

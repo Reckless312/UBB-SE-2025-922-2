@@ -11,7 +11,7 @@ namespace Repository.Authentication
         public static SqlConnection GetConnection()
         {
             // Get the connection string from App.config
-            string connectionString = "Data Source=CORA\\MSSQLSERVER01; Initial Catalog = DrinkDB_Dev; Integrated Security = True; Trust Server Certificate = True";
+            string connectionString = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=DrinkDB_Dev;User Id=sa;Password=yourStrong(!)Password;Trust Server Certificate=True";
 
             // Create and open a new SqlConnection
             SqlConnection connection = new (connectionString);

@@ -11,27 +11,27 @@ namespace ServerAPI.Controllers
     {
         private ISessionRepository repository = new SessionRepository();
         [HttpPost("add")]
-        public Session CreateSession([FromQuery] Guid userId)
+        public async Task<Session> CreateSession([FromQuery] Guid userId)
         {
-            return repository.CreateSession(userId);
+            return await repository.CreateSession(userId);
         }
 
         [HttpPatch("end")]
-        public bool EndSession([FromQuery] Guid sessionId)
+        public async Task<bool> EndSession([FromQuery] Guid sessionId)
         {
-            return repository.EndSession(sessionId);
+            return await repository.EndSession(sessionId);
         }
 
         [HttpGet("{id}")]
-        public Session GetSession(Guid id)
+        public async Task<Session> GetSession(Guid id)
         { 
-            return repository.GetSession(id);
+            return await repository.GetSession(id);
         }
         
         [HttpGet("byUserId/{id}")]
-        public Session GetSessionByUserID(Guid id)
+        public async Task<Session> GetSessionByUserID(Guid id)
         { 
-            return repository.GetSessionByUserId(id);
+            return await repository.GetSessionByUserId(id);
         }
     }
 }

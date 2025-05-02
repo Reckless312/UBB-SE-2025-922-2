@@ -1,9 +1,9 @@
 using System;
 using DataAccess.Model.Authentication;
 using DrinkDb_Auth.OAuthProviders;
-using DrinkDb_Auth.Repository.AdminDashboard;
 using IRepository;
-using DrinkDb_Auth.Repository.Authentication;
+using Repository.AdminDashboard;
+using Repository.Authentication;
 
 namespace DrinkDb_Auth.AuthProviders.Github
 {
@@ -48,9 +48,9 @@ namespace DrinkDb_Auth.AuthProviders.Github
                 if (UserExists(gitHubLogin))
                 {
                     // User exists, so proceed.
-                    User user = userRepository.GetUserByUsername(gitHubLogin) ?? throw new Exception("User not found");
+                    User user = userRepository.GetUserByUsername(gitHubLogin).Result ?? throw new Exception("User not found");
 
-                    Session session = sessionRepository.CreateSession(user.UserId);
+                    Session session = sessionRepository.CreateSession(user.UserId).Result;
 
                     return new AuthenticationResponse
                     {
@@ -67,7 +67,7 @@ namespace DrinkDb_Auth.AuthProviders.Github
                     if (newUserId != Guid.Empty)
                     {
                         // Successfully inserted, so login is successful.
-                        Session session = sessionRepository.CreateSession(newUserId);
+                        Session session = sessionRepository.CreateSession(newUserId).Result;
                         return new AuthenticationResponse
                         {
                             AuthenticationSuccessful = true,
@@ -110,7 +110,7 @@ namespace DrinkDb_Auth.AuthProviders.Github
         {
             try
             {
-                User? user = userRepository.GetUserByUsername(gitHubLogin);
+                User? user = userRepository.GetUserByUsername(gitHubLogin).Result;
                 if (user != null)
                 {
                     return true;

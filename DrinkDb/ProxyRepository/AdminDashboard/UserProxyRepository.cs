@@ -3,65 +3,77 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net.Http;
+    using System.Net.Http.Json;
     using System.Text;
     using System.Threading.Tasks;
     using DataAccess.Model.AdminDashboard;
     using DataAccess.Model.Authentication;
     using IRepository;
 
-    internal class UserProxyRepository : IUserRepository
+    public class UserProxyRepository : IUserRepository
     {
-        public void AddRoleToUser(Guid userID, Role roleToAdd)
+        private const string ApiRoute = "api/users";
+        private HttpClient httpClient;
+
+        public UserProxyRepository(string baseRoute) { 
+            httpClient = new HttpClient();
+            httpClient.BaseAddress = new Uri(baseRoute);
+        }
+
+        public async Task AddRoleToUser(Guid userID, Role roleToAdd)
+        {
+            var userUrl = $"{ApiRoute}/{userID}/roles";
+            var response = await this.httpClient.PostAsJsonAsync(userUrl, roleToAdd);
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task<bool> CreateUser(User user)
         {
             throw new NotImplementedException();
         }
 
-        public bool CreateUser(User user)
+        public Task<List<User>> GetAllUsers()
         {
             throw new NotImplementedException();
         }
 
-        public List<User> GetAllUsers()
+        public async Task<List<User>> GetBannedUsersWhoHaveSubmittedAppeals()
         {
             throw new NotImplementedException();
         }
 
-        public List<User> GetBannedUsersWhoHaveSubmittedAppeals()
+        public async Task<RoleType> GetHighestRoleTypeForUser(Guid userId)
         {
             throw new NotImplementedException();
         }
 
-        public RoleType GetHighestRoleTypeForUser(Guid userId)
+        public async Task<User?> GetUserById(Guid userId)
         {
             throw new NotImplementedException();
         }
 
-        public User? GetUserById(Guid userId)
+        public async Task<User?> GetUserByUsername(string username)
         {
             throw new NotImplementedException();
         }
 
-        public User? GetUserByUsername(string username)
+        public async Task<List<User>> GetUsersByRoleType(RoleType roleType)
         {
             throw new NotImplementedException();
         }
 
-        public List<User> GetUsersByRoleType(RoleType roleType)
+        public async Task<List<User>> GetUsersWhoHaveSubmittedAppeals()
         {
             throw new NotImplementedException();
         }
 
-        public List<User> GetUsersWhoHaveSubmittedAppeals()
+        public async Task<bool> UpdateUser(User user)
         {
             throw new NotImplementedException();
         }
 
-        public bool UpdateUser(User user)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool ValidateAction(Guid userId, string resource, string action)
+        public async Task<bool> ValidateAction(Guid userId, string resource, string action)
         {
             throw new NotImplementedException();
         }
