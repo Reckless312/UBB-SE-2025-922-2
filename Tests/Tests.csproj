@@ -22,8 +22,8 @@
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250228001" />
 		<PackageReference Include="MSTest.TestAdapter" Version="3.1.1" />
 		<PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
-		<PackageReference Include="xunit" Version="2.9.3" />
-		<PackageReference Include="xunit.extensibility.core" Version="2.9.3" />
+		<!--<PackageReference Include="xunit" Version="2.9.3" />
+		<PackageReference Include="xunit.extensibility.core" Version="2.9.3" />-->
 		
 	</ItemGroup>
 
