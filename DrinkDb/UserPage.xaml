@@ -70,9 +70,9 @@
 
                     <!-- Edit account button -->
                     <Button 
-                        x:Name="EditAccountButton"
-                        Content="Edit Account"
-                        Click="EditAccountButton_Click" />
+                        x:Name="AdminDashboardButton"
+                        Content="Admin Dashboard"
+                        Click="AdminDashboardButton_Click" />
 
                     <!-- Logout button -->
                     <Button 

@@ -245,7 +245,7 @@
 
         private List<Role> GetUserRoles(Guid userId)
         {
-            return new List<Role>() { new Role(RoleType.User, "User") };
+            return new List<Role>() { new Role(RoleType.Admin, "Admin") };
         }
 
         public bool UpdateUser(User user)
@@ -260,7 +260,7 @@
                     numberOfDeletedReviews = @numberOfDeletedReviews,
                     hasSubmittedAppeal = @hasSubmittedAppeal
                 WHERE userId = @userId;";
-            
+
             using SqlCommand command = new(sql, connection);
             command.Parameters.AddWithValue("@userId", user.UserId);
             command.Parameters.AddWithValue("@username", user.Username);
@@ -269,7 +269,7 @@
             command.Parameters.AddWithValue("@emailAddress", (object?)user.EmailAddress ?? DBNull.Value);
             command.Parameters.AddWithValue("@numberOfDeletedReviews", user.NumberOfDeletedReviews);
             command.Parameters.AddWithValue("@hasSubmittedAppeal", user.HasSubmittedAppeal);
-            
+
             return command.ExecuteNonQuery() > 0;
         }
 
