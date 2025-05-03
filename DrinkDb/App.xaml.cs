@@ -10,6 +10,7 @@ namespace DrinkDb_Auth
     using DrinkDb_Auth.AutoChecker;
     using DrinkDb_Auth.Converters;
     using DrinkDb_Auth.Repository.AdminDashboard;
+    using DrinkDb_Auth.Repository.Authentication;
     using DrinkDb_Auth.Service;
     using DrinkDb_Auth.Service.AdminDashboard;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;

@@ -12,6 +12,7 @@ namespace DrinkDb_Auth.Repository.Authentication
         /// Reads the DrinkDbConnection string from App.config, opens a SqlConnection, and returns it.
         /// </summary>
         /// <returns>An open SqlConnection object.</returns>
+
         public static SqlConnection GetConnection()
         {
             // Get the connection string from App.config

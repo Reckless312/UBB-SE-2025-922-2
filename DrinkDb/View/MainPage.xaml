@@ -186,118 +186,84 @@
             </Grid>
         </Grid>
 
-        <!-- Middle Column - Statistics and Requests -->
+        <!-- Middle Column - Requests -->
         <Grid Grid.Row="1" Grid.Column="1" Margin="12,24">
             <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Statistics Grid -->
-            <Border Grid.Row="0" Margin="0,0,0,20"
-                    Background="{ThemeResource CardBackgroundFillColorDefault}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefault}"
-                    BorderThickness="{StaticResource CardBorderThickness}"
-                    CornerRadius="{StaticResource ControlCornerRadius}"
-                    Padding="16">
-                <Border.Shadow>
-                    <ThemeShadow />
-                </Border.Shadow>
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="Statistics" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                    <Grid Grid.Row="1">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                    </Grid>
-                </Grid>
-            </Border>
+            <TextBlock Grid.Row="0" Margin="0,0,0,12" FontSize="16" FontWeight="SemiBold">
+                Role Upgrade Requests
+            </TextBlock>
 
-            <!-- Role Upgrade Requests Grid -->
-            <Border Grid.Row="1"
-                    Background="{ThemeResource CardBackgroundFillColorDefault}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefault}"
-                    BorderThickness="{StaticResource CardBorderThickness}"
-                    CornerRadius="{StaticResource ControlCornerRadius}"
-                    Padding="16">
-                <Border.Shadow>
-                    <ThemeShadow />
-                </Border.Shadow>
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="Role Upgrade Requests" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                    <ListView x:Name="UpgradeRequestsList" Grid.Row="1" 
-                              Height="150"
-                              Background="Transparent"
-                              BorderThickness="0"
-                              IsItemClickEnabled="True" 
-                              ItemClick="RequestList_ItemClick"
-                              ItemsSource="{x:Bind ViewModel.UpgradeRequests, Mode=OneWay}">
-                        <ListView.ItemContainerStyle>
-                            <Style TargetType="ListViewItem">
-                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                <Setter Property="Padding" Value="0,4"/>
-                                <Setter Property="Background" Value="Transparent"/>
-                            </Style>
-                        </ListView.ItemContainerStyle>
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <Border Padding="12" 
-                                        Background="{ThemeResource CardBackgroundFillColorDefault}"
-                                        BorderBrush="{ThemeResource CardStrokeColorDefault}"
-                                        BorderThickness="{StaticResource CardBorderThickness}"
-                                        CornerRadius="{StaticResource ControlCornerRadius}">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="1.5*" />
-                                            <ColumnDefinition Width="1*" />
-                                            <ColumnDefinition Width="1*" />
-                                        </Grid.ColumnDefinitions>
+            <!-- Role Upgrade Requests List -->
+            <ListView x:Name="UpgradeRequestsList" Grid.Row="1" 
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                      Background="Transparent"
+                      BorderThickness="0"
+                      IsItemClickEnabled="True" 
+                      ItemClick="RequestList_ItemClick"
+                      ItemsSource="{x:Bind ViewModel.UpgradeRequests, Mode=OneWay}">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Padding" Value="0,4"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Padding="16" 
+                                Background="{ThemeResource CardBackgroundFillColorDefault}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefault}"
+                                BorderThickness="{StaticResource CardBorderThickness}"
+                                CornerRadius="{StaticResource ControlCornerRadius}"
+                                Margin="0,4">
+                            <Border.Shadow>
+                                <ThemeShadow />
+                            </Border.Shadow>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1.5*" />
+                                    <ColumnDefinition Width="1*" />
+                                    <ColumnDefinition Width="1*" />
+                                </Grid.ColumnDefinitions>
 
-                                        <TextBlock Text="{Binding}" 
-                                                   FontSize="16" 
-                                                   FontWeight="SemiBold" 
-                                                   VerticalAlignment="Center" 
-                                                   Grid.Column="0"
-                                                   TextWrapping="Wrap"
-                                                   Margin="0,0,8,0"/>
+                                <TextBlock Text="{Binding}" 
+                                           FontSize="16" 
+                                           FontWeight="SemiBold" 
+                                           VerticalAlignment="Center" 
+                                           Grid.Column="0"
+                                           TextWrapping="Wrap"
+                                           Margin="0,0,8,0"/>
 
-                                        <Button x:Name="AcceptUpgradeRequestButton"
-                                                Content="Accept"
-                                                Tag="{Binding UpgradeRequestId}"
-                                                Background="{StaticResource AcceptButtonColor}"
-                                                Foreground="White"
-                                                HorizontalAlignment="Stretch"
-                                                Grid.Column="1"
-                                                Margin="4,0"
-                                                Click="AcceptUpgradeRequestButton_Click"
-                                                />
+                                <Button x:Name="AcceptUpgradeRequestButton"
+                                        Content="Accept"
+                                        Tag="{Binding UpgradeRequestId}"
+                                        Background="{StaticResource AcceptButtonColor}"
+                                        Foreground="White"
+                                        HorizontalAlignment="Stretch"
+                                        Grid.Column="1"
+                                        Margin="4,0"
+                                        Click="AcceptUpgradeRequestButton_Click"
+                                        />
 
-                                        <Button x:Name="DeclineUpgradeRequestButton"
-                                                Content="Decline"
-                                                Tag="{Binding UpgradeRequestId}"
-                                                Background="{StaticResource DeclineButtonColor}"
-                                                Foreground="White"
-                                                HorizontalAlignment="Stretch"
-                                                Grid.Column="2"
-                                                Margin="4,0"
-                                                Click="DeclineUpgradeRequestButton_Click"
-                                                />
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                </Grid>
-            </Border>
+                                <Button x:Name="DeclineUpgradeRequestButton"
+                                        Content="Decline"
+                                        Tag="{Binding UpgradeRequestId}"
+                                        Background="{StaticResource DeclineButtonColor}"
+                                        Foreground="White"
+                                        HorizontalAlignment="Stretch"
+                                        Grid.Column="2"
+                                        Margin="4,0"
+                                        Click="DeclineUpgradeRequestButton_Click"
+                                        />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
         </Grid>
 
         <!-- Right Column - Appeals -->
