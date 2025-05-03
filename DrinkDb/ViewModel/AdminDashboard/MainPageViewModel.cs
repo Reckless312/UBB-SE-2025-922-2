@@ -16,9 +16,6 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
     using DataAccess.Model.Authentication;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using DrinkDb_Auth.ViewModel.AdminDashboard.Components;
-    using LiveChartsCore;
-    using LiveChartsCore.Kernel.Sketches;
-    using LiveChartsCore.SkiaSharpView;
 
     /// <summary>
     /// View model for the main page that handles review moderation and user management.
@@ -35,10 +32,6 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         private ObservableCollection<User> appealsUsers;
         private ObservableCollection<UpgradeRequest> upgradeRequests;
         private ObservableCollection<string> offensiveWords;
-        private ISeries[] pieChartSeries;
-        private ISeries[] barChartSeries;
-        private IEnumerable<ICartesianAxis> barChartXAxes;
-        private IEnumerable<ICartesianAxis> barChartYAxes;
         private User selectedAppealUser;
         private UpgradeRequest selectedUpgradeRequest;
         private ObservableCollection<string> userReviewsFormatted;
@@ -192,58 +185,6 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         }
 
         /// <summary>
-        /// Gets or sets the pie chart series for user role statistics.
-        /// </summary>
-        public ISeries[] PieChartSeries
-        {
-            get => pieChartSeries;
-            set
-            {
-                pieChartSeries = value;
-                OnPropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the bar chart series for review statistics.
-        /// </summary>
-        public ISeries[] BarChartSeries
-        {
-            get => barChartSeries;
-            set
-            {
-                barChartSeries = value;
-                OnPropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the X-axes for the bar chart.
-        /// </summary>
-        public IEnumerable<ICartesianAxis> BarChartXAxes
-        {
-            get => barChartXAxes;
-            set
-            {
-                barChartXAxes = value;
-                OnPropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the Y-axes for the bar chart.
-        /// </summary>
-        public IEnumerable<ICartesianAxis> BarChartYAxes
-        {
-            get => barChartYAxes;
-            set
-            {
-                barChartYAxes = value;
-                OnPropertyChanged();
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the currently selected user for appeal review.
         /// </summary>
         public User SelectedAppealUser
@@ -366,7 +307,6 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             LoadFlaggedReviews();
             LoadAppeals();
             LoadRoleRequests();
-            LoadStatistics();
             LoadOffensiveWords();
         }
 
@@ -400,15 +340,6 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         public void LoadOffensiveWords()
         {
             OffensiveWords = new ObservableCollection<string>(checkersService.GetOffensiveWordsList());
-        }
-
-        /// <summary>
-        /// Loads the statistical data for charts.
-        /// </summary>
-        public void LoadStatistics()
-        {
-            LoadPieChart();
-            LoadBarChart();
         }
 
         /// <summary>
@@ -451,7 +382,6 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         {
             reviewsService.ResetReviewFlags(reviewId);
             LoadFlaggedReviews();
-            LoadStatistics();
         }
 
         /// <summary>
@@ -464,7 +394,6 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             reviewsService.HideReview(reviewId);
             reviewsService.ResetReviewFlags(reviewId);
             LoadFlaggedReviews();
-            LoadStatistics();
         }
 
         /// <summary>
@@ -486,7 +415,6 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             List<Review> reviews = reviewsService.GetFlaggedReviews();
             List<string> messages = checkersService.RunAutoCheck(reviews);
             LoadFlaggedReviews();
-            LoadStatistics();
             return messages;
         }
 
@@ -522,7 +450,6 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         {
             requestsService.ProcessUpgradeRequest(approve, requestId);
             LoadRoleRequests();
-            LoadStatistics();
         }
 
         /// <summary>
@@ -603,7 +530,6 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             UpdateUserRole(user, RoleType.Banned);
             IsAppealUserBanned = true;
             UserStatusDisplay = GetUserStatusDisplay(user, true);
-            LoadStatistics();
         }
 
         /// <summary>
@@ -620,7 +546,6 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             UpdateUserRole(user, RoleType.User);
             IsAppealUserBanned = false;
             UserStatusDisplay = GetUserStatusDisplay(user, false);
-            LoadStatistics();
         }
 
         /// <summary>
@@ -733,34 +658,6 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         }
 
         /// <summary>
-        /// Loads the bar chart data.
-        /// </summary>
-        private void LoadBarChart()
-        {
-            int rejectedCount = reviewsService.GetHiddenReviews().Count;
-            int pendingCount = reviewsService.GetFlaggedReviews().Count;
-            int totalCount = reviewsService.GetAllReviews().Count;
-
-            BarChartSeries = new ISeries[]
-            {
-                new ColumnSeries<double>
-                {
-                    Values = new double[] { rejectedCount, pendingCount, totalCount },
-                },
-            };
-
-            BarChartXAxes = new[]
-            {
-                new Axis { Labels = new List<string> { "rejected", "pending", "total" } },
-            };
-
-            BarChartYAxes = new[]
-            {
-                new Axis { Name = "Total", MinLimit = 0 },
-            };
-        }
-
-        /// <summary>
         /// Initializes the commands used by the view model.
         /// </summary>
         private void InitializeCommands()
@@ -791,46 +688,6 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
 
             ShowWordListPopupCommand = new RelayCommand(() => ShowWordListPopup());
             HideWordListPopupCommand = new RelayCommand(() => HideWordListPopup());
-        }
-
-        /// <summary>
-        /// Loads the pie chart data.
-        /// </summary>
-        private void LoadPieChart()
-        {
-            int bannedCount = 0;
-            int usersCount = 0;
-            int adminsCount = 0;
-            int managerCount = 0;
-
-            List<User> users = userService.GetAllUsers();
-            foreach (User user in users)
-            {
-                int count = user.AssignedRoles.Count;
-                switch (count)
-                {
-                    case 0:
-                        bannedCount++;
-                        break;
-                    case 1:
-                        usersCount++;
-                        break;
-                    case 2:
-                        adminsCount++;
-                        break;
-                    case 3:
-                        managerCount++;
-                        break;
-                }
-            }
-
-            PieChartSeries = new ISeries[]
-            {
-                new PieSeries<double> { Values = new double[] { bannedCount }, Name = "Banned" },
-                new PieSeries<double> { Values = new double[] { usersCount }, Name = "Users" },
-                new PieSeries<double> { Values = new double[] { adminsCount }, Name = "Admins" },
-                new PieSeries<double> { Values = new double[] { managerCount }, Name = "Managers" },
-            };
         }
 
         /// <summary>
