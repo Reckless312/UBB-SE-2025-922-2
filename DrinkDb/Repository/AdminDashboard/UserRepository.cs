@@ -251,24 +251,8 @@
 
         private List<Role> GetUserRoles(Guid userId)
         {
-            using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
-            string sql = @"
-                SELECT r.* 
-                FROM Roles r
-                INNER JOIN UserRoles ur ON r.roleId = ur.roleId
-                WHERE ur.userId = @userId";
-            using SqlCommand command = new(sql, connection);
-            command.Parameters.AddWithValue("@userId", userId);
-            using SqlDataReader reader = command.ExecuteReader();
-            
-            var roles = new List<Role>();
-            while (reader.Read())
-            {
-                var roleType = (RoleType)reader.GetInt32(reader.GetOrdinal("roleType"));
-                var roleName = reader.GetString(reader.GetOrdinal("roleName"));
-                roles.Add(new Role(roleType, roleName));
-            }
-            return roles;
+            var user = _usersList.FirstOrDefault(u => u.UserId == userId);
+            return user?.AssignedRoles ?? new List<Role>();
         }
 
         public bool UpdateUser(User user)
@@ -308,53 +292,27 @@
         public bool CreateUser(User user)
         {
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
-            using SqlTransaction transaction = connection.BeginTransaction();
-            
-            try
+            string sql = @"
+                INSERT INTO Users (userId, userName, passwordHash, twoFASecret, emailAddress, numberOfDeletedReviews, hasSubmittedAppeal) 
+                VALUES (@userId, @username, @passwordHash, @twoFASecret, @emailAddress, @numberOfDeletedReviews, @hasSubmittedAppeal);";
+            using SqlCommand command = new(sql, connection);
+            command.Parameters.AddWithValue("@userId", user.UserId);
+            command.Parameters.AddWithValue("@username", user.Username);
+            command.Parameters.AddWithValue("@passwordHash", user.PasswordHash);
+            command.Parameters.AddWithValue("@twoFASecret", (object?)user.TwoFASecret ?? DBNull.Value);
+            command.Parameters.AddWithValue("@emailAddress", (object?)user.EmailAddress ?? DBNull.Value);
+            command.Parameters.AddWithValue("@numberOfDeletedReviews", user.NumberOfDeletedReviews);
+            command.Parameters.AddWithValue("@hasSubmittedAppeal", user.HasSubmittedAppeal);
+            int result = command.ExecuteNonQuery();
+            if (result > 0)
             {
-                // Insert user
-                string sql = @"
-                    INSERT INTO Users (userId, userName, passwordHash, twoFASecret, emailAddress, numberOfDeletedReviews, hasSubmittedAppeal) 
-                    VALUES (@userId, @username, @passwordHash, @twoFASecret, @emailAddress, @numberOfDeletedReviews, @hasSubmittedAppeal);";
-                
-                using SqlCommand command = new(sql, connection, transaction);
-                command.Parameters.AddWithValue("@userId", user.UserId);
-                command.Parameters.AddWithValue("@username", user.Username);
-                command.Parameters.AddWithValue("@passwordHash", user.PasswordHash);
-                command.Parameters.AddWithValue("@twoFASecret", (object?)user.TwoFASecret ?? DBNull.Value);
-                command.Parameters.AddWithValue("@emailAddress", (object?)user.EmailAddress ?? DBNull.Value);
-                command.Parameters.AddWithValue("@numberOfDeletedReviews", user.NumberOfDeletedReviews);
-                command.Parameters.AddWithValue("@hasSubmittedAppeal", user.HasSubmittedAppeal);
-                
-                int result = command.ExecuteNonQuery();
-                
-                if (result > 0 && user.AssignedRoles != null)
+                if (user.AssignedRoles == null || user.AssignedRoles.Count == 0)
                 {
-                    // Add default role if no roles are assigned
-                    if (user.AssignedRoles.Count == 0)
-                    {
-                        user.AssignedRoles = BasicUserRoles;
-                    }
-                    
-                    // Insert user roles
-                    foreach (var role in user.AssignedRoles)
-                    {
-                        string roleSql = "INSERT INTO UserRoles (userId, roleId) VALUES (@userId, @roleId);";
-                        using SqlCommand roleCommand = new(roleSql, connection, transaction);
-                        roleCommand.Parameters.AddWithValue("@userId", user.UserId);
-                        roleCommand.Parameters.AddWithValue("@roleId", role.RoleType);
-                        roleCommand.ExecuteNonQuery();
-                    }
+                    user.AssignedRoles = BasicUserRoles;
                 }
-                
-                transaction.Commit();
-                return result > 0;
+                _usersList.Add(user);
             }
-            catch
-            {
-                transaction.Rollback();
-                throw;
-            }
+            return result > 0;
         }
 
         public virtual bool ValidateAction(Guid userId, string resource, string action)
