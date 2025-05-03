@@ -12,6 +12,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.AspNetCore.Http;
 using DrinkDb_Auth.OAuthProviders;
 using DataAccess.Model.Authentication;
+using DataAccess.Model.AdminDashboard;
 using IRepository;
 using DrinkDb_Auth.Repository.AdminDashboard;
 using DrinkDb_Auth.Repository.Authentication;
@@ -20,6 +21,8 @@ namespace DrinkDb_Auth.AuthProviders.Google
 {
     public class GoogleOAuth2Provider : GenericOAuth2Provider, IGoogleOAuth2Provider
     {
+        private static readonly List<Role> BasicUserRoles = new List<Role> { new Role(RoleType.User, "User") };
+
         public static Guid CreateGloballyUniqueIdentifier(string identifier)
         {
             using (MD5 cryptographicHasher = MD5.Create())
@@ -49,11 +52,27 @@ namespace DrinkDb_Auth.AuthProviders.Google
             switch (user)
             {
                 case null:
-                    // Don't know why email is used as username but let's vibe with it
-                    User newUser = new User { UserId = userId, Username = email, PasswordHash = string.Empty, TwoFASecret = null };
+                    // Create new user with email
+                    User newUser = new User 
+                    { 
+                        UserId = userId, 
+                        Username = email, 
+                        PasswordHash = string.Empty, 
+                        TwoFASecret = null,
+                        EmailAddress = email,
+                        NumberOfDeletedReviews = 0,
+                        HasSubmittedAppeal = false,
+                        AssignedRoles = BasicUserRoles
+                    };
                     bool wasCreated = UserRepository.CreateUser(newUser);
                     break;
                 case not null:
+                    // Update email if it's different
+                    if (user.EmailAddress != email)
+                    {
+                        user.EmailAddress = email;
+                        UserRepository.UpdateUser(user);
+                    }
                     break;
             }
 
@@ -167,7 +186,8 @@ namespace DrinkDb_Auth.AuthProviders.Google
 
                                         userInformation = ExtractUserInfoFromIdToken(tokenResult.IdToken);
                                         userId = EnsureUserExists(userInformation.Identifier, httpClientInformation.Email, httpClientInformation.Name);
-                                        return new AuthenticationResponse { AuthenticationSuccessful = true, OAuthToken = tokenResult.AccessToken, SessionId = SessionRepository.CreateSession(userId).SessionId, NewAccount = false };
+                                        Session session = SessionRepository.CreateSession(userId);
+                                        return new AuthenticationResponse { AuthenticationSuccessful = true, OAuthToken = tokenResult.AccessToken, SessionId = session.SessionId, NewAccount = false };
                                     case false:
                                         if (string.IsNullOrEmpty(tokenResult.IdToken))
                                         {
@@ -184,7 +204,8 @@ namespace DrinkDb_Auth.AuthProviders.Google
                         {
                             userInformation = ExtractUserInfoFromIdToken(tokenResult.IdToken);
                             userId = EnsureUserExists(userInformation.Identifier, userInformation.Email, userInformation.Name);
-                            return new AuthenticationResponse { AuthenticationSuccessful = true, OAuthToken = tokenResult.AccessToken, SessionId = SessionRepository.CreateSession(userId).SessionId, NewAccount = false };
+                            Session session = SessionRepository.CreateSession(userId);
+                            return new AuthenticationResponse { AuthenticationSuccessful = true, OAuthToken = tokenResult.AccessToken, SessionId = session.SessionId, NewAccount = false };
                         }
                     case false:
                         throw new Exception("Trigger Catch | Repeated code to attempt a failed authentication");

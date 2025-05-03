@@ -4,6 +4,11 @@ using DrinkDb_Auth.OAuthProviders;
 using DrinkDb_Auth.Repository.AdminDashboard;
 using IRepository;
 using DrinkDb_Auth.Repository.Authentication;
+using System.Net.Http;
+using System.Text.Json;
+using System.Linq;
+using System.Data.SqlClient;
+using System.Configuration;
 
 namespace DrinkDb_Auth.AuthProviders.Github
 {
@@ -31,7 +36,7 @@ namespace DrinkDb_Auth.AuthProviders.Github
         {
             try
             {
-                var (gitHubId, gitHubLogin) = FetchGitHubUserInfo(token);
+                var (gitHubId, gitHubLogin, email) = FetchGitHubUserInfo(token);
 
                 if (string.IsNullOrEmpty(gitHubLogin))
                 {
@@ -50,6 +55,13 @@ namespace DrinkDb_Auth.AuthProviders.Github
                     // User exists, so proceed.
                     User user = userRepository.GetUserByUsername(gitHubLogin) ?? throw new Exception("User not found");
 
+                    // Update email if it's different
+                    if (user.EmailAddress != email)
+                    {
+                        user.EmailAddress = email;
+                        userRepository.UpdateUser(user);
+                    }
+
                     Session session = sessionRepository.CreateSession(user.UserId);
 
                     return new AuthenticationResponse
@@ -63,7 +75,7 @@ namespace DrinkDb_Auth.AuthProviders.Github
                 else
                 {
                     // User does not exist. Insert the new user.
-                    Guid newUserId = CreateUserFromGitHub(gitHubLogin);
+                    Guid newUserId = CreateUserFromGitHub(gitHubLogin, email);
                     if (newUserId != Guid.Empty)
                     {
                         // Successfully inserted, so login is successful.
@@ -101,9 +113,45 @@ namespace DrinkDb_Auth.AuthProviders.Github
             }
         }
 
-        private (string gitHubId, string gitHubLogin) FetchGitHubUserInfo(string token)
+        private (string gitHubId, string gitHubLogin, string email) FetchGitHubUserInfo(string token)
         {
-            return gitHubHttpHelper.FetchGitHubUserInfo(token);
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+                client.DefaultRequestHeaders.Add("User-Agent", "DrinkDb_Auth-App");
+
+                // First get the user info
+                var userResponse = client.GetAsync("https://api.github.com/user").Result;
+                if (!userResponse.IsSuccessStatusCode)
+                {
+                    throw new Exception($"Failed to fetch user info from GitHub. Status code: {userResponse.StatusCode}");
+                }
+
+                string userJson = userResponse.Content.ReadAsStringAsync().Result;
+                using (JsonDocument userDoc = JsonDocument.Parse(userJson))
+                {
+                    var root = userDoc.RootElement;
+                    string gitHubId = root.GetProperty("id").ToString();
+                    string gitHubLogin = root.GetProperty("login").ToString();
+
+                    // Then get the user's email
+                    var emailResponse = client.GetAsync("https://api.github.com/user/emails").Result;
+                    if (!emailResponse.IsSuccessStatusCode)
+                    {
+                        throw new Exception($"Failed to fetch email from GitHub. Status code: {emailResponse.StatusCode}");
+                    }
+
+                    string emailJson = emailResponse.Content.ReadAsStringAsync().Result;
+                    using (JsonDocument emailDoc = JsonDocument.Parse(emailJson))
+                    {
+                        var emails = emailDoc.RootElement.EnumerateArray();
+                        string primaryEmail = emails.FirstOrDefault(e => e.GetProperty("primary").GetBoolean()).GetProperty("email").GetString() 
+                            ?? throw new Exception("No primary email found for GitHub user");
+
+                        return (gitHubId, gitHubLogin, primaryEmail);
+                    }
+                }
+            }
         }
 
         private bool UserExists(string gitHubLogin)
@@ -123,7 +171,7 @@ namespace DrinkDb_Auth.AuthProviders.Github
             return false;
         }
 
-        private Guid CreateUserFromGitHub(string gitHubLogin)
+        private Guid CreateUserFromGitHub(string gitHubLogin, string email)
         {
             try
             {
@@ -133,6 +181,7 @@ namespace DrinkDb_Auth.AuthProviders.Github
                     Username = gitHubLogin.Trim(),
                     TwoFASecret = string.Empty,
                     PasswordHash = string.Empty,
+                    EmailAddress = email,
                 };
                 userRepository.CreateUser(newUser);
                 return newUser.UserId;
@@ -142,6 +191,55 @@ namespace DrinkDb_Auth.AuthProviders.Github
                 Console.WriteLine("Error creating user: " + exception.Message);
             }
             return Guid.Empty;
+        }
+
+        private bool StoreOrUpdateUserInDb(string gitHubId, string gitHubLogin, string email)
+        {
+            bool isNewAccount = false;
+            string connectionString = ConfigurationManager.ConnectionStrings["DrinkDbConnection"].ConnectionString;
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                // Check if a user with this gitHubId already exists (stored as userName)
+                string checkQuery = "SELECT COUNT(*) FROM Users WHERE userName = @gitHubId";
+                using (SqlCommand checkCommand = new SqlCommand(checkQuery, connection))
+                {
+                    checkCommand.Parameters.AddWithValue("@gitHubId", gitHubId);
+                    int count = (int)checkCommand.ExecuteScalar();
+                    if (count == 0)
+                    {
+                        // Insert a new user with email
+                        string insertQuery = @"
+                            INSERT INTO Users (userId, userName, passwordHash, twoFASecret, emailAddress, numberOfDeletedReviews, hasSubmittedAppeal)
+                            VALUES (NEWID(), @gitHubId, '', NULL, @email, 0, 0)";
+                        using (SqlCommand insertCommand = new SqlCommand(insertQuery, connection))
+                        {
+                            insertCommand.Parameters.AddWithValue("@gitHubId", gitHubId);
+                            insertCommand.Parameters.AddWithValue("@email", email);
+                            int result = insertCommand.ExecuteNonQuery();
+                            if (result > 0)
+                            {
+                                isNewAccount = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Update email if it's different
+                        string updateQuery = "UPDATE Users SET emailAddress = @email WHERE userName = @gitHubId";
+                        using (SqlCommand updateCommand = new SqlCommand(updateQuery, connection))
+                        {
+                            updateCommand.Parameters.AddWithValue("@gitHubId", gitHubId);
+                            updateCommand.Parameters.AddWithValue("@email", email);
+                            updateCommand.ExecuteNonQuery();
+                        }
+                    }
+                }
+            }
+
+            return isNewAccount;
         }
     }
 }

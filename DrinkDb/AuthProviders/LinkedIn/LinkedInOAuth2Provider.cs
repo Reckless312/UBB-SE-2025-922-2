@@ -59,6 +59,9 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
                     PasswordHash = string.Empty,
                     UserId = Guid.NewGuid(),
                     TwoFASecret = string.Empty,
+                    EmailAddress = root.GetProperty("email").GetString() ?? string.Empty,
+                    NumberOfDeletedReviews = 0,
+                    HasSubmittedAppeal = false
                 };
                 UserRepository.CreateUser(newUser);
                 Session session = SessionAdapter.CreateSession(newUser.UserId);
@@ -72,6 +75,13 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
             }
             else
             {
+                // Update email if it's different
+                string email = root.GetProperty("email").GetString() ?? string.Empty;
+                if (user.EmailAddress != email)
+                {
+                    user.EmailAddress = email;
+                    UserRepository.UpdateUser(user);
+                }
                 Session session = SessionAdapter.CreateSession(user.UserId);
                 return new AuthenticationResponse
                 {
@@ -136,21 +146,21 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
                 connection.Open();
 
                 // Check if a user with this lnId already exists (stored as userName)
-                string checkQuery = "SELECT COUNT(*) FROM User WHERE userName = @lnId";
+                string checkQuery = "SELECT COUNT(*) FROM Users WHERE userName = @lnId";
                 using (SqlCommand checkCommand = new SqlCommand(checkQuery, connection))
                 {
                     checkCommand.Parameters.AddWithValue("@lnId", lnId);
                     int count = (int)checkCommand.ExecuteScalar();
                     if (count == 0)
                     {
-                        // Insert a new user
+                        // Insert a new user with email
                         string insertQuery = @"
-                            INSERT INTO User (userId, userName, passwordHash, twoFASecret, roleId)
-                            VALUES (NEWID(), @lnId, '', NULL, @roleId)";
+                            INSERT INTO Users (userId, userName, passwordHash, twoFASecret, emailAddress, numberOfDeletedReviews, hasSubmittedAppeal)
+                            VALUES (NEWID(), @lnId, '', NULL, @email, 0, 0)";
                         using (SqlCommand insertCommand = new SqlCommand(insertQuery, connection))
                         {
                             insertCommand.Parameters.AddWithValue("@lnId", lnId);
-                            insertCommand.Parameters.AddWithValue("@roleId", GetDefaultRoleId(connection));
+                            insertCommand.Parameters.AddWithValue("@email", email);
                             int result = insertCommand.ExecuteNonQuery();
                             if (result > 0)
                             {
@@ -158,8 +168,20 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
                             }
                         }
                     }
+                    else
+                    {
+                        // Update email if it's different
+                        string updateQuery = "UPDATE Users SET emailAddress = @email WHERE userName = @lnId";
+                        using (SqlCommand updateCommand = new SqlCommand(updateQuery, connection))
+                        {
+                            updateCommand.Parameters.AddWithValue("@lnId", lnId);
+                            updateCommand.Parameters.AddWithValue("@email", email);
+                            updateCommand.ExecuteNonQuery();
+                        }
+                    }
                 }
             }
+
             return isNewAccount;
         }
 
