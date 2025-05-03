@@ -1,6 +1,7 @@
 use DrinkDB_Dev
 -- Create the following functions in the database
 -- Get user by id
+go
 CREATE OR ALTER FUNCTION fnGetUserById
 (
     @userId UNIQUEIDENTIFIER
