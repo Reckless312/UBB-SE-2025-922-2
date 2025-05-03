@@ -94,6 +94,7 @@
   <ItemGroup>
     <Folder Include="Database\" />
     <Folder Include="Logs\" />
+    <Folder Include="Logs\" />
     <Folder Include="View\AdminDashboard\" />
   </ItemGroup>
   <ItemGroup>

@@ -48,3 +48,16 @@ BEGIN
         twoFASecret NVARCHAR(255),
     );
 END
+
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Reviews' AND xtype='U')
+BEGIN
+CREATE TABLE Reviews (
+    ReviewId INT IDENTITY(1,1) PRIMARY KEY,
+    UserId UNIQUEIDENTIFIER NOT NULL,
+    Rating INT NOT NULL,
+    Content NVARCHAR(1000) NOT NULL,
+    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
+    NumberOfFlags INT NOT NULL DEFAULT 0,
+    IsHidden BIT NOT NULL DEFAULT 0
+);
+END

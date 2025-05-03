@@ -12,7 +12,7 @@ namespace DataAccess.Model.AdminDashboard
             RoleName = roleName;
         }
 
-        public RoleType RoleType { get; set; }
+        public RoleType RoleType { get; set; } = RoleType.User;
 
         public string RoleName { get; set; }
     }
