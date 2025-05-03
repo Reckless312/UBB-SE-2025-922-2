@@ -11,7 +11,7 @@ namespace ServerAPI.Controllers
     {
         private IReviewsRepository repository = new ReviewsRepository();
 
-        [HttpGet]
+        [HttpGet("")]
         public async Task<IEnumerable<Review>> GetAll()
         {
             return await repository.GetAllReviews();

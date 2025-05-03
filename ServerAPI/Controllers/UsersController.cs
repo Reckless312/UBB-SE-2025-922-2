@@ -13,43 +13,45 @@ namespace ServerAPI.Controllers
         private IUserRepository repository = new UserRepository();
 
         [HttpGet]
-        public async Task<IEnumerable<User>> GetUsers()
+        public IEnumerable<User> GetUsers()
         {
-            return await repository.GetAllUsers();
+            List<User> users = repository.GetAllUsers().Result;
+            return users;
+
         }
 
         [HttpGet("appealed")]
-        public async Task<IEnumerable<User>> GetUsersWhoHaveSubmittedAppeals()
+        public IEnumerable<User> GetUsersWhoHaveSubmittedAppeals()
         {
-            return await repository.GetUsersWhoHaveSubmittedAppeals();
+            return repository.GetUsersWhoHaveSubmittedAppeals().Result;
         }
         
         [HttpGet("banned/appealed")]
-        public async Task<IEnumerable<User>> GetBannedUsersWhoHaveSubmittedAppeals()
+        public IEnumerable<User> GetBannedUsersWhoHaveSubmittedAppeals()
         {
-            return await repository.GetBannedUsersWhoHaveSubmittedAppeals();
+            return  repository.GetBannedUsersWhoHaveSubmittedAppeals().Result;
         }
 
         [HttpGet("byRole/{role}")]
-        public async Task<IEnumerable<User>> GetUsersByRoleType(RoleType roleType)
+        public IEnumerable<User> GetUsersByRoleType(RoleType roleType)
         {
-            return await repository.GetUsersByRoleType(roleType);
+            return repository.GetUsersByRoleType(roleType).Result;
         }
 
         [HttpGet("byId/{userId}/role")]
-        public async Task<ActionResult<RoleType>> GetHighestRoleTypeForUser(Guid userId)
+        public ActionResult<RoleType> GetHighestRoleTypeForUser(Guid userId)
         {
             var role = repository.GetHighestRoleTypeForUser(userId);
-            return role == null ? NotFound() : await role;
+            return role == null ? NotFound() :  role.Result;
         }
 
         [HttpPatch("byId/{userID}/addRole")]
-        public async Task AddRoleToUser(Guid userID, [FromBody] Role role)
+        public void AddRoleToUser(Guid userID, [FromBody] Role role)
         {
             // change function to:
             // return repository.AddRoleToUser(userID, role) == null ? NotFound() : Ok() ;
             // when AddRoleToUser is changed to return null
-            await repository.AddRoleToUser(userID, role);
+            repository.AddRoleToUser(userID, role);
         }
 
         [HttpGet("byId/{userID}")]
@@ -67,21 +69,21 @@ namespace ServerAPI.Controllers
         }
 
         [HttpPatch("updateUser")]
-        public async Task<bool> UpdateUser([FromBody] User user)
+        public bool UpdateUser([FromBody] User user)
         {
-            return await repository.UpdateUser(user);
+            return repository.UpdateUser(user).Result;
         }
 
         [HttpPost("add")]
-        public async Task<bool> CreateUser([FromBody] User user)
+        public bool CreateUser([FromBody] User user)
         {
-            return await repository.CreateUser(user);
+            return repository.CreateUser(user).Result;
         }
 
         [HttpGet("validateAction")]
-        public async Task<bool> ValidateAction([FromQuery] Guid userID, [FromQuery] string resource, [FromQuery] string action)
+        public bool ValidateAction([FromQuery] Guid userID, [FromQuery] string resource, [FromQuery] string action)
         {
-            return await repository.ValidateAction(userID, resource, action);
+            return repository.ValidateAction(userID, resource, action).Result;
         }
     }
 }

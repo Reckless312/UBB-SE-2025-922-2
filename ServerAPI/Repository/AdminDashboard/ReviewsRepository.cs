@@ -15,7 +15,7 @@ namespace Repository.AdminDashboard
     public class ReviewsRepository : IReviewsRepository
     {
         private readonly List<Review> reviews;
-        private int nextReviewId;
+        private int nextReviewId=0;
 
         public ReviewsRepository()
         {

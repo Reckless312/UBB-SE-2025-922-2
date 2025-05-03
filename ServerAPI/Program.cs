@@ -3,6 +3,7 @@ using ServerAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using IRepository;
 using Repository.AdminDashboard;
+using ServerAPI.Repository.AutoChecker;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -14,7 +15,8 @@ builder.Services.AddSwaggerGen();
 
 // Add database context to server
 builder.Services.AddDbContext<DatabaseContext>(options =>
-    options.UseSqlServer("Data Source=DESKTOP-KEB351O\\SQLEXPRESS;Initial Catalog=DrinkDB_Dev;Integrated Security=True;Trust Server Certificate=True"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<IOffensiveWordsRepository, OffensiveWordsRepository>();
 
 var app = builder.Build();
 
