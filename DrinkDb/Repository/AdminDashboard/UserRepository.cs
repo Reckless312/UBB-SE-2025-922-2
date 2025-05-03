@@ -148,13 +148,7 @@
         {
             try
             {
-                User? user = _usersList.FirstOrDefault(u => u.UserId == userId);
-                if (user == null)
-                {
-                    throw new ArgumentException($"No user found with ID {userId}");
-                }
-
-                user.AssignedRoles.Add(roleToAdd);
+                // Need to test this
             }
             catch (Exception ex)
             {
@@ -251,8 +245,7 @@
 
         private List<Role> GetUserRoles(Guid userId)
         {
-            var user = _usersList.FirstOrDefault(u => u.UserId == userId);
-            return user?.AssignedRoles ?? new List<Role>();
+            return new List<Role>() { new Role(RoleType.User, "User") };
         }
 
         public bool UpdateUser(User user)

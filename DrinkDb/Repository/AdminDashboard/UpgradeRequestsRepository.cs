@@ -46,7 +46,7 @@ namespace DrinkDb_Auth.Repository.AdminDashboard
                     {
                         UpgradeRequest upgradeRequest = new UpgradeRequest(
                             reader.GetInt32(0),
-                            Guid.NewGuid(),
+                            reader.GetGuid(1),
                             reader.GetString(2));
 
                         upgradeRequestsList.Add(upgradeRequest);
@@ -96,7 +96,7 @@ namespace DrinkDb_Auth.Repository.AdminDashboard
                     {
                         retrievedUpgradeRequest = new UpgradeRequest(
                             reader.GetInt32(0),
-                            Guid.NewGuid(),
+                            reader.GetGuid(1),
                             reader.GetString(2));
                     }
                 }
