@@ -192,54 +192,6 @@ namespace DrinkDb_Auth.AuthProviders.Github
             }
             return Guid.Empty;
         }
-
-        private bool StoreOrUpdateUserInDb(string gitHubId, string gitHubLogin, string email)
-        {
-            bool isNewAccount = false;
-            string connectionString = ConfigurationManager.ConnectionStrings["DrinkDbConnection"].ConnectionString;
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                // Check if a user with this gitHubId already exists (stored as userName)
-                string checkQuery = "SELECT COUNT(*) FROM Users WHERE userName = @gitHubId";
-                using (SqlCommand checkCommand = new SqlCommand(checkQuery, connection))
-                {
-                    checkCommand.Parameters.AddWithValue("@gitHubId", gitHubId);
-                    int count = (int)checkCommand.ExecuteScalar();
-                    if (count == 0)
-                    {
-                        // Insert a new user with email
-                        string insertQuery = @"
-                            INSERT INTO Users (userId, userName, passwordHash, twoFASecret, emailAddress, numberOfDeletedReviews, hasSubmittedAppeal)
-                            VALUES (NEWID(), @gitHubId, '', NULL, @email, 0, 0)";
-                        using (SqlCommand insertCommand = new SqlCommand(insertQuery, connection))
-                        {
-                            insertCommand.Parameters.AddWithValue("@gitHubId", gitHubId);
-                            insertCommand.Parameters.AddWithValue("@email", email);
-                            int result = insertCommand.ExecuteNonQuery();
-                            if (result > 0)
-                            {
-                                isNewAccount = true;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // Update email if it's different
-                        string updateQuery = "UPDATE Users SET emailAddress = @email WHERE userName = @gitHubId";
-                        using (SqlCommand updateCommand = new SqlCommand(updateQuery, connection))
-                        {
-                            updateCommand.Parameters.AddWithValue("@gitHubId", gitHubId);
-                            updateCommand.Parameters.AddWithValue("@email", email);
-                            updateCommand.ExecuteNonQuery();
-                        }
-                    }
-                }
-            }
-
-            return isNewAccount;
-        }
+        
     }
 }
