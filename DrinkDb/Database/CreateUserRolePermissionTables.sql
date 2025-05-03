@@ -41,12 +41,15 @@ END
 
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Users' AND xtype='U')
 BEGIN
-    CREATE TABLE Users (
-        userId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-        userName NVARCHAR(50) NOT NULL UNIQUE,
-        passwordHash NVARCHAR(255),
-        twoFASecret NVARCHAR(255),
-    );
+  CREATE TABLE Users (
+    userId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    userName NVARCHAR(50) NOT NULL UNIQUE,
+    passwordHash NVARCHAR(255) NOT NULL,
+    twoFASecret NVARCHAR(255),
+    emailAddress NVARCHAR(255),
+    numberOfDeletedReviews INT NOT NULL DEFAULT 0,
+    hasSubmittedAppeal BIT NOT NULL DEFAULT 0
+);
 END
 
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Reviews' AND xtype='U')
