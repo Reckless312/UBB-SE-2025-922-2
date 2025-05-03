@@ -3,66 +3,97 @@ using System.Data;
 using DataAccess.Model.Authentication;
 using IRepository;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using ServerAPI.Data;
+using static Repository.AdminDashboard.UserRepository;
 
 namespace Repository.Authentication
 {
     public class SessionRepository : ISessionRepository
     {
+        private readonly DatabaseContext _context;
+
+        public SessionRepository(DatabaseContext context)
+        {
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+        }
         public async Task<Session> CreateSession(Guid userId)
         {
-            using SqlConnection databaseConnection = DrinkDbConnectionHelper.GetConnection();
-            using SqlCommand createSessionCommand = new SqlCommand("create_session", databaseConnection);
-            createSessionCommand.CommandType = CommandType.StoredProcedure;
+            try
+            {
+                var session = new Session
+                {
+                    SessionId = Guid.NewGuid(),
+                    UserId = userId
+                };
 
-            createSessionCommand.Parameters.Add("@userId", SqlDbType.UniqueIdentifier).Value = userId;
-            SqlParameter sessionIdParameter = createSessionCommand.Parameters.Add("@sessionId", SqlDbType.UniqueIdentifier);
-            sessionIdParameter.Direction = ParameterDirection.Output;
+                await _context.Sessions.AddAsync(session);
+                await _context.SaveChangesAsync();
 
-            createSessionCommand.ExecuteNonQuery();
-
-            Guid sessionId = (Guid)sessionIdParameter.Value;
-            return Session.CreateSessionWithIds(sessionId, userId);
+                return session;
+            }
+            catch (Exception ex)
+            {
+                throw new RepositoryException("Failed to create a new session.", ex);
+            }
         }
 
         public async Task<bool> EndSession(Guid sessionId)
         {
-            using SqlConnection databaseConnection = DrinkDbConnectionHelper.GetConnection();
-            using SqlCommand endSessionCommand = new SqlCommand("end_session", databaseConnection);
-            endSessionCommand.CommandType = CommandType.StoredProcedure;
-            endSessionCommand.Parameters.Add("@sessionId", SqlDbType.UniqueIdentifier).Value = sessionId;
+            try
+            {
+                var session = await _context.Sessions.FirstOrDefaultAsync(s => s.SessionId == sessionId);
 
-            SqlParameter returnValue = endSessionCommand.Parameters.Add("@RETURN_VALUE", SqlDbType.Int);
-            returnValue.Direction = ParameterDirection.ReturnValue;
-            endSessionCommand.ExecuteNonQuery();
-            return (int)returnValue.Value > 0;
+                if (session == null)
+                {
+                    throw new ArgumentException($"No session found with ID {sessionId}");
+                }
+
+                _context.Sessions.Remove(session);
+                return await _context.SaveChangesAsync() > 0;
+            }
+            catch (Exception ex)
+            {
+                throw new RepositoryException($"Failed to end session with ID {sessionId}.", ex);
+            }
         }
 
         public async Task<Session> GetSession(Guid sessionId)
         {
-            using SqlConnection databaseConnection = DrinkDbConnectionHelper.GetConnection();
-            using SqlCommand getSessionCommand = new SqlCommand("SELECT userId FROM Sessions WHERE sessionId = @sessionId", databaseConnection);
-            getSessionCommand.Parameters.Add("@sessionId", SqlDbType.UniqueIdentifier).Value = sessionId;
-            using SqlDataReader reader = getSessionCommand.ExecuteReader();
-            if (reader.Read())
+            try
             {
-                int firstColumn = 0;
-                return Session.CreateSessionWithIds(sessionId, reader.GetGuid(firstColumn));
+                var session = await _context.Sessions.FirstOrDefaultAsync(s => s.SessionId == sessionId);
+
+                if (session == null)
+                {
+                    throw new ArgumentException($"No session found with ID {sessionId}");
+                }
+
+                return session;
             }
-            throw new Exception("Session not found.");
+            catch (Exception ex)
+            {
+                throw new RepositoryException($"Failed to retrieve session with ID {sessionId}.", ex);
+            }
         }
 
         public async Task<Session> GetSessionByUserId(Guid userId)
         {
-            using SqlConnection databaseConnection = DrinkDbConnectionHelper.GetConnection();
-            using SqlCommand getSessionCommand = new SqlCommand("SELECT sessionId FROM Sessions WHERE userId = @userId", databaseConnection);
-            getSessionCommand.Parameters.Add("@userId", SqlDbType.UniqueIdentifier).Value = userId;
-            using SqlDataReader reader = getSessionCommand.ExecuteReader();
-            if (reader.Read())
+            try
             {
-                int firstColumn = 0;
-                return Session.CreateSessionWithIds(reader.GetGuid(firstColumn), userId);
+                var session = await _context.Sessions.FirstOrDefaultAsync(s => s.UserId == userId);
+
+                if (session == null)
+                {
+                    throw new ArgumentException($"No session found for user with ID {userId}");
+                }
+
+                return session;
             }
-            throw new Exception("Session not found.");
+            catch (Exception ex)
+            {
+                throw new RepositoryException($"Failed to retrieve session for user with ID {userId}.", ex);
+            }
         }
     }
 }

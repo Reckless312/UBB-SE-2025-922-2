@@ -9,7 +9,13 @@ namespace ServerAPI.Controllers
     [Route("[controller]")]
     public class SessionController : ControllerBase
     {
-        private ISessionRepository repository = new SessionRepository();
+        private ISessionRepository repository;
+
+        public SessionController(ISessionRepository repository)
+        {
+            this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        }
+
         [HttpPost("add")]
         public async Task<Session> CreateSession([FromQuery] Guid userId)
         {

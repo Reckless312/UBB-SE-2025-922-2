@@ -9,7 +9,12 @@ namespace ServerAPI.Controllers
     [Route("[controller]")]
     public class ReviewsController : ControllerBase
     {
-        private IReviewsRepository repository = new ReviewsRepository();
+        private IReviewsRepository repository;
+
+        public ReviewsController(IReviewsRepository repository)
+        {
+            this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        }
 
         [HttpGet]
         public async Task<IEnumerable<Review>> GetAll()
