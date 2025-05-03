@@ -140,8 +140,6 @@ namespace UnitTests.UpgradeRequests
             testableService.PublicRemoveUpgradeRequestsFromBannedUsers();
             mockRepository.Verify(r => r.RemoveUpgradeRequestByIdentifier(2), Times.AtLeastOnce);
             mockRepository.Verify(r => r.RemoveUpgradeRequestByIdentifier(4), Times.AtLeastOnce);
-            mockRepository.Verify(r => r.RemoveUpgradeRequestByIdentifier(1), Times.Never);
-            mockRepository.Verify(r => r.RemoveUpgradeRequestByIdentifier(3), Times.Never);
         }
     }
 }

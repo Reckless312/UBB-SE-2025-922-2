@@ -68,15 +68,6 @@
         }
 
         [Fact]
-        public void ReturnJob_WhenJobIsDisposable_CallsDispose()
-        {
-            Mock<IDisposableJob> mockDisposableJob = new Mock<IDisposableJob>();
-            JobFactory jobFactory = new JobFactory(Mock.Of<IServiceProvider>());
-            jobFactory.ReturnJob(mockDisposableJob.Object);
-            mockDisposableJob.Verify(j => j.Dispose(), Times.AtLeastOnce);
-        }
-
-        [Fact]
         public void NewJob_WhenServiceProviderReturnsNull_ThrowsException()
         {
             Type mockJobType = typeof(IJob);

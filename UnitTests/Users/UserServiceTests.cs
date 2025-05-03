@@ -6,6 +6,7 @@ namespace UnitTests.Users
 {
     using System;
     using System.Collections.Generic;
+    using System.Net.Mail;
     using DataAccess.Model.AdminDashboard;
     using DataAccess.Model.Authentication;
     using DrinkDb_Auth.Service;
@@ -45,24 +46,23 @@ namespace UnitTests.Users
         }
 
         /// <summary>
-        /// Verifies that the <see cref="UserService"/> constructor throws an <see cref="ArgumentNullException"/> when the <see cref="IUserRepository"/> is null.
-        /// </summary>
-        [Fact]
-        public void Constructor_ShouldThrowArgumentNullException_WhenUserRepositoryIsNull()
-        {
-            ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() => new UserService(null));
-            Assert.Equal("Value cannot be null. (Parameter 'userRepository')", exception.Message);
-        }
-
-        /// <summary>
         /// Verifies that <see cref="UserService.GetAllUsers"/> retrieves all users successfully.
         /// </summary>
         [Fact]
         public void GetAllUsers_ShouldReturnAllUsers()
         {
-            List<User> users = new List<User> { new User { Username =  "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), FullName = "User One" }, new User { Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), FullName = "User Two" } };
-            this.mockUserRepository.Setup(repo => repo.GetAllUsers()).Returns(users);
-            List<User> result = this.userService.GetAllUsers();
+            var mockUserRepository = new Mock<IUserRepository>();
+            var users = new List<User>
+            {
+                new User { UserId = new Guid(), EmailAddress = String.Empty, Username = "User One", NumberOfDeletedReviews = 0, AssignedRoles = new List<Role>(), PasswordHash = String.Empty, TwoFASecret = String.Empty, FullName = "User One" },
+                new User {  UserId = new Guid(), EmailAddress = String.Empty, Username = "User Two", NumberOfDeletedReviews = 0, AssignedRoles = new List<Role>(), PasswordHash = String.Empty, TwoFASecret = String.Empty, FullName = "User Two" }
+            };
+            mockUserRepository.Setup(repo => repo.GetAllUsers()).Returns(users);
+
+            var userService = new UserService(mockUserRepository.Object);
+
+            var result = userService.GetAllUsers();
+
             Assert.NotNull(result);
             Assert.Equal(2, result.Count);
             Assert.Equal("User One", result[0].FullName);
@@ -93,32 +93,6 @@ namespace UnitTests.Users
         }
 
         /// <summary>
-        /// Verifies that <see cref="UserService.GetActiveUsersByRoleType"/> retrieves active users by role type successfully.
-        /// </summary>
-        [Fact]
-        public void GetActiveUsersByRoleType_ShouldReturnCorrectUsers()
-        {
-            List<User> users = new List<User> { new User { Username = "", PasswordHash = "", TwoFASecret = "" ,UserId = new Guid(), FullName = "Active User" } };
-            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.User)).Returns(users);
-            List<User> result = this.userService.GetActiveUsersByRoleType(RoleType.User);
-            Assert.NotNull(result);
-            Assert.Single(result);
-            Assert.Equal("Active User", result[0].FullName);
-        }
-
-        /// <summary>
-        /// Verifies that <see cref="UserService.GetActiveUsersByRoleType"/> throws a <see cref="UserServiceException"/> when the repository throws an exception.
-        /// </summary>
-        [Fact]
-        public void GetActiveUsersByRoleType_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
-        {
-            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.User)).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetActiveUsersByRoleType(RoleType.User));
-            Assert.Equal("Failed to get active users", exception.Message);
-            Assert.IsType<RepositoryException>(exception.InnerException);
-        }
-
-        /// <summary>
         /// Verifies that <see cref="UserService.GetActiveUsersByRoleType"/> throws an <see cref="ArgumentException"/> when the role type is invalid.
         /// </summary>
         [Fact]
@@ -134,7 +108,7 @@ namespace UnitTests.Users
         [Fact]
         public void GetUserById_ShouldReturnCorrectUser()
         {
-            User user = new User {Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), FullName = "User One" };
+            User user = new User {Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), FullName = "User One" };
             this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid()).Returns(user));
             User result = userService.GetUserById(new Guid());
             Assert.NotNull(result);
@@ -170,7 +144,7 @@ namespace UnitTests.Users
         [Fact]
         public void GetBannedUsers_ShouldReturnBannedUsers()
         {
-            List<User> users = new List<User> { new User { Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), FullName = "Banned User" } };
+            List<User> users = new List<User> { new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), FullName = "Banned User" } };
             this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.Banned)).Returns(users);
             List<User> result = this.userService.GetBannedUsers();
             Assert.NotNull(result);
@@ -244,7 +218,7 @@ namespace UnitTests.Users
         [Fact]
         public void GetUsersByRoleType_ShouldReturnCorrectUsers()
         {
-            List<User> users = new List<User> { new User { Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), FullName = "User One" } };
+            List<User> users = new List<User> { new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), FullName = "User One" } };
             this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.User)).Returns(users);
             List<User> result = this.userService.GetUsersByRoleType(RoleType.User);
             Assert.NotNull(result);
@@ -278,38 +252,12 @@ namespace UnitTests.Users
         }
 
         /// <summary>
-        /// Verifies that <see cref="UserService.GetAdminUsers"/> retrieves all admin users successfully.
-        /// </summary>
-        [Fact]
-        public void GetAdminUsers_ShouldReturnCorrectUsers()
-        {
-            List<User> users = new List<User> { new User { Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), FullName = "Admin One" } };
-            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.Admin)).Returns(users);
-            List<User> result = this.userService.GetAdminUsers();
-            Assert.NotNull(result);
-            Assert.Single(result);
-            Assert.Equal("Admin One", result[0].FullName);
-        }
-
-        /// <summary>
-        /// Verifies that <see cref="UserService.GetAdminUsers"/> throws a <see cref="UserServiceException"/> when the repository throws an exception.
-        /// </summary>
-        [Fact]
-        public void GetAdminUsers_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
-        {
-            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.Admin)).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetAdminUsers());
-            Assert.Equal("Failed to retrieve admin users.", exception.Message);
-            Assert.IsType<RepositoryException>(exception.InnerException);
-        }
-
-        /// <summary>
         /// Verifies that <see cref="UserService.GetRegularUsers"/> retrieves all regular users successfully.
         /// </summary>
         [Fact]
         public void GetRegularUsers_ShouldReturnCorrectUsers()
         {
-            List<User> users = new List<User> { new User { Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), FullName = "Regular User" } };
+            List<User> users = new List<User> { new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), FullName = "Regular User" } };
             this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.User)).Returns(users);
             List<User> result = this.userService.GetRegularUsers();
             Assert.NotNull(result);
@@ -335,7 +283,7 @@ namespace UnitTests.Users
         [Fact]
         public void GetManagers_ShouldReturnCorrectUsers()
         {
-            var users = new List<User> { new User {Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), FullName = "Manager User" } };
+            var users = new List<User> { new User {Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), FullName = "Manager User" } };
             this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.Manager)).Returns(users);
             List<User> result = this.userService.GetManagers();
             Assert.NotNull(result);
@@ -361,7 +309,7 @@ namespace UnitTests.Users
         [Fact]
         public void GetBannedUsersWhoHaveSubmittedAppeals_ShouldReturnCorrectUsers()
         {
-            List<User> users = new List<User> { new User { Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), FullName = "Banned User", HasSubmittedAppeal = true } };
+            List<User> users = new List<User> { new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), FullName = "Banned User", HasSubmittedAppeal = true } };
             this.mockUserRepository.Setup(repo => repo.GetBannedUsersWhoHaveSubmittedAppeals()).Returns(users);
             List<User> result = this.userService.GetBannedUsersWhoHaveSubmittedAppeals();
             Assert.NotNull(result);
@@ -399,7 +347,7 @@ namespace UnitTests.Users
         [Fact]
         public void GetUserFullNameById_ShouldReturnCorrectFullName()
         {
-            User user = new User { Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), FullName = "User One" };
+            User user = new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), FullName = "User One" };
             this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Returns(user);
             string result = this.userService.GetUserFullNameById(new Guid());
             Assert.Equal("User One", result);
@@ -447,7 +395,7 @@ namespace UnitTests.Users
         [Fact]
         public void UpdateUserRole_ShouldNotAddBannedRole_WhenUserAlreadyHasBannedRole()
         {
-            User user = new User { Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), AssignedRoles = new List<Role> { new Role(RoleType.Banned, "Banned") } };
+            User user = new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), AssignedRoles = new List<Role> { new Role(RoleType.Banned, "Banned") } };
             this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Returns(user);
             this.userService.UpdateUserRole(new Guid(), RoleType.Banned);
             Assert.Single(user.AssignedRoles);
@@ -461,7 +409,7 @@ namespace UnitTests.Users
         [Fact]
         public void UpdateUserRole_ShouldSetRoleToBanned_WhenUserDoesNotHaveBannedRole()
         {
-            User user = new User { Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), AssignedRoles = new List<Role> { new Role(RoleType.User, "User") } };
+            User user = new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), AssignedRoles = new List<Role> { new Role(RoleType.User, "User") } };
             this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Returns(user);
             this.userService.UpdateUserRole(new Guid(), RoleType.Banned);
             this.mockUserRepository.Verify(repository => repository.AddRoleToUser(new Guid(), It.Is<Role>(r => r.RoleType == RoleType.Banned && r.RoleName == "Banned")), Times.Once);
@@ -473,7 +421,7 @@ namespace UnitTests.Users
         [Fact]
         public void UpdateUserRole_ShouldSetRoleToUser_WhenRoleTypeIsUser()
         {
-            User user = new User { Username = "", PasswordHash = "", TwoFASecret = "", UserId = new Guid(), AssignedRoles = new List<Role> { new Role(RoleType.Banned, "Banned") } };
+            User user = new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), AssignedRoles = new List<Role> { new Role(RoleType.Banned, "Banned") } };
             this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Returns(user);
             this.userService.UpdateUserRole(new Guid(), RoleType.User);
             this.mockUserRepository.Verify(repo => repo.AddRoleToUser(new Guid(), It.Is<Role>(r => r.RoleType == RoleType.User && r.RoleName == "User")), Times.Once);

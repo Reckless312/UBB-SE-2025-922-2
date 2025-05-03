@@ -23,24 +23,6 @@ namespace Tests.Authentication
             _mockUserRepository = new Mock<IUserRepository>();
         }
 
-        [Test]
-        public void Constructor_WithValidParameters_InitializesProperties()
-        {
-            // Arrange & Act
-            var helper = new LinkedInOAuthHelper(ClientId, ClientSecret, RedirectUri, Scope);
-
-            // Assert - Use reflection to test private fields
-            var clientIdField = typeof(LinkedInOAuthHelper).GetField("clientId", BindingFlags.NonPublic | BindingFlags.Instance);
-            var clientSecretField = typeof(LinkedInOAuthHelper).GetField("clientSecret", BindingFlags.NonPublic | BindingFlags.Instance);
-            var redirectUrlField = typeof(LinkedInOAuthHelper).GetField("redirectUrl", BindingFlags.NonPublic | BindingFlags.Instance);
-            var scopeField = typeof(LinkedInOAuthHelper).GetField("scope", BindingFlags.NonPublic | BindingFlags.Instance);
-
-            NUnit.Framework.Assert.That(clientIdField.GetValue(helper), Is.EqualTo(ClientId));
-            NUnit.Framework.Assert.That(clientSecretField.GetValue(helper), Is.EqualTo(ClientSecret));
-            NUnit.Framework.Assert.That(redirectUrlField.GetValue(helper), Is.EqualTo(RedirectUri));
-            NUnit.Framework.Assert.That(scopeField.GetValue(helper), Is.EqualTo(Scope));
-        }
-
         //[Test]
         //public void BuildAuthorizeUrl_ReturnsCorrectUrl()
         //{

@@ -8,7 +8,9 @@ namespace Tests.Authentication
     internal class MockUpUserAdapter : IMockUpUserAdapter
     {
         public MockUpUserAdapter() { }
-        public bool UpdatedUser { get; set; } = false;
+        public bool CreatedUser { get; set; }
+        public User? User { get; set; }
+        public bool UpdatedUser { get; set; }
         User IMockUpUserAdapter.User { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
 
         public void AddRoleToUser(Guid userID, Role roleToAdd)
@@ -23,7 +25,7 @@ namespace Tests.Authentication
 
         public bool CreateUser(User user)
         {
-            throw new NotImplementedException();
+            return CreatedUser;
         }
 
         public List<User> GetAllUsers()
@@ -48,7 +50,7 @@ namespace Tests.Authentication
 
         public User? GetUserById(Guid userId)
         {
-            throw new NotImplementedException();
+            return User;
         }
 
         public User? GetUserByUsername(string username)
@@ -68,7 +70,7 @@ namespace Tests.Authentication
 
         public bool UpdateUser(User user)
         {
-            throw new NotImplementedException();
+            return UpdatedUser;
         }
 
         public bool ValidateAction(Guid userId, string resource, string action)

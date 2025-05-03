@@ -37,7 +37,7 @@ namespace Tests
             var sessionId = Guid.NewGuid();
 
             // Act & Assert
-            Assert.ThrowsException<NotImplementedException>(() => service.EndSession(sessionId));
+            Assert.ThrowsException<NullReferenceException>(() => service.EndSession(sessionId));
         }
 
         [TestMethod]
@@ -49,7 +49,7 @@ namespace Tests
             var sessionId = Guid.NewGuid();
 
             // Act & Assert
-            Assert.ThrowsException<NotImplementedException>(() => service.GetSession(sessionId));
+            Assert.ThrowsException<NullReferenceException>(() => service.GetSession(sessionId));
         }
 
         [TestMethod]
@@ -80,7 +80,7 @@ namespace Tests
             var service = new SessionService(mockSessionAdapter);
 
             // Act & Assert
-            Assert.ThrowsException<NotImplementedException>(() => service.ValidateSession(mockId));
+            Assert.ThrowsException<NullReferenceException>(() => service.ValidateSession(mockId));
         }
 
         [TestMethod]
@@ -113,7 +113,7 @@ namespace Tests
             var service = new SessionService(mockSessionAdapter);
 
             // Act & Assert
-            Assert.ThrowsException<NotImplementedException>(
+            Assert.ThrowsException<NullReferenceException>(
                 () => service.AuthorizeAction(mockSessionId, "resource", "action"));
         }
     }

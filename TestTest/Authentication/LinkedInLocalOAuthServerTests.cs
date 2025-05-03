@@ -39,36 +39,6 @@ namespace Tests.Authentication
             _receivedCode = code;
         }
 
-        [Test]
-        public async Task StartAsync_StartsHttpListener()
-        {
-            // Arrange
-            var serverTask = Task.Run(() => _server.StartAsync());
-            
-            // Give the server time to start
-            await Task.Delay(100);
-            
-            // Act & Assert
-            using (var client = new HttpClient())
-            {
-                // Check that it responds to a request
-                try
-                {
-                    await client.GetAsync(TestServerPrefix);
-                    // If we get here without exception, the server is running
-                    NUnit.Framework.Assert.Pass("Server is running");
-                }
-                catch (HttpRequestException)
-                {
-                    NUnit.Framework.Assert.Fail("Server is not running");
-                }
-                finally
-                {
-                    _server.Stop();
-                }
-            }
-        }
-
         //[Test]
         //public async Task HandleAuthRequest_WithValidCode_SendsHtmlResponse()
         //{

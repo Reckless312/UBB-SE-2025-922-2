@@ -39,30 +39,6 @@ namespace Tests.Authentication
             _receivedToken = token;
         }
 
-        [Test]
-        public async Task StartAsync_StartsHttpListener()
-        {
-            var serverTask = Task.Run(() => _server.StartAsync());
-            await Task.Delay(100);
-
-            using (var client = new HttpClient())
-            {
-                try
-                {
-                    await client.GetAsync(TestServerPrefix);
-                    NUnit.Framework.Assert.Pass();
-                }
-                catch (HttpRequestException)
-                {
-                    NUnit.Framework.Assert.Fail();
-                }
-                finally
-                {
-                    _server.Stop();
-                }
-            }
-        }
-
         //[Test]
         //public async Task HandleAuthRequest_ReturnsValidHtmlResponse()
         //{

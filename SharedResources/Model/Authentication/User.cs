@@ -20,7 +20,7 @@ namespace DataAccess.Model.Authentication
         /// <param name="numberOfDeletedReviews">The number of reviews deleted by the user.</param>
         /// <param name="hasSubmittedAppeal">Indicates whether the user has submitted an appeal.</param>
         /// <param name="assignedRoles">The list of roles assigned to the user.</param>
-        public User(Guid userId, string emailAddress, string userName, int numberOfDeletedReviews, bool hasSubmittedAppeal, List<Role> assignedRoles)
+        public User(Guid userId, string emailAddress, string userName, int numberOfDeletedReviews, bool hasSubmittedAppeal, List<Role> assignedRoles, string fullName)
         {
             this.UserId = userId;
             this.EmailAddress = emailAddress;
@@ -28,6 +28,7 @@ namespace DataAccess.Model.Authentication
             this.NumberOfDeletedReviews = numberOfDeletedReviews;
             this.HasSubmittedAppeal = hasSubmittedAppeal;
             this.AssignedRoles = assignedRoles;
+            this.FullName = fullName;
         }
 
         public required Guid UserId { get; set; }

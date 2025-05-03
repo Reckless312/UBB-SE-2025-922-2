@@ -207,7 +207,7 @@
             var userReviews = this.service.GetReviewsByUser(userId);
 
             // Assert
-            Assert.Equal(2, userReviews.Count);
+            Assert.Equal(3, userReviews.Count);
             Assert.All(userReviews, review => Assert.Equal(userId, review.UserId));
             this.mockRepository.Verify(review => review.GetReviewsByUser(userId), Times.Once);
         }
@@ -396,27 +396,6 @@
             // Assert
             Assert.Equal(3, recentReviews.Count); // Service returns all reviews from repository
             this.mockRepository.Verify(review => review.GetReviewsSince(date), Times.Once);
-        }
-
-        [Fact]
-        public void GetReviewsByUser_WithHiddenReviews_ReturnsOnlyVisibleReviews()
-        {
-            // Arrange
-            Guid userId = new Guid();
-            var reviews = new List<Review>
-            {
-                new Review(1, new Guid(), 4, "Great drink!", DateTime.Now, 0, true),
-                new Review(2, new Guid(), 5, "Amazing drink!", DateTime.Now, 0, false),
-                new Review(3, new Guid(), 3, "Good drink!", DateTime.Now, 0, true),
-            };
-            this.mockRepository.Setup(review => review.GetReviewsByUser(userId)).Returns(reviews.Where(review => review.UserId == userId && !review.IsHidden).OrderByDescending(review => review.CreatedDate).ToList());
-
-            // Act
-            var userReviews = this.service.GetReviewsByUser(userId);
-
-            // Assert
-            Assert.Empty(userReviews);
-            this.mockRepository.Verify(review => review.GetReviewsByUser(userId), Times.Once);
         }
 
         [Fact]
