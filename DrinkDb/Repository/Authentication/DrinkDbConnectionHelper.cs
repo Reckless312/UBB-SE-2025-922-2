@@ -13,13 +13,10 @@ namespace DrinkDb_Auth.Repository.Authentication
         /// </summary>
         /// <returns>An open SqlConnection object.</returns>
 
-        public static readonly string ConnectionString = "Data Source=ALEXIA_ZEN\\SQLEXPRESS; Initial Catalog = DrinkDB_Dev; Integrated Security = True; Trust Server Certificate = True";
-
         public static SqlConnection GetConnection()
         {
             // Get the connection string from App.config
-            string connectionString = "Data Source=ALEXIA_ZEN\\SQLEXPRESS; Initial Catalog = DrinkDB_Dev; Integrated Security = True; Trust Server Certificate = True";
-
+            string connectionString = "Server=CORA\\MSSQLSERVER01;Database=DrinkDB_Dev;Integrated Security=True;TrustServerCertificate=True;";
 
         // Create and open a new SqlConnection
         SqlConnection connection = new (connectionString);

@@ -69,10 +69,9 @@ namespace DrinkDb_Auth
             Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
                 .ConfigureServices((context, services) =>
                 {
-                    //IConfiguration config = new ConfigurationBuilder().AddUserSecrets<App>().AddEnvironmentVariables().AddJsonFile("appSettings.json", optional: false, reloadOnChange: true).Build();
-                    //services.AddSingleton<IConfiguration>(config);
-                    //string connectionString = config.GetConnectionString("DefaultConnection");
-                    string connectionString = DrinkDbConnectionHelper.ConnectionString;
+                    IConfiguration config = new ConfigurationBuilder().AddUserSecrets<App>().AddEnvironmentVariables().AddJsonFile("appSettings.json", optional: false, reloadOnChange: true).Build();
+                    services.AddSingleton<IConfiguration>(config);
+                    string connectionString = config.GetConnectionString("DefaultConnection");
                     services.AddSingleton<IUserRepository, UserRepository>();
                     services.AddSingleton<IReviewsRepository, ReviewsRepository>(provider =>
                     {
