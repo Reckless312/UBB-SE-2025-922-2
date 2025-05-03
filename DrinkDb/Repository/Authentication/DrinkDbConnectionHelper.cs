@@ -16,10 +16,10 @@ namespace DrinkDb_Auth.Repository.Authentication
         public static SqlConnection GetConnection()
         {
             // Get the connection string from App.config
-            string connectionString = "Server=CORA\\MSSQLSERVER01;Database=DrinkDB_Dev;Integrated Security=True;TrustServerCertificate=True;";
+            string connectionString = "Data Source=DESKTOP-E65E5LS; Initial Catalog = DrinksImdb; Integrated Security = True; Trust Server Certificate = True";
 
-        // Create and open a new SqlConnection
-        SqlConnection connection = new (connectionString);
+            // Create and open a new SqlConnection
+            SqlConnection connection = new(connectionString);
             connection.Open();
             return connection;
         }

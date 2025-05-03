@@ -148,13 +148,7 @@
         {
             try
             {
-                User? user = _usersList.FirstOrDefault(u => u.UserId == userId);
-                if (user == null)
-                {
-                    throw new ArgumentException($"No user found with ID {userId}");
-                }
-
-                user.AssignedRoles.Add(roleToAdd);
+                // Need to test this
             }
             catch (Exception ex)
             {
@@ -216,6 +210,10 @@
                     Username = reader.IsDBNull(reader.GetOrdinal("userName")) ? string.Empty : reader.GetString(reader.GetOrdinal("userName")),
                     PasswordHash = reader.IsDBNull(reader.GetOrdinal("passwordHash")) ? string.Empty : reader.GetString(reader.GetOrdinal("passwordHash")),
                     TwoFASecret = reader.IsDBNull(reader.GetOrdinal("twoFASecret")) ? null : reader.GetString(reader.GetOrdinal("twoFASecret")),
+                    EmailAddress = reader.IsDBNull(reader.GetOrdinal("emailAddress")) ? string.Empty : reader.GetString(reader.GetOrdinal("emailAddress")),
+                    NumberOfDeletedReviews = reader.GetInt32(reader.GetOrdinal("numberOfDeletedReviews")),
+                    HasSubmittedAppeal = reader.GetBoolean(reader.GetOrdinal("hasSubmittedAppeal")),
+                    AssignedRoles = GetUserRoles(userId)
                 };
             }
             return null;
@@ -236,24 +234,45 @@
                     Username = reader.IsDBNull(reader.GetOrdinal("userName")) ? string.Empty : reader.GetString(reader.GetOrdinal("userName")),
                     PasswordHash = reader.IsDBNull(reader.GetOrdinal("passwordHash")) ? string.Empty : reader.GetString(reader.GetOrdinal("passwordHash")),
                     TwoFASecret = reader.IsDBNull(reader.GetOrdinal("twoFASecret")) ? null : reader.GetString(reader.GetOrdinal("twoFASecret")),
+                    EmailAddress = reader.IsDBNull(reader.GetOrdinal("emailAddress")) ? string.Empty : reader.GetString(reader.GetOrdinal("emailAddress")),
+                    NumberOfDeletedReviews = reader.GetInt32(reader.GetOrdinal("numberOfDeletedReviews")),
+                    HasSubmittedAppeal = reader.GetBoolean(reader.GetOrdinal("hasSubmittedAppeal")),
+                    AssignedRoles = GetUserRoles(reader.GetGuid(reader.GetOrdinal("userId")))
                 };
             }
             return null;
         }
 
+        private List<Role> GetUserRoles(Guid userId)
+        {
+            return new List<Role>() { new Role(RoleType.User, "User") };
+        }
+
         public bool UpdateUser(User user)
         {
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
-            string sql = "UPDATE Users SET userName = @username, passwordHash = @passwordHash, twoFASecret = @twoFASecret WHERE userId = @userId;";
-            using (SqlCommand command = new(sql, connection))
-            {
-                command.Parameters.AddWithValue("@userId", user.UserId);
-                command.Parameters.AddWithValue("@username", user.Username);
-                command.Parameters.AddWithValue("@passwordHash", (object?)user.PasswordHash ?? DBNull.Value);
-                command.Parameters.AddWithValue("@twoFASecret", (object?)user.TwoFASecret ?? DBNull.Value);
-                return command.ExecuteNonQuery() > 0;
-            }
+            string sql = @"
+                UPDATE Users 
+                SET userName = @username, 
+                    passwordHash = @passwordHash, 
+                    twoFASecret = @twoFASecret,
+                    emailAddress = @emailAddress,
+                    numberOfDeletedReviews = @numberOfDeletedReviews,
+                    hasSubmittedAppeal = @hasSubmittedAppeal
+                WHERE userId = @userId;";
+            
+            using SqlCommand command = new(sql, connection);
+            command.Parameters.AddWithValue("@userId", user.UserId);
+            command.Parameters.AddWithValue("@username", user.Username);
+            command.Parameters.AddWithValue("@passwordHash", user.PasswordHash);
+            command.Parameters.AddWithValue("@twoFASecret", (object?)user.TwoFASecret ?? DBNull.Value);
+            command.Parameters.AddWithValue("@emailAddress", (object?)user.EmailAddress ?? DBNull.Value);
+            command.Parameters.AddWithValue("@numberOfDeletedReviews", user.NumberOfDeletedReviews);
+            command.Parameters.AddWithValue("@hasSubmittedAppeal", user.HasSubmittedAppeal);
+            
+            return command.ExecuteNonQuery() > 0;
         }
+
         public bool DeleteUser(Guid userId)
         {
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
@@ -266,13 +285,27 @@
         public bool CreateUser(User user)
         {
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
-            string sql = "INSERT INTO Users (userId, userName, passwordHash, twoFASecret) VALUES (@userId, @username, @passwordHash, @twoFASecret);";
+            string sql = @"
+                INSERT INTO Users (userId, userName, passwordHash, twoFASecret, emailAddress, numberOfDeletedReviews, hasSubmittedAppeal) 
+                VALUES (@userId, @username, @passwordHash, @twoFASecret, @emailAddress, @numberOfDeletedReviews, @hasSubmittedAppeal);";
             using SqlCommand command = new(sql, connection);
             command.Parameters.AddWithValue("@userId", user.UserId);
             command.Parameters.AddWithValue("@username", user.Username);
-            command.Parameters.AddWithValue("@passwordHash", (object?)user.PasswordHash ?? DBNull.Value);
+            command.Parameters.AddWithValue("@passwordHash", user.PasswordHash);
             command.Parameters.AddWithValue("@twoFASecret", (object?)user.TwoFASecret ?? DBNull.Value);
-            return command.ExecuteNonQuery() > 0;
+            command.Parameters.AddWithValue("@emailAddress", (object?)user.EmailAddress ?? DBNull.Value);
+            command.Parameters.AddWithValue("@numberOfDeletedReviews", user.NumberOfDeletedReviews);
+            command.Parameters.AddWithValue("@hasSubmittedAppeal", user.HasSubmittedAppeal);
+            int result = command.ExecuteNonQuery();
+            if (result > 0)
+            {
+                if (user.AssignedRoles == null || user.AssignedRoles.Count == 0)
+                {
+                    user.AssignedRoles = BasicUserRoles;
+                }
+                _usersList.Add(user);
+            }
+            return result > 0;
         }
 
         public virtual bool ValidateAction(Guid userId, string resource, string action)

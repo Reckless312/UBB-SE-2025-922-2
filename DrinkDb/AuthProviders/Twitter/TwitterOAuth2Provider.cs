@@ -212,6 +212,7 @@
                             PasswordHash = string.Empty,
                             UserId = Guid.NewGuid(),
                             TwoFASecret = string.Empty,
+                            EmailAddress = "ionutcora66@gmail.com",
                         };
                         UserRepository.CreateUser(user);
                     }
