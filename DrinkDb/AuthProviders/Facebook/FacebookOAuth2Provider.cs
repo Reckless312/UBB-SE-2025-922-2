@@ -7,14 +7,12 @@ using DataAccess.Model.Authentication;
 using DrinkDb_Auth.Repository.Authentication;
 using IRepository;
 using DrinkDb_Auth.Repository.AdminDashboard;
-using System.Data.SqlClient;
-using System.Configuration;
 
 namespace DrinkDb_Auth.AuthProviders.Facebook
 {
     public class FacebookOAuth2Provider : GenericOAuth2Provider
     {
-        private static readonly SessionRepository SessionAdapter = new ();
+        private static readonly SessionRepository SessionAdapter = new();
         public AuthenticationResponse Authenticate(string userId, string token)
         {
             try
@@ -32,81 +30,66 @@ namespace DrinkDb_Auth.AuthProviders.Facebook
                         {
                             string fbId = idProp.GetString() ?? throw new Exception("Facebook ID is null.");
                             string fbName = doc.GetProperty("name").GetString() ?? throw new Exception("Facebook name is null.");
-                            string fbEmail = doc.GetProperty("email").GetString() ?? throw new Exception("Facebook email is null.");
 
                             // store or update user in DB - UserService
-                            bool isNewAccount = StoreOrUpdateUserInDb(fbId, fbName, fbEmail);
+                            bool isNewAccount = StoreOrUpdateUserInDb(fbId, fbName);
 
                             User user = UserRepository.GetUserByUsername(fbName) ?? throw new Exception("User not found");
 
                             Session session = SessionAdapter.CreateSession(user.UserId);
+
                             return new AuthenticationResponse
                             {
                                 AuthenticationSuccessful = true,
-                                OAuthToken = token,
                                 SessionId = session.SessionId,
+                                OAuthToken = token,
                                 NewAccount = isNewAccount
                             };
                         }
                     }
+                    return new AuthenticationResponse
+                    {
+                        AuthenticationSuccessful = false,
+                        OAuthToken = token,
+                        SessionId = Guid.Empty,
+                        NewAccount = false
+                    };
                 }
-                return new AuthenticationResponse { AuthenticationSuccessful = false, OAuthToken = string.Empty, SessionId = Guid.Empty, NewAccount = false };
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"Facebook authentication failed: {ex}");
-                return new AuthenticationResponse { AuthenticationSuccessful = false, OAuthToken = string.Empty, SessionId = Guid.Empty, NewAccount = false };
+                return new AuthenticationResponse
+                {
+                    AuthenticationSuccessful = false,
+                    OAuthToken = token,
+                    SessionId = Guid.Empty,
+                    NewAccount = false
+                };
             }
         }
 
         private static readonly IUserRepository UserRepository = new UserRepository();
-        private bool StoreOrUpdateUserInDb(string fbId, string fbName, string email)
+        private bool StoreOrUpdateUserInDb(string fbId, string fbName)
         {
-            bool isNewAccount = false;
-            string connectionString = ConfigurationManager.ConnectionStrings["DrinkDbConnection"].ConnectionString;
+            var user = UserRepository.GetUserByUsername(fbName);
 
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            if (user == null)
             {
-                connection.Open();
-
-                // Check if a user with this fbId already exists (stored as userName)
-                string checkQuery = "SELECT COUNT(*) FROM Users WHERE userName = @fbId";
-                using (SqlCommand checkCommand = new SqlCommand(checkQuery, connection))
+                UserRepository.CreateUser(new User
                 {
-                    checkCommand.Parameters.AddWithValue("@fbId", fbId);
-                    int count = (int)checkCommand.ExecuteScalar();
-                    if (count == 0)
-                    {
-                        // Insert a new user with email
-                        string insertQuery = @"
-                            INSERT INTO Users (userId, userName, passwordHash, twoFASecret, emailAddress, numberOfDeletedReviews, hasSubmittedAppeal)
-                            VALUES (NEWID(), @fbId, '', NULL, @email, 0, 0)";
-                        using (SqlCommand insertCommand = new SqlCommand(insertQuery, connection))
-                        {
-                            insertCommand.Parameters.AddWithValue("@fbId", fbId);
-                            insertCommand.Parameters.AddWithValue("@email", email);
-                            int result = insertCommand.ExecuteNonQuery();
-                            if (result > 0)
-                            {
-                                isNewAccount = true;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // Update email if it's different
-                        string updateQuery = "UPDATE Users SET emailAddress = @email WHERE userName = @fbId";
-                        using (SqlCommand updateCommand = new SqlCommand(updateQuery, connection))
-                        {
-                            updateCommand.Parameters.AddWithValue("@fbId", fbId);
-                            updateCommand.Parameters.AddWithValue("@email", email);
-                            updateCommand.ExecuteNonQuery();
-                        }
-                    }
-                }
+                    UserId = Guid.NewGuid(),
+                    Username = fbName,
+                    PasswordHash = string.Empty,
+                    TwoFASecret = string.Empty
+                });
+                return true;
             }
-
-            return isNewAccount;
+            else
+            {
+                user.Username = fbName;
+                UserRepository.UpdateUser(user);
+                return false;
+            }
         }
     }
 }
