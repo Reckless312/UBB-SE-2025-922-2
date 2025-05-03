@@ -43,20 +43,25 @@ namespace DrinkDb_Auth.AuthProviders.Google
         private static readonly IUserRepository UserRepository = new UserRepository();
         private Guid EnsureUserExists(string identifier, string email, string name)
         {
-            Guid userId = CreateGloballyUniqueIdentifier(identifier);
-            User? user = UserRepository.GetUserById(userId);
-
-            switch (user)
+            // Use provider's display name as username, like Facebook/GitHub
+            User? user = UserRepository.GetUserByUsername(name);
+            Guid userId;
+            if (user == null)
             {
-                case null:
-                    // Don't know why email is used as username but let's vibe with it
-                    User newUser = new User { UserId = userId, Username = email, PasswordHash = string.Empty, TwoFASecret = null };
-                    bool wasCreated = UserRepository.CreateUser(newUser);
-                    break;
-                case not null:
-                    break;
+                userId = Guid.NewGuid();
+                User newUser = new User { UserId = userId, Username = name, PasswordHash = string.Empty, TwoFASecret = null, EmailAddress = email };
+                UserRepository.CreateUser(newUser);
             }
-
+            else
+            {
+                userId = user.UserId;
+                // Update email if it's different
+                if (user.EmailAddress != email)
+                {
+                    user.EmailAddress = email;
+                    UserRepository.UpdateUser(user);
+                }
+            }
             return userId;
         }
 
@@ -391,8 +396,8 @@ namespace DrinkDb_Auth.AuthProviders.Google
                                     });
                                     break;
                             }
-                            }
                         }
+                    }
                     catch
                     {
                     }

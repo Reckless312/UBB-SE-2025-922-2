@@ -14,6 +14,10 @@ using IRepository;
 using DrinkDb_Auth.Repository.Authentication;
 using DrinkDb_Auth.Service.Authentication.Interfaces;
 using Microsoft.UI.Xaml;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using System.Net;
+using System.Net.Mail;
+using static QRCoder.PayloadGenerator;
 
 namespace DrinkDb_Auth.Service.Authentication
 {
@@ -108,6 +112,7 @@ namespace DrinkDb_Auth.Service.Authentication
                 if (basicAuthenticationProvider.Authenticate(username, password))
                 {
                     User user = userRepository.GetUserByUsername(username) ?? throw new UserNotFoundException("User not found");
+
                     Session session = sessionRepository.CreateSession(user.UserId);
                     return new AuthenticationResponse
                     {
@@ -138,6 +143,8 @@ namespace DrinkDb_Auth.Service.Authentication
                     UserId = Guid.NewGuid(),
                     TwoFASecret = string.Empty
                 };
+                user.EmailAddress = "ionutcora66@gmail.com";
+
                 userRepository.CreateUser(user);
                 Session session = sessionRepository.CreateSession(user.UserId);
                 return new AuthenticationResponse
