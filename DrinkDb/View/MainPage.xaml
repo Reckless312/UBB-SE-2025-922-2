@@ -25,7 +25,7 @@
         <SolidColorBrush x:Key="HeaderBackgroundColor" Color="#1f3d7a" />
         <SolidColorBrush x:Key="AcceptButtonColor" Color="#107C10" />
         <SolidColorBrush x:Key="DeclineButtonColor" Color="#D13438" />
-        
+
         <converters:UserIdToNameConverter x:Key="UserIdToNameConverter"/>
     </Page.Resources>
 
@@ -43,15 +43,28 @@
 
         <!-- Header with Acrylic effect -->
         <Grid Grid.Row="0" Grid.ColumnSpan="3" Background="{StaticResource HeaderBackgroundColor}">
-            <Image Margin="24,0,0,0" HorizontalAlignment="Left" Source="Assets/beers-logo.png" Width="32" Height="32"/>
-            <TextBlock Text="Admin Dashboard" Foreground="White" FontSize="18" FontWeight="SemiBold" 
-                     VerticalAlignment="Center" Margin="68,0,0,0"/>
-                <Button 
-        x:Name="GoBackButton"
-        Content="Go Back"
-        Click="GoBackButton_Click"
-        Background="White"
-        Foreground="Black"/>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Image Grid.Column="0" Margin="24,0,0,0" HorizontalAlignment="Left" Source="Assets/beers-logo.png" Width="32" Height="32"/>
+            <TextBlock Grid.Column="1" Text="Admin Dashboard" Foreground="White" FontSize="18" FontWeight="SemiBold" 
+                     VerticalAlignment="Center" Margin="12,0,0,0"/>
+            <Button Grid.Column="2"
+                x:Name="GoBackButton"
+                Content="Go Back"
+                Click="GoBackButton_Click"
+                Margin="0,0,24,0"
+                Padding="12,4"
+                MinWidth="80"
+                CornerRadius="4"
+                Background="#3a5a9a"
+                Foreground="White"
+                FontWeight="SemiBold"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"/>
         </Grid>
 
         <!-- Left Column - Reviews -->
@@ -139,7 +152,7 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                        
+
                 <Button 
                     CornerRadius="8"
                     Background="{StaticResource AccentColor}"
@@ -151,14 +164,14 @@
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Center"
                     Command="{x:Bind ViewModel.RunAutoCheckCommand}">
-                            <Button.Resources>
-                                <Style TargetType="Border">
-                                    <Setter Property="CornerRadius" Value="8"/>
-                                </Style>
-                            </Button.Resources>
-                            <Button.Content>
-                                <TextBlock Text="Automatically check reviews" TextWrapping="Wrap" TextAlignment="Center"/>
-                            </Button.Content>
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="8"/>
+                        </Style>
+                    </Button.Resources>
+                    <Button.Content>
+                        <TextBlock Text="Automatically check reviews" TextWrapping="Wrap" TextAlignment="Center"/>
+                    </Button.Content>
                 </Button>
 
                 <Button Grid.Column="1"

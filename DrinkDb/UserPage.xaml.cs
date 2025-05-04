@@ -1,3 +1,14 @@
+using DataAccess.Model.AdminDashboard;
+using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
+using DrinkDb_Auth.Service;
+using DrinkDb_Auth.View;
+using DrinkDb_Auth;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml;
+using System.Collections.Generic;
+using System;
+
 using System;
 using DataAccess.Model.Authentication;
 using DrinkDb_Auth.Service;
@@ -8,13 +19,17 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
 using System.Linq;
+using System.Collections.Generic;
+using DataAccess.Model.AdminDashboard;
 
 namespace DrinkDb_Auth
 {
     public sealed partial class UserPage : Page
     {
-        private static readonly AuthenticationService AuthenticationService = new ();
-        private static readonly UserService UserService = new ();
+        private static readonly AuthenticationService AuthenticationService = new();
+        private static readonly UserService UserService = new();
+
+        private User currentUser;
 
         public UserPage()
         {
@@ -33,13 +48,13 @@ namespace DrinkDb_Auth
             {
                 // Retrieve the user from the database using your UserService.
                 var userService = new UserService();
-                var user = userService.GetUserById(currentUserId);
+                currentUser = userService.GetUserById(currentUserId);
 
                 // Update UI with the retrieved data.
-                if (user != null)
+                if (currentUser != null)
                 {
-                    NameTextBlock.Text = user.Username;
-                    UsernameTextBlock.Text = "@" + user.Username;
+                    NameTextBlock.Text = currentUser.Username;
+                    UsernameTextBlock.Text = "@" + currentUser.Username;
                     StatusTextBlock.Text = "Status: Online";
                 }
                 else
@@ -56,6 +71,23 @@ namespace DrinkDb_Auth
                 UsernameTextBlock.Text = string.Empty;
                 StatusTextBlock.Text = string.Empty;
             }
+
+            List<Role> userRoles = this.currentUser.AssignedRoles;
+
+            bool isAdmin = false;
+
+            foreach (Role role in userRoles)
+            {
+                if (role.RoleType == RoleType.Admin)
+                {
+                    isAdmin = true;
+                }
+            }
+
+            if (!isAdmin)
+            {
+                this.AdminDashboardButton.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
@@ -64,91 +96,7 @@ namespace DrinkDb_Auth
             App.MainWindow.Close();
         }
 
-        public void LoadMockUserData()
-        {
-            User user = UserService.GetCurrentUser();
-            string mockStatus = "Online";
-            ReviewModel[] mockReviews =
-            [
-                new ReviewModel { Date = DateTime.Now.AddDays(-1), Rating = 5, Comment = "Great drink!" },
-                new ReviewModel { Date = DateTime.Now.AddDays(-2), Rating = 4, Comment = "Good, but could be better." },
-                new ReviewModel { Date = DateTime.Now.AddDays(-3), Rating = 3, Comment = "Average." }
-            ];
-
-            string[] mockDrinkList =
-            [
-                "Mojito",
-                "Pina Colada",
-                "Margarita",
-                "Whiskey Sour"
-            ];
-
-            // Show user info
-            NameTextBlock.Text = user.Username;
-            UsernameTextBlock.Text = "@" + user.Username;
-            StatusTextBlock.Text = $"Status: {mockStatus}";
-
-            // Display each review in the ReviewsItemsControl
-            foreach (var review in mockReviews)
-            {
-                // Create a simple border "card"
-                var border = new Border
-                {
-                    BorderBrush = new SolidColorBrush(Microsoft.UI.Colors.Black),
-                    BorderThickness = new Thickness(1),
-                    CornerRadius = new CornerRadius(8),
-                    Margin = new Thickness(0, 0, 0, 10),
-                    Padding = new Thickness(12)
-                };
-
-                // A small stack to hold rating, date, and comment
-                var reviewStack = new StackPanel { Spacing = 4 };
-
-                // Star rating
-                string stars = new string('★', review.Rating) + new string('☆', 5 - review.Rating);
-                var starsText = new TextBlock
-                {
-                    Text = stars,
-                    FontSize = 20,
-                    Foreground = new SolidColorBrush(Microsoft.UI.Colors.Gold)
-                };
-                reviewStack.Children.Add(starsText);
-
-                // Date
-                var dateText = new TextBlock
-                {
-                    Text = review.Date.ToShortDateString(),
-                    FontSize = 12,
-                    Foreground = new SolidColorBrush(Microsoft.UI.Colors.Gray)
-                };
-                reviewStack.Children.Add(dateText);
-
-                // Comment
-                var commentText = new TextBlock
-                {
-                    Text = review.Comment,
-                    FontSize = 14
-                };
-                reviewStack.Children.Add(commentText);
-
-                border.Child = reviewStack;
-                ReviewsItemsControl.Items.Add(border);
-            }
-
-            // Display each drink in the DrinklistItemsControl
-            foreach (var drink in mockDrinkList)
-            {
-                var drinkText = new TextBlock
-                {
-                    Text = drink,
-                    FontSize = 14,
-                    Margin = new Thickness(0, 0, 0, 4)
-                };
-                DrinklistItemsControl.Items.Add(drinkText);
-            }
-        }
-
-        private void EditAccountButton_Click(object sender, RoutedEventArgs e)
+        private void AdminDashboardButton_Click(object sender, RoutedEventArgs e)
         {
             if (this.Frame != null)
             {
