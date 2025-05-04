@@ -330,5 +330,15 @@
 
             return result;
         }
+
+        public void GetHighestRoleTypeForUser(int v)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddRoleToUser(int v, Role role)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
