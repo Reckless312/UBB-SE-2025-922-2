@@ -15,7 +15,7 @@ namespace ServerAPI.Data
             : base(options)
         {
         }
-        
+
         public DbSet<User> Users => Set<User>();
         public DbSet<Session> Sessions => Set<Session>();
         public DbSet<Role> Roles => Set<Role>();
@@ -27,7 +27,7 @@ namespace ServerAPI.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
- 
+
             // configure user
             modelBuilder.Entity<User>(user =>
             {
@@ -53,8 +53,8 @@ namespace ServerAPI.Data
             modelBuilder.Entity<UpgradeRequest>(request =>
             {
                 request.HasKey(currentRequest => currentRequest.UpgradeRequestId);
-                request.HasOne<User>().WithMany().HasForeignKey(upgradeRequest=> upgradeRequest.RequestingUserIdentifier);
-                request.Property(upgradeRequest=>upgradeRequest.RequestingUserIdentifier).IsRequired();
+                request.HasOne<User>().WithMany().HasForeignKey(upgradeRequest => upgradeRequest.RequestingUserIdentifier);
+                request.Property(upgradeRequest => upgradeRequest.RequestingUserIdentifier).IsRequired();
             });
 
             // configure session

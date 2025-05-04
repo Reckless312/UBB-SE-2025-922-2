@@ -113,7 +113,7 @@
 
         public async Task<bool> UpdateUser(User user)
         {
-            var response = await this.httpClient.PatchAsJsonAsync($"{ApiRoute}/updateUser", user);
+            var response = this.httpClient.PatchAsJsonAsync($"{ApiRoute}/updateUser", user).Result;
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<bool>();
         }

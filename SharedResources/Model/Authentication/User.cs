@@ -4,6 +4,7 @@ namespace DataAccess.Model.Authentication
 {
     public class User
     {
+        public User() { AssignedRoles = new List<Role>(); }
         public required Guid UserId { get; set; }
 
         public required string Username { get; set; }

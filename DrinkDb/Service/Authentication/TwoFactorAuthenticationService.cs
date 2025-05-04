@@ -62,6 +62,7 @@ namespace DrinkDb_Auth.Service.Authentication
                 case true:
                     twoFactorSecret = keyGeneration?.GenerateRandomKey(keyLength) ?? throw new InvalidOperationException("Failed to generate 2FA secret.");
                     currentUser.TwoFASecret = Convert.ToBase64String(twoFactorSecret);
+                    userRepository.UpdateUser(currentUser);
                     string? uniformResourceIdentifier = new OtpUri(OtpType.Totp, twoFactorSecret, currentUser.Username, "DrinkDB").ToString();
                     this.windowSetup = windowSetup == null ? new AuthenticationQRCodeAndTextBoxDigits(uniformResourceIdentifier) : windowSetup;
                     this.authenticationWindow = authenticationWindow == null ? new TwoFactorAuthSetupView(this.windowSetup) : authenticationWindow;
