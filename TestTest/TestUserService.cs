@@ -42,7 +42,7 @@ namespace Tests
         [TestMethod]
         public void GetUserById_ShouldReturnUser()
         {
-            var user = new User
+            User user = new User
             {
                 UserId = Guid.NewGuid(),
                 Username = "test",
@@ -50,13 +50,13 @@ namespace Tests
                 TwoFASecret = "2fa"
             };
 
-            var mockAdapter = new MockUserAdapter { ReturnById = user };
+            MockUserAdapter mockAdapter = new MockUserAdapter { ReturnById = user };
 
-            var userService = (UserService)Activator.CreateInstance(typeof(UserService), true)!;
+            UserService userService = (UserService)Activator.CreateInstance(typeof(UserService), true)!;
             typeof(UserService).GetField("userAdapter", BindingFlags.Instance | BindingFlags.NonPublic)!
                 .SetValue(userService, mockAdapter);
 
-            var result = userService.GetUserById(user.UserId);
+            User result = userService.GetUserById(user.UserId);
 
             Assert.AreEqual(user, result);
         }
@@ -65,9 +65,9 @@ namespace Tests
         [ExpectedException(typeof(ArgumentException))]
         public void GetUserById_ShouldThrow_WhenUserNotFound()
         {
-            var mockAdapter = new MockUserAdapter { ReturnById = null };
+            MockUserAdapter mockAdapter = new MockUserAdapter { ReturnById = null };
 
-            var userService = (UserService)Activator.CreateInstance(typeof(UserService), true)!;
+            UserService userService = (UserService)Activator.CreateInstance(typeof(UserService), true)!;
             typeof(UserService).GetField("userAdapter", BindingFlags.Instance | BindingFlags.NonPublic)!
                 .SetValue(userService, mockAdapter);
 
@@ -77,7 +77,7 @@ namespace Tests
         [TestMethod]
         public void GetUserByUsername_ShouldReturnUser()
         {
-            var user = new User
+            User user = new User
             {
                 UserId = Guid.NewGuid(),
                 Username = "test",
@@ -85,13 +85,13 @@ namespace Tests
                 TwoFASecret = "2fa"
             };
 
-            var mockAdapter = new MockUserAdapter { ReturnByUsername = user };
+            MockUserAdapter mockAdapter = new MockUserAdapter { ReturnByUsername = user };
 
-            var userService = (UserService)Activator.CreateInstance(typeof(UserService), true)!;
+            UserService userService = (UserService)Activator.CreateInstance(typeof(UserService), true)!;
             typeof(UserService).GetField("userAdapter", BindingFlags.Instance | BindingFlags.NonPublic)!
                 .SetValue(userService, mockAdapter);
 
-            var result = userService.GetUserByUsername(user.Username);
+            User result = userService.GetUserByUsername(user.Username);
 
             Assert.AreEqual(user, result);
         }
@@ -100,9 +100,9 @@ namespace Tests
         [ExpectedException(typeof(ArgumentException))]
         public void GetUserByUsername_ShouldThrow_WhenUserNotFound()
         {
-            var mockAdapter = new MockUserAdapter { ReturnByUsername = null };
+            MockUserAdapter mockAdapter = new MockUserAdapter { ReturnByUsername = null };
 
-            var userService = (UserService)Activator.CreateInstance(typeof(UserService), true)!;
+            UserService userService = (UserService)Activator.CreateInstance(typeof(UserService), true)!;
             typeof(UserService).GetField("userAdapter", BindingFlags.Instance | BindingFlags.NonPublic)!
                 .SetValue(userService, mockAdapter);
 
@@ -112,7 +112,7 @@ namespace Tests
         [TestMethod]
         public void GetCurrentUser_ShouldReturnUser_WhenSessionExists()
         {
-            var user = new User
+            User user = new User
             {
                 UserId = Guid.NewGuid(),
                 Username = "alpha",
@@ -122,13 +122,13 @@ namespace Tests
 
             App.CurrentSessionId = Guid.NewGuid();
 
-            var mockAuth = new MockAuthenticationService(user);
-            var userService = (UserService)Activator.CreateInstance(typeof(UserService), true)!;
+            MockAuthenticationService mockAuth = new MockAuthenticationService(user);
+            UserService userService = (UserService)Activator.CreateInstance(typeof(UserService), true)!;
 
             typeof(UserService).GetField("authenticationService", BindingFlags.Instance | BindingFlags.NonPublic)!
                 .SetValue(userService, mockAuth);
 
-            var result = userService.GetCurrentUser();
+            User result = userService.GetCurrentUser();
 
             Assert.AreEqual(user, result);
         }
@@ -139,7 +139,7 @@ namespace Tests
         {
             App.CurrentSessionId = Guid.Empty;
 
-            var userService = new UserService();
+            UserService userService = new UserService();
             userService.GetCurrentUser();
         }
 
@@ -148,11 +148,11 @@ namespace Tests
         {
             var mockAdapter = new MockUserAdapter { ValidateActionResult = true };
 
-            var userService = (UserService)Activator.CreateInstance(typeof(UserService), true)!;
+            UserService userService = (UserService)Activator.CreateInstance(typeof(UserService), true)!;
             typeof(UserService).GetField("userAdapter", BindingFlags.Instance | BindingFlags.NonPublic)!
                 .SetValue(userService, mockAdapter);
 
-            var result = userService.ValidateAction(Guid.NewGuid(), "resource", "read");
+            Boolean result = userService.ValidateAction(Guid.NewGuid(), "resource", "read");
 
             Assert.IsTrue(result);
         }
@@ -161,7 +161,7 @@ namespace Tests
         [ExpectedException(typeof(ArgumentException))]
         public void ValidateAction_ShouldThrow_WhenResourceIsEmpty()
         {
-            var userService = new UserService();
+            UserService userService = new UserService();
             userService.ValidateAction(Guid.NewGuid(), "", "read");
         }
 
@@ -169,14 +169,14 @@ namespace Tests
         [ExpectedException(typeof(ArgumentException))]
         public void ValidateAction_ShouldThrow_WhenActionIsEmpty()
         {
-            var userService = new UserService();
+            UserService userService = new UserService();
             userService.ValidateAction(Guid.NewGuid(), "resource", "");
         }
 
         [TestMethod]
         public void LogoutUser_ShouldCallLogout()
         {
-            var mockAuth = new MockAuthenticationService(new User
+            MockAuthenticationService mockAuth = new MockAuthenticationService(new User
             {
                 UserId = Guid.NewGuid(),
                 Username = "test",
@@ -184,7 +184,7 @@ namespace Tests
                 TwoFASecret = "2fa"
             });
 
-            var userService = (UserService)Activator.CreateInstance(typeof(UserService), true)!;
+            UserService userService = (UserService)Activator.CreateInstance(typeof(UserService), true)!;
             typeof(UserService).GetField("authenticationService", BindingFlags.Instance | BindingFlags.NonPublic)!
                 .SetValue(userService, mockAuth);
 

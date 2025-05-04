@@ -53,13 +53,13 @@ namespace DrinkDb_Auth.Service.Authentication
         {
             currentUser = userRepository?.GetUserById(userId) ?? throw new ArgumentException("User not found.");
 
-            int keyLength = 42;
+            int KEY_LENGTH = 42;
             byte[] twoFactorSecret;
 
             switch (isFirstTimeSetup)
             {
                 case true:
-                    twoFactorSecret = keyGeneration?.GenerateRandomKey(keyLength) ?? throw new InvalidOperationException("Failed to generate 2FA secret.");
+                    twoFactorSecret = keyGeneration?.GenerateRandomKey(KEY_LENGTH) ?? throw new InvalidOperationException("Failed to generate 2FA secret.");
                     currentUser.TwoFASecret = Convert.ToBase64String(twoFactorSecret);
                     string? uniformResourceIdentifier = new OtpUri(OtpType.Totp, twoFactorSecret, currentUser.Username, "DrinkDB").ToString();
                     this.windowSetup = windowSetup == null ? new AuthenticationQRCodeAndTextBoxDigits(uniformResourceIdentifier) : windowSetup;

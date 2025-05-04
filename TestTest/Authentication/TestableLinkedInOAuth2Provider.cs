@@ -5,6 +5,7 @@ using DataAccess.Model;
 using DrinkDb_Auth.OAuthProviders;
 using IRepository;
 using DataAccess.Model.Authentication;
+using System.Text.Json;
 
 namespace Tests.Authentication
 {
@@ -13,15 +14,15 @@ namespace Tests.Authentication
     /// </summary>
     public class TestableLinkedInOAuth2Provider : LinkedInOAuth2Provider
     {
-        private readonly HttpClient _httpClient;
-        private readonly IUserRepository _userRepository;
-        private readonly ISessionRepository _sessionRepository;
+        private readonly HttpClient httpClient;
+        private readonly IUserRepository userRepository;
+        private readonly ISessionRepository sessionRepository;
         private IUserRepository object1;
         private ISessionRepository object2;
 
         public TestableLinkedInOAuth2Provider(HttpClient httpClient, IUserRepository object1, ISessionRepository object2)
         {
-            _httpClient = httpClient;
+            this.httpClient = httpClient;
             this.object1 = object1;
             this.object2 = object2;
         }
@@ -30,13 +31,13 @@ namespace Tests.Authentication
         public new AuthenticationResponse Authenticate(string userId, string token)
         {
             // Use the same implementation as the parent class but with our injected HttpClient
-            _httpClient.DefaultRequestHeaders.Clear();
-            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
-            _httpClient.DefaultRequestHeaders.Add("User-Agent", "DrinkDb_Auth-App");
+            httpClient.DefaultRequestHeaders.Clear();
+            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+            httpClient.DefaultRequestHeaders.Add("User-Agent", "DrinkDb_Auth-App");
             
             try 
             {
-                var response = _httpClient.GetAsync("https://api.linkedin.com/v2/userinfo").Result;
+                HttpResponseMessage response = httpClient.GetAsync("https://api.linkedin.com/v2/userinfo").Result;
                 if (!response.IsSuccessStatusCode)
                 {
                     throw new HttpRequestException("Failed to fetch user info from Linkedin.");
@@ -45,12 +46,12 @@ namespace Tests.Authentication
                 string json = response.Content.ReadAsStringAsync().Result;
                 return ProcessResponseJson(json, token);
             }
-            catch (AggregateException ex) 
+            catch (AggregateException exception) 
             {
                 // Unwrap the inner exception if it's an HttpRequestException
-                if (ex.InnerException is HttpRequestException httpEx)
+                if (exception.InnerException is HttpRequestException httpException)
                 {
-                    throw httpEx;
+                    throw httpException;
                 }
                 throw;
             }
@@ -59,20 +60,20 @@ namespace Tests.Authentication
         // Helper method to process the response JSON
         private AuthenticationResponse ProcessResponseJson(string json, string token)
         {
-            using (var document = System.Text.Json.JsonDocument.Parse(json))
+            using (JsonDocument document = System.Text.Json.JsonDocument.Parse(json))
             {
-                var root = document.RootElement;
+                JsonElement root = document.RootElement;
                 
                 // Safely get properties with null checking
                 string id = "";
                 string name = "";
                 
-                if (root.TryGetProperty("sub", out var subElement) && !subElement.ValueKind.Equals(System.Text.Json.JsonValueKind.Null))
+                if (root.TryGetProperty("sub", out JsonElement subElement) && !subElement.ValueKind.Equals(System.Text.Json.JsonValueKind.Null))
                 {
                     id = subElement.GetString() ?? "";
                 }
                 
-                if (root.TryGetProperty("name", out var nameElement) && !nameElement.ValueKind.Equals(System.Text.Json.JsonValueKind.Null))
+                if (root.TryGetProperty("name", out JsonElement nameElement) && !nameElement.ValueKind.Equals(System.Text.Json.JsonValueKind.Null))
                 {
                     name = nameElement.GetString() ?? "";
                 }
@@ -89,7 +90,7 @@ namespace Tests.Authentication
                 }
 
                 // If userAdapter is null, return a fake response
-                if (_userRepository == null)
+                if (userRepository == null)
                 {
                     return new AuthenticationResponse
                     {
@@ -100,11 +101,11 @@ namespace Tests.Authentication
                     };
                 }
 
-                var user = _userRepository.GetUserByUsername(name);
+                User user = userRepository.GetUserByUsername(name);
                 if (user == null)
                 {
                     // Create a new user since none exists
-                    var newUser = new User
+                    User newUser = new User
                     {
                         Username = name,
                         PasswordHash = string.Empty,
@@ -113,16 +114,16 @@ namespace Tests.Authentication
                     };
                     
                     bool userCreated = true;
-                    if (_userRepository != null)
+                    if (userRepository != null)
                     {
-                        userCreated = _userRepository.CreateUser(newUser);
+                        userCreated = userRepository.CreateUser(newUser);
                     }
                     
                     // Create a session for the new user
                     Guid sessionId = Guid.NewGuid();
-                    if (_sessionRepository != null && userCreated)
+                    if (sessionRepository != null && userCreated)
                     {
-                        var session = _sessionRepository.CreateSession(newUser.UserId);
+                        Session session = sessionRepository.CreateSession(newUser.UserId);
                         if (session != null)
                         {
                             sessionId = session.SessionId;
@@ -141,9 +142,9 @@ namespace Tests.Authentication
                 {
                     // User exists, create a session for them
                     Guid sessionId = Guid.NewGuid();
-                    if (_sessionRepository != null)
+                    if (sessionRepository != null)
                     {
-                        var session = _sessionRepository.CreateSession(user.UserId);
+                        Session session = sessionRepository.CreateSession(user.UserId);
                         if (session != null)
                         {
                             sessionId = session.SessionId;

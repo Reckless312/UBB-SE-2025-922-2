@@ -22,6 +22,7 @@ namespace DrinkDb_Auth.Service.AdminDashboard.Components
     {
         private static readonly string HuggingFaceApiUrl = "https://api-inference.huggingface.co/models/facebook/roberta-hate-speech-dynabench-r1-target";
         private static readonly string HuggingFaceApiToken = string.Empty;
+        private const string MediaTypeJson = "application/json";
 
         /// <summary>
         /// Search for offensive content.
@@ -32,7 +33,7 @@ namespace DrinkDb_Auth.Service.AdminDashboard.Components
         {
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {HuggingFaceApiToken}");
-            StringContent jsonContent = new StringContent(JsonConvert.SerializeObject(text), Encoding.UTF8, "application/json");
+            StringContent jsonContent = new StringContent(JsonConvert.SerializeObject(text), Encoding.UTF8, MediaTypeJson);
             try
             {
                 HttpResponseMessage response = client.PostAsync(HuggingFaceApiUrl, jsonContent).GetAwaiter().GetResult();
@@ -43,9 +44,9 @@ namespace DrinkDb_Auth.Service.AdminDashboard.Components
 
                 return $"Error: {response.StatusCode}";
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                return $"Exception: {ex.Message}";
+                return $"Exception: {exception.Message}";
             }
         }
     }

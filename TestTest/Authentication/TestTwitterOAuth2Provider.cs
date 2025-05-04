@@ -54,32 +54,35 @@ namespace Tests.Authentication
         [TestMethod]
         public void Authenticate_ShouldReturnSuccess_WhenTokenIsNotEmpty()
         {
-            var provider = new TwitterOAuth2Provider();
-            var result = provider.Authenticate("id", "token123");
+            string identifier = "id";
+            string token = "token123";
+
+            TwitterOAuth2Provider provider = new TwitterOAuth2Provider();
+            AuthenticationResponse result = provider.Authenticate(identifier, token);
             Assert.IsTrue(result.AuthenticationSuccessful);
-            Assert.AreEqual("token123", result.OAuthToken);
+            Assert.AreEqual(token, result.OAuthToken);
         }
 
         [TestMethod]
         public void Authenticate_ShouldReturnFail_WhenTokenIsEmpty()
         {
-            var provider = new TwitterOAuth2Provider();
-            var result = provider.Authenticate("id", "");
+            TwitterOAuth2Provider provider = new TwitterOAuth2Provider();
+            AuthenticationResponse result = provider.Authenticate("id", "");
             Assert.IsFalse(result.AuthenticationSuccessful);
         }
 
         [TestMethod]
         public void Authenticate_ShouldReturnFail_WhenTokenIsNull()
         {
-            var provider = new TwitterOAuth2Provider();
-            var result = provider.Authenticate("id", null!);
+            TwitterOAuth2Provider provider = new TwitterOAuth2Provider();
+            AuthenticationResponse result = provider.Authenticate("id", null!);
             Assert.IsFalse(result.AuthenticationSuccessful);
         }
 
         [TestMethod]
         public void GetAuthorizationUrl_ShouldReturnValidUrl()
         {
-            var provider = new TwitterOAuth2Provider();
+            TwitterOAuth2Provider provider = new TwitterOAuth2Provider();
             string url = provider.GetAuthorizationUrl();
             Assert.IsTrue(url.StartsWith("https://twitter.com/i/oauth2/authorize"));
             Assert.IsTrue(url.Contains("code_challenge"));
@@ -92,7 +95,7 @@ namespace Tests.Authentication
         [TestMethod]
         public void GeneratePkceData_ShouldGenerateValidCodeVerifierAndChallenge()
         {
-            var provider = new TwitterOAuth2Provider();
+            TwitterOAuth2Provider provider = new TwitterOAuth2Provider();
             var method = typeof(TwitterOAuth2Provider)
                 .GetMethod("GeneratePkceData", BindingFlags.NonPublic | BindingFlags.Instance);
 
@@ -109,7 +112,7 @@ namespace Tests.Authentication
         [TestMethod]
         public void GeneratePkceData_ShouldGenerateDifferentValuesEachTime()
         {
-            var provider = new TwitterOAuth2Provider();
+            TwitterOAuth2Provider provider = new TwitterOAuth2Provider();
             var method = typeof(TwitterOAuth2Provider)
                 .GetMethod("GeneratePkceData", BindingFlags.NonPublic | BindingFlags.Instance);
 
@@ -125,15 +128,15 @@ namespace Tests.Authentication
         [TestMethod]
         public async Task ExchangeCodeForTokenAsync_ShouldFailGracefully_WhenTokenInvalid()
         {
-            var mockHandler = new MockHttpMessageHandler
+            MockHttpMessageHandler mockHandler = new MockHttpMessageHandler
             {
                 TokenResponse = new HttpResponseMessage(HttpStatusCode.BadRequest)
                 {
                     Content = new StringContent("{\"error\":\"invalid_request\"}")
                 }
             };
-            var provider = BuildProvider(mockHandler);
-            var result = await provider.ExchangeCodeForTokenAsync("badcode");
+            TwitterOAuth2Provider provider = BuildProvider(mockHandler);
+            AuthenticationResponse result = await provider.ExchangeCodeForTokenAsync("badcode");
             Assert.IsFalse(result.AuthenticationSuccessful);
             Assert.AreEqual(Guid.Empty, result.SessionId);
         }
@@ -141,7 +144,7 @@ namespace Tests.Authentication
         [TestMethod]
         public async Task ExchangeCodeForTokenAsync_ShouldFail_WhenUserInfoMissing()
         {
-            var tokenJson = JsonSerializer.Serialize(new TwitterTokenResponse
+            String tokenJson = JsonSerializer.Serialize(new TwitterTokenResponse
             {
                 AccessToken = "abc123",
                 TokenType = "Bearer",
@@ -149,7 +152,7 @@ namespace Tests.Authentication
                 Scope = "tweet.read users.read"
             });
 
-            var mockHandler = new MockHttpMessageHandler
+            MockHttpMessageHandler mockHandler = new MockHttpMessageHandler
             {
                 TokenResponse = new HttpResponseMessage(HttpStatusCode.OK)
                 {
@@ -160,20 +163,20 @@ namespace Tests.Authentication
                     Content = new StringContent("{}")
                 }
             };
-            var provider = BuildProvider(mockHandler);
-            var result = await provider.ExchangeCodeForTokenAsync("validcode");
+            TwitterOAuth2Provider provider = BuildProvider(mockHandler);
+            AuthenticationResponse result = await provider.ExchangeCodeForTokenAsync("validcode");
             Assert.IsFalse(result.AuthenticationSuccessful);
         }
 
         [TestMethod]
         public async Task ExchangeCodeForTokenAsync_ShouldHandleNetworkError()
         {
-            var mockHandler = new MockHttpMessageHandler
+            MockHttpMessageHandler mockHandler = new MockHttpMessageHandler
             {
                 ThrowException = new HttpRequestException("Network error")
             };
-            var provider = BuildProvider(mockHandler);
-            var result = await provider.ExchangeCodeForTokenAsync("anycode");
+            TwitterOAuth2Provider provider = BuildProvider(mockHandler);
+            AuthenticationResponse result = await provider.ExchangeCodeForTokenAsync("anycode");
             Assert.IsFalse(result.AuthenticationSuccessful);
             Assert.AreEqual(Guid.Empty, result.SessionId);
         }
@@ -181,15 +184,15 @@ namespace Tests.Authentication
         [TestMethod]
         public async Task ExchangeCodeForTokenAsync_ShouldHandleInvalidJsonResponse()
         {
-            var mockHandler = new MockHttpMessageHandler
+            MockHttpMessageHandler mockHandler = new MockHttpMessageHandler
             {
                 TokenResponse = new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent("invalid json")
                 }
             };
-            var provider = BuildProvider(mockHandler);
-            var result = await provider.ExchangeCodeForTokenAsync("anycode");
+            TwitterOAuth2Provider provider = BuildProvider(mockHandler);
+            AuthenticationResponse result = await provider.ExchangeCodeForTokenAsync("anycode");
             Assert.IsFalse(result.AuthenticationSuccessful);
             Assert.AreEqual(Guid.Empty, result.SessionId);
         }
@@ -197,12 +200,12 @@ namespace Tests.Authentication
         [TestMethod]
         public void ExtractQueryParameter_ShouldExtractParameterFromUrl()
         {
-            var provider = new TwitterOAuth2Provider();
+            TwitterOAuth2Provider provider = new TwitterOAuth2Provider();
             var method = typeof(TwitterOAuth2Provider)
                 .GetMethod("ExtractQueryParameter", BindingFlags.NonPublic | BindingFlags.Instance);
 
-            var url = "http://example.com?code=12345&state=abc";
-            var result = method!.Invoke(provider, new object[] { url, "code" }) as string;
+            String url = "http://example.com?code=12345&state=abc";
+            String result = method!.Invoke(provider, new object[] { url, "code" }) as string;
 
             Assert.AreEqual("12345", result);
         }
@@ -210,11 +213,11 @@ namespace Tests.Authentication
         [TestMethod]
         public void ExtractQueryParameter_ShouldThrowWhenParameterNotFound()
         {
-            var provider = new TwitterOAuth2Provider();
+            TwitterOAuth2Provider provider = new TwitterOAuth2Provider();
             var method = typeof(TwitterOAuth2Provider)
                 .GetMethod("ExtractQueryParameter", BindingFlags.NonPublic | BindingFlags.Instance);
 
-            var url = "http://example.com?state=abc";
+            String url = "http://example.com?state=abc";
             Assert.ThrowsException<TargetInvocationException>(() =>
                 method!.Invoke(provider, new object[] { url, "code" }));
         }
@@ -222,17 +225,17 @@ namespace Tests.Authentication
         [TestMethod]
         public void ExtractUserInfoFromIdToken_ShouldParseValidToken()
         {
-            var provider = new TwitterOAuth2Provider();
+            TwitterOAuth2Provider provider = new TwitterOAuth2Provider();
             var method = typeof(TwitterOAuth2Provider)
                 .GetMethod("ExtractUserInfoFromIdToken", BindingFlags.NonPublic | BindingFlags.Instance);
 
             // Create a valid JWT token
-            var header = Convert.ToBase64String(Encoding.UTF8.GetBytes("{\"alg\":\"HS256\",\"typ\":\"JWT\"}"));
-            var payload = Convert.ToBase64String(Encoding.UTF8.GetBytes("{\"data\":{\"id\":\"123\",\"name\":\"Test User\",\"username\":\"testuser\"}}"));
-            var signature = Convert.ToBase64String(Encoding.UTF8.GetBytes("signature"));
-            var token = $"{header}.{payload}.{signature}";
+            String header = Convert.ToBase64String(Encoding.UTF8.GetBytes("{\"alg\":\"HS256\",\"typ\":\"JWT\"}"));
+            String payload = Convert.ToBase64String(Encoding.UTF8.GetBytes("{\"data\":{\"id\":\"123\",\"name\":\"Test User\",\"username\":\"testuser\"}}"));
+            String signature = Convert.ToBase64String(Encoding.UTF8.GetBytes("signature"));
+            String token = $"{header}.{payload}.{signature}";
 
-            var result = method!.Invoke(provider, new object[] { token }) as TwitterUserInfoResponse;
+            TwitterUserInfoResponse result = method!.Invoke(provider, new object[] { token }) as TwitterUserInfoResponse;
 
             Assert.IsNotNull(result);
             Assert.AreEqual("123", result.Data.Id);
@@ -243,7 +246,7 @@ namespace Tests.Authentication
         [TestMethod]
         public void ExtractUserInfoFromIdToken_ShouldThrowOnInvalidTokenFormat()
         {
-            var provider = new TwitterOAuth2Provider();
+            TwitterOAuth2Provider provider = new TwitterOAuth2Provider();
             var method = typeof(TwitterOAuth2Provider)
                 .GetMethod("ExtractUserInfoFromIdToken", BindingFlags.NonPublic | BindingFlags.Instance);
 

@@ -16,6 +16,7 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
         private readonly string clientSecret = "WPL_AP1.pg2Bd1XhCi821VTG.+hatTA==";
         private readonly string redirectUrl = "http://localhost:8891/auth";
         private readonly string scope = "openid profile email";
+
         private TaskCompletionSource<AuthenticationResponse>? taskCompletionSource;
         private readonly IUserRepository userRepository = new UserRepository();
         private readonly static LinkedInOAuth2Provider LinkedInOAuth2Provider = new ();
@@ -31,7 +32,7 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
 
         private string BuildAuthorizeUrl()
         {
-            var url = $"https://www.linkedin.com/oauth/v2/authorization" +
+            String url = $"https://www.linkedin.com/oauth/v2/authorization" +
                       $"?response_type=code" +
                       $"&client_id={clientId}" +
                       $"&redirect_uri={Uri.EscapeDataString(redirectUrl)}" +
@@ -49,13 +50,13 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
 
             try
             {
-                var token = await ExchangeCodeForToken(code);
-                var response = LinkedInOAuth2Provider.Authenticate(string.Empty, token);
+                String token = await ExchangeCodeForToken(code);
+                AuthenticationResponse response = LinkedInOAuth2Provider.Authenticate(string.Empty, token);
                 taskCompletionSource.SetResult(response);
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                taskCompletionSource.SetException(ex);
+                taskCompletionSource.SetException(exception);
             }
         }
 
@@ -63,7 +64,7 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
         {
             taskCompletionSource = new TaskCompletionSource<AuthenticationResponse>();
 
-            var authorizeUri = new Uri(BuildAuthorizeUrl());
+            Uri authorizeUri = new Uri(BuildAuthorizeUrl());
             Process.Start(new ProcessStartInfo
             {
                 FileName = authorizeUri.ToString(),
@@ -77,9 +78,9 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
         {
             using (var client = new HttpClient())
             {
-                var request = new HttpRequestMessage(HttpMethod.Post, "https://www.linkedin.com/oauth/v2/accessToken");
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://www.linkedin.com/oauth/v2/accessToken");
                 request.Headers.Add("Accept", "application/json");
-                var content = new FormUrlEncodedContent(new[]
+                FormUrlEncodedContent content = new FormUrlEncodedContent(new[]
                 {
                     new KeyValuePair<string, string>("grant_type", "authorization_code"),
                     new KeyValuePair<string, string>("code", code),
@@ -89,11 +90,11 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
                 });
                 request.Content = content;
 
-                var response = await client.SendAsync(request);
-                var body = await response.Content.ReadAsStringAsync();
+                HttpResponseMessage response = await client.SendAsync(request);
+                String body = await response.Content.ReadAsStringAsync();
 
-                using var document = JsonDocument.Parse(body);
-                if (document.RootElement.TryGetProperty("access_token", out var tokenProp))
+                using JsonDocument document = JsonDocument.Parse(body);
+                if (document.RootElement.TryGetProperty("access_token", out JsonElement tokenProp))
                 {
                     return tokenProp.GetString() ?? throw new Exception("Token is null");
                 }

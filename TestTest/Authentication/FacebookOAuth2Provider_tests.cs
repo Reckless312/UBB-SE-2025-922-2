@@ -18,32 +18,32 @@ namespace Tests.Authentication
     [TestFixture]
     public class FacebookOAuth2ProviderTests
     {
-        private Mock<HttpMessageHandler> _mockHttpMessageHandler;
-        private FacebookOAuth2Provider _provider;
-        private MockUserAdapter _mockUserAdapter;
-        private MockSessionAdapter _mockSessionAdapter;
+        private Mock<HttpMessageHandler> mockHttpMessageHandler;
+        private FacebookOAuth2Provider provider;
+        private MockUserAdapter mockUserAdapter;
+        private MockSessionAdapter mockSessionAdapter;
         private const string TestToken = "test_token";
-        private readonly Guid _testUserId = Guid.NewGuid();
-        private readonly Guid _testSessionId = Guid.NewGuid();
+        private readonly Guid testUserId = Guid.NewGuid();
+        private readonly Guid testSessionId = Guid.NewGuid();
 
         [SetUp]
         public void Setup()
         {
-            _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-            _mockUserAdapter = new MockUserAdapter();
-            _mockSessionAdapter = new MockSessionAdapter();
+            mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+            mockUserAdapter = new MockUserAdapter();
+            mockSessionAdapter = new MockSessionAdapter();
 
 
-            _provider = new FacebookOAuth2Provider();
+            provider = new FacebookOAuth2Provider();
 
 
             var userAdapterField = typeof(FacebookOAuth2Provider)
                 .GetField("UserAdapter", BindingFlags.NonPublic | BindingFlags.Static);
-            userAdapterField.SetValue(null, _mockUserAdapter);
+            userAdapterField.SetValue(null, mockUserAdapter);
 
             var sessionAdapterField = typeof(FacebookOAuth2Provider)
                 .GetField("SessionAdapter", BindingFlags.NonPublic | BindingFlags.Static);
-            sessionAdapterField.SetValue(null, _mockSessionAdapter);
+            sessionAdapterField.SetValue(null, mockSessionAdapter);
         }
 
         [TearDown]
@@ -61,13 +61,13 @@ namespace Tests.Authentication
 
         private void SetupMockHttpResponse(string jsonContent)
         {
-            var response = new HttpResponseMessage
+            HttpResponseMessage response = new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.OK,
                 Content = new StringContent(jsonContent, Encoding.UTF8, "application/json")
             };
 
-            _mockHttpMessageHandler
+            mockHttpMessageHandler
                 .Protected()
                 .Setup<Task<HttpResponseMessage>>(
                     "SendAsync",

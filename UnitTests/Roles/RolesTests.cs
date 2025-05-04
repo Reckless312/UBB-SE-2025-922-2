@@ -27,7 +27,7 @@ namespace UnitTests.Roles
 
             foreach (var testCase in testCases)
             {
-                var role = new Role(testCase.Type, testCase.Name);
+                Role role = new Role(testCase.Type, testCase.Name);
 
                 Assert.Equal(testCase.Type, role.RoleType);
                 Assert.Equal(testCase.Name, role.RoleName);
@@ -37,7 +37,7 @@ namespace UnitTests.Roles
         [Fact]
         public void Role_WhenPropertiesModified_UpdatesCorrectly()
         {
-            var role = new Role(RoleType.User, "User");
+            Role role = new Role(RoleType.User, "User");
 
             role.RoleType = RoleType.Admin;
             role.RoleName = "Admin";

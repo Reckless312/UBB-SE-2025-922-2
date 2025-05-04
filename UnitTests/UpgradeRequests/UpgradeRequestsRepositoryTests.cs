@@ -107,7 +107,7 @@ namespace UnitTests.UpgradeRequests
         {
             Mock<IDbConnectionFactory> mockConnectionFactory = new Mock<IDbConnectionFactory>();
             mockConnectionFactory
-                .Setup(f => f.CreateConnection());
+                .Setup(factory => factory.CreateConnection());
             UpgradeRequestsRepository repository = new UpgradeRequestsRepository(mockConnectionFactory.Object);
             List<UpgradeRequest> result = repository.RetrieveAllUpgradeRequests();
             Assert.NotNull(result);
@@ -119,7 +119,7 @@ namespace UnitTests.UpgradeRequests
         {
             Mock<IDbConnectionFactory> mockConnectionFactory = new Mock<IDbConnectionFactory>();
             mockConnectionFactory
-                .Setup(f => f.CreateConnection());
+                .Setup(factory => factory.CreateConnection());
             UpgradeRequestsRepository repository = new UpgradeRequestsRepository(mockConnectionFactory.Object);
             Exception exception = Record.Exception(() => repository.RemoveUpgradeRequestByIdentifier(1));
             Assert.Null(exception);
@@ -129,7 +129,7 @@ namespace UnitTests.UpgradeRequests
         public void RetrieveUpgradeRequestByIdentifier_DbException_HandlesExceptionAndReturnsNull()
         {
             Mock<IDbConnectionFactory> mockConnectionFactory = new Mock<IDbConnectionFactory>();
-            mockConnectionFactory.Setup(f => f.CreateConnection());
+            mockConnectionFactory.Setup(factory => factory.CreateConnection());
             UpgradeRequestsRepository repository = new UpgradeRequestsRepository(mockConnectionFactory.Object);
             UpgradeRequest result = repository.RetrieveUpgradeRequestByIdentifier(1);
             Assert.Null(result);
@@ -162,17 +162,17 @@ namespace UnitTests.UpgradeRequests
 
         private void CleanupTable()
         {
-            using var conn = new SqlConnection(this.connectionString);
-            conn.Open();
-            using var cmd = new SqlCommand("DELETE FROM UpgradeRequests", conn);
-            cmd.ExecuteNonQuery();
+            using SqlConnection sqlConnection = new SqlConnection(this.connectionString);
+            sqlConnection.Open();
+            using SqlCommand sqlCommand = new SqlCommand("DELETE FROM UpgradeRequests", sqlConnection);
+            sqlCommand.ExecuteNonQuery();
         }
 
         private void EnsureTableExists()
         {
-            using var conn = new SqlConnection(this.connectionString);
-            conn.Open();
-            using var cmd = new SqlCommand(
+            using SqlConnection sqlConnection = new SqlConnection(this.connectionString);
+            sqlConnection.Open();
+            using SqlCommand sqlCommand = new SqlCommand(
                 @"IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'UpgradeRequests')
                 BEGIN
                     CREATE TABLE UpgradeRequests (
@@ -180,25 +180,25 @@ namespace UnitTests.UpgradeRequests
                         RequestingUserId INT NOT NULL,
                         RequestingUserName NVARCHAR(100) NOT NULL
                     )
-                END", conn);
-            cmd.ExecuteNonQuery();
+                END", sqlConnection);
+            sqlCommand.ExecuteNonQuery();
         }
 
         private int InsertTestRequest(int userId, string userName)
         {
             int requestId = 0;
-            using var conn = new SqlConnection(this.connectionString);
-            conn.Open();
+            using SqlConnection sqlConnection = new SqlConnection(this.connectionString);
+            sqlConnection.Open();
 
-            using (var cmdInsert = new SqlCommand(
+            using (SqlCommand commandInsert = new SqlCommand(
                 @"INSERT INTO UpgradeRequests (RequestingUserId, RequestingUserName) 
                   VALUES (@userId, @userName);
-                  SELECT SCOPE_IDENTITY();", conn))
+                  SELECT SCOPE_IDENTITY();", sqlConnection))
             {
-                cmdInsert.Parameters.AddWithValue("@userId", userId);
-                cmdInsert.Parameters.AddWithValue("@userName", userName);
+                commandInsert.Parameters.AddWithValue("@userId", userId);
+                commandInsert.Parameters.AddWithValue("@userName", userName);
 
-                requestId = Convert.ToInt32(cmdInsert.ExecuteScalar());
+                requestId = Convert.ToInt32(commandInsert.ExecuteScalar());
             }
 
             return requestId;

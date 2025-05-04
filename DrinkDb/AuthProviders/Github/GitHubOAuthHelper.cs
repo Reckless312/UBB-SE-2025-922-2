@@ -56,8 +56,8 @@ namespace DrinkDb_Auth.AuthProviders.Github
             try
             {
                 // Exchange code for an access token
-                var token = await ExchangeCodeForToken(code);
-                var result = gitHubOAuth2Provider.Authenticate(string.Empty, token);
+                String token = await ExchangeCodeForToken(code);
+                AuthenticationResponse result = gitHubOAuth2Provider.Authenticate(string.Empty, token);
                 taskCompletionSource.SetResult(result);
             }
             catch (Exception exception)
@@ -74,7 +74,7 @@ namespace DrinkDb_Auth.AuthProviders.Github
         {
             taskCompletionSource = new TaskCompletionSource<AuthenticationResponse>();
 
-            var authorizeUri = new Uri(BuildAuthorizeUrl());
+            Uri authorizeUri = new Uri(BuildAuthorizeUrl());
             Process.Start(new ProcessStartInfo
             {
                 FileName = authorizeUri.ToString(),
@@ -89,11 +89,11 @@ namespace DrinkDb_Auth.AuthProviders.Github
         /// </summary>
         private async Task<string> ExchangeCodeForToken(string code)
         {
-            using (var client = new HttpClient())
+            using (HttpClient client = new HttpClient())
             {
-                var request = new HttpRequestMessage(HttpMethod.Post, "https://github.com/login/oauth/access_token");
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://github.com/login/oauth/access_token");
                 request.Headers.Add("Accept", "application/json"); // we want JSON response
-                var content = new FormUrlEncodedContent(new[]
+                FormUrlEncodedContent content = new FormUrlEncodedContent(new[]
                 {
                     new KeyValuePair<string, string>("client_id", ClientId),
                     new KeyValuePair<string, string>("client_secret", ClientSecret),
@@ -102,10 +102,10 @@ namespace DrinkDb_Auth.AuthProviders.Github
                 });
                 request.Content = content;
 
-                var response = await client.SendAsync(request);
-                var responseBody = await response.Content.ReadAsStringAsync();
+                HttpResponseMessage response = await client.SendAsync(request);
+                String responseBody = await response.Content.ReadAsStringAsync();
 
-                using var responseDocument = JsonDocument.Parse(responseBody);
+                using JsonDocument responseDocument = JsonDocument.Parse(responseBody);
                 if (responseDocument.RootElement.TryGetProperty("access_token", out var tokenProperty))
                 {
                     return tokenProperty.GetString() ?? throw new Exception("Access token is null.");

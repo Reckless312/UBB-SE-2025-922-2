@@ -20,8 +20,8 @@ namespace DrinkDb_Auth.Repository.AdminDashboard
         {
             List<Review> reviews = new();
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
-            using SqlCommand cmd = new("SELECT * FROM Reviews", connection);
-            using SqlDataReader reader = cmd.ExecuteReader();
+            using SqlCommand sqlCommand = new("SELECT * FROM Reviews", connection);
+            using SqlDataReader reader = sqlCommand.ExecuteReader();
 
             while (reader.Read())
             {
@@ -36,9 +36,9 @@ namespace DrinkDb_Auth.Repository.AdminDashboard
         {
             List<Review> reviews = new();
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
-            using SqlCommand cmd = new("SELECT * FROM Reviews WHERE CreatedDate >= @date AND IsHidden = 0 ORDER BY CreatedDate DESC", connection);
-            cmd.Parameters.Add("@date", SqlDbType.DateTime2).Value = date;
-            using SqlDataReader reader = cmd.ExecuteReader();
+            using SqlCommand sqlCommand = new("SELECT * FROM Reviews WHERE CreatedDate >= @date AND IsHidden = 0 ORDER BY CreatedDate DESC", connection);
+            sqlCommand.Parameters.Add("@date", SqlDbType.DateTime2).Value = date;
+            using SqlDataReader reader = sqlCommand.ExecuteReader();
 
             while (reader.Read())
             {
@@ -51,8 +51,8 @@ namespace DrinkDb_Auth.Repository.AdminDashboard
         public double GetAverageRatingForVisibleReviews()
         {
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
-            using SqlCommand cmd = new("SELECT AVG(CAST(Rating AS FLOAT)) FROM Reviews WHERE IsHidden = 0", connection);
-            object result = cmd.ExecuteScalar();
+            using SqlCommand sqlCommand = new("SELECT AVG(CAST(Rating AS FLOAT)) FROM Reviews WHERE IsHidden = 0", connection);
+            object result = sqlCommand.ExecuteScalar();
 
             return result == DBNull.Value ? 0.0 : Math.Round(Convert.ToDouble(result), 1);
         }
@@ -61,9 +61,9 @@ namespace DrinkDb_Auth.Repository.AdminDashboard
         {
             List<Review> reviews = new();
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
-            using SqlCommand cmd = new("SELECT TOP (@count) * FROM Reviews WHERE IsHidden = 0 ORDER BY CreatedDate DESC", connection);
-            cmd.Parameters.Add("@count", SqlDbType.Int).Value = count;
-            using SqlDataReader reader = cmd.ExecuteReader();
+            using SqlCommand sqlCommand = new("SELECT TOP (@count) * FROM Reviews WHERE IsHidden = 0 ORDER BY CreatedDate DESC", connection);
+            sqlCommand.Parameters.Add("@count", SqlDbType.Int).Value = count;
+            using SqlDataReader reader = sqlCommand.ExecuteReader();
 
             while (reader.Read())
             {
@@ -76,18 +76,18 @@ namespace DrinkDb_Auth.Repository.AdminDashboard
         public int GetReviewCountAfterDate(DateTime date)
         {
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
-            using SqlCommand cmd = new("SELECT COUNT(*) FROM Reviews WHERE CreatedDate >= @date AND IsHidden = 0", connection);
-            cmd.Parameters.Add("@date", SqlDbType.DateTime2).Value = date;
-            return (int)cmd.ExecuteScalar();
+            using SqlCommand sqlCommand = new("SELECT COUNT(*) FROM Reviews WHERE CreatedDate >= @date AND IsHidden = 0", connection);
+            sqlCommand.Parameters.Add("@date", SqlDbType.DateTime2).Value = date;
+            return (int)sqlCommand.ExecuteScalar();
         }
 
         public List<Review> GetFlaggedReviews(int minFlags)
         {
             List<Review> reviews = new();
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
-            using SqlCommand cmd = new("SELECT * FROM Reviews WHERE NumberOfFlags >= @minFlags AND IsHidden = 0", connection);
-            cmd.Parameters.Add("@minFlags", SqlDbType.Int).Value = minFlags;
-            using SqlDataReader reader = cmd.ExecuteReader();
+            using SqlCommand sqlCommand = new("SELECT * FROM Reviews WHERE NumberOfFlags >= @minFlags AND IsHidden = 0", connection);
+            sqlCommand.Parameters.Add("@minFlags", SqlDbType.Int).Value = minFlags;
+            using SqlDataReader reader = sqlCommand.ExecuteReader();
 
             while (reader.Read())
             {
@@ -101,9 +101,9 @@ namespace DrinkDb_Auth.Repository.AdminDashboard
         {
             List<Review> reviews = new();
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
-            using SqlCommand cmd = new("SELECT * FROM Reviews WHERE UserId = @userId AND IsHidden = 0 ORDER BY CreatedDate DESC", connection);
-            cmd.Parameters.Add("@userId", SqlDbType.UniqueIdentifier).Value = userId;
-            using SqlDataReader reader = cmd.ExecuteReader();
+            using SqlCommand sqlCommand = new("SELECT * FROM Reviews WHERE UserId = @userId AND IsHidden = 0 ORDER BY CreatedDate DESC", connection);
+            sqlCommand.Parameters.Add("@userId", SqlDbType.UniqueIdentifier).Value = userId;
+            using SqlDataReader reader = sqlCommand.ExecuteReader();
 
             while (reader.Read())
             {
@@ -116,9 +116,9 @@ namespace DrinkDb_Auth.Repository.AdminDashboard
         public Review GetReviewById(int reviewId)
         {
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
-            using SqlCommand cmd = new("SELECT * FROM Reviews WHERE ReviewId = @reviewId", connection);
-            cmd.Parameters.Add("@reviewId", SqlDbType.Int).Value = reviewId;
-            using SqlDataReader reader = cmd.ExecuteReader();
+            using SqlCommand sqlCommand = new("SELECT * FROM Reviews WHERE ReviewId = @reviewId", connection);
+            sqlCommand.Parameters.Add("@reviewId", SqlDbType.Int).Value = reviewId;
+            using SqlDataReader reader = sqlCommand.ExecuteReader();
 
             if (reader.Read())
             {
@@ -131,50 +131,50 @@ namespace DrinkDb_Auth.Repository.AdminDashboard
         public void UpdateReviewVisibility(int reviewId, bool isHidden)
         {
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
-            using SqlCommand cmd = new("UPDATE Reviews SET IsHidden = @isHidden WHERE ReviewId = @reviewId", connection);
-            cmd.Parameters.Add("@isHidden", SqlDbType.Bit).Value = isHidden;
-            cmd.Parameters.Add("@reviewId", SqlDbType.Int).Value = reviewId;
-            cmd.ExecuteNonQuery();
+            using SqlCommand sqlCommand = new("UPDATE Reviews SET IsHidden = @isHidden WHERE ReviewId = @reviewId", connection);
+            sqlCommand.Parameters.Add("@isHidden", SqlDbType.Bit).Value = isHidden;
+            sqlCommand.Parameters.Add("@reviewId", SqlDbType.Int).Value = reviewId;
+            sqlCommand.ExecuteNonQuery();
         }
 
         public void UpdateNumberOfFlagsForReview(int reviewId, int numberOfFlags)
         {
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
-            using SqlCommand cmd = new("UPDATE Reviews SET NumberOfFlags = @numberOfFlags WHERE ReviewId = @reviewId", connection);
-            cmd.Parameters.Add("@numberOfFlags", SqlDbType.Int).Value = numberOfFlags;
-            cmd.Parameters.Add("@reviewId", SqlDbType.Int).Value = reviewId;
-            cmd.ExecuteNonQuery();
+            using SqlCommand sqlCommand = new("UPDATE Reviews SET NumberOfFlags = @numberOfFlags WHERE ReviewId = @reviewId", connection);
+            sqlCommand.Parameters.Add("@numberOfFlags", SqlDbType.Int).Value = numberOfFlags;
+            sqlCommand.Parameters.Add("@reviewId", SqlDbType.Int).Value = reviewId;
+            sqlCommand.ExecuteNonQuery();
         }
 
         public int AddReview(Review review)
         {
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
-            using SqlCommand cmd = new("INSERT INTO Reviews (UserId, Rating, Content, CreatedDate, NumberOfFlags, IsHidden) OUTPUT INSERTED.ReviewId VALUES (@userId, @rating, @content, @createdDate, @numberOfFlags, @isHidden)", connection);
+            using SqlCommand sqlCommand = new("INSERT INTO Reviews (UserId, Rating, Content, CreatedDate, NumberOfFlags, IsHidden) OUTPUT INSERTED.ReviewId VALUES (@userId, @rating, @content, @createdDate, @numberOfFlags, @isHidden)", connection);
 
-            cmd.Parameters.Add("@userId", SqlDbType.UniqueIdentifier).Value = review.UserId;
-            cmd.Parameters.Add("@rating", SqlDbType.Int).Value = review.Rating;
-            cmd.Parameters.Add("@content", SqlDbType.NVarChar).Value = review.Content;
-            cmd.Parameters.Add("@createdDate", SqlDbType.DateTime2).Value = review.CreatedDate;
-            cmd.Parameters.Add("@numberOfFlags", SqlDbType.Int).Value = review.NumberOfFlags;
-            cmd.Parameters.Add("@isHidden", SqlDbType.Bit).Value = review.IsHidden;
+            sqlCommand.Parameters.Add("@userId", SqlDbType.UniqueIdentifier).Value = review.UserId;
+            sqlCommand.Parameters.Add("@rating", SqlDbType.Int).Value = review.Rating;
+            sqlCommand.Parameters.Add("@content", SqlDbType.NVarChar).Value = review.Content;
+            sqlCommand.Parameters.Add("@createdDate", SqlDbType.DateTime2).Value = review.CreatedDate;
+            sqlCommand.Parameters.Add("@numberOfFlags", SqlDbType.Int).Value = review.NumberOfFlags;
+            sqlCommand.Parameters.Add("@isHidden", SqlDbType.Bit).Value = review.IsHidden;
 
-            return (int)cmd.ExecuteScalar();
+            return (int)sqlCommand.ExecuteScalar();
         }
 
         public bool RemoveReviewById(int reviewId)
         {
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
-            using SqlCommand cmd = new("DELETE FROM Reviews WHERE ReviewId = @reviewId", connection);
-            cmd.Parameters.Add("@reviewId", SqlDbType.Int).Value = reviewId;
-            return cmd.ExecuteNonQuery() > 0;
+            using SqlCommand sqlCommand = new("DELETE FROM Reviews WHERE ReviewId = @reviewId", connection);
+            sqlCommand.Parameters.Add("@reviewId", SqlDbType.Int).Value = reviewId;
+            return sqlCommand.ExecuteNonQuery() > 0;
         }
 
         public List<Review> GetHiddenReviews()
         {
             List<Review> reviews = new();
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
-            using SqlCommand cmd = new("SELECT * FROM Reviews WHERE IsHidden = 1", connection);
-            using SqlDataReader reader = cmd.ExecuteReader();
+            using SqlCommand sqlCommand = new("SELECT * FROM Reviews WHERE IsHidden = 1", connection);
+            using SqlDataReader reader = sqlCommand.ExecuteReader();
 
             while (reader.Read())
             {

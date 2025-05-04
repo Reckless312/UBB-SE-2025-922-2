@@ -19,7 +19,7 @@ namespace DrinkDb_Auth.OAuthProviders
 
         public override bool Equals(object other)
         {
-            var otherResponse = other as AuthenticationResponse;
+            AuthenticationResponse otherResponse = other as AuthenticationResponse;
             if (otherResponse == null)
             {
                 return false;

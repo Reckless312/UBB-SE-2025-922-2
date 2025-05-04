@@ -8,7 +8,7 @@
 
     public class FileTemplateProviderTests : IDisposable
     {
-        private readonly string tempDirectory;
+        private readonly string templateDirectory;
         private readonly string templatesDirectory;
         private readonly string emailTemplatePath;
         private readonly string plainTextTemplatePath;
@@ -17,8 +17,8 @@
         public FileTemplateProviderTests()
         {
             // Set up test directory structure
-            this.tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-            this.templatesDirectory = Path.Combine(this.tempDirectory, "Templates");
+            this.templateDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            this.templatesDirectory = Path.Combine(this.templateDirectory, "Templates");
             Directory.CreateDirectory(this.templatesDirectory);
 
             // Create template files with test content
@@ -31,14 +31,14 @@
             File.WriteAllText(this.reviewTemplatePath, "<div>Review Template</div>");
 
             // Mock or override the base directory for tests
-            Environment.SetEnvironmentVariable("BASEDIR", this.tempDirectory);
+            Environment.SetEnvironmentVariable("BASEDIR", this.templateDirectory);
         }
 
         [Fact]
         public void GetEmailTemplate_WhenFileExists_ReturnsFileContent()
         {
             // Arrange
-            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.tempDirectory);
+            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.templateDirectory);
 
             // Act
             string result = provider.GetEmailTemplate();
@@ -50,7 +50,7 @@
         [Fact]
         public void GetPlainTextTemplate_WhenFileExists_ReturnsFileContent()
         {
-            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.tempDirectory);
+            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.templateDirectory);
             string result = provider.GetPlainTextTemplate();
             Assert.Equal("Plain Text Template", result);
         }
@@ -58,7 +58,7 @@
         [Fact]
         public void GetReviewRowTemplate_WhenFileExists_ReturnsFileContent()
         {
-            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.tempDirectory);
+            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.templateDirectory);
             string result = provider.GetReviewRowTemplate();
             Assert.Equal("<div>Review Template</div>", result);
         }
@@ -66,7 +66,7 @@
         [Fact]
         public void GetEmailTemplate_WhenFileDoesNotExist_ThrowsFileNotFoundException()
         {
-            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.tempDirectory);
+            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.templateDirectory);
             File.Delete(this.emailTemplatePath);
             Assert.Throws<FileNotFoundException>(() => provider.GetEmailTemplate());
         }
@@ -74,7 +74,7 @@
         [Fact]
         public void GetPlainTextTemplate_WhenFileDoesNotExist_ThrowsFileNotFoundException()
         {
-            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.tempDirectory);
+            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.templateDirectory);
             File.Delete(this.plainTextTemplatePath);
 
             // Act & Assert
@@ -85,7 +85,7 @@
         public void GetReviewRowTemplate_WhenFileDoesNotExist_ThrowsFileNotFoundException()
         {
             // Arrange
-            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.tempDirectory);
+            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.templateDirectory);
             File.Delete(this.reviewTemplatePath);
 
             // Act & Assert
@@ -97,7 +97,7 @@
         {
             // Arrange
             Directory.Delete(this.templatesDirectory, true);
-            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.tempDirectory);
+            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.templateDirectory);
 
             // Act & Assert
             Assert.Throws<DirectoryNotFoundException>(() => provider.GetEmailTemplate());
@@ -107,7 +107,7 @@
         public void GetPlainTextTemplate_WhenDirectoryDoesNotExist_ThrowsDirectoryNotFoundException()
         {
             Directory.Delete(this.templatesDirectory, true);
-            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.tempDirectory);
+            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.templateDirectory);
             Assert.Throws<DirectoryNotFoundException>(() => provider.GetPlainTextTemplate());
         }
 
@@ -115,7 +115,7 @@
         public void GetReviewRowTemplate_WhenDirectoryDoesNotExist_ThrowsDirectoryNotFoundException()
         {
             Directory.Delete(this.templatesDirectory, true);
-            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.tempDirectory);
+            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.templateDirectory);
             Assert.Throws<DirectoryNotFoundException>(() => provider.GetReviewRowTemplate());
         }
 
@@ -132,8 +132,8 @@
         public void GetPlainTextTemplate_WhenAccessDenied_ThrowsUnauthorizedAccessException()
         {
             Mock<IFileSystem> mockFileSystem = new Mock<IFileSystem>();
-            mockFileSystem.Setup(fs => fs.ReadAllText(It.IsAny<string>())).Throws(new UnauthorizedAccessException("Access denied"));
-            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.tempDirectory, mockFileSystem.Object);
+            mockFileSystem.Setup(fileSystem => fileSystem.ReadAllText(It.IsAny<string>())).Throws(new UnauthorizedAccessException("Access denied"));
+            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.templateDirectory, mockFileSystem.Object);
             Assert.Throws<UnauthorizedAccessException>(() => provider.GetPlainTextTemplate());
         }
 
@@ -141,8 +141,8 @@
         public void GetReviewRowTemplate_WhenAccessDenied_ThrowsUnauthorizedAccessException()
         {
             Mock<IFileSystem> mockFileSystem = new Mock<IFileSystem>();
-            mockFileSystem.Setup(fs => fs.ReadAllText(It.IsAny<string>())).Throws(new UnauthorizedAccessException("Access denied"));
-            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.tempDirectory, mockFileSystem.Object);
+            mockFileSystem.Setup(fileSystem => fileSystem.ReadAllText(It.IsAny<string>())).Throws(new UnauthorizedAccessException("Access denied"));
+            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.templateDirectory, mockFileSystem.Object);
             Assert.Throws<UnauthorizedAccessException>(() => provider.GetReviewRowTemplate());
         }
 
@@ -150,8 +150,8 @@
         public void GetEmailTemplate_WhenIOExceptionOccurs_ThrowsIOException()
         {
             Mock<IFileSystem> mockFileSystem = new Mock<IFileSystem>();
-            mockFileSystem.Setup(fs => fs.ReadAllText(It.IsAny<string>())).Throws(new IOException("IO error occurred"));
-            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.tempDirectory, mockFileSystem.Object);
+            mockFileSystem.Setup(fileSystem => fileSystem.ReadAllText(It.IsAny<string>())).Throws(new IOException("IO error occurred"));
+            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.templateDirectory, mockFileSystem.Object);
             Assert.Throws<IOException>(() => provider.GetEmailTemplate());
         }
 
@@ -159,8 +159,8 @@
         public void GetPlainTextTemplate_WhenIOExceptionOccurs_ThrowsIOException()
         {
             Mock<IFileSystem> mockFileSystem = new Mock<IFileSystem>();
-            mockFileSystem.Setup(fs => fs.ReadAllText(It.IsAny<string>())).Throws(new IOException("IO error occurred"));
-            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.tempDirectory, mockFileSystem.Object);
+            mockFileSystem.Setup(fileSystem => fileSystem.ReadAllText(It.IsAny<string>())).Throws(new IOException("IO error occurred"));
+            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.templateDirectory, mockFileSystem.Object);
             Assert.Throws<IOException>(() => provider.GetPlainTextTemplate());
         }
 
@@ -168,8 +168,8 @@
         public void GetReviewRowTemplate_WhenIOExceptionOccurs_ThrowsIOException()
         {
             Mock<IFileSystem> mockFileSystem = new Mock<IFileSystem>();
-            mockFileSystem.Setup(fs => fs.ReadAllText(It.IsAny<string>())).Throws(new IOException("IO error occurred"));
-            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.tempDirectory, mockFileSystem.Object);
+            mockFileSystem.Setup(fileSystem => fileSystem.ReadAllText(It.IsAny<string>())).Throws(new IOException("IO error occurred"));
+            TestFileTemplateProvider provider = new TestFileTemplateProvider(this.templateDirectory, mockFileSystem.Object);
             Assert.Throws<IOException>(() => provider.GetReviewRowTemplate());
         }
 
@@ -177,7 +177,7 @@
         {
             try
             {
-                Directory.Delete(this.tempDirectory, true);
+                Directory.Delete(this.templateDirectory, true);
             }
             catch
             {

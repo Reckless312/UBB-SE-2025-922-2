@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -10,6 +12,11 @@ namespace DrinkDb_Auth.AuthProviders.Facebook
     public class FacebookLocalOAuthServer : IFacebookLocalOAuthServer
     {
         private readonly HttpListener listener;
+
+        private const int HTTP_STATUS_OK = 200;
+        private const int HTTP_STATUS_NOT_FOUND = 404;
+        private const char FRAGMENT_PREFIX_CHARACTER = '#';
+        private const int FRAGMENT_PREFIX_LENGTH = 1;
 
         public static event Action<string>? OnTokenReceived;
 
@@ -28,7 +35,7 @@ namespace DrinkDb_Auth.AuthProviders.Facebook
             {
                 try
                 {
-                    var context = await listener.GetContextAsync();
+                    HttpListenerContext context = await listener.GetContextAsync();
 
                     if (context.Request.Url?.AbsolutePath.Equals("/auth", StringComparison.OrdinalIgnoreCase) == true)
                     {
@@ -41,15 +48,15 @@ namespace DrinkDb_Auth.AuthProviders.Facebook
                     }
                     else if (context.Request.Url?.AbsolutePath.Equals("/token", StringComparison.OrdinalIgnoreCase) == true)
                     {
-                        using (var reader = new System.IO.StreamReader(context.Request.InputStream, context.Request.ContentEncoding))
+                        using (StreamReader reader = new System.IO.StreamReader(context.Request.InputStream, context.Request.ContentEncoding))
                         {
                             string queryParameters = await reader.ReadToEndAsync();
-                            if (queryParameters.StartsWith("#"))
+                            if (queryParameters.StartsWith(FRAGMENT_PREFIX_CHARACTER))
                             {
-                                queryParameters = queryParameters.Substring(1);
+                                queryParameters = queryParameters.Substring(FRAGMENT_PREFIX_LENGTH);
                             }
 
-                            var splitParameters = HttpUtility.ParseQueryString(queryParameters.Trim());
+                            NameValueCollection splitParameters = HttpUtility.ParseQueryString(queryParameters.Trim());
                             string accessToken = splitParameters["access_token"] ?? throw new Exception("Acess token not found.");
                             if (!string.IsNullOrEmpty(accessToken))
                             {
@@ -62,18 +69,18 @@ namespace DrinkDb_Auth.AuthProviders.Facebook
                                 Console.WriteLine("Acess token not found.");
                             }
                         }
-                        context.Response.StatusCode = 200;
+                        context.Response.StatusCode = HTTP_STATUS_OK;
                         context.Response.OutputStream.Close();
                     }
                     else
                     {
-                        context.Response.StatusCode = 404;
+                        context.Response.StatusCode = HTTP_STATUS_NOT_FOUND;
                         context.Response.OutputStream.Close();
                     }
                 }
-                catch (Exception ex)
+                catch (Exception exception)
                 {
-                    Console.WriteLine("Eroare: " + ex.Message);
+                    Console.WriteLine("Error: " + exception.Message);
                     break;
                 }
             }

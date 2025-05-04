@@ -11,7 +11,7 @@ namespace Tests.Authentication
     [TestFixture]
     public class LinkedInOAuthHelperTests
     {
-        private Mock<IUserRepository> _mockUserRepository;
+        private Mock<IUserRepository> mockUserRepository;
         private const string ClientId = "test_client_id";
         private const string ClientSecret = "test_client_secret";
         private const string RedirectUri = "http://localhost:8891/auth";
@@ -20,7 +20,7 @@ namespace Tests.Authentication
         [SetUp]
         public void Setup()
         {
-            _mockUserRepository = new Mock<IUserRepository>();
+            mockUserRepository = new Mock<IUserRepository>();
         }
 
         //[Test]

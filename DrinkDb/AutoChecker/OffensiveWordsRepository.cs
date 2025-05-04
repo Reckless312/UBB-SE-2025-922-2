@@ -31,11 +31,11 @@ namespace DrinkDb_Auth.AutoChecker
         public HashSet<string> LoadOffensiveWords()
         {
             HashSet<string> offensiveWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            using var connection = connectionFactory.CreateConnection();
+            using SqlConnection connection = connectionFactory.CreateConnection();
             connection.Open();
 
-            using var command = new SqlCommand(SELECTOFFENSIVEWORDSQUERY, connection);
-            using var reader = command.ExecuteReader();
+            using SqlCommand command = new SqlCommand(SELECTOFFENSIVEWORDSQUERY, connection);
+            using SqlDataReader reader = command.ExecuteReader();
 
             while (reader.Read())
             {
@@ -52,10 +52,10 @@ namespace DrinkDb_Auth.AutoChecker
                 return;
             }
 
-            using var connection = connectionFactory.CreateConnection();
+            using SqlConnection connection = connectionFactory.CreateConnection();
             connection.Open();
 
-            using var command = new SqlCommand(INSERTOFFENSIVEWORDQUERY, connection);
+            using SqlCommand command = new SqlCommand(INSERTOFFENSIVEWORDQUERY, connection);
             command.Parameters.AddWithValue(WORDPARAMETERNAME, word);
             command.ExecuteNonQuery();
         }
@@ -67,10 +67,10 @@ namespace DrinkDb_Auth.AutoChecker
                 return;
             }
 
-            using var connection = connectionFactory.CreateConnection();
+            using SqlConnection connection = connectionFactory.CreateConnection();
             connection.Open();
 
-            using var command = new SqlCommand(DELETEOFFENSIVEWORDQUERY, connection);
+            using SqlCommand command = new SqlCommand(DELETEOFFENSIVEWORDQUERY, connection);
             command.Parameters.AddWithValue(WORDPARAMETERNAME, word);
             command.ExecuteNonQuery();
         }

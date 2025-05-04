@@ -15,10 +15,10 @@ namespace Tests.Authentication
         public async Task AuthWithOAuth_Google()
         {
             AuthenticationService service = new AuthenticationService(new MockLinkedInServer(), new MockGitHubServer(), new MockFacebookServer(), new MockUserAdapter(), new MockSessionAdapter(), new MockBasicAuth());
-            var google = new MockGoogleAuthProvider();
-            var id = Guid.NewGuid();
+            MockGoogleAuthProvider google = new MockGoogleAuthProvider();
+            Guid id = Guid.NewGuid();
             google.MockId = id;
-            var response = await service.AuthWithOAuth(null, OAuthService.Google, google);
+            AuthenticationResponse response = await service.AuthWithOAuth(null, OAuthService.Google, google);
 
             AuthenticationResponse authResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = id };
 
@@ -29,12 +29,12 @@ namespace Tests.Authentication
         public async Task AuthWithOAuth_Facebook()
         {
             AuthenticationService service = new AuthenticationService(new MockLinkedInServer(), new MockGitHubServer(), new MockFacebookServer(), new MockUserAdapter(), new MockSessionAdapter(), new MockBasicAuth());
-            var facebook = new MockFacebookAuthProvider();
-            var id = Guid.NewGuid();
+            MockFacebookAuthProvider facebook = new MockFacebookAuthProvider();
+            Guid id = Guid.NewGuid();
             facebook.MockId = id;
-            var response = await service.AuthWithOAuth(null, OAuthService.Facebook, facebook);
+            AuthenticationResponse response = await service.AuthWithOAuth(null, OAuthService.Facebook, facebook);
 
-            var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = id };
+            AuthenticationResponse expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = id };
 
             Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(response, expectedResponse);
         }
@@ -43,12 +43,12 @@ namespace Tests.Authentication
         public async Task AuthWithOAuth_Twitter()
         {
             AuthenticationService service = new AuthenticationService(new MockLinkedInServer(), new MockGitHubServer(), new MockFacebookServer(), new MockUserAdapter(), new MockSessionAdapter(), new MockBasicAuth());
-            var twitter = new MockTwitterAuthProvider();
-            var id = Guid.NewGuid();
+            MockTwitterAuthProvider twitter = new MockTwitterAuthProvider();
+            Guid id = Guid.NewGuid();
             twitter.MockId = id;
-            var response = await service.AuthWithOAuth(null, OAuthService.Twitter, twitter);
+            AuthenticationResponse response = await service.AuthWithOAuth(null, OAuthService.Twitter, twitter);
 
-            var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = id };
+            AuthenticationResponse expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = id };
 
             Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(response, expectedResponse);
         }
@@ -57,12 +57,12 @@ namespace Tests.Authentication
         public async Task AuthWithOAuth_Github()
         {
             AuthenticationService service = new AuthenticationService(new MockLinkedInServer(), new MockGitHubServer(), new MockFacebookServer(), new MockUserAdapter(), new MockSessionAdapter(), new MockBasicAuth());
-            var github = new MockGitHubAuthProvider();
-            var id = Guid.NewGuid();
+            MockGitHubAuthProvider github = new MockGitHubAuthProvider();
+            Guid id = Guid.NewGuid();
             github.MockId = id;
-            var response = await service.AuthWithOAuth(null, OAuthService.GitHub, github);
+            AuthenticationResponse response = await service.AuthWithOAuth(null, OAuthService.GitHub, github);
 
-            var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = id };
+            AuthenticationResponse expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = id };
 
             Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(response, expectedResponse);
         }
@@ -71,12 +71,12 @@ namespace Tests.Authentication
         public async Task AuthWithOAuth_LinkedIn()
         {
             AuthenticationService service = new AuthenticationService(new MockLinkedInServer(), new MockGitHubServer(), new MockFacebookServer(), new MockUserAdapter(), new MockSessionAdapter(), new MockBasicAuth());
-            var linkedin = new MockLinkedInAuthProvider();
-            var id = Guid.NewGuid();
+            MockLinkedInAuthProvider linkedin = new MockLinkedInAuthProvider();
+            Guid id = Guid.NewGuid();
             linkedin.MockId = id;
-            var response = await service.AuthWithOAuth(null, OAuthService.LinkedIn, linkedin);
+            AuthenticationResponse response = await service.AuthWithOAuth(null, OAuthService.LinkedIn, linkedin);
 
-            var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = id };
+            AuthenticationResponse expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = id };
 
             Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(response, expectedResponse);
         }
@@ -84,54 +84,54 @@ namespace Tests.Authentication
         [TestMethod]
         public void AuthWithUserPass_Success()
         {
-            var basicAuth = new MockBasicAuth();
+            MockBasicAuth basicAuth = new MockBasicAuth();
             basicAuth.Succeeds = true;
-            var userAdapter = new MockUserAdapter();
-            var mockId = Guid.NewGuid();
+            MockUserAdapter userAdapter = new MockUserAdapter();
+            Guid mockId = Guid.NewGuid();
             userAdapter.MockId = mockId;
             userAdapter.MockUsername = "testuser";
-            var sessionAdapter = new MockSessionAdapter();
+            MockSessionAdapter sessionAdapter = new MockSessionAdapter();
             sessionAdapter.MockId = mockId;
 
             AuthenticationService service = new AuthenticationService(new MockLinkedInServer(), new MockGitHubServer(), new MockFacebookServer(), userAdapter, sessionAdapter, basicAuth);
 
-            var response = service.AuthWithUserPass(userAdapter.MockUsername, "");
+            AuthenticationResponse response = service.AuthWithUserPass(userAdapter.MockUsername, "");
 
-            var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = true, NewAccount = false, OAuthToken = string.Empty, SessionId = userAdapter.MockId };
+            AuthenticationResponse expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = true, NewAccount = false, OAuthToken = string.Empty, SessionId = userAdapter.MockId };
             Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(expectedResponse, response);
         }
 
         [TestMethod]
         public void AuthWithUserPass_Fail()
         {
-            var basicAuth = new MockBasicAuth();
-            basicAuth.Succeeds = false;
+            MockBasicAuth basicAuthentication = new MockBasicAuth();
+            basicAuthentication.Succeeds = false;
 
-            AuthenticationService service = new AuthenticationService(new MockLinkedInServer(), new MockGitHubServer(), new MockFacebookServer(), new MockUserAdapter(), new MockSessionAdapter(), basicAuth);
+            AuthenticationService service = new AuthenticationService(new MockLinkedInServer(), new MockGitHubServer(), new MockFacebookServer(), new MockUserAdapter(), new MockSessionAdapter(), basicAuthentication);
 
-            var response = service.AuthWithUserPass("", "");
+            AuthenticationResponse response = service.AuthWithUserPass("", "");
 
-            var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = Guid.Empty };
+            AuthenticationResponse expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = Guid.Empty };
             Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(expectedResponse, response);
         }
 
         [TestMethod]
         public void AuthWithUserPass_Throws_UserNotFound()
         {
-            var basicAuth = new MockBasicAuth();
-            basicAuth.Succeeds = true;
-            var userAdapter = new MockUserAdapter();
-            var mockId = Guid.Parse("12345678-1234-1234-1234-1234567890ab");
+            MockBasicAuth basicAuthentication = new MockBasicAuth();
+            basicAuthentication.Succeeds = true;
+            MockUserAdapter userAdapter = new MockUserAdapter();
+            Guid mockId = Guid.Parse("12345678-1234-1234-1234-1234567890ab");
             userAdapter.MockId = mockId;
             userAdapter.MockUsername = "testuser";
-            var sessionAdapter = new MockSessionAdapter();
+            MockSessionAdapter sessionAdapter = new MockSessionAdapter();
             sessionAdapter.MockId = mockId;
 
-            AuthenticationService service = new AuthenticationService(new MockLinkedInServer(), new MockGitHubServer(), new MockFacebookServer(), userAdapter, sessionAdapter, basicAuth);
+            AuthenticationService service = new AuthenticationService(new MockLinkedInServer(), new MockGitHubServer(), new MockFacebookServer(), userAdapter, sessionAdapter, basicAuthentication);
 
-            var response = service.AuthWithUserPass("wronguser", "");
+            AuthenticationResponse response = service.AuthWithUserPass("wronguser", "");
 
-            var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = true, NewAccount = true, OAuthToken = string.Empty, SessionId = mockId };
+            AuthenticationResponse expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = true, NewAccount = true, OAuthToken = string.Empty, SessionId = mockId };
         
             Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(expectedResponse, response);
         }

@@ -11,18 +11,18 @@ namespace Tests.Authentication
     [TestFixture]
     public class FacebookLocalOAuthServerTests
     {
-        private FacebookLocalOAuthServer _server;
+        private FacebookLocalOAuthServer server;
         private const string TestServerPrefix = "http://localhost:8898/";//check this if errors when running test
         private const string TestToken = "test_access_token";
-        private bool _tokenReceived;
-        private string _receivedToken;
+        private bool tokenReceived;
+        private string receivedToken;
 
         [SetUp]
         public void Setup()
         {
-            _server = new FacebookLocalOAuthServer(TestServerPrefix);
-            _tokenReceived = false;
-            _receivedToken = string.Empty;
+            server = new FacebookLocalOAuthServer(TestServerPrefix);
+            tokenReceived = false;
+            receivedToken = string.Empty;
             FacebookLocalOAuthServer.OnTokenReceived += TokenReceivedHandler;
         }
 
@@ -30,13 +30,13 @@ namespace Tests.Authentication
         public void TearDown()
         {
             FacebookLocalOAuthServer.OnTokenReceived -= TokenReceivedHandler;
-            _server.Stop();
+            server.Stop();
         }
 
         private void TokenReceivedHandler(string token)
         {
-            _tokenReceived = true;
-            _receivedToken = token;
+            tokenReceived = true;
+            receivedToken = token;
         }
 
         //[Test]

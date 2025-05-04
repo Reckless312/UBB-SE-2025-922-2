@@ -51,8 +51,8 @@ namespace UnitTests.Users
         [Fact]
         public void GetAllUsers_ShouldReturnAllUsers()
         {
-            var mockUserRepository = new Mock<IUserRepository>();
-            var users = new List<User>
+            Mock<IUserRepository> mockUserRepository = new Mock<IUserRepository>();
+            List<User> users = new List<User>
             {
                 new User { UserId = new Guid(), EmailAddress = String.Empty, Username = "User One", NumberOfDeletedReviews = 0, AssignedRoles = new List<Role>(), PasswordHash = String.Empty, TwoFASecret = String.Empty, FullName = "User One" },
                 new User {  UserId = new Guid(), EmailAddress = String.Empty, Username = "User Two", NumberOfDeletedReviews = 0, AssignedRoles = new List<Role>(), PasswordHash = String.Empty, TwoFASecret = String.Empty, FullName = "User Two" }
@@ -61,7 +61,7 @@ namespace UnitTests.Users
 
             //var userService = new UserService(mockUserRepository.Object);
 
-            var result = userService.GetAllUsers();
+            List<User> result = userService.GetAllUsers();
 
             Assert.NotNull(result);
             Assert.Equal(2, result.Count);
@@ -74,7 +74,7 @@ namespace UnitTests.Users
         [Fact]
         public void GetAllUsers_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
         {
-            this.mockUserRepository.Setup(repo => repo.GetAllUsers()).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
+            this.mockUserRepository.Setup(repository => repository.GetAllUsers()).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
             UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetAllUsers());
             Assert.Equal("Failed to retrieve all users.", exception.Message);
             Assert.IsType<RepositoryException>(exception.InnerException);
@@ -98,7 +98,7 @@ namespace UnitTests.Users
         [Fact]
         public void GetActiveUsersByRoleType_ShouldThrowArgumentException_WhenRoleTypeIsInvalid()
         {
-            var exception = Assert.Throws<ArgumentException>(() => this.userService.GetActiveUsersByRoleType(0));
+            Exception exception = Assert.Throws<ArgumentException>(() => this.userService.GetActiveUsersByRoleType(0));
             Assert.Equal("Permission ID must be positive", exception.Message);
         }
 
@@ -283,7 +283,7 @@ namespace UnitTests.Users
         [Fact]
         public void GetManagers_ShouldReturnCorrectUsers()
         {
-            var users = new List<User> { new User {Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), FullName = "Manager User" } };
+            List<User> users = new List<User> { new User {Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), FullName = "Manager User" } };
             this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.Manager)).Returns(users);
             List<User> result = this.userService.GetManagers();
             Assert.NotNull(result);

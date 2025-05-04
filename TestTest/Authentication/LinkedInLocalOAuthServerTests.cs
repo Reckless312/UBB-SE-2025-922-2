@@ -11,18 +11,18 @@ namespace Tests.Authentication
     [TestFixture]
     public class LinkedInLocalOAuthServerTests
     {
-        private LinkedInLocalOAuthServer _server;
+        private LinkedInLocalOAuthServer server;
         private const string TestServerPrefix = "http://localhost:8899/";
         private const string TestCode = "test_auth_code";
-        private bool _codeReceived;
-        private string _receivedCode;
+        private bool codeReceived;
+        private string receivedCode;
 
         [SetUp]
         public void Setup()
         {
-            _server = new LinkedInLocalOAuthServer(TestServerPrefix);
-            _codeReceived = false;
-            _receivedCode = string.Empty;
+            server = new LinkedInLocalOAuthServer(TestServerPrefix);
+            codeReceived = false;
+            receivedCode = string.Empty;
             LinkedInLocalOAuthServer.OnCodeReceived += CodeReceivedHandler;
         }
 
@@ -30,13 +30,13 @@ namespace Tests.Authentication
         public void TearDown()
         {
             LinkedInLocalOAuthServer.OnCodeReceived -= CodeReceivedHandler;
-            _server.Stop();
+            server.Stop();
         }
 
         private void CodeReceivedHandler(string code)
         {
-            _codeReceived = true;
-            _receivedCode = code;
+            codeReceived = true;
+            receivedCode = code;
         }
 
         //[Test]

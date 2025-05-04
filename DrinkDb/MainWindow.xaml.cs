@@ -16,6 +16,7 @@ using Microsoft.UI;
 using Quartz.Impl;
 using DrinkDb_Auth.Service.Authentication.Interfaces;
 using DrinkDb_Auth.Service.Authentication;
+using DataAccess.Model.Authentication;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -63,9 +64,9 @@ namespace DrinkDb_Auth
                 await this.scheduler.Start();
                 System.Diagnostics.Debug.WriteLine("Scheduler initialized successfully");
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                System.Diagnostics.Debug.WriteLine($"Scheduler initialization failed: {ex}");
+                System.Diagnostics.Debug.WriteLine($"Scheduler initialization failed: {exception}");
             }
         }
 
@@ -86,17 +87,17 @@ namespace DrinkDb_Auth
                 await this.scheduler.ScheduleJob(job, trigger);
                 System.Diagnostics.Debug.WriteLine($"Job scheduled to run every 1 minute");
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                System.Diagnostics.Debug.WriteLine($"Job scheduling failed: {ex}");
+                System.Diagnostics.Debug.WriteLine($"Job scheduling failed: {exception}");
             }
         }
 
-        private async Task<bool> AuthenticationComplete(AuthenticationResponse res)
+        private async Task<bool> AuthenticationComplete(AuthenticationResponse response)
         {
-            if (res.AuthenticationSuccessful)
+            if (response.AuthenticationSuccessful)
             {
-                var user = authenticationService.GetUser(res.SessionId);
+                User user = authenticationService.GetUser(response.SessionId);
                 bool twoFAresponse = false;
                 if (!user.TwoFASecret.IsNullOrEmpty())
                 {
@@ -114,7 +115,7 @@ namespace DrinkDb_Auth
                 if (twoFAresponse)
                 {
                     App.CurrentUserId = user.UserId;
-                    App.CurrentSessionId = res.SessionId;
+                    App.CurrentSessionId = response.SessionId;
                     MainFrame.Navigate(typeof(SuccessPage), this);
                     return true;
                 }
@@ -147,12 +148,12 @@ namespace DrinkDb_Auth
         {
             try
             {
-                var authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.GitHub, new GitHubOAuthHelper());
+                AuthenticationResponse authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.GitHub, new GitHubOAuthHelper());
                 _ = AuthenticationComplete(authResponse);
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                await ShowError("Authentication Error", ex.ToString());
+                await ShowError("Authentication Error", exception.ToString());
             }
         }
 
@@ -161,12 +162,12 @@ namespace DrinkDb_Auth
             try
             {
                 GoogleSignInButton.IsEnabled = false;
-                var authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.Google, new GoogleOAuth2Provider());
+                AuthenticationResponse authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.Google, new GoogleOAuth2Provider());
                 await AuthenticationComplete(authResponse);
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                await ShowError("Error", ex.Message);
+                await ShowError("Error", exception.Message);
             }
             finally
             {
@@ -178,12 +179,12 @@ namespace DrinkDb_Auth
         {
             try
             {
-                var authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.Facebook, new FacebookOAuthHelper());
+                AuthenticationResponse authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.Facebook, new FacebookOAuthHelper());
                 await AuthenticationComplete(authResponse);
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                await ShowError("Authentication Error", ex.ToString());
+                await ShowError("Authentication Error", exception.ToString());
             }
         }
 
@@ -192,12 +193,12 @@ namespace DrinkDb_Auth
             try
             {
                 XSignInButton.IsEnabled = false;
-                var authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.Twitter, new TwitterOAuth2Provider());
+                AuthenticationResponse authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.Twitter, new TwitterOAuth2Provider());
                 await AuthenticationComplete(authResponse);
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                await ShowError("Error", ex.Message);
+                await ShowError("Error", exception.Message);
             }
             finally
             {
@@ -209,22 +210,22 @@ namespace DrinkDb_Auth
         {
             try
             {
-                var authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.LinkedIn, new LinkedInOAuthHelper(
+                AuthenticationResponse authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.LinkedIn, new LinkedInOAuthHelper(
                     clientId: "86j0ikb93jm78x",
                     clientSecret: "WPL_AP1.pg2Bd1XhCi821VTG.+hatTA==",
                     redirectUri: "http://localhost:8891/auth",
                     scope: "openid profile email"));
                 await AuthenticationComplete(authResponse);
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                await ShowError("Authentication Error", ex.ToString());
+                await ShowError("Authentication Error", exception.ToString());
             }
         }
 
         private async Task ShowError(string title, string content)
         {
-            var errorDialog = new ContentDialog
+            ContentDialog errorDialog = new ContentDialog
             {
                 Title = title,
                 Content = content,

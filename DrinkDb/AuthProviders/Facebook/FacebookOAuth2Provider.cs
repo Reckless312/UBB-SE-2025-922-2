@@ -2,7 +2,6 @@ using System;
 using System.Net.Http;
 using System.Text.Json;
 using DrinkDb_Auth.OAuthProviders;
-using Windows.Networking.Sockets;
 using DataAccess.Model.Authentication;
 using DrinkDb_Auth.Repository.Authentication;
 using IRepository;
@@ -38,23 +37,23 @@ namespace DrinkDb_Auth.AuthProviders.Facebook
                     if (response.IsSuccessStatusCode)
                     {
                         string json = response.Content.ReadAsStringAsync().Result;
-                        var doc = JsonDocument.Parse(json).RootElement;
+                        JsonElement document = JsonDocument.Parse(json).RootElement;
 
-                        if (doc.TryGetProperty("id", out var idProp))
+                        if (document.TryGetProperty("id", out JsonElement idProperty))
                         {
-                            string fbId = idProp.GetString() ?? throw new Exception("Facebook ID is null.");
-                            string fbName = doc.GetProperty("name").GetString() ?? throw new Exception("Facebook name is null.");
-                            string email = doc.GetProperty("email").GetString() ?? string.Empty;
+                            string facebookId = idProperty.GetString() ?? throw new Exception("Facebook ID is null.");
+                            string facebookName = document.GetProperty("name").GetString() ?? throw new Exception("Facebook name is null.");
+                            string email = document.GetProperty("email").GetString() ?? string.Empty;
 
                             // Check if user exists
-                            var user = userRepository.GetUserByUsername(fbName);
+                            User user = userRepository.GetUserByUsername(facebookName);
                             if (user == null)
                             {
                                 // Create new user
                                 User newUser = new()
                                 {
                                     UserId = Guid.NewGuid(),
-                                    Username = fbName,
+                                    Username = facebookName,
                                     PasswordHash = string.Empty,
                                     TwoFASecret = string.Empty,
                                     EmailAddress = email

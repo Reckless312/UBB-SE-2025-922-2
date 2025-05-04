@@ -73,9 +73,9 @@ namespace DrinkDb_Auth.Service
             {
                 return this.userRepository.GetAllUsers();
             }
-            catch (RepositoryException ex)
+            catch (RepositoryException exception)
             {
-                throw new UserServiceException("Failed to retrieve all users.", ex);
+                throw new UserServiceException("Failed to retrieve all users.", exception);
             }
         }
 
@@ -89,9 +89,9 @@ namespace DrinkDb_Auth.Service
                     _ => throw new ArgumentException("Permission ID must be positive")
                 };
             }
-            catch (RepositoryException ex)
+            catch (RepositoryException exception)
             {
-                throw new UserServiceException("Failed to get active users", ex);
+                throw new UserServiceException("Failed to get active users", exception);
             }
         }
 
@@ -101,9 +101,9 @@ namespace DrinkDb_Auth.Service
             {
                 return this.userRepository.GetUsersByRoleType(RoleType.Banned);
             }
-            catch (RepositoryException ex)
+            catch (RepositoryException exception)
             {
-                throw new UserServiceException("Failed to get banned users", ex);
+                throw new UserServiceException("Failed to get banned users", exception);
             }
         }
 
@@ -113,9 +113,9 @@ namespace DrinkDb_Auth.Service
             {
                 return this.userRepository.GetUsersByRoleType(roleType);
             }
-            catch (RepositoryException ex)
+            catch (RepositoryException exception)
             {
-                throw new UserServiceException($"Failed to retrieve users by role type '{roleType}'.", ex);
+                throw new UserServiceException($"Failed to retrieve users by role type '{roleType}'.", exception);
             }
         }
 
@@ -131,9 +131,9 @@ namespace DrinkDb_Auth.Service
 
                 return user.Username;
             }
-            catch (RepositoryException ex)
+            catch (RepositoryException exception)
             {
-                throw new UserServiceException($"Failed to retrieve the full name of the user with ID {userId}.", ex);
+                throw new UserServiceException($"Failed to retrieve the full name of the user with ID {userId}.", exception);
             }
         }
 
@@ -143,9 +143,9 @@ namespace DrinkDb_Auth.Service
             {
                 return this.userRepository.GetBannedUsersWhoHaveSubmittedAppeals();
             }
-            catch (RepositoryException ex)
+            catch (RepositoryException exception)
             {
-                throw new UserServiceException("Failed to retrieve banned users who have submitted appeals.", ex);
+                throw new UserServiceException("Failed to retrieve banned users who have submitted appeals.", exception);
             }
         }
 
@@ -155,9 +155,9 @@ namespace DrinkDb_Auth.Service
             {
                 return this.userRepository.GetHighestRoleTypeForUser(userId);
             }
-            catch (RepositoryException ex)
+            catch (RepositoryException exception)
             {
-                throw new UserServiceException($"Failed to retrieve the highest role type for user with ID {userId}.", ex);
+                throw new UserServiceException($"Failed to retrieve the highest role type for user with ID {userId}.", exception);
             }
         }
 
@@ -167,9 +167,9 @@ namespace DrinkDb_Auth.Service
             {
                 return this.userRepository.GetUsersByRoleType(RoleType.Admin);
             }
-            catch (RepositoryException ex)
+            catch (RepositoryException exception)
             {
-                throw new UserServiceException("Failed to retrieve admin users.", ex);
+                throw new UserServiceException("Failed to retrieve admin users.", exception);
             }
         }
 
@@ -179,9 +179,9 @@ namespace DrinkDb_Auth.Service
             {
                 return this.userRepository.GetUsersByRoleType(RoleType.User);
             }
-            catch (RepositoryException ex)
+            catch (RepositoryException exception)
             {
-                throw new UserServiceException("Failed to retrieve regular users.", ex);
+                throw new UserServiceException("Failed to retrieve regular users.", exception);
             }
         }
 
@@ -191,9 +191,9 @@ namespace DrinkDb_Auth.Service
             {
                 return this.userRepository.GetUsersByRoleType(RoleType.Manager);
             }
-            catch (RepositoryException ex)
+            catch (RepositoryException exception)
             {
-                throw new UserServiceException("Failed to retrieve manager users.", ex);
+                throw new UserServiceException("Failed to retrieve manager users.", exception);
             }
         }
 
@@ -231,9 +231,9 @@ namespace DrinkDb_Auth.Service
                     this.userRepository.AddRoleToUser(userId, new Role(RoleType.User, "User"));
                 }
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                throw new UserServiceException("Failed to update user role", ex);
+                throw new UserServiceException("Failed to update user role", exception);
             }
         }
     }

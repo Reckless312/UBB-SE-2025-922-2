@@ -191,7 +191,7 @@ namespace UnitTests.AiCheck
             try
             {
                 // Create a binary file with invalid CSV format that will trigger errors when processed
-                using (var fs = new FileStream(specialDataPath, FileMode.Create, FileAccess.Write))
+                using (FileStream fs = new FileStream(specialDataPath, FileMode.Create, FileAccess.Write))
                 {
                     // Write some binary data that's not valid text/CSV
                     byte[] invalidData = new byte[] { 0xFF, 0xFE, 0x00, 0x00 }; // Invalid UTF encoding
@@ -248,7 +248,7 @@ namespace UnitTests.AiCheck
             EnsureTestDirectoriesExist();
 
             // Create a file with correct header but invalid data values (invalid boolean format)
-            var csvContent = new StringBuilder();
+            StringBuilder csvContent = new StringBuilder();
             csvContent.AppendLine("ReviewContent}IsOffensiveContent");
             csvContent.AppendLine("This is a test}2"); // Invalid boolean value (not 0 or 1)
             csvContent.AppendLine("This is another test}3"); // Invalid boolean value (not 0 or 1)
@@ -513,7 +513,7 @@ namespace UnitTests.AiCheck
         {
             // Arrange
             EnsureTestDirectoriesExist();
-            var csvContent = new StringBuilder();
+            StringBuilder csvContent = new StringBuilder();
             csvContent.AppendLine("WrongColumn1}WrongColumn2");
             csvContent.AppendLine("Test content}0");
             File.WriteAllText(TestDataPath, csvContent.ToString());
@@ -546,7 +546,7 @@ namespace UnitTests.AiCheck
         {
             // Arrange
             EnsureTestDirectoriesExist();
-            var csvContent = new StringBuilder();
+            StringBuilder csvContent = new StringBuilder();
             csvContent.AppendLine("ReviewContent}IsOffensiveContent");
             csvContent.AppendLine("Test content}NotABoolean");
             File.WriteAllText(TestDataPath, csvContent.ToString());
@@ -667,6 +667,9 @@ namespace UnitTests.AiCheck
 
         private static void CreateRobustTestDataFile(string path = null)
         {
+            const int EXAMPLE_COUNT_PER_TYPE = 50;
+            const int PREVIEW_LINE_COUNT = 3;
+
             string filePath = path ?? TestDataPath;
 
             // Ensure directory exists
@@ -681,12 +684,12 @@ namespace UnitTests.AiCheck
 
             try
             {
-                var csvContent = new StringBuilder();
+                StringBuilder csvContent = new StringBuilder();
                 csvContent.AppendLine("ReviewContent}IsOffensiveContent");
 
                 // Add more data with clearer patterns for ML to detect
                 // Non-offensive reviews (positive examples) - 150 examples
-                for (int i = 0; i < 50; i++)
+                for (int i = 0; i < EXAMPLE_COUNT_PER_TYPE; i++)
                 {
                     csvContent.AppendLine($"This drink is absolutely delicious and refreshing! {i}}}0");
                     csvContent.AppendLine($"The cocktail had perfect balance of flavors, highly recommended! {i}}}0");
@@ -694,7 +697,7 @@ namespace UnitTests.AiCheck
                 }
 
                 // Offensive reviews (negative examples) - 150 examples
-                for (int i = 0; i < 50; i++)
+                for (int i = 0; i < EXAMPLE_COUNT_PER_TYPE; i++)
                 {
                     csvContent.AppendLine($"This drink is absolutely disgusting, only an idiot would enjoy this! {i}}}1");
                     csvContent.AppendLine($"The bartender is incompetent and stupid for making this terrible drink! {i}}}1");
@@ -707,18 +710,18 @@ namespace UnitTests.AiCheck
                 Console.WriteLine($"File size: {new FileInfo(filePath).Length} bytes");
                 try
                 {
-                    string[] firstFewLines = File.ReadLines(filePath).Take(3).ToArray();
+                    string[] firstFewLines = File.ReadLines(filePath).Take(PREVIEW_LINE_COUNT).ToArray();
                     Console.WriteLine($"First few lines of file: {string.Join(", ", firstFewLines)}");
                 }
-                catch (Exception readEx)
+                catch (Exception readException)
                 {
-                    Console.WriteLine($"Error reading back file content: {readEx.Message}");
+                    Console.WriteLine($"Error reading back file content: {readException.Message}");
                 }
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                Console.WriteLine($"ERROR creating test data file: {ex.Message}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                Console.WriteLine($"ERROR creating test data file: {exception.Message}");
+                Console.WriteLine($"Stack trace: {exception.StackTrace}");
             }
         }
 
@@ -745,16 +748,18 @@ namespace UnitTests.AiCheck
 
         private static void DisplayLogIfAvailable()
         {
+            const int LINES_TO_DISPLAY_COUNT = 10;
+
             if (File.Exists(TestLogPath))
             {
                 string logContent = File.ReadAllText(TestLogPath);
                 Console.WriteLine("Log contents:");
                 Console.WriteLine(logContent);
                 string[] logLines = File.ReadAllLines(TestLogPath);
-                if (logLines.Length > 10)
+                if (logLines.Length > LINES_TO_DISPLAY_COUNT)
                 {
                     Console.WriteLine("\nLast 10 lines of log:");
-                    foreach (string line in logLines.Skip(logLines.Length - 10))
+                    foreach (string line in logLines.Skip(logLines.Length - LINES_TO_DISPLAY_COUNT))
                     {
                         Console.WriteLine(line);
                     }
@@ -802,9 +807,9 @@ namespace UnitTests.AiCheck
 
                 Console.WriteLine("Cleanup completed successfully");
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                Console.WriteLine($"Error during cleanup: {ex.Message}");
+                Console.WriteLine($"Error during cleanup: {exception.Message}");
 
                 // Continue execution, don't throw from cleanup
             }

@@ -72,7 +72,7 @@ namespace DrinkDb_Auth.Service.Authentication
 
         public async Task<AuthenticationResponse> AuthWithOAuth(Window window, OAuthService selectedService, object authProvider)
         {
-            var authResponse = selectedService switch
+            AuthenticationResponse authResponse = selectedService switch
             {
                 OAuthService.Google => await AuthenticateWithGoogleAsync(window, authProvider as IGoogleOAuth2Provider),
                 OAuthService.Facebook => await AuthenticateWithFacebookAsync(authProvider as IFacebookOAuthHelper),

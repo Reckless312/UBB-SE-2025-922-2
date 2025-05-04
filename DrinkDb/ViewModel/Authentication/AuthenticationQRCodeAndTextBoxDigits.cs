@@ -32,7 +32,7 @@ namespace DrinkDb_Auth.ViewModel.Authentication
             fifthDigit = string.Empty;
             sixthDigit = string.Empty;
 
-            if (keyCode.CompareTo("none") != 0)
+            if (keyCode.CompareTo(QRCodeDefaultKeyCode) != 0)
             {
                 CreateQRCode(keyCode);
             }
@@ -115,9 +115,11 @@ namespace DrinkDb_Auth.ViewModel.Authentication
 
         public void CreateQRCode(string keyCode)
         {
+            const int QR_CODE_PIXELS_PER_MODULE = 20;
+
             QRCodeData qrCodeData = new QRCodeGenerator().CreateQrCode(keyCode, QRCodeGenerator.ECCLevel.Q);
             BitmapByteQRCode qrCode = new (qrCodeData);
-            byte[] qrCodeImageBytes = qrCode.GetGraphic(20);
+            byte[] qrCodeImageBytes = qrCode.GetGraphic(QR_CODE_PIXELS_PER_MODULE);
             Bitmap qrCodeBitmap = new Bitmap(new MemoryStream(qrCodeImageBytes));
             BitmapImage qrCodeBitmapImage = new BitmapImage();
             using (MemoryStream stream = new MemoryStream())

@@ -22,7 +22,7 @@ public class EmailJob : IJob
 {
     private readonly IUserService userService;
     private readonly IReviewService reviewService;
-    private readonly IConfiguration config;
+    private readonly IConfiguration configuration;
     private readonly ITemplateProvider templateProvider;
     private readonly IEmailSender emailSender;
 
@@ -33,7 +33,7 @@ public class EmailJob : IJob
     {
         this.userService = userService;
         this.reviewService = reviewService;
-        this.config = configuration;
+        this.configuration = configuration;
         this.templateProvider = new FileTemplateProvider();
         this.emailSender = new SmtpEmailSender();
     }
@@ -47,7 +47,7 @@ public class EmailJob : IJob
     {
         this.userService = userService;
         this.reviewService = reviewService;
-        this.config = configuration;
+        this.configuration = configuration;
         this.templateProvider = templateProvider;
         this.emailSender = emailSender;
     }
@@ -56,8 +56,8 @@ public class EmailJob : IJob
     {
         try
         {
-            string? smtpEmail = this.config["SMTP_MODERATOR_EMAIL"];
-            string? smtpPassword = this.config["SMTP_MODERATOR_PASSWORD"];
+            string? smtpEmail = this.configuration["SMTP_MODERATOR_EMAIL"];
+            string? smtpPassword = this.configuration["SMTP_MODERATOR_PASSWORD"];
 
             if (string.IsNullOrEmpty(smtpEmail) || string.IsNullOrEmpty(smtpPassword))
             {
@@ -76,7 +76,7 @@ public class EmailJob : IJob
                 message.To.Add(new MailboxAddress(admin.Username, admin.EmailAddress));
                 message.Subject = $"Admin Report - {reportData.ReportDate:yyyy-MM-dd}";
 
-                var body = new BodyBuilder { HtmlBody = emailHtml, TextBody = emailText };
+                BodyBuilder body = new BodyBuilder { HtmlBody = emailHtml, TextBody = emailText };
 
                 message.Body = body.ToMessageBody();
 
@@ -86,9 +86,9 @@ public class EmailJob : IJob
 
             System.Diagnostics.Debug.WriteLine("Email job completed successfully");
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            System.Diagnostics.Debug.WriteLine($"Email Job Failed: {ex}");
+            System.Diagnostics.Debug.WriteLine($"Email Job Failed: {exception}");
         }
     }
 
@@ -127,7 +127,7 @@ public class EmailJob : IJob
         }
 
         StringBuilder html = new StringBuilder("<table border='1' cellpadding='5' style='border-collapse: collapse; width: 100%;'> <tr><th>User</th><th>Rating</th><th>Date</th></tr>");
-        foreach (var review in reviews)
+        foreach (Review review in reviews)
         {
             string row = this.templateProvider.GetReviewRowTemplate();
             string userName = this.userService.GetUserById(review.UserId).Username;

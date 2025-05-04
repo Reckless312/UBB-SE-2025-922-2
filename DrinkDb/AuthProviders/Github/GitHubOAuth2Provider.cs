@@ -121,7 +121,7 @@ namespace DrinkDb_Auth.AuthProviders.Github
                 client.DefaultRequestHeaders.Add("User-Agent", "DrinkDb_Auth-App");
 
                 // First get the user info
-                var userResponse = client.GetAsync("https://api.github.com/user").Result;
+                HttpResponseMessage userResponse = client.GetAsync("https://api.github.com/user").Result;
                 if (!userResponse.IsSuccessStatusCode)
                 {
                     throw new Exception($"Failed to fetch user info from GitHub. Status code: {userResponse.StatusCode}");
@@ -130,12 +130,12 @@ namespace DrinkDb_Auth.AuthProviders.Github
                 string userJson = userResponse.Content.ReadAsStringAsync().Result;
                 using (JsonDocument userDoc = JsonDocument.Parse(userJson))
                 {
-                    var root = userDoc.RootElement;
+                    JsonElement root = userDoc.RootElement;
                     string gitHubId = root.GetProperty("id").ToString();
                     string gitHubLogin = root.GetProperty("login").ToString();
 
                     // Then get the user's email
-                    var emailResponse = client.GetAsync("https://api.github.com/user/emails").Result;
+                    HttpResponseMessage emailResponse = client.GetAsync("https://api.github.com/user/emails").Result;
                     if (!emailResponse.IsSuccessStatusCode)
                     {
                         throw new Exception($"Failed to fetch email from GitHub. Status code: {emailResponse.StatusCode}");

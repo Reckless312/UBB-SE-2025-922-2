@@ -7,9 +7,6 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.AspNetCore.Http;
 using DrinkDb_Auth.OAuthProviders;
 using DataAccess.Model.Authentication;
 using IRepository;
@@ -20,15 +17,6 @@ namespace DrinkDb_Auth.AuthProviders.Google
 {
     public class GoogleOAuth2Provider : GenericOAuth2Provider, IGoogleOAuth2Provider
     {
-        public static Guid CreateGloballyUniqueIdentifier(string identifier)
-        {
-            using (MD5 cryptographicHasher = MD5.Create())
-            {
-                byte[] hashResult = cryptographicHasher.ComputeHash(Encoding.UTF8.GetBytes(identifier));
-                return new Guid(hashResult);
-            }
-        }
-
         private string ClientId { get; }
         private string ClientSecret { get; }
 
@@ -41,6 +29,16 @@ namespace DrinkDb_Auth.AuthProviders.Google
         private HttpClient httpClient;
         private static readonly ISessionRepository SessionRepository = new SessionRepository();
         private static readonly IUserRepository UserRepository = new UserRepository();
+
+        public static Guid CreateGloballyUniqueIdentifier(string identifier)
+        {
+            using (MD5 cryptographicHasher = MD5.Create())
+            {
+                byte[] hashResult = cryptographicHasher.ComputeHash(Encoding.UTF8.GetBytes(identifier));
+                return new Guid(hashResult);
+            }
+        }
+
         private Guid EnsureUserExists(string identifier, string email, string name)
         {
             // Use provider's display name as username, like Facebook/GitHub
@@ -105,6 +103,7 @@ namespace DrinkDb_Auth.AuthProviders.Google
 
         public async Task<AuthenticationResponse> ExchangeCodeForTokenAsync(string code)
         {
+            int DELAY_TIME = 500;
             Dictionary<string, string> tokenRequest = new Dictionary<string, string>
             {
                 { "code", code },
@@ -156,7 +155,7 @@ namespace DrinkDb_Auth.AuthProviders.Google
                             using (HttpClient httpClient = new HttpClient())
                             {
                                 httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenResult.AccessToken);
-                                await Task.Delay(500);
+                                await Task.Delay(DELAY_TIME);
                                 HttpResponseMessage? httpClientResponse = await httpClient.GetAsync(UserInformationEndpoint);
                                 string httpClientResponseContent = await httpClientResponse.Content.ReadAsStringAsync();
 
@@ -167,7 +166,7 @@ namespace DrinkDb_Auth.AuthProviders.Google
 
                                         if (httpClientInformation == null)
                                         {
-                                            throw new Exception("Couldn't get http client informatin");
+                                            throw new Exception("Couldn't get http client information");
                                         }
 
                                         userInformation = ExtractUserInfoFromIdToken(tokenResult.IdToken);
@@ -180,7 +179,7 @@ namespace DrinkDb_Auth.AuthProviders.Google
                                         }
                                         else
                                         {
-                                            throw new Exception("Trigger Catch | Repeated code to attempt a succesfull authentication");
+                                            throw new Exception("Trigger Catch | Repeated code to attempt a successful authentication");
                                         }
                                 }
                             }
@@ -203,6 +202,9 @@ namespace DrinkDb_Auth.AuthProviders.Google
 
         public async Task<AuthenticationResponse> SignInWithGoogleAsync(Window parentWindow)
         {
+            int WEB_VIEW_WIDTH = 450;
+            int WEB_VIEW_HEIGHT = 600;
+
             TaskCompletionSource<AuthenticationResponse> taskResults = new TaskCompletionSource<AuthenticationResponse>();
             try
             {
@@ -215,8 +217,8 @@ namespace DrinkDb_Auth.AuthProviders.Google
                 };
 
                 WebView2 webView = new WebView2();
-                webView.Width = 450;
-                webView.Height = 600;
+                webView.Width = WEB_VIEW_WIDTH;
+                webView.Height = WEB_VIEW_HEIGHT;
                 googleSubWindow.Content = webView;
 
                 await webView.EnsureCoreWebView2Async();
@@ -412,9 +414,9 @@ namespace DrinkDb_Auth.AuthProviders.Google
                     taskResults.SetResult(new AuthenticationResponse { AuthenticationSuccessful = false, OAuthToken = string.Empty, SessionId = Guid.Empty, NewAccount = false });
                 }
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                taskResults.TrySetException(ex);
+                taskResults.TrySetException(exception);
             }
 
             return await taskResults.Task;
@@ -422,9 +424,12 @@ namespace DrinkDb_Auth.AuthProviders.Google
 
         private UserInfoResponse ExtractUserInfoFromIdToken(string idToken)
         {
+            int VALID_TOKEN_LENGTH = 3;
+            int BASE64_BLOCK_SIZE = 4;
+
             // Too many random numbers and chars to even pretend I know what's happening
             string[] splittedToken = idToken.Split('.');
-            if (splittedToken.Length != 3)
+            if (splittedToken.Length != VALID_TOKEN_LENGTH)
             {
                 throw new ArgumentException("Invalid JWT format");
             }
@@ -434,7 +439,7 @@ namespace DrinkDb_Auth.AuthProviders.Google
                 int payloadIndex = 1;
                 string payload = splittedToken[payloadIndex];
 
-                while (payload.Length % 4 != 0)
+                while (payload.Length % BASE64_BLOCK_SIZE != 0)
                 {
                     payload += '=';
                 }
@@ -447,9 +452,9 @@ namespace DrinkDb_Auth.AuthProviders.Google
                 UserInfoResponse? result = System.Text.Json.JsonSerializer.Deserialize<UserInfoResponse>(json, options);
                 return result != null ? result : throw new Exception("Failed to deserialize user info from ID token");
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                throw new Exception($"Error parsing ID token: {ex.Message}", ex);
+                throw new Exception($"Error parsing ID token: {exception.Message}", exception);
             }
         }
     }

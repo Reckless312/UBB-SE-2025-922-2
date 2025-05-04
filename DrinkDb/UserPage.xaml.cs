@@ -47,7 +47,7 @@ namespace DrinkDb_Auth
             if (currentUserId != Guid.Empty)
             {
                 // Retrieve the user from the database using your UserService.
-                var userService = new UserService();
+                UserService userService = new UserService();
                 currentUser = userService.GetUserById(currentUserId);
 
                 // Update UI with the retrieved data.
@@ -90,13 +90,13 @@ namespace DrinkDb_Auth
             }
         }
 
-        private void LogoutButton_Click(object sender, RoutedEventArgs e)
+        private void LogoutButton_Click(object sender, RoutedEventArgs eventArguments)
         {
             AuthenticationService.Logout();
             App.MainWindow.Close();
         }
 
-        private void AdminDashboardButton_Click(object sender, RoutedEventArgs e)
+        private void AdminDashboardButton_Click(object sender, RoutedEventArgs eventArguments)
         {
             if (this.Frame != null)
             {
@@ -106,48 +106,59 @@ namespace DrinkDb_Auth
 
         private void LoadUserReviews()
         {
+            // Constants for layout styling
+            const int BORDER_THICKNESS_VALUE = 1;
+            const int BORDER_CORNER_RADIUS = 8;
+            const int BORDER_BOTTOM_MARGIN = 10;
+            const int BORDER_PADDING = 12;
+            const int STAR_RATING_MAX = 5;
+            const int STAR_FONT_SIZE = 20;
+            const int DATE_FONT_SIZE = 12;
+            const int COMMENT_FONT_SIZE = 14;
+            const int STACK_SPACING = 4;
+
             // Get the review service from DI
-            var reviewService = (IReviewService)App.Host.Services.GetService(typeof(IReviewService));
+            IReviewService reviewService = (IReviewService)App.Host.Services.GetService(typeof(IReviewService));
             Guid currentUserId = App.CurrentUserId;
             if (currentUserId == Guid.Empty || reviewService == null)
             {
                 return;
             }
-            var userReviews = reviewService.GetReviewsByUser(currentUserId)
-                .Where(r => !r.IsHidden)
-                .OrderByDescending(r => r.CreatedDate)
+            List<Review> userReviews = reviewService.GetReviewsByUser(currentUserId)
+                .Where(review => !review.IsHidden)
+                .OrderByDescending(review => review.CreatedDate)
                 .ToList();
             ReviewsItemsControl.Items.Clear();
-            foreach (var review in userReviews)
+            foreach (Review review in userReviews)
             {
-                var border = new Border
+                Border border = new Border
                 {
                     BorderBrush = new SolidColorBrush(Microsoft.UI.Colors.Black),
-                    BorderThickness = new Thickness(1),
-                    CornerRadius = new CornerRadius(8),
-                    Margin = new Thickness(0, 0, 0, 10),
-                    Padding = new Thickness(12)
+                    BorderThickness = new Thickness(BORDER_THICKNESS_VALUE),
+                    CornerRadius = new CornerRadius(BORDER_CORNER_RADIUS),
+                    Margin = new Thickness(0, 0, 0, BORDER_BOTTOM_MARGIN),
+                    Padding = new Thickness(BORDER_PADDING)
                 };
-                var reviewStack = new StackPanel { Spacing = 4 };
-                string stars = new string('★', review.Rating) + new string('☆', 5 - review.Rating);
-                var starsText = new TextBlock
+                StackPanel reviewStack = new StackPanel { Spacing = STACK_SPACING };
+                string stars = new string('★', review.Rating) + new string('☆', STAR_RATING_MAX - review.Rating);
+                TextBlock starsText = new TextBlock
                 {
                     Text = stars,
-                    FontSize = 20,
+                    FontSize = STAR_FONT_SIZE,
                     Foreground = new SolidColorBrush(Microsoft.UI.Colors.Gold)
                 };
                 reviewStack.Children.Add(starsText);
                 var dateText = new TextBlock
                 {
                     Text = review.CreatedDate.ToShortDateString(),
-                    FontSize = 12,
+                    FontSize = DATE_FONT_SIZE,
                     Foreground = new SolidColorBrush(Microsoft.UI.Colors.Gray)
                 };
                 reviewStack.Children.Add(dateText);
                 var commentText = new TextBlock
                 {
                     Text = review.Content,
-                    FontSize = 14
+                    FontSize = COMMENT_FONT_SIZE
                 };
                 reviewStack.Children.Add(commentText);
                 border.Child = reviewStack;

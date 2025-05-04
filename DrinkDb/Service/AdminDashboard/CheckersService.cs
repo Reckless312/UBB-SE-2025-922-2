@@ -136,9 +136,9 @@ namespace DrinkDb_Auth.Service.AdminDashboard
 
                 return 0;
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                Console.WriteLine("Deserialization error: " + ex.Message);
+                Console.WriteLine("Deserialization error: " + exception.Message);
                 return 0;
             }
         }

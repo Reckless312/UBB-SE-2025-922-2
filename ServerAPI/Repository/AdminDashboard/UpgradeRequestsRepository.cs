@@ -34,13 +34,13 @@ namespace Repository.AdminDashboard
         {
             List<UpgradeRequest> upgradeRequestsList = new List<UpgradeRequest>();
 
-            using (var connection = connectionFactory.CreateConnection())
+            using (SqlConnection connection = connectionFactory.CreateConnection())
             {
                 try
                 {
                     connection.Open();
-                    using var command = new SqlCommand(SELECTALLUPGRADEREQUESTSQUERY, connection);
-                    using var reader = command.ExecuteReader();
+                    using SqlCommand command = new SqlCommand(SELECTALLUPGRADEREQUESTSQUERY, connection);
+                    using SqlDataReader reader = command.ExecuteReader();
 
                     while (reader.Read())
                     {
@@ -63,12 +63,12 @@ namespace Repository.AdminDashboard
 
         public void RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
         {
-            using (var connection = connectionFactory.CreateConnection())
+            using (SqlConnection connection = connectionFactory.CreateConnection())
             {
                 try
                 {
                     connection.Open();
-                    using var command = new SqlCommand(DELETEUPGRADEREQUESTQUERY, connection);
+                    using SqlCommand command = new SqlCommand(DELETEUPGRADEREQUESTQUERY, connection);
                     command.Parameters.AddWithValue("@upgradeRequestIdentifier", upgradeRequestIdentifier);
                     command.ExecuteNonQuery();
                 }
@@ -83,15 +83,15 @@ namespace Repository.AdminDashboard
         {
             UpgradeRequest? retrievedUpgradeRequest = null;
 
-            using (var connection = connectionFactory.CreateConnection())
+            using (SqlConnection connection = connectionFactory.CreateConnection())
             {
                 try
                 {
                     connection.Open();
-                    using var command = new SqlCommand(SELECTUPGRADEREQUESTBYIDENTIFIERQUERY, connection);
+                    using SqlCommand command = new SqlCommand(SELECTUPGRADEREQUESTBYIDENTIFIERQUERY, connection);
                     command.Parameters.AddWithValue("@upgradeRequestIdentifier", upgradeRequestIdentifier);
 
-                    using var reader = command.ExecuteReader();
+                    using SqlDataReader reader = command.ExecuteReader();
                     if (reader.Read())
                     {
                         retrievedUpgradeRequest = new UpgradeRequest(

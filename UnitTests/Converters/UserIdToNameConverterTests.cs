@@ -5,6 +5,7 @@
 namespace App1.Converters
 {
     using System;
+    using DataAccess.Model.Authentication;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using Microsoft.UI.Xaml.Data;
 
@@ -14,7 +15,7 @@ namespace App1.Converters
     public class UserIdToNameConverter : IValueConverter
     {
         // Keep the original field name for compatibility with reflection in tests
-        private static IUserService _userService;
+        private static IUserService UserService;
 
         /// <summary>
         /// Initializes the converter with a user service.
@@ -22,7 +23,7 @@ namespace App1.Converters
         /// <param name="userService">The user service to use for lookups.</param>
         public static void Initialize(IUserService userService)
         {
-            _userService = userService;
+            UserService = userService;
         }
 
         /// <summary>
@@ -35,11 +36,11 @@ namespace App1.Converters
         /// <returns>A string representation of the user name.</returns>
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            if (value is int userId && _userService != null)
+            if (value is int userId && UserService != null)
             {
                 try
                 {
-                    var user = _userService.GetUserById(new Guid());
+                    User user = UserService.GetUserById(new Guid());
                     return string.IsNullOrEmpty(user?.FullName) ? $"User {userId}" : user.FullName;
                 }
                 catch

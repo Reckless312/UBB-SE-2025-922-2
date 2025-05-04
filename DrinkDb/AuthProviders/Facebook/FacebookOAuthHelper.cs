@@ -34,8 +34,8 @@ namespace DrinkDb_Auth.AuthProviders.Facebook
         {
             if (taskCompletionSource != null && !taskCompletionSource.Task.IsCompleted)
             {
-                AuthenticationResponse res = FacebookOAuth2Provider.Authenticate(string.Empty, accessToken);
-                taskCompletionSource.TrySetResult(res);
+                AuthenticationResponse response = FacebookOAuth2Provider.Authenticate(string.Empty, accessToken);
+                taskCompletionSource.TrySetResult(response);
             }
         }
 
@@ -43,7 +43,7 @@ namespace DrinkDb_Auth.AuthProviders.Facebook
         {
             taskCompletionSource = new TaskCompletionSource<AuthenticationResponse>();
 
-            var authorizeUri = new Uri(BuildAuthorizeUrl());
+            Uri authorizeUri = new Uri(BuildAuthorizeUrl());
 
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
             {

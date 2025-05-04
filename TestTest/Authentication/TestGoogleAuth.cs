@@ -32,9 +32,12 @@ namespace Tests.Authentication
         [TestMethod]
         public void AuthenticateSuccesful()
         {
+            string identifier = "me";
+            string token = "token";
+
             GoogleOAuth2Provider provider = new GoogleOAuth2Provider();
 
-            AuthenticationResponse response = provider.Authenticate("me", "token");
+            AuthenticationResponse response = provider.Authenticate(identifier, token);
 
             Assert.IsTrue(response.AuthenticationSuccessful);
         }
@@ -42,9 +45,11 @@ namespace Tests.Authentication
         [TestMethod]
         public void AuthenticateFailed()
         {
+            string identifier = "me";
+
             GoogleOAuth2Provider provider = new GoogleOAuth2Provider();
 
-            AuthenticationResponse response = provider.Authenticate("me", string.Empty);
+            AuthenticationResponse response = provider.Authenticate(identifier, string.Empty);
 
             Assert.IsFalse(response.AuthenticationSuccessful);
         }

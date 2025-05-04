@@ -513,7 +513,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
 
             List<Review> reviews = this.GetUserReviews(user.UserId);
             UserReviewsFormatted = new ObservableCollection<string>(
-                reviews.Select(r => FormatReviewContent(r)).ToList());
+                reviews.Select(review => FormatReviewContent(review)).ToList());
         }
 
         /// <summary>
@@ -566,7 +566,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
 
             List<Review> reviews = this.GetUserReviews(selectedUser.UserId);
             UserReviewsWithFlags = new ObservableCollection<string>(
-                reviews.Select(r => FormatReviewWithFlags(r)).ToList());
+                reviews.Select(review => FormatReviewWithFlags(review)).ToList());
         }
 
         /// <summary>
@@ -666,14 +666,14 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             AcceptAppealCommand = new RelayCommand(() => AcceptAppealForUser(SelectedAppealUser));
             CloseAppealCaseCommand = new RelayCommand(() => CloseAppealCase(SelectedAppealUser));
 
-            HandleUpgradeRequestCommand = new RelayCommand<Tuple<bool, int>>(param =>
-                HandleUpgradeRequest(param.Item1, param.Item2));
+            HandleUpgradeRequestCommand = new RelayCommand<Tuple<bool, int>>(parameter =>
+                HandleUpgradeRequest(parameter.Item1, parameter.Item2));
 
             ResetReviewFlagsCommand = new RelayCommand<int>(reviewId =>
                 ResetReviewFlags(reviewId));
 
-            HideReviewCommand = new RelayCommand<int>(param =>
-                HideReview(param));
+            HideReviewCommand = new RelayCommand<int>(parameter =>
+                HideReview(parameter));
 
             RunAICheckCommand = new RelayCommand<Review>(review =>
                 RunAICheck(review));

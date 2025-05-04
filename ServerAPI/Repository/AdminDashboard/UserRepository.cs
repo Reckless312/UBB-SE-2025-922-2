@@ -29,14 +29,14 @@
         /// <summary>
         /// Internal list of users managed by the repository.
         /// </summary>
-        private readonly List<User> _usersList;
+        private readonly List<User> usersList;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserRepository"/> class with default user data.
         /// </summary>
         public UserRepository()
         {
-            _usersList = new List<User>();
+            usersList = new List<User>();
         }
 
         /// <summary>
@@ -48,16 +48,16 @@
         {
             try
             {
-                if (_usersList == null)
+                if (usersList == null)
                 {
-                    throw new NullReferenceException("_usersList is null.");
+                    throw new NullReferenceException("usersList is null.");
                 }
 
-                return _usersList.Where(user => user.HasSubmittedAppeal).ToList();
+                return usersList.Where(user => user.HasSubmittedAppeal).ToList();
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                throw new RepositoryException("Failed to retrieve users who have submitted appeals.", ex);
+                throw new RepositoryException("Failed to retrieve users who have submitted appeals.", exception);
             }
         }
 
@@ -71,16 +71,16 @@
         {
             try
             {
-                if (_usersList == null)
+                if (usersList == null)
                 {
-                    throw new NullReferenceException("_usersList is null.");
+                    throw new NullReferenceException("usersList is null.");
                 }
 
-                return _usersList.Where(user => user.AssignedRoles != null && user.AssignedRoles.Any(role => role.RoleType == roleType)).ToList();
+                return usersList.Where(user => user.AssignedRoles != null && user.AssignedRoles.Any(role => role.RoleType == roleType)).ToList();
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                throw new RepositoryException($"Failed to retrieve users with role type '{roleType}'.", ex);
+                throw new RepositoryException($"Failed to retrieve users with role type '{roleType}'.", exception);
             }
         }
 
@@ -102,13 +102,13 @@
 
                 return user.AssignedRoles.Max(role => role.RoleType);
             }
-            catch (ArgumentException ex)
+            catch (ArgumentException exception)
             {
-                throw new RepositoryException("User has no roles assigned.", ex);
+                throw new RepositoryException("User has no roles assigned.", exception);
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                throw new RepositoryException($"Failed to get highest role type for user with ID {userId}.", ex);
+                throw new RepositoryException($"Failed to get highest role type for user with ID {userId}.", exception);
             }
         }
 
@@ -121,20 +121,20 @@
         {
             try
             {
-                if (_usersList == null)
+                if (usersList == null)
                 {
-                    throw new NullReferenceException("_usersList is null.");
+                    throw new NullReferenceException("usersList is null.");
                 }
 
-                return _usersList.Where(user =>
+                return usersList.Where(user =>
                     user.HasSubmittedAppeal &&
                     user.AssignedRoles != null &&
                     user.AssignedRoles.Any(role => role.RoleType == RoleType.Banned)
                 ).ToList();
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                throw new RepositoryException("Failed to retrieve banned users who have submitted appeals.", ex);
+                throw new RepositoryException("Failed to retrieve banned users who have submitted appeals.", exception);
             }
         }
 
@@ -148,7 +148,7 @@
         {
             try
             {
-                User? user = _usersList.FirstOrDefault(u => u.UserId == userId);
+                User? user = usersList.FirstOrDefault(u => u.UserId == userId);
                 if (user == null)
                 {
                     throw new ArgumentException($"No user found with ID {userId}");
@@ -156,9 +156,9 @@
 
                 user.AssignedRoles.Add(roleToAdd);
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                throw new RepositoryException($"Failed to add role to user with ID {userId}.", ex);
+                throw new RepositoryException($"Failed to add role to user with ID {userId}.", exception);
             }
         }
 
@@ -171,16 +171,16 @@
         {
             try
             {
-                if (_usersList == null)
+                if (usersList == null)
                 {
-                    throw new NullReferenceException("_usersList is null.");
+                    throw new NullReferenceException("usersList is null.");
                 }
 
-                return _usersList;
+                return usersList;
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                throw new RepositoryException("Failed to retrieve all users.", ex);
+                throw new RepositoryException("Failed to retrieve all users.", exception);
             }
         }
 
@@ -203,8 +203,8 @@
         public virtual User? GetUserById(Guid userId)
         {
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
-            string sql = "SELECT * FROM Users WHERE userId = @userId;";
-            using SqlCommand command = new(sql, connection);
+            string sqlData = "SELECT * FROM Users WHERE userId = @userId;";
+            using SqlCommand command = new(sqlData, connection);
             command.Parameters.AddWithValue("@userId", userId);
             using SqlDataReader reader = command.ExecuteReader();
 
@@ -224,8 +224,8 @@
         public virtual User? GetUserByUsername(string username)
         {
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
-            string sql = "SELECT * FROM Users WHERE userName = @username;";
-            using SqlCommand command = new(sql, connection);
+            string sqlData = "SELECT * FROM Users WHERE userName = @username;";
+            using SqlCommand command = new(sqlData, connection);
             command.Parameters.AddWithValue("@username", username);
             using SqlDataReader reader = command.ExecuteReader();
             if (reader.Read())
@@ -244,8 +244,8 @@
         public bool UpdateUser(User user)
         {
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
-            string sql = "UPDATE Users SET userName = @username, passwordHash = @passwordHash, twoFASecret = @twoFASecret WHERE userId = @userId;";
-            using (SqlCommand command = new(sql, connection))
+            string sqlData = "UPDATE Users SET userName = @username, passwordHash = @passwordHash, twoFASecret = @twoFASecret WHERE userId = @userId;";
+            using (SqlCommand command = new(sqlData, connection))
             {
                 command.Parameters.AddWithValue("@userId", user.UserId);
                 command.Parameters.AddWithValue("@username", user.Username);
@@ -257,8 +257,8 @@
         public bool DeleteUser(Guid userId)
         {
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
-            string sql = "DELETE FROM Users WHERE userId = @userId;";
-            using SqlCommand command = new(sql, connection);
+            string sqlData = "DELETE FROM Users WHERE userId = @userId;";
+            using SqlCommand command = new(sqlData, connection);
             command.Parameters.AddWithValue("@userId", userId);
             return command.ExecuteNonQuery() > 0;
         }
@@ -266,8 +266,8 @@
         public bool CreateUser(User user)
         {
             using SqlConnection connection = DrinkDbConnectionHelper.GetConnection();
-            string sql = "INSERT INTO Users (userId, userName, passwordHash, twoFASecret) VALUES (@userId, @username, @passwordHash, @twoFASecret);";
-            using SqlCommand command = new(sql, connection);
+            string sqlData = "INSERT INTO Users (userId, userName, passwordHash, twoFASecret) VALUES (@userId, @username, @passwordHash, @twoFASecret);";
+            using SqlCommand command = new(sqlData, connection);
             command.Parameters.AddWithValue("@userId", user.UserId);
             command.Parameters.AddWithValue("@username", user.Username);
             command.Parameters.AddWithValue("@passwordHash", (object?)user.PasswordHash ?? DBNull.Value);
@@ -278,17 +278,17 @@
         public virtual bool ValidateAction(Guid userId, string resource, string action)
         {
             bool result = false;
-            string sql = "SELECT dbo.fnValidateAction(@userId, @resource, @action)";
+            string sqlData = "SELECT dbo.fnValidateAction(@userId, @resource, @action)";
 
             using (SqlConnection connection = DrinkDbConnectionHelper.GetConnection())
-            using (SqlCommand command = new(sql, connection))
+            using (SqlCommand command = new(sqlData, connection))
             {
                 command.Parameters.AddWithValue("@userId", userId);
                 command.Parameters.AddWithValue("@resource", resource);
                 command.Parameters.AddWithValue("@action", action);
 
                 connection.Open();
-                var scalarResult = command.ExecuteScalar();
+                Object scalarResult = command.ExecuteScalar();
                 if (scalarResult != null && scalarResult != DBNull.Value)
                 {
                     result = Convert.ToBoolean(scalarResult);

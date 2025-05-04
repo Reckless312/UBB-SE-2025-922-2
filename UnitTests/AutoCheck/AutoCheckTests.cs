@@ -17,7 +17,7 @@ namespace UnitTests.Autocheck
             this.testOffensiveWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "bad", "offensive", "inappropriate" };
 
             this.mockRepository = new Mock<IOffensiveWordsRepository>();
-            this.mockRepository.Setup(r => r.LoadOffensiveWords()).Returns(this.testOffensiveWords);
+            this.mockRepository.Setup(repository => repository.LoadOffensiveWords()).Returns(this.testOffensiveWords);
 
             this.autoCheck = new AutoCheck(this.mockRepository.Object);
         }

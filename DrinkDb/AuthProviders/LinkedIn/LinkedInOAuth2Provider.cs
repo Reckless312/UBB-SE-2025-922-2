@@ -8,12 +8,18 @@ using DrinkDb_Auth.OAuthProviders;
 using DrinkDb_Auth.Repository.AdminDashboard;
 using IRepository;
 using DrinkDb_Auth.Repository.Authentication;
-using Microsoft.Data.SqlClient;
 
 namespace DrinkDb_Auth.AuthProviders.LinkedIn
 {
     public class LinkedInOAuth2Provider : GenericOAuth2Provider
     {
+
+        private const string LinkedInIdField = "sub";
+        private const string LinkedInNameField = "name";
+        private const string LinkedInEmailField = "email";
+        private const int INITIAL_DELETED_REVIEWS = 0;
+
+
         private readonly static IUserRepository UserRepository = new UserRepository();
         private readonly static SessionRepository SessionAdapter = new();
 
@@ -25,7 +31,7 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
             using HttpClient client = new();
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
             client.DefaultRequestHeaders.Add("User-Agent", "DrinkDb_Auth-App");
-            var response = client.GetAsync("https://api.linkedin.com/v2/userinfo").Result;
+            HttpResponseMessage response = client.GetAsync("https://api.linkedin.com/v2/userinfo").Result;
             if (!response.IsSuccessStatusCode)
             {
                 throw new Exception("Failed to fetch user info from Linkedin.");
@@ -34,11 +40,11 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
             string json = response.Content.ReadAsStringAsync().Result;
 
             using JsonDocument document = JsonDocument.Parse(json);
-            var root = document.RootElement;
-            string id = root.GetProperty("sub").GetString() ?? throw new Exception("LinkedIn ID not found in response.");
-            string name = root.GetProperty("name").GetString() ?? throw new Exception("LinkedIn name not found in response.");
+            JsonElement root = document.RootElement;
+            string linkedinId = root.GetProperty(LinkedInIdField).GetString() ?? throw new Exception("LinkedIn ID not found in response.");
+            string linkedinName = root.GetProperty(LinkedInNameField).GetString() ?? throw new Exception("LinkedIn name not found in response.");
 
-            if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(linkedinId) || string.IsNullOrEmpty(linkedinName))
             {
                 Debug.WriteLine("LinkedIn ID or name is empty.");
                 return new AuthenticationResponse
@@ -50,17 +56,17 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
                 };
             }
 
-            var user = UserRepository.GetUserByUsername(name);
+            User user = UserRepository.GetUserByUsername(linkedinName);
             if (user == null)
             {
                 User newUser = new User
                 {
-                    Username = name,
+                    Username = linkedinName,
                     PasswordHash = string.Empty,
                     UserId = Guid.NewGuid(),
                     TwoFASecret = string.Empty,
-                    EmailAddress = root.GetProperty("email").GetString() ?? string.Empty,
-                    NumberOfDeletedReviews = 0,
+                    EmailAddress = root.GetProperty(LinkedInEmailField).GetString() ?? string.Empty,
+                    NumberOfDeletedReviews = INITIAL_DELETED_REVIEWS,
                     HasSubmittedAppeal = false
                 };
                 UserRepository.CreateUser(newUser);

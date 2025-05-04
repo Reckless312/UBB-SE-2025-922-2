@@ -17,29 +17,29 @@ namespace Tests.Authentication
     [TestFixture]
     public class LinkedInOAuth2ProviderTests
     {
-        private Mock<IUserRepository> _mockUserRepository;
-        private Mock<ISessionRepository> _mockSessionRepository;
-        private Mock<HttpMessageHandler> _mockHttpMessageHandler;
-        private TestableLinkedInOAuth2Provider _provider;
+        private Mock<IUserRepository> mockUserRepository;
+        private Mock<ISessionRepository> mockSessionRepository;
+        private Mock<HttpMessageHandler> mockHttpMessageHandler;
+        private TestableLinkedInOAuth2Provider provider;
         private const string TestToken = "test_token";
-        private readonly Guid _testUserId = Guid.NewGuid();
-        private readonly Guid _testSessionId = Guid.NewGuid();
+        private readonly Guid testUserId = Guid.NewGuid();
+        private readonly Guid testSessionId = Guid.NewGuid();
 
         [SetUp]
         public void Setup()
         {
-            _mockUserRepository = new Mock<IUserRepository>();
-            _mockSessionRepository = new Mock<ISessionRepository>();
-            _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+            mockUserRepository = new Mock<IUserRepository>();
+            mockSessionRepository = new Mock<ISessionRepository>();
+            mockHttpMessageHandler = new Mock<HttpMessageHandler>();
 
             // Create HttpClient with mock handler
-            var httpClient = new HttpClient(_mockHttpMessageHandler.Object);
+            HttpClient httpClient = new HttpClient(mockHttpMessageHandler.Object);
 
             // Use our testable provider that accepts mock dependencies
-            _provider = new TestableLinkedInOAuth2Provider(
+            provider = new TestableLinkedInOAuth2Provider(
                 httpClient,
-                _mockUserRepository.Object,
-                _mockSessionRepository.Object);
+                mockUserRepository.Object,
+                mockSessionRepository.Object);
         }
 
         //[Test]

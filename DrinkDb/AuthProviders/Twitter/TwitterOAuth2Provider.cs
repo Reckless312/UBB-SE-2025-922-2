@@ -7,6 +7,7 @@
     using System.Net.Http.Json;
     using System.Security.Cryptography;
     using System.Text;
+    using System.Text.Json;
     using System.Text.Json.Serialization;
     using System.Threading;
     using System.Threading.Tasks;
@@ -86,9 +87,9 @@
             var (generatedCodeVerifier, generatedCodeChallenge) = GeneratePkceData();
             this.codeVerifier = generatedCodeVerifier;  // store for later use in token request
 
-            var concatenatedScopes = string.Join(" ", scopes);
+            String concatenatedScopes = string.Join(" ", scopes);
 
-            var authorizationParameters = new Dictionary<string, string>
+            Dictionary<string, string> authorizationParameters = new Dictionary<string, string>
             {
                 { "client_id", ClientId },
                 { "redirect_uri", RedirectUri },
@@ -102,10 +103,10 @@
             };
 
             // Build the query string
-            var encodedQueryString = string.Join("&", authorizationParameters
+            String encodedQueryString = string.Join("&", authorizationParameters
                 .Select(p => $"{Uri.EscapeDataString(p.Key)}={Uri.EscapeDataString(p.Value)}"));
 
-            var fullAuthorizationUrl = $"{AuthorizationEndpoint}?{encodedQueryString}";
+            String fullAuthorizationUrl = $"{AuthorizationEndpoint}?{encodedQueryString}";
             System.Diagnostics.Debug.WriteLine($"Generated authorization URL: {fullAuthorizationUrl}");
             return fullAuthorizationUrl;
         }
@@ -117,7 +118,7 @@
         public async Task<AuthenticationResponse> ExchangeCodeForTokenAsync(string code)
         {
             // 3) PKCE: Provide the stored code_verifier in the token request
-            var tokenRequestParameters = new Dictionary<string, string>
+            Dictionary<string, string> tokenRequestParameters = new Dictionary<string, string>
             {
                 { "code", code },
                 { "client_id", ClientId },
@@ -134,9 +135,9 @@
 
             try
             {
-                using var requestContent = new FormUrlEncodedContent(tokenRequestParameters);
-                var tokenResponse = await httpClient.PostAsync(TokenEndpoint, requestContent);
-                var tokenResponseContent = await tokenResponse.Content.ReadAsStringAsync();
+                using FormUrlEncodedContent requestContent = new FormUrlEncodedContent(tokenRequestParameters);
+                HttpResponseMessage tokenResponse = await httpClient.PostAsync(TokenEndpoint, requestContent);
+                String tokenResponseContent = await tokenResponse.Content.ReadAsStringAsync();
 
                 System.Diagnostics.Debug.WriteLine($"Token Response status: {tokenResponse.StatusCode}");
                 System.Diagnostics.Debug.WriteLine($"Token Response content: {tokenResponseContent}");
@@ -180,12 +181,12 @@
                 // 4) Optionally, get user info
                 try
                 {
-                    using var twitterUserInfoClient = new HttpClient();
+                    using HttpClient twitterUserInfoClient = new HttpClient();
                     twitterUserInfoClient.DefaultRequestHeaders.Authorization =
                         new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", twitterTokenResult.AccessToken);
 
-                    var userInfoResponse = await twitterUserInfoClient.GetAsync(UserInfoEndpoint);
-                    var userInfoResponseBody = await userInfoResponse.Content.ReadAsStringAsync();
+                    HttpResponseMessage userInfoResponse = await twitterUserInfoClient.GetAsync(UserInfoEndpoint);
+                    String userInfoResponseBody = await userInfoResponse.Content.ReadAsStringAsync();
 
                     if (!userInfoResponse.IsSuccessStatusCode)
                     {
@@ -200,7 +201,7 @@
                         };
                     }
 
-                    var twitterUserInfoObject = System.Text.Json.JsonSerializer.Deserialize<TwitterUserInfoResponse>(userInfoResponseBody);
+                    TwitterUserInfoResponse twitterUserInfoObject = System.Text.Json.JsonSerializer.Deserialize<TwitterUserInfoResponse>(userInfoResponseBody);
                     System.Diagnostics.Debug.WriteLine($"Authenticated user: {twitterUserInfoObject?.Data.Id} ({twitterUserInfoObject?.Data.Username})");
                     User? user = UserRepository.GetUserByUsername(twitterUserInfoObject?.Data.Username ?? throw new Exception("user not found in json response payload for Twitter authentication"));
                     if (user == null)
@@ -262,11 +263,11 @@
         /// </summary>
         public async Task<AuthenticationResponse> SignInWithTwitterAsync(Window parentWindow)
         {
-            var twitterAuthenticationCompletion = new TaskCompletionSource<AuthenticationResponse>();
+            TaskCompletionSource<AuthenticationResponse> twitterAuthenticationCompletion = new TaskCompletionSource<AuthenticationResponse>();
 
             try
             {
-                var twitterLoginDialog = new ContentDialog
+                ContentDialog twitterLoginDialog = new ContentDialog
                 {
                     Title = "Sign in with Twitter",
                     CloseButtonText = "Cancel",
@@ -274,7 +275,7 @@
                     XamlRoot = parentWindow.Content.XamlRoot
                 };
 
-                var twitterLoginWebView = new WebView2
+                WebView2 twitterLoginWebView = new WebView2
                 {
                     Width = 450,
                     Height = 600
@@ -295,10 +296,10 @@
                     {
                         navigationArgs.Cancel = true; // don't actually navigate to 127.0.0.1 in the WebView
 
-                        var receivedAuthCode = ExtractQueryParameter(callbackUrl, "code");
+                        String receivedAuthCode = ExtractQueryParameter(callbackUrl, "code");
                         System.Diagnostics.Debug.WriteLine($"Found 'code' in callback: {receivedAuthCode}");
 
-                        var twitterAuthResponse = await ExchangeCodeForTokenAsync(receivedAuthCode);
+                        AuthenticationResponse twitterAuthResponse = await ExchangeCodeForTokenAsync(receivedAuthCode);
 
                         // Close the dialog and return
                         parentWindow.DispatcherQueue.TryEnqueue(() =>
@@ -342,8 +343,8 @@
         /// </summary>
         private string ExtractQueryParameter(string fullUrl, string targetParameter)
         {
-            var uriObject = new Uri(fullUrl);
-            var queryString = uriObject.Query.TrimStart('?');
+            Uri uriObject = new Uri(fullUrl);
+            String queryString = uriObject.Query.TrimStart('?');
             var parameterPairs = queryString.Split('&', StringSplitOptions.RemoveEmptyEntries);
             foreach (var parameterPair in parameterPairs)
             {
@@ -369,21 +370,21 @@
         private (string codeVerifier, string codeChallenge) GeneratePkceData()
         {
             // code_verifier: a random 43–128 char string
-            var cryptographicRandomGenerator = RandomNumberGenerator.Create();
+            RandomNumberGenerator cryptographicRandomGenerator = RandomNumberGenerator.Create();
             var randomVerifierBytes = new byte[32];
             cryptographicRandomGenerator.GetBytes(randomVerifierBytes);
 
             // Base64Url-encode without padding
-            var codeVerifier = Convert.ToBase64String(randomVerifierBytes)
+            String codeVerifier = Convert.ToBase64String(randomVerifierBytes)
                 .TrimEnd('=')
                 .Replace('+', '-')
                 .Replace('/', '_');
 
             // code_challenge: SHA256 hash of verifier, then Base64Url-encode
-            using (var sha256Hasher = SHA256.Create())
+            using (SHA256 sha256Hasher = SHA256.Create())
             {
                 var verifierHashBytes = sha256Hasher.ComputeHash(Encoding.UTF8.GetBytes(codeVerifier));
-                var codeChallenge = Convert.ToBase64String(verifierHashBytes)
+                String codeChallenge = Convert.ToBase64String(verifierHashBytes)
                     .TrimEnd('=')
                     .Replace('+', '-')
                     .Replace('/', '_');
@@ -410,17 +411,17 @@
             }
 
             // Get the payload (middle part of JWT)
-            var base64UrlEncodedPayload = tokenComponents[1];
+            String base64UrlEncodedPayload = tokenComponents[1];
             while (base64UrlEncodedPayload.Length % 4 != 0)
             {
                 base64UrlEncodedPayload += '=';
             }
             // Convert from Base64URL to regular Base64 and decode
             var decodedPayloadBytes = Convert.FromBase64String(base64UrlEncodedPayload.Replace('-', '+').Replace('_', '/'));
-            var decodedPayloadJson = Encoding.UTF8.GetString(decodedPayloadBytes);
+            String decodedPayloadJson = Encoding.UTF8.GetString(decodedPayloadBytes);
 
             // Configure JSON deserialization options
-            var jsonDeserializerOptions = new System.Text.Json.JsonSerializerOptions
+            JsonSerializerOptions jsonDeserializerOptions = new System.Text.Json.JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             };

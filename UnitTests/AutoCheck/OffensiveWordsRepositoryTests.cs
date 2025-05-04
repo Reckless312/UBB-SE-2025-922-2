@@ -49,7 +49,7 @@
         [Fact]
         public void LoadOffensiveWords_WhenEmpty_ReturnsEmptySet()
         {
-            var result = this.repository.LoadOffensiveWords();
+            HashSet<string> result = this.repository.LoadOffensiveWords();
             Assert.Empty(result);
         }
 
@@ -61,7 +61,7 @@
         {
             this.repository.AddWord("troll");
 
-            var result = this.repository.LoadOffensiveWords();
+            HashSet<string> result = this.repository.LoadOffensiveWords();
 
             Assert.Contains("troll", result, StringComparer.OrdinalIgnoreCase);
         }
@@ -75,7 +75,7 @@
             this.repository.AddWord("annoying");
             this.repository.DeleteWord("annoying");
 
-            var result = this.repository.LoadOffensiveWords();
+            HashSet<string> result = this.repository.LoadOffensiveWords();
 
             Assert.DoesNotContain("annoying", result, StringComparer.OrdinalIgnoreCase);
         }
@@ -95,7 +95,7 @@
         [Fact]
         public void AddWord_NullWord_DoesNotThrow()
         {
-            var exception = Record.Exception(() => this.repository.AddWord(null));
+            Exception exception = Record.Exception(() => this.repository.AddWord(null));
             Assert.Null(exception);
         }
 
@@ -105,7 +105,7 @@
         [Fact]
         public void AddWord_EmptyWord_DoesNotThrow()
         {
-            var exception = Record.Exception(() => this.repository.AddWord(string.Empty));
+            Exception exception = Record.Exception(() => this.repository.AddWord(string.Empty));
             Assert.Null(exception);
         }
 
@@ -115,7 +115,7 @@
         [Fact]
         public void AddWord_WhitespaceWord_DoesNotThrow()
         {
-            var exception = Record.Exception(() => this.repository.AddWord("   "));
+            Exception exception = Record.Exception(() => this.repository.AddWord("   "));
             Assert.Null(exception);
         }
 
@@ -125,7 +125,7 @@
         [Fact]
         public void DeleteWord_NullWord_DoesNotThrow()
         {
-            var exception = Record.Exception(() => this.repository.DeleteWord(null));
+            Exception exception = Record.Exception(() => this.repository.DeleteWord(null));
             Assert.Null(exception);
         }
 
@@ -135,7 +135,7 @@
         [Fact]
         public void DeleteWord_EmptyWord_DoesNotThrow()
         {
-            var exception = Record.Exception(() => this.repository.DeleteWord(string.Empty));
+            Exception exception = Record.Exception(() => this.repository.DeleteWord(string.Empty));
             Assert.Null(exception);
         }
 
@@ -145,7 +145,7 @@
         [Fact]
         public void DeleteWord_WhitespaceWord_DoesNotThrow()
         {
-            var exception = Record.Exception(() => this.repository.DeleteWord("   "));
+            Exception exception = Record.Exception(() => this.repository.DeleteWord("   "));
             Assert.Null(exception);
         }
 
@@ -155,7 +155,7 @@
         [Fact]
         public void DeleteWord_NonExistentWord_DoesNotThrow()
         {
-            var exception = Record.Exception(() => this.repository.DeleteWord("nonexistent"));
+            Exception exception = Record.Exception(() => this.repository.DeleteWord("nonexistent"));
             Assert.Null(exception);
         }
 
@@ -164,10 +164,10 @@
         /// </summary>
         private void CleanupTable()
         {
-            using SqlConnection conn = new SqlConnection(this.connectionString);
-            conn.Open();
-            using var cmd = new SqlCommand("DELETE FROM OffensiveWords", conn);
-            cmd.ExecuteNonQuery();
+            using SqlConnection sqlConnection = new SqlConnection(this.connectionString);
+            sqlConnection.Open();
+            using SqlCommand sqlCommand = new SqlCommand("DELETE FROM OffensiveWords", sqlConnection);
+            sqlCommand.ExecuteNonQuery();
         }
 
         /// <summary>
@@ -175,16 +175,16 @@
         /// </summary>
         private void EnsureTableExists()
         {
-            using var conn = new SqlConnection(this.connectionString);
-            conn.Open();
-            using var cmd = new SqlCommand(
+            using SqlConnection sqlConnection = new SqlConnection(this.connectionString);
+            sqlConnection.Open();
+            using SqlCommand sqlCommand = new SqlCommand(
                 @"IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'OffensiveWords')
                 BEGIN
                     CREATE TABLE OffensiveWords (
                         Word NVARCHAR(100) PRIMARY KEY
                     )
-                END", conn);
-            cmd.ExecuteNonQuery();
+                END", sqlConnection);
+            sqlCommand.ExecuteNonQuery();
         }
     }
 }

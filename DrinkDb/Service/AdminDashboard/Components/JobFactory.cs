@@ -19,9 +19,9 @@ public class JobFactory : IJobFactory
             IJob? job = this.serviceProvider.GetRequiredService(bundle.JobDetail.JobType) as IJob;
             return job == null ? throw new Exception("Couldn't retrieve the required service") : job;
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            System.Diagnostics.Debug.WriteLine($"Job creation failed: {ex}");
+            System.Diagnostics.Debug.WriteLine($"Job creation failed: {exception}");
             throw;
         }
     }

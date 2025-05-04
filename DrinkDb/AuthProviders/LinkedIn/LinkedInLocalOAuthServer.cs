@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,6 +12,18 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
         private readonly HttpListener listener;
         public static event Action<string>? OnCodeReceived;
         private bool isRunning;
+
+        // Status code constants
+        private const int HTTP_STATUS_OK = 200;
+        private const int HTTP_STATUS_NOT_FOUND = 404;
+
+        // HTTP paths
+        private const string AuthenticationPath = "/auth";
+        private const string ExchangePath = "/exchange";
+
+        // HTTP method
+        private const string PostMethod = "POST";
+
 
         public LinkedInLocalOAuthServer(string prefix)
         {
@@ -28,12 +41,12 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
             {
                 try
                 {
-                    var context = await listener.GetContextAsync();
+                    HttpListenerContext context = await listener.GetContextAsync();
                     if (context.Request.Url == null)
                     {
                         throw new Exception("Request URL is null.");
                     }
-                    if (context.Request.Url.AbsolutePath.Equals("/auth", StringComparison.OrdinalIgnoreCase))
+                    if (context.Request.Url.AbsolutePath.Equals(AuthenticationPath, StringComparison.OrdinalIgnoreCase))
                     {
                         // LinkedIn redirects here with ?code=...
                         string code = HttpUtility.ParseQueryString(context.Request.Url.Query).Get("code") ?? throw new Exception("No code found in the request.");
@@ -45,10 +58,10 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
                         await context.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
                         context.Response.OutputStream.Close();
                     }
-                    else if (context.Request.Url.AbsolutePath.Equals("/exchange", StringComparison.OrdinalIgnoreCase) &&
-                             context.Request.HttpMethod == "POST")
+                    else if (context.Request.Url.AbsolutePath.Equals(ExchangePath, StringComparison.OrdinalIgnoreCase) &&
+                             context.Request.HttpMethod == PostMethod)
                     {
-                        using (var reader = new System.IO.StreamReader(context.Request.InputStream, context.Request.ContentEncoding))
+                        using (StreamReader reader = new System.IO.StreamReader(context.Request.InputStream, context.Request.ContentEncoding))
                         {
                             string code = (await reader.ReadToEndAsync()).Trim();
                             if (!string.IsNullOrEmpty(code))
@@ -61,18 +74,18 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
                                 Console.WriteLine("No LinkedIn code found.");
                             }
                         }
-                        context.Response.StatusCode = 200;
+                        context.Response.StatusCode = HTTP_STATUS_OK;
                         context.Response.OutputStream.Close();
                     }
                     else
                     {
-                        context.Response.StatusCode = 404;
+                        context.Response.StatusCode = HTTP_STATUS_NOT_FOUND;
                         context.Response.OutputStream.Close();
                     }
                 }
-                catch (Exception ex)
+                catch (Exception exception)
                 {
-                    Console.WriteLine("Error in LinkedInLocalOAuthServer: " + ex.Message);
+                    Console.WriteLine("Error in LinkedInLocalOAuthServer: " + exception.Message);
                     break;
                 }
             }

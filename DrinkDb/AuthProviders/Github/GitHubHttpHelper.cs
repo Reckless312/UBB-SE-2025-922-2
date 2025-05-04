@@ -35,7 +35,7 @@ namespace DrinkDb_Auth.AuthProviders.Github
                 client.DefaultRequestHeaders.Add("Authorization", $"token {token}");
                 client.DefaultRequestHeaders.Add("User-Agent", "DrinkDb_Auth-App");
 
-                var response = client.GetAsync("https://api.github.com/user").Result;
+                HttpResponseMessage response = client.GetAsync("https://api.github.com/user").Result;
                 if (!response.IsSuccessStatusCode)
                 {
                     throw new Exception("Failed to fetch user info from GitHub.");
@@ -44,7 +44,7 @@ namespace DrinkDb_Auth.AuthProviders.Github
                 string userJson = response.Content.ReadAsStringAsync().Result;
                 using (JsonDocument userDocument = JsonDocument.Parse(userJson))
                 {
-                    var root = userDocument.RootElement;
+                    JsonElement root = userDocument.RootElement;
                     string gitHubId = root.GetProperty("id").GetRawText();
                     string? gitHubLogin = root.GetProperty("login").GetString();
                     if (gitHubLogin == null)

@@ -30,7 +30,7 @@ namespace UnitTests.Users
             {
                 new Role(RoleType.User, "User"),
             };
-            var exception = Record.Exception(() => new User { UserId = userId, EmailAddress = emailAddress, Username = fullName, NumberOfDeletedReviews = numberOfDeletedReviews, AssignedRoles = assignedRoles, HasSubmittedAppeal = hasSubmittedAppeal, PasswordHash = String.Empty, TwoFASecret = String.Empty });
+            Exception exception = Record.Exception(() => new User { UserId = userId, EmailAddress = emailAddress, Username = fullName, NumberOfDeletedReviews = numberOfDeletedReviews, AssignedRoles = assignedRoles, HasSubmittedAppeal = hasSubmittedAppeal, PasswordHash = String.Empty, TwoFASecret = String.Empty });
             Assert.Null(exception);
 
             User user = new User { UserId = userId, EmailAddress = emailAddress, Username = fullName, NumberOfDeletedReviews = numberOfDeletedReviews, AssignedRoles = assignedRoles, HasSubmittedAppeal = hasSubmittedAppeal, PasswordHash = String.Empty, TwoFASecret = String.Empty };
