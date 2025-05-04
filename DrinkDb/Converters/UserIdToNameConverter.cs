@@ -40,7 +40,7 @@ namespace DrinkDb_Auth.Converters
             {
                 try
                 {
-                    User user = userService.GetUserById(userId).Result;
+                    User user = userService.GetUserById(userId);
                     return string.IsNullOrEmpty(user?.Username) ? $"User {userId}" : user.Username;
                 }
                 catch

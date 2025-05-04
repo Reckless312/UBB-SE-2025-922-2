@@ -36,7 +36,7 @@ namespace DrinkDb_Auth.Service.Authentication
             return session != null && session.IsActive();
         }
 
-        public async Task<bool> AuthorizeAction(Guid sessionId, string resource, string action)
+        public bool AuthorizeAction(Guid sessionId, string resource, string action)
         {
             var session = GetSession(sessionId);
             if (session == null || !session.IsActive())
@@ -45,7 +45,7 @@ namespace DrinkDb_Auth.Service.Authentication
             }
 
             var userService = new UserService();
-            return await userService.ValidateAction(session.UserId, resource, action);
+            return userService.ValidateAction(session.UserId, resource, action);
         }
     }
 }

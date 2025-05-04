@@ -6,7 +6,7 @@ namespace DrinkDb_Auth.Service.Authentication.Interfaces
 {
     public interface IAuthenticationService
     {
-        Task<User> GetUser(Guid sessionId);
+        User GetUser(Guid sessionId);
 
         void Logout();
     }

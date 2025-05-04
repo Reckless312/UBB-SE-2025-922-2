@@ -97,19 +97,19 @@ namespace DrinkDb_Auth
         {
             if (res.AuthenticationSuccessful)
             {
-                User user = authenticationService.GetUser(res.SessionId).Result;
+                User user = authenticationService.GetUser(res.SessionId);
                 bool twoFAresponse = false;
                 if (!user.TwoFASecret.IsNullOrEmpty())
                 {
                     this.twoFactorAuthentificationService = new TwoFactorAuthenticationService(this, user.UserId, false);
                     this.twoFactorAuthentificationService.InitializeOtherComponents();
-                    twoFAresponse = await this.twoFactorAuthentificationService.SetupOrVerifyTwoFactor();
+                    twoFAresponse = this.twoFactorAuthentificationService.SetupOrVerifyTwoFactor();
                 }
                 else
                 {
                     this.twoFactorAuthentificationService = new TwoFactorAuthenticationService(this, user.UserId, true);
                     this.twoFactorAuthentificationService.InitializeOtherComponents();
-                    twoFAresponse = await this.twoFactorAuthentificationService.SetupOrVerifyTwoFactor();
+                    twoFAresponse = this.twoFactorAuthentificationService.SetupOrVerifyTwoFactor();
                 }
 
                 if (twoFAresponse)
@@ -141,7 +141,7 @@ namespace DrinkDb_Auth
             string username = UsernameTextBox.Text;
             string password = PasswordBox.Password;
 
-            AuthenticationResponse response = authenticationService.AuthWithUserPass(username, password).Result;
+            AuthenticationResponse response = authenticationService.AuthWithUserPass(username, password);
             _ = AuthenticationComplete(response);
         }
 
@@ -149,7 +149,7 @@ namespace DrinkDb_Auth
         {
             try
             {
-                var authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.GitHub, new GitHubOAuthHelper());
+                var authResponse = authenticationService.AuthWithOAuth(this, OAuthService.GitHub, new GitHubOAuthHelper());
                 _ = AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
@@ -163,7 +163,7 @@ namespace DrinkDb_Auth
             try
             {
                 GoogleSignInButton.IsEnabled = false;
-                var authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.Google, new GoogleOAuth2Provider());
+                var authResponse = authenticationService.AuthWithOAuth(this, OAuthService.Google, new GoogleOAuth2Provider());
                 await AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
@@ -180,7 +180,7 @@ namespace DrinkDb_Auth
         {
             try
             {
-                var authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.Facebook, new FacebookOAuthHelper());
+                var authResponse = authenticationService.AuthWithOAuth(this, OAuthService.Facebook, new FacebookOAuthHelper());
                 await AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
@@ -194,7 +194,7 @@ namespace DrinkDb_Auth
             try
             {
                 XSignInButton.IsEnabled = false;
-                var authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.Twitter, new TwitterOAuth2Provider());
+                var authResponse = authenticationService.AuthWithOAuth(this, OAuthService.Twitter, new TwitterOAuth2Provider());
                 await AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
@@ -211,7 +211,7 @@ namespace DrinkDb_Auth
         {
             try
             {
-                var authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.LinkedIn, new LinkedInOAuthHelper(
+                var authResponse = authenticationService.AuthWithOAuth(this, OAuthService.LinkedIn, new LinkedInOAuthHelper(
                     clientId: "86j0ikb93jm78x",
                     clientSecret: "WPL_AP1.pg2Bd1XhCi821VTG.+hatTA==",
                     redirectUri: "http://localhost:8891/auth",

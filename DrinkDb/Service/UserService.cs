@@ -36,11 +36,11 @@ namespace DrinkDb_Auth.Service
             authenticationService = authService;
         }
 
-        public async Task<User> GetUserById(Guid userId)
+        public User GetUserById(Guid userId)
         {
             try
             {
-                var user = await userRepository.GetUserById(userId);
+                var user = userRepository.GetUserById(userId).Result;
                 if (user == null)
                 {
                     throw new ArgumentException(UserNotFoundMessage, nameof(userId));
@@ -53,11 +53,11 @@ namespace DrinkDb_Auth.Service
             }
         }
 
-        public async Task<User> GetUserByUsername(string username)
+        public User GetUserByUsername(string username)
         {
             try
             {
-                var user = await userRepository.GetUserByUsername(username);
+                var user = userRepository.GetUserByUsername(username).Result;
                 if (user == null)
                 {
                     throw new ArgumentException(UserNotFoundMessage, nameof(username));
@@ -70,17 +70,17 @@ namespace DrinkDb_Auth.Service
             }
         }
 
-        public async Task<User> GetCurrentUser()
+        public User GetCurrentUser()
         {
             Guid currentSessionId = App.CurrentSessionId;
             if (currentSessionId == Guid.Empty)
             {
                 throw new InvalidOperationException(NoUserLoggedInMessage);
             }
-            return await authenticationService.GetUser(currentSessionId);
+            return authenticationService.GetUser(currentSessionId);
         }
 
-        public async Task<bool> ValidateAction(Guid userId, string resource, string action)
+        public bool ValidateAction(Guid userId, string resource, string action)
         {
             if (string.IsNullOrEmpty(resource))
             {
@@ -94,7 +94,7 @@ namespace DrinkDb_Auth.Service
 
             try
             {
-                return await userRepository.ValidateAction(userId, resource, action);
+                return userRepository.ValidateAction(userId, resource, action).Result;
             }
             catch (Exception ex)
             {
@@ -107,11 +107,11 @@ namespace DrinkDb_Auth.Service
             authenticationService.Logout();
         }
 
-        public async Task<List<User>> GetAllUsers()
+        public List<User> GetAllUsers()
         {
             try
             {
-                return await userRepository.GetAllUsers();
+                return userRepository.GetAllUsers().Result;
             }
             catch (Exception ex)
             {
@@ -119,13 +119,13 @@ namespace DrinkDb_Auth.Service
             }
         }
 
-        public async Task<List<User>> GetActiveUsersByRoleType(RoleType roleType)
+        public List<User> GetActiveUsersByRoleType(RoleType roleType)
         {
             try
             {
                 return roleType switch
                 {
-                    > 0 => await userRepository.GetUsersByRoleType(roleType),
+                    > 0 => userRepository.GetUsersByRoleType(roleType).Result,
                     _ => throw new ArgumentException("Role type must be a valid value")
                 };
             }
@@ -135,11 +135,11 @@ namespace DrinkDb_Auth.Service
             }
         }
 
-        public async Task<List<User>> GetBannedUsers()
+        public List<User> GetBannedUsers()
         {
             try
             {
-                return await userRepository.GetUsersByRoleType(RoleType.Banned);
+                return userRepository.GetUsersByRoleType(RoleType.Banned).Result;
             }
             catch (Exception ex)
             {
@@ -147,11 +147,11 @@ namespace DrinkDb_Auth.Service
             }
         }
 
-        public async Task<List<User>> GetUsersByRoleType(RoleType roleType)
+        public List<User> GetUsersByRoleType(RoleType roleType)
         {
             try
             {
-                return await userRepository.GetUsersByRoleType(roleType);
+                return userRepository.GetUsersByRoleType(roleType).Result;
             }
             catch (Exception ex)
             {
@@ -159,11 +159,11 @@ namespace DrinkDb_Auth.Service
             }
         }
 
-        public async Task<string> GetUserFullNameById(Guid userId)
+        public string GetUserFullNameById(Guid userId)
         {
             try
             {
-                User user = await userRepository.GetUserById(userId);
+                User user = userRepository.GetUserById(userId).Result;
                 if (user == null)
                 {
                     throw new UserServiceException($"Failed to retrieve the full name of the user with ID {userId}.", 
@@ -178,11 +178,11 @@ namespace DrinkDb_Auth.Service
             }
         }
 
-        public async Task<List<User>> GetBannedUsersWhoHaveSubmittedAppeals()
+        public List<User> GetBannedUsersWhoHaveSubmittedAppeals()
         {
             try
             {
-                return await userRepository.GetBannedUsersWhoHaveSubmittedAppeals();
+                return userRepository.GetBannedUsersWhoHaveSubmittedAppeals().Result;
             }
             catch (Exception ex)
             {
@@ -190,11 +190,11 @@ namespace DrinkDb_Auth.Service
             }
         }
 
-        public async Task<RoleType> GetHighestRoleTypeForUser(Guid userId)
+        public RoleType GetHighestRoleTypeForUser(Guid userId)
         {
             try
             {
-                return await userRepository.GetHighestRoleTypeForUser(userId);
+                return userRepository.GetHighestRoleTypeForUser(userId).Result;
             }
             catch (Exception ex)
             {
@@ -202,11 +202,11 @@ namespace DrinkDb_Auth.Service
             }
         }
 
-        public async Task<List<User>> GetAdminUsers()
+        public List<User> GetAdminUsers()
         {
             try
             {
-                return await userRepository.GetUsersByRoleType(RoleType.Admin);
+                return userRepository.GetUsersByRoleType(RoleType.Admin).Result;
             }
             catch (Exception ex)
             {
@@ -214,11 +214,11 @@ namespace DrinkDb_Auth.Service
             }
         }
 
-        public async Task<List<User>> GetRegularUsers()
+        public List<User> GetRegularUsers()
         {
             try
             {
-                return await userRepository.GetUsersByRoleType(RoleType.User);
+                return userRepository.GetUsersByRoleType(RoleType.User).Result;
             }
             catch (Exception ex)
             {
@@ -226,11 +226,11 @@ namespace DrinkDb_Auth.Service
             }
         }
 
-        public async Task<List<User>> GetManagers()
+        public List<User> GetManagers()
         {
             try
             {
-                return await userRepository.GetUsersByRoleType(RoleType.Manager);
+                return userRepository.GetUsersByRoleType(RoleType.Manager).Result;
             }
             catch (Exception ex)
             {
@@ -238,11 +238,11 @@ namespace DrinkDb_Auth.Service
             }
         }
 
-        public async Task UpdateUserRole(Guid userId, RoleType roleType)
+        public void UpdateUserRole(Guid userId, RoleType roleType)
         {
             try
             {
-                User? user = await userRepository.GetUserById(userId);
+                User? user = userRepository.GetUserById(userId).Result;
                 if (user == null)
                 {
                     throw new ArgumentException($"User with ID {userId} not found.", nameof(userId));
@@ -263,17 +263,17 @@ namespace DrinkDb_Auth.Service
                     if (!hasBannedRole)
                     {
                         user.AssignedRoles.Clear();
-                        await userRepository.AddRoleToUser(userId, new Role(RoleType.Banned, "Banned"));
+                        userRepository.AddRoleToUser(userId, new Role(RoleType.Banned, "Banned"));
                     }
                 }
                 else
                 {
                     user.AssignedRoles.Clear();
-                    await userRepository.AddRoleToUser(userId, new Role(roleType, roleType.ToString()));
+                    userRepository.AddRoleToUser(userId, new Role(roleType, roleType.ToString()));
                 }
 
                 // Update the user after modifying roles
-                await userRepository.UpdateUser(user);
+                userRepository.UpdateUser(user);
             }
             catch (Exception ex) when (!(ex is ArgumentException))
             {

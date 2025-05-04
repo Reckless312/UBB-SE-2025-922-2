@@ -30,7 +30,7 @@ namespace DrinkDb_Auth
             {
                 // Retrieve the user from the database using your UserService.
                 var userService = new UserService();
-                User user = userService.GetUserById(currentUserId).Result;
+                User user = userService.GetUserById(currentUserId);
 
                 // Update UI with the retrieved data.
                 if (user != null)
@@ -63,7 +63,7 @@ namespace DrinkDb_Auth
 
         public void LoadMockUserData()
         {
-            User user = UserService.GetCurrentUser().Result;
+            User user = UserService.GetCurrentUser();
             string mockStatus = "Online";
             ReviewModel[] mockReviews =
             [

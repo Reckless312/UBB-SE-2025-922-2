@@ -11,7 +11,7 @@ namespace DrinkDb_Auth.Service.Authentication.Interfaces
 {
     internal interface ITwoFactorAuthenticationService
     {
-        Task<bool> SetupOrVerifyTwoFactor();
+        bool SetupOrVerifyTwoFactor();
         void InitializeOtherComponents(IAuthenticationWindowSetup? windowSetup = null, ITwoFactorAuthenticationView? authenticationWindow = null, IDialog? dialog = null, IDialog? invalidDialog = null);
     }
 }

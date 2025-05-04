@@ -25,46 +25,46 @@
             this.RemoveUpgradeRequestsFromBannedUsers();
         }
 
-        public async Task RemoveUpgradeRequestsFromBannedUsers()
+        public void RemoveUpgradeRequestsFromBannedUsers()
         {
-            List<UpgradeRequest> pendingUpgradeRequests = await this.RetrieveAllUpgradeRequests();
+            List<UpgradeRequest> pendingUpgradeRequests = this.RetrieveAllUpgradeRequests();
 
             // Use a reversed loop or a copy of the list to safely remove items
             for (int i = pendingUpgradeRequests.Count - 1; i >= 0; i--)
             {
                 Guid requestingUserIdentifier = pendingUpgradeRequests[i].RequestingUserIdentifier;
 
-                if (await this.userRepository.GetHighestRoleTypeForUser(requestingUserIdentifier) == RoleType.Banned)
+                if (this.userRepository.GetHighestRoleTypeForUser(requestingUserIdentifier).Result == RoleType.Banned)
                 {
-                    await this.upgradeRequestsRepository.RemoveUpgradeRequestByIdentifier(pendingUpgradeRequests[i].UpgradeRequestId);
+                    this.upgradeRequestsRepository.RemoveUpgradeRequestByIdentifier(pendingUpgradeRequests[i].UpgradeRequestId);
                 }
             }
         }
 
-        public async Task<string> GetRoleNameBasedOnIdentifier(RoleType roleType)
+        public string GetRoleNameBasedOnIdentifier(RoleType roleType)
         {
-            List<Role> availableRoles = await this.rolesRepository.GetAllRoles();
+            List<Role> availableRoles = this.rolesRepository.GetAllRoles().Result;
             Role matchingRole = availableRoles.First(role => role.RoleType == roleType);
             return matchingRole.RoleName;
         }
 
-        public async Task<List<UpgradeRequest>> RetrieveAllUpgradeRequests()
+        public List<UpgradeRequest> RetrieveAllUpgradeRequests()
         {
-            return await this.upgradeRequestsRepository.RetrieveAllUpgradeRequests();
+            return this.upgradeRequestsRepository.RetrieveAllUpgradeRequests().Result;
         }
 
-        public async Task ProcessUpgradeRequest(bool isRequestAccepted, int upgradeRequestIdentifier)
+        public void ProcessUpgradeRequest(bool isRequestAccepted, int upgradeRequestIdentifier)
         {
             if (isRequestAccepted)
             {
-                UpgradeRequest currentUpgradeRequest = await this.upgradeRequestsRepository.RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
+                UpgradeRequest currentUpgradeRequest = this.upgradeRequestsRepository.RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier).Result;
                 Guid requestingUserIdentifier = currentUpgradeRequest.RequestingUserIdentifier;
-                RoleType currentHighestRoleType = await this.userRepository.GetHighestRoleTypeForUser(requestingUserIdentifier);
-                Role nextRoleLevel = await this.rolesRepository.GetNextRoleInHierarchy(currentHighestRoleType);
-                await this.userRepository.AddRoleToUser(requestingUserIdentifier, nextRoleLevel);
+                RoleType currentHighestRoleType = this.userRepository.GetHighestRoleTypeForUser(requestingUserIdentifier).Result;
+                Role nextRoleLevel = this.rolesRepository.GetNextRoleInHierarchy(currentHighestRoleType).Result;
+                this.userRepository.AddRoleToUser(requestingUserIdentifier, nextRoleLevel);
             }
 
-            await this.upgradeRequestsRepository.RemoveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
+            this.upgradeRequestsRepository.RemoveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
         }
     }
 }

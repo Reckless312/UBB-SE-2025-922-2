@@ -90,16 +90,16 @@ namespace DrinkDb_Auth.Service.Authentication
             return instance;
         }
 
-        public async Task<bool> SetupOrVerifyTwoFactor()
+        public bool SetupOrVerifyTwoFactor()
         {
             dialog?.ShowAsync();
-            bool authentificationResult = await authentificationTask.Task;
+            bool authentificationResult = authentificationTask.Task.Result;
 
             authentificationCompleteTask = new TaskCompletionSource<bool>();
             dialog?.Hide();
 
             ShowResults(window, authentificationCompleteTask, authentificationResult);
-            return await authentificationCompleteTask.Task;
+            return authentificationCompleteTask.Task.Result;
         }
 
         private IDialog CreateAuthentificationSubWindow(Window? window, object view, RelayCommand command, IDialog? dialog = null)
