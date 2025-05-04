@@ -10,6 +10,7 @@
     using System.Text.Json.Serialization;
     using System.Threading;
     using System.Threading.Tasks;
+    using DataAccess.Model.AdminDashboard;
     using DataAccess.Model.Authentication;
     using DrinkDb_Auth.OAuthProviders;
     using DrinkDb_Auth.ProxyRepository.AdminDashboard;
@@ -210,10 +211,14 @@
                         // Create a new user
                         user = new User
                         {
-                            Username = twitterUserInfoObject?.Data.Username ?? throw new Exception("user not found in json response payload for Twitter authentication"),
+                            Username = twitterUserInfoObject?.Data.Username,
                             PasswordHash = string.Empty,
                             UserId = Guid.NewGuid(),
                             TwoFASecret = string.Empty,
+                            EmailAddress = string.Empty,
+                            NumberOfDeletedReviews = 0,
+                            HasSubmittedAppeal = false,
+                            AssignedRoles = new List<Role> { },
                         };
                         UserRepository.CreateUser(user);
                     }

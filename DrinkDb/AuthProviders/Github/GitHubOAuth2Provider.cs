@@ -1,4 +1,6 @@
 using System;
+using DataAccess.Model.AdminDashboard;
+using System.Collections.Generic;
 using DataAccess.Model.Authentication;
 using DrinkDb_Auth.OAuthProviders;
 using DrinkDb_Auth.ProxyRepository.AdminDashboard;
@@ -135,6 +137,10 @@ namespace DrinkDb_Auth.AuthProviders.Github
                     Username = gitHubLogin.Trim(),
                     TwoFASecret = string.Empty,
                     PasswordHash = string.Empty,
+                    EmailAddress = string.Empty,
+                    NumberOfDeletedReviews = 0,
+                    HasSubmittedAppeal = false,
+                    AssignedRoles = new List<Role> { },
                 };
                 userRepository.CreateUser(newUser);
                 return newUser.UserId;

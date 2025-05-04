@@ -38,8 +38,7 @@ namespace ServerAPI.Data
                 user.Property(currentUser => currentUser.EmailAddress).IsRequired(false);
                 user.Property(currentUser => currentUser.NumberOfDeletedReviews).IsRequired();
                 user.Property(currentUser => currentUser.HasSubmittedAppeal).IsRequired();
-                user.HasMany(currentUser => currentUser.AssignedRoles)
-                         .WithMany();
+                user.HasMany(currentUser => currentUser.AssignedRoles).WithMany();
             });
 
             // configure role

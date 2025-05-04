@@ -18,6 +18,8 @@
         public RolesRepository(DatabaseContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            if(this.GetAllRoles().Result.Count == 0)
+                InitializeRoles();
         }
 
         public async Task<List<Role>> GetAllRoles()
@@ -36,20 +38,28 @@
         {
             try
             {
-                var nextRole = await _context.Roles
-                    .FirstOrDefaultAsync(role => role.RoleType == currentRoleType + 1);
-
-                if (nextRole == null)
-                {
-                    throw new InvalidOperationException($"No next role exists for {currentRoleType}");
-                }
-
+                if (currentRoleType.Equals(RoleType.Manager))
+                    return await _context.Roles.FirstOrDefaultAsync(role => role.RoleType == currentRoleType);
+                var nextRole = await _context.Roles.FirstOrDefaultAsync(role => role.RoleType == currentRoleType + 1);
                 return nextRole;
             }
             catch (Exception ex)
             {
                 throw new RepositoryException($"Failed to retrieve the next role in hierarchy for {currentRoleType}.", ex);
             }
+        }
+
+        private void InitializeRoles() {
+            this.AddRole(RoleType.Banned, "Banned");
+            this.AddRole(RoleType.User, "User");
+            this.AddRole(RoleType.Admin, "Admin");
+            this.AddRole(RoleType.Manager, "Manager");
+        }
+
+        private void AddRole(RoleType roleType, string roleName) {
+
+            _context.Roles.Add(new Role(roleType, roleName));
+            _context.SaveChanges();
         }
     }
 }

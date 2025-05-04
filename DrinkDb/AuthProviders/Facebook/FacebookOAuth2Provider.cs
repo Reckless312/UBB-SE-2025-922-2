@@ -9,6 +9,8 @@ using Repository.AdminDashboard;
 using Repository.Authentication;
 using DrinkDb_Auth.ProxyRepository.Authentification;
 using DrinkDb_Auth.ProxyRepository.AdminDashboard;
+using DataAccess.Model.AdminDashboard;
+using System.Collections.Generic;
 
 namespace DrinkDb_Auth.AuthProviders.Facebook
 {
@@ -79,10 +81,14 @@ namespace DrinkDb_Auth.AuthProviders.Facebook
             {
                 UserRepository.CreateUser(new User
                 {
-                    UserId = Guid.NewGuid(),
                     Username = fbName,
                     PasswordHash = string.Empty,
-                    TwoFASecret = string.Empty
+                    UserId = Guid.NewGuid(),
+                    TwoFASecret = string.Empty,
+                    EmailAddress = string.Empty,
+                    NumberOfDeletedReviews = 0,
+                    HasSubmittedAppeal = false,
+                    AssignedRoles = new List<Role> { },
                 });
                 return true;
             }
