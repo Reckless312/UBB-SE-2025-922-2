@@ -22,6 +22,12 @@ namespace DrinkDb_Auth.Service
         private const string NullResourceError = "Resource cannot be null or empty.";
         private const string NullActionError = "Action cannot be null or empty.";
 
+        public UserService(IUserRepository userRepository)
+        {
+            this.userRepository = userRepository;
+            this.authenticationService = new AuthenticationService();
+        }
+
         public UserService()
         {
             // Aici trebuie sa vina proxy ul in final, da momentan se poate testa pe repo ul facut

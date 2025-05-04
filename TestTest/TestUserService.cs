@@ -134,7 +134,7 @@ namespace Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void GetCurrentUser_ShouldThrow_WhenNoSessionExists()
         {
             App.CurrentSessionId = Guid.Empty;

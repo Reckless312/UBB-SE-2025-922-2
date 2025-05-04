@@ -31,7 +31,7 @@ namespace UnitTests.Users
         public UserServiceTests()
         {
             this.mockUserRepository = new Mock<IUserRepository>();
-            //this.userService = new UserService(this.mockUserRepository.Object);
+            this.userService = new UserService(this.mockUserRepository.Object);
         }
 
         /// <summary>
@@ -121,9 +121,10 @@ namespace UnitTests.Users
         [Fact]
         public void GetUserById_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
         {
-            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetUserById(new Guid()));
-            Assert.Equal("Failed to retrieve user with ID 1.", exception.Message);
+            var id = new Guid();
+            this.mockUserRepository.Setup(repository => repository.GetUserById(id)).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
+            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetUserById(id));
+            Assert.Equal("Failed to retrieve user with ID " + id.ToString() + ".", exception.Message);
             Assert.IsType<RepositoryException>(exception.InnerException);
         }
 
@@ -133,6 +134,7 @@ namespace UnitTests.Users
         [Fact]
         public void GetUserById_ShouldThrowUserServiceException_WhenRepositoryReturnsNull()
         {
+
             this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Returns((User)null);
             UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetUserById(new Guid()));
             Assert.Equal("Failed to retrieve user with ID 1.", exception.Message);
@@ -194,10 +196,11 @@ namespace UnitTests.Users
         [Fact]
         public void GetHighestRoleTypeForUser_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
         {
-            this.mockUserRepository.Setup(repo => repo.GetHighestRoleTypeForUser(new Guid())).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
+            var id = new Guid();
+            this.mockUserRepository.Setup(repo => repo.GetHighestRoleTypeForUser(id)).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
 
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetHighestRoleTypeForUser(new Guid()));
-            Assert.Equal("Failed to retrieve the highest role type for user with ID 1.", exception.Message);
+            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetHighestRoleTypeForUser(id));
+            Assert.Equal("Failed to retrieve the highest role type for user with ID " + id.ToString() + ".", exception.Message);
             Assert.IsType<RepositoryException>(exception.InnerException);
         }
 
@@ -359,9 +362,10 @@ namespace UnitTests.Users
         [Fact]
         public void GetUserFullNameById_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
         {
-            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetUserFullNameById(new Guid()));
-            Assert.Equal("Failed to retrieve the full name of the user with ID 1.", exception.Message);
+            var id = new Guid();
+            this.mockUserRepository.Setup(repository => repository.GetUserById(id)).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
+            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetUserFullNameById(id));
+            Assert.Equal("Failed to retrieve the full name of the user with ID " + id.ToString() + ".", exception.Message);
             Assert.IsType<RepositoryException>(exception.InnerException);
         }
 
@@ -371,9 +375,10 @@ namespace UnitTests.Users
         [Fact]
         public void GetUserFullNameById_ShouldThrowUserServiceException_WhenRepositoryReturnsNull()
         {
-            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Returns((User)null);
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetUserFullNameById(new Guid()));
-            Assert.Equal("Failed to retrieve the full name of the user with ID 1.", exception.Message);
+            var id = new Guid();
+            this.mockUserRepository.Setup(repository => repository.GetUserById(id)).Returns((User)null);
+            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetUserFullNameById(id));
+            Assert.Equal("Failed to retrieve the full name of the user with ID " + id.ToString() + ".", exception.Message);
         }
 
         /// <summary>

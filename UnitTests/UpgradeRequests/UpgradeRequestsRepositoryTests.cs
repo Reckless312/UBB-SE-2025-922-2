@@ -48,11 +48,31 @@ namespace UnitTests.UpgradeRequests
             Assert.Empty(result);
         }
 
+        private int fixedInsertTestRequest(Guid userId, string userName)
+        {
+            int requestId = 0;
+            using var conn = new SqlConnection(this.connectionString);
+            conn.Open();
+
+            using (var cmdInsert = new SqlCommand(
+                @"INSERT INTO UpgradeRequests (RequestingUserId, RequestingUserName) 
+                  VALUES (@userId, @userName);
+                  SELECT SCOPE_IDENTITY();", conn))
+            {
+                cmdInsert.Parameters.AddWithValue("@userId", userId);
+                cmdInsert.Parameters.AddWithValue("@userName", userName);
+
+                requestId = Convert.ToInt32(cmdInsert.ExecuteScalar());
+            }
+            conn.Close();
+            return requestId;
+        }
+
         [Fact]
         public void RetrieveAllUpgradeRequests_WithData_ReturnsAllRequests()
         {
-            this.InsertTestRequest(1, "User1");
-            this.InsertTestRequest(2, "User2");
+            this.fixedInsertTestRequest(new Guid(), "User1");
+            this.fixedInsertTestRequest(new Guid(), "User2");
             List<UpgradeRequest> result = this.repository.RetrieveAllUpgradeRequests();
             Assert.Equal(2, result.Count);
         }
@@ -67,7 +87,7 @@ namespace UnitTests.UpgradeRequests
         [Fact]
         public void RetrieveUpgradeRequestByIdentifier_ExistingId_ReturnsRequest()
         {
-            int requestId = this.InsertTestRequest(42, "TestUser");
+            int requestId = this.fixedInsertTestRequest(new Guid(), "TestUser");
             UpgradeRequest result = this.repository.RetrieveUpgradeRequestByIdentifier(requestId);
             Assert.NotNull(result);
             Assert.Equal("TestUser", result.RequestingUserDisplayName);
@@ -76,7 +96,7 @@ namespace UnitTests.UpgradeRequests
         [Fact]
         public void RemoveUpgradeRequestByIdentifier_ExistingId_RemovesRequest()
         {
-            int requestId = this.InsertTestRequest(42, "RemoveTestUser");
+            int requestId = this.fixedInsertTestRequest(new Guid(), "RemoveTestUser");
             this.repository.RemoveUpgradeRequestByIdentifier(requestId);
             UpgradeRequest result = this.repository.RetrieveUpgradeRequestByIdentifier(requestId);
             Assert.Null(result);
@@ -184,24 +204,24 @@ namespace UnitTests.UpgradeRequests
             cmd.ExecuteNonQuery();
         }
 
-        private int InsertTestRequest(int userId, string userName)
-        {
-            int requestId = 0;
-            using var conn = new SqlConnection(this.connectionString);
-            conn.Open();
+        //private int InsertTestRequest(int userId, string userName)
+        //{
+        //    int requestId = 0;
+        //    using var conn = new SqlConnection(this.connectionString);
+        //    conn.Open();
 
-            using (var cmdInsert = new SqlCommand(
-                @"INSERT INTO UpgradeRequests (RequestingUserId, RequestingUserName) 
-                  VALUES (@userId, @userName);
-                  SELECT SCOPE_IDENTITY();", conn))
-            {
-                cmdInsert.Parameters.AddWithValue("@userId", userId);
-                cmdInsert.Parameters.AddWithValue("@userName", userName);
+        //    using (var cmdInsert = new SqlCommand(
+        //        @"INSERT INTO UpgradeRequests (RequestingUserId, RequestingUserName) 
+        //          VALUES (@userId, @userName);
+        //          SELECT SCOPE_IDENTITY();", conn))
+        //    {
+        //        cmdInsert.Parameters.AddWithValue("@userId", userId);
+        //        cmdInsert.Parameters.AddWithValue("@userName", userName);
 
-                requestId = Convert.ToInt32(cmdInsert.ExecuteScalar());
-            }
-
-            return requestId;
-        }
+        //        requestId = Convert.ToInt32(cmdInsert.ExecuteScalar());
+        //    }
+        //    conn.Close();
+        //    return requestId;
+        //}
     }
 }
