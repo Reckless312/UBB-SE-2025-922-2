@@ -1,11 +1,17 @@
-﻿using DrinkDb_Auth.Adapter;
-using DataAccess.Model;
+﻿using DataAccess.Model;
+using DataAccess.Model.Authentication;
 using DrinkDb_Auth.Service;
+using IRepository;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
 namespace Tests
 {
+    public SessionService(MockSessionAdapter mockSessionAdapter)
+    {
+        sessionRepository = mockSessionAdapter ?? throw new ArgumentNullException(nameof(mockSessionAdapter));
+    }
+
     [TestClass]
     public sealed class SessionService_Tests
     {
@@ -24,7 +30,7 @@ namespace Tests
             Assert.IsNotNull(result);
             Assert.AreEqual(mockId, result.SessionId);
             Assert.AreEqual(mockId, result.UserId);
-            Assert.IsTrue(result.IsActive);
+            Assert.IsTrue(result.IsActive());
         }
 
         [TestMethod]
@@ -87,7 +93,8 @@ namespace Tests
         {
             // Arrange
             var mockSessionAdapter = new MockSessionAdapter();
-            var service = new SessionService(mockSessionAdapter);
+            var mockUserService = new MockUserService();
+            var service = new SessionService(mockSessionAdapter, mockUserService);
             var invalidSessionId = Guid.NewGuid();
 
             // Act
@@ -120,11 +127,13 @@ namespace Tests
     // Modified SessionService to accept dependency injection for testing
     public class SessionService
     {
-        private readonly ISessionAdapter sessionRepository;
+        private readonly ISessionRepository sessionRepository;
+        private readonly IUserService userService;
 
-        public SessionService(ISessionAdapter sessionAdapter)
+        public SessionService(ISessionRepository sessionAdapter, IUserService userService)
         {
             sessionRepository = sessionAdapter ?? throw new ArgumentNullException(nameof(sessionAdapter));
+            this.userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
         public Session CreateSession(Guid userId)
@@ -145,19 +154,38 @@ namespace Tests
         public bool ValidateSession(Guid sessionId)
         {
             var session = GetSession(sessionId);
-            return session != null && session.IsActive;
+            return session != null && session.IsActive();
         }
 
         public bool AuthorizeAction(Guid sessionId, string resource, string action)
         {
             var session = GetSession(sessionId);
-            if (session == null || !session.IsActive)
+            if (session == null || !session.IsActive())
             {
                 return false;
             }
-
-            var userService = new UserService();
             return userService.ValidateAction(session.UserId, resource, action);
         }
+    }
+
+    // Add a simple mock IUserService for testing
+    public class MockUserService : IUserService
+    {
+        public bool ValidateAction(Guid userId, string resource, string action) => false;
+        // Implement other interface members as needed with throw new NotImplementedException() or dummy returns
+        public DataAccess.Model.Authentication.User GetUserById(Guid id) => throw new NotImplementedException();
+        public DataAccess.Model.Authentication.User GetUserByUsername(string username) => throw new NotImplementedException();
+        public DataAccess.Model.Authentication.User GetCurrentUser() => throw new NotImplementedException();
+        public System.Collections.Generic.List<DataAccess.Model.Authentication.User> GetUsersByRoleType(DataAccess.Model.AdminDashboard.RoleType roleType) => throw new NotImplementedException();
+        public System.Collections.Generic.List<DataAccess.Model.Authentication.User> GetActiveUsersByRoleType(DataAccess.Model.AdminDashboard.RoleType roleType) => throw new NotImplementedException();
+        public System.Collections.Generic.List<DataAccess.Model.Authentication.User> GetBannedUsers() => throw new NotImplementedException();
+        public System.Collections.Generic.List<DataAccess.Model.Authentication.User> GetBannedUsersWhoHaveSubmittedAppeals() => throw new NotImplementedException();
+        public System.Collections.Generic.List<DataAccess.Model.Authentication.User> GetAdminUsers() => throw new NotImplementedException();
+        public System.Collections.Generic.List<DataAccess.Model.Authentication.User> GetManagers() => throw new NotImplementedException();
+        public System.Collections.Generic.List<DataAccess.Model.Authentication.User> GetRegularUsers() => throw new NotImplementedException();
+        public DataAccess.Model.AdminDashboard.RoleType GetHighestRoleTypeForUser(Guid id) => throw new NotImplementedException();
+        public void UpdateUserRole(Guid userId, DataAccess.Model.AdminDashboard.RoleType roleType) => throw new NotImplementedException();
+        public string GetUserFullNameById(Guid userId) => throw new NotImplementedException();
+        public void GetUserById(int v) => throw new NotImplementedException();
     }
 }

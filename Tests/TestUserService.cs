@@ -3,8 +3,9 @@ using System;
 using System.Reflection;
 using DataAccess.Model;
 using DrinkDb_Auth.Service;
-using DataAccess.Adapter;
 using DrinkDb_Auth;
+using DrinkDb_Auth.Service.Authentication;
+using DataAccess.Model.Authentication;
 
 namespace Tests
 {
@@ -13,15 +14,11 @@ namespace Tests
     {
         // ─────────────── Mocks ───────────────
 
-        private sealed class MockUserAdapter : UserAdapter
+        private sealed class MockUserAdapter
         {
             public User? ReturnById { get; set; }
             public User? ReturnByUsername { get; set; }
             public bool ValidateActionResult { get; set; }
-
-            public override User? GetUserById(Guid userId) => ReturnById;
-            public override User? GetUserByUsername(string username) => ReturnByUsername;
-            public override bool ValidateAction(Guid userId, string resource, string action) => ValidateActionResult;
         }
 
         private sealed class MockAuthenticationService : AuthenticationService
