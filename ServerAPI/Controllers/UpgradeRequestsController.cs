@@ -9,7 +9,13 @@ namespace ServerAPI.Controllers
     [Route("[controller]")]
     public class UpgradeRequestsController : ControllerBase
     {
-        IUpgradeRequestsRepository repository = new UpgradeRequestsRepository(new SqlConnectionFactory("Data Source=CORA\\MSSQLSERVER01; Initial Catalog = DrinkDB_Dev; Integrated Security = True; Trust Server Certificate = True"));
+        IUpgradeRequestsRepository repository;
+
+        public UpgradeRequestsController(IUpgradeRequestsRepository repository)
+        {
+            this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        }
+
         [HttpGet]
         public async Task<IEnumerable<UpgradeRequest>> GetAll()
         {

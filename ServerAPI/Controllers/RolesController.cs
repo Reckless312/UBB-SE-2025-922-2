@@ -10,7 +10,12 @@ namespace ServerAPI.Controllers
     [Route("[controller]")]
     public class RolesController : ControllerBase
     {
-        private IRolesRepository repository = new RolesRepository();
+        private IRolesRepository repository;
+        public RolesController(IRolesRepository repository)
+        {
+            this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        }
+
         [HttpGet]
         public async Task<IEnumerable<Role>> GetAll()
         {

@@ -10,7 +10,12 @@ namespace ServerAPI.Controllers
     [Route("[controller]")]
     public class UsersController : ControllerBase
     {
-        private IUserRepository repository = new UserRepository();
+        private IUserRepository repository;
+
+        public UsersController(IUserRepository repository)
+        {
+            this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        }
 
         [HttpGet]
         public IEnumerable<User> GetUsers()
