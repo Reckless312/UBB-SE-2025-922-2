@@ -8,6 +8,7 @@ namespace DrinkDb_Auth.AutoChecker
     using System.Collections.Generic;
     using System.Data;
     using System.Linq;
+    using IRepository;
     using Microsoft.Data.SqlClient;
 
     /// <summary>
@@ -24,7 +25,7 @@ namespace DrinkDb_Auth.AutoChecker
         public AutoCheck(IOffensiveWordsRepository repository)
         {
             this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
-            offensiveWords = this.repository.LoadOffensiveWords();
+            this.offensiveWords = this.repository.LoadOffensiveWords().Result;
         }
 
         public bool AutoCheckReview(string reviewText)

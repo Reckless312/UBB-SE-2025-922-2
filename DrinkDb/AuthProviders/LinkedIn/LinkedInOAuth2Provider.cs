@@ -1,10 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
+using DataAccess.Model.AdminDashboard;
 using DataAccess.Model.Authentication;
 using DrinkDb_Auth.OAuthProviders;
+using DrinkDb_Auth.ProxyRepository.AdminDashboard;
 using DrinkDb_Auth.ProxyRepository.Authentification;
 using IRepository;
 using Microsoft.Data.SqlClient;
@@ -15,8 +18,8 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
 {
     public class LinkedInOAuth2Provider : GenericOAuth2Provider
     {
-        private readonly static IUserRepository UserRepository = new UserRepository();
-        private readonly static SessionProxyRepository SessionAdapter = new ("https://localhost:7167");
+        private readonly static IUserRepository UserRepository = new UserProxyRepository();
+        private readonly static ISessionRepository SessionAdapter = new SessionProxyRepository();
 
         /// <summary>
         /// Performs authentication using the access token, fetches user info via OpenID Connect, and stores/updates the user.
@@ -60,6 +63,10 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
                     PasswordHash = string.Empty,
                     UserId = Guid.NewGuid(),
                     TwoFASecret = string.Empty,
+                    EmailAddress = string.Empty,
+                    NumberOfDeletedReviews = 0,
+                    HasSubmittedAppeal = false,
+                    AssignedRoles = new List<Role> { },
                 };
                 UserRepository.CreateUser(newUser);
                 Session session = SessionAdapter.CreateSession(newUser.UserId).Result;

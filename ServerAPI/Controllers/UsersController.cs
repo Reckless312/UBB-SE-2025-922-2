@@ -7,7 +7,7 @@ using IRepository;
 namespace ServerAPI.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("users")]
     public class UsersController : ControllerBase
     {
         private IUserRepository repository;
@@ -18,7 +18,7 @@ namespace ServerAPI.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<User> GetUsers()
+        public async Task<IEnumerable<User>> GetUsers()
         {
             List<User> users = repository.GetAllUsers().Result;
             return users;
@@ -60,17 +60,17 @@ namespace ServerAPI.Controllers
         }
 
         [HttpGet("byId/{userID}")]
-        public ActionResult<User> GetUserById(Guid userId)
+        public User? GetUserById(Guid userId)
         {
-            var user = repository.GetUserById(userId);
-            return user == null ? NotFound() : Ok(user);
+            var user = repository.GetUserById(userId).Result;
+            return user;
         }
 
-        [HttpGet("byUserName/{userName}")]
-        public ActionResult<User> GetUserByName(string userName)
+        [HttpGet("byUserName/{username}")]
+        public User? GetUserByName(string username)
         {
-            var user = repository.GetUserByUsername(userName);
-            return user == null ? NotFound() : Ok(user);
+            var user = repository.GetUserByUsername(username).Result;
+            return user;
         }
 
         [HttpPatch("updateUser")]

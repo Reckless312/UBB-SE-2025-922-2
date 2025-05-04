@@ -3,6 +3,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using DataAccess.Model.Authentication;
+using DrinkDb_Auth.ProxyRepository.AdminDashboard;
 using IRepository;
 using Repository.AdminDashboard;
 
@@ -16,7 +17,7 @@ namespace DrinkDb_Auth.AuthProviders
     }
     public class BasicAuthenticationProvider : IBasicAuthenticationProvider
     {
-        private static readonly IUserRepository UserRepository = new UserRepository();
+        private static readonly IUserRepository UserRepository = new UserProxyRepository();
 
         public bool Authenticate(string username, string password)
         {

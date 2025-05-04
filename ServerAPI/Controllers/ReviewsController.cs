@@ -6,7 +6,7 @@ using IRepository;
 namespace ServerAPI.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("reviews")]
     public class ReviewsController : ControllerBase
     {
         private IReviewsRepository repository;

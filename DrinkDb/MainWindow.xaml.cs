@@ -132,6 +132,7 @@ namespace DrinkDb_Auth
                 };
                 _ = errorDialog.ShowAsync();
             }
+
             return false;
         }
 
@@ -215,7 +216,7 @@ namespace DrinkDb_Auth
                     clientSecret: "WPL_AP1.pg2Bd1XhCi821VTG.+hatTA==",
                     redirectUri: "http://localhost:8891/auth",
                     scope: "openid profile email"));
-                await AuthenticationComplete(authResponse);
+                AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
             {

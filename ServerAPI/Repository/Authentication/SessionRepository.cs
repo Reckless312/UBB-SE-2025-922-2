@@ -27,9 +27,9 @@ namespace Repository.Authentication
                     UserId = userId
                 };
 
-                await _context.Sessions.AddAsync(session);
-                await _context.SaveChangesAsync();
-
+                _context.Sessions.Add(session);
+                _context.SaveChanges();
+                
                 return session;
             }
             catch (Exception ex)
@@ -62,7 +62,7 @@ namespace Repository.Authentication
         {
             try
             {
-                var session = await _context.Sessions.FirstOrDefaultAsync(s => s.SessionId == sessionId);
+                var session = _context.Sessions.FirstOrDefaultAsync(s => s.SessionId == sessionId).Result;
 
                 if (session == null)
                 {

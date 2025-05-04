@@ -12,7 +12,7 @@ namespace DrinkDb_Auth.ProxyRepository.AdminDashboard
 {
     public class RolesProxyRepository : IRolesRepository
     {
-        private const string ApiRoute = "api/roles";
+        private const string ApiRoute = "roles";
         private HttpClient httpClient;
 
         public RolesProxyRepository(string baseApiUrl) {

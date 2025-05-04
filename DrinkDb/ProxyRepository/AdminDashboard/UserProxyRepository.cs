@@ -14,10 +14,16 @@
 
     public class UserProxyRepository : IUserRepository
     {
-        private const string ApiRoute = "api/users";
+        private const string ApiRoute = "users";
         private readonly HttpClient httpClient;
         private readonly JsonSerializerOptions jsonOptions;
 
+        public UserProxyRepository()
+        {
+
+                this.httpClient = new HttpClient();
+                httpClient.BaseAddress = new Uri("http://localhost:5280/");
+        }
         public UserProxyRepository(string baseRoute)
         {
             httpClient = new HttpClient();
@@ -37,7 +43,7 @@
 
         public async Task<bool> CreateUser(User user)
         {
-            var response = await this.httpClient.PostAsJsonAsync($"{ApiRoute}/add", user);
+            var response = this.httpClient.PostAsJsonAsync($"{ApiRoute}/add", user).Result;
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<bool>();
         }
@@ -67,7 +73,7 @@
 
         public async Task<User?> GetUserById(Guid userId)
         {
-            var response = await this.httpClient.GetAsync($"{ApiRoute}/byId/{userId}");
+            var response = this.httpClient.GetAsync($"{ApiRoute}/byId/{userId}").Result;
 
             if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                 return null;
@@ -78,13 +84,15 @@
 
         public async Task<User?> GetUserByUsername(string username)
         {
-            var response = await this.httpClient.GetAsync($"{ApiRoute}/byUserName/{username}");
-
-            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-                return null;
-
+            var response = this.httpClient.GetAsync($"{ApiRoute}/byUserName/{username}").Result;
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<User>(jsonOptions);
+            try
+            {
+                return await response.Content.ReadFromJsonAsync<User>(jsonOptions);
+            }
+            catch (Exception) {
+                return null;
+            }
         }
 
         public async Task<List<User>> GetUsersByRoleType(RoleType roleType)

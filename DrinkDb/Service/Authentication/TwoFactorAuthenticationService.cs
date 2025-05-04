@@ -15,12 +15,13 @@ using DrinkDb_Auth.ViewModel.Authentication.Interfaces;
 using Microsoft.UI.Xaml;
 using OtpNet;
 using Repository.AdminDashboard;
+using DrinkDb_Auth.ProxyRepository.AdminDashboard;
 
 namespace DrinkDb_Auth.Service.Authentication
 {
     public class TwoFactorAuthenticationService : ITwoFactorAuthenticationService
     {
-        private IUserRepository? userRepository = new UserRepository();
+        private IUserRepository? userRepository = new UserProxyRepository();
         private IKeyGeneration? keyGeneration = new OtpKeyGeneration();
         private IVerify? twoFactorSecretVerifier = new Verify2FactorAuthenticationSecret();
         private IAuthenticationWindowSetup? windowSetup;

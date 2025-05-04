@@ -14,6 +14,9 @@ using DrinkDb_Auth.Service.Authentication.Interfaces;
 using Microsoft.UI.Xaml;
 using Repository.Authentication;
 using Repository.AdminDashboard;
+using DrinkDb_Auth.ProxyRepository.AdminDashboard;
+using Org.BouncyCastle.Tls;
+using DrinkDb_Auth.ProxyRepository.Authentification;
 
 namespace DrinkDb_Auth.Service.Authentication
 {
@@ -46,11 +49,11 @@ namespace DrinkDb_Auth.Service.Authentication
             linkedinLocalServer = new LinkedInLocalOAuthServer("http://localhost:8891/");
             _ = linkedinLocalServer.StartAsync();
 
-            sessionRepository = new SessionRepository();
+            sessionRepository = new SessionProxyRepository();
 
             basicAuthenticationProvider = new BasicAuthenticationProvider();
 
-            userRepository = new UserRepository();
+            userRepository = new UserProxyRepository();
         }
 
         public AuthenticationService(ILinkedInLocalOAuthServer linkedinLocalServer, IGitHubLocalOAuthServer githubLocalServer, IFacebookLocalOAuthServer facebookLocalServer, IUserRepository userRepository, ISessionRepository sessionAdapter, IBasicAuthenticationProvider basicAuthenticationProvider)
@@ -98,7 +101,8 @@ namespace DrinkDb_Auth.Service.Authentication
         public virtual async Task<User> GetUser(Guid sessionId)
         {
             Session session = sessionRepository.GetSession(sessionId).Result;
-            return await userRepository.GetUserById(session.UserId) ?? throw new UserNotFoundException("User not found");
+            User user = userRepository.GetUserById(session.UserId).Result;
+            return user ?? throw new UserNotFoundException("User not found");
         }
 
         public async Task<AuthenticationResponse> AuthWithUserPass(string username, string password)

@@ -8,12 +8,13 @@ using IRepository;
 using Repository.AdminDashboard;
 using Repository.Authentication;
 using DrinkDb_Auth.ProxyRepository.Authentification;
+using DrinkDb_Auth.ProxyRepository.AdminDashboard;
 
 namespace DrinkDb_Auth.AuthProviders.Facebook
 {
     public class FacebookOAuth2Provider : GenericOAuth2Provider
     {
-        private static readonly SessionProxyRepository SessionAdapter = new ("https://localhost:7167");
+        private static readonly SessionProxyRepository SessionAdapter = new ();
         public AuthenticationResponse Authenticate(string userId, string token)
         {
             try
@@ -69,7 +70,7 @@ namespace DrinkDb_Auth.AuthProviders.Facebook
             }
         }
 
-        private static readonly IUserRepository UserRepository = new UserRepository();
+        private static readonly IUserRepository UserRepository = new UserProxyRepository();
         private bool StoreOrUpdateUserInDb(string fbId, string fbName)
         {
             User user = UserRepository.GetUserByUsername(fbName).Result;

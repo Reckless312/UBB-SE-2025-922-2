@@ -12,6 +12,8 @@
     using System.Threading.Tasks;
     using DataAccess.Model.Authentication;
     using DrinkDb_Auth.OAuthProviders;
+    using DrinkDb_Auth.ProxyRepository.AdminDashboard;
+    using DrinkDb_Auth.ProxyRepository.Authentification;
     using IRepository;
     using Microsoft.UI.Dispatching;
     using Microsoft.UI.Xaml;
@@ -25,8 +27,8 @@
     /// </summary>
     public class TwitterOAuth2Provider : GenericOAuth2Provider, ITwitterOAuth2Provider
     {
-        private static readonly IUserRepository UserRepository = new UserRepository();
-        private static readonly SessionRepository SessionAdapter = new ();
+        private static readonly IUserRepository UserRepository = new UserProxyRepository();
+        private static readonly ISessionRepository SessionAdapter = new SessionProxyRepository();
         // ▼▼▼ 1) Set these appropriately ▼▼▼
 
         // In "Native App" flows, we typically do NOT use a Client Secret.

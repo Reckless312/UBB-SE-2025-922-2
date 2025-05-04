@@ -22,11 +22,10 @@ namespace DrinkDb_Auth.Service
         private const string NoUserLoggedInMessage = "No user is currently logged in.";
         private const string NullResourceError = "Resource cannot be null or empty.";
         private const string NullActionError = "Action cannot be null or empty.";
-        private const string ApiBaseUrl = "https://your-api-base-url.com/"; // Replace with your actual API base URL
 
         public UserService()
         {
-            this.userRepository = new UserRepository();
+            this.userRepository = new UserProxyRepository();
             this.authenticationService = new AuthenticationService();
         }
 

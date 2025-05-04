@@ -12,7 +12,7 @@
 
     public class ReviewsProxyRepository : IReviewsRepository
     {
-        private const string ApiRoute = "api/reviews";
+        private const string ApiRoute = "reviews";
         private readonly HttpClient httpClient;
 
         public ReviewsProxyRepository(string baseApiUrl)

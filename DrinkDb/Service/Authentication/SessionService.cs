@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using DataAccess.Model.Authentication;
+using DrinkDb_Auth.ProxyRepository.AdminDashboard;
 using IRepository;
 
 namespace DrinkDb_Auth.Service.Authentication

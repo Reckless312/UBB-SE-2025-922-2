@@ -173,13 +173,12 @@
         {
             try
             {
-                return await _context.Users
-                    .Include(user => user.AssignedRoles)
+                return await _context.Users.Include(user => user.AssignedRoles)
                     .FirstOrDefaultAsync(user => user.UserId == userId);
             }
             catch (Exception ex)
             {
-                throw new RepositoryException($"Failed to retrieve user with ID {userId}.", ex);
+                throw new RepositoryException($"Failed to retrieve user with id '{userId}'.", ex);
             }
         }
 

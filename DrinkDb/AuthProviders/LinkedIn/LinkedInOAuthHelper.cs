@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using DrinkDb_Auth.OAuthProviders;
+using DrinkDb_Auth.ProxyRepository.AdminDashboard;
 using IRepository;
 using Repository.AdminDashboard;
 
@@ -17,7 +18,7 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
         private readonly string redirectUrl = "http://localhost:8891/auth";
         private readonly string scope = "openid profile email";
         private TaskCompletionSource<AuthenticationResponse>? taskCompletionSource;
-        private readonly IUserRepository userRepository = new UserRepository();
+        private readonly IUserRepository userRepository = new UserProxyRepository();
         private readonly static LinkedInOAuth2Provider LinkedInOAuth2Provider = new ();
 
         public LinkedInOAuthHelper(string clientId, string clientSecret, string redirectUri, string scope)

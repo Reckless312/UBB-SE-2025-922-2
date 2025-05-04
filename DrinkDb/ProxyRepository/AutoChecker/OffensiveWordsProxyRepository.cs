@@ -13,10 +13,10 @@ namespace DrinkDb_Auth.ProxyRepository.AutoChecker
 {
     public class OffensiveWordsProxyRepository : IOffensiveWordsRepository
     {
-        private const string ApiBaseRoute = "api/upgradeRequests";
+        private const string ApiBaseRoute = "offenssiveWords";
         private HttpClient httpClient;
 
-        public OffensiveWordsProxyRepository(string baseApiUrl) { 
+        public OffensiveWordsProxyRepository(string baseApiUrl) {
             this.httpClient  = new HttpClient();
             this.httpClient.BaseAddress = new Uri(baseApiUrl);
         }

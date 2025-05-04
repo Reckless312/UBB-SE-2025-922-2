@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using IRepository;
 using Repository.AdminDashboard;
 using ServerAPI.Repository.AutoChecker;
+using Repository.Authentication;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -17,6 +18,12 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<DatabaseContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IOffensiveWordsRepository, OffensiveWordsRepository>();
+builder.Services.AddScoped<IUpgradeRequestsRepository, UpgradeRequestsRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IRolesRepository, RolesRepository>();
+builder.Services.AddScoped<IReviewsRepository, ReviewsRepository>();
+builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+
 
 var app = builder.Build();
 
