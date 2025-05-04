@@ -112,9 +112,9 @@ namespace UnitTests.UpgradeRequests
             int upgradeRequestIdentifier = 1;
             this.upgradeRequestsService.ProcessUpgradeRequest(false, upgradeRequestIdentifier);
             this.mockUpgradeRequestsRepository.Verify(r => r.RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier), Times.Never);
-            this.mockUserRepository.Verify(r => r.GetHighestRoleTypeForUser(It.IsAny<int>()), Times.Never);
+            this.mockUserRepository.Verify(r => r.GetHighestRoleTypeForUser(It.IsAny<Guid>()), Times.Never);
             this.mockRolesRepository.Verify(r => r.GetNextRoleInHierarchy(It.IsAny<RoleType>()), Times.Never);
-            this.mockUserRepository.Verify(r => r.AddRoleToUser(It.IsAny<int>(), It.IsAny<Role>()), Times.Never);
+            this.mockUserRepository.Verify(r => r.AddRoleToUser(It.IsAny<Guid>(), It.IsAny<Role>()), Times.Never);
             this.mockUpgradeRequestsRepository.Verify(r => r.RemoveUpgradeRequestByIdentifier(upgradeRequestIdentifier), Times.Once);
         }
 

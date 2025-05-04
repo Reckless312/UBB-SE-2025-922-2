@@ -22,15 +22,11 @@ namespace DrinkDb_Auth.Service
         private const string NullResourceError = "Resource cannot be null or empty.";
         private const string NullActionError = "Action cannot be null or empty.";
 
-        public UserService(IUserRepository @object)
+        public UserService()
         {
             // Aici trebuie sa vina proxy ul in final, da momentan se poate testa pe repo ul facut
             userRepository = new UserRepository();
             authenticationService = new AuthenticationService();
-        }
-
-        public UserService()
-        {
         }
 
         public User GetUserById(Guid userId)
@@ -239,11 +235,6 @@ namespace DrinkDb_Auth.Service
             {
                 throw new UserServiceException("Failed to update user role", ex);
             }
-        }
-
-        public void GetUserById(int v)
-        {
-            throw new NotImplementedException();
         }
     }
 }

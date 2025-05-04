@@ -31,7 +31,7 @@ namespace UnitTests.Users
         public UserServiceTests()
         {
             this.mockUserRepository = new Mock<IUserRepository>();
-            this.userService = new UserService(this.mockUserRepository.Object);
+            //this.userService = new UserService(this.mockUserRepository.Object);
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace UnitTests.Users
         public void Constructor_ShouldInitialize_WhenUserRepositoryIsValid()
         {
             Mock<IUserRepository> mockUserRepository = new Mock<IUserRepository>();
-            UserService userService = new UserService(mockUserRepository.Object);
+            //UserService userService = new UserService(mockUserRepository.Object);
             Assert.NotNull(userService);
         }
 
@@ -59,7 +59,7 @@ namespace UnitTests.Users
             };
             mockUserRepository.Setup(repo => repo.GetAllUsers()).Returns(users);
 
-            var userService = new UserService(mockUserRepository.Object);
+            //var userService = new UserService(mockUserRepository.Object);
 
             var result = userService.GetAllUsers();
 
@@ -386,7 +386,7 @@ namespace UnitTests.Users
 
             this.userService.UpdateUserRole(new Guid(), RoleType.Banned);
 
-            this.mockUserRepository.Verify(repository => repository.AddRoleToUser(It.IsAny<int>(), It.IsAny<Role>()), Times.Never);
+            this.mockUserRepository.Verify(repository => repository.AddRoleToUser(It.IsAny<Guid>(), It.IsAny<Role>()), Times.Never);
         }
 
         /// <summary>
@@ -400,7 +400,7 @@ namespace UnitTests.Users
             this.userService.UpdateUserRole(new Guid(), RoleType.Banned);
             Assert.Single(user.AssignedRoles);
             Assert.Equal(RoleType.Banned, user.AssignedRoles[0].RoleType);
-            this.mockUserRepository.Verify(repository => repository.AddRoleToUser(It.IsAny<int>(), It.IsAny<Role>()), Times.Never);
+            this.mockUserRepository.Verify(repository => repository.AddRoleToUser(It.IsAny<Guid>(), It.IsAny<Role>()), Times.Never);
         }
 
         /// <summary>
