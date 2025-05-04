@@ -1,5 +1,6 @@
 ﻿using DataAccess.Model;
 using DataAccess.Model.Authentication;
+using DrinkDb_Auth.Repository.Authentication;
 using DrinkDb_Auth.Service;
 using IRepository;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -14,8 +15,10 @@ namespace Tests
         public void CreateSession_ReturnsValidSession()
         {
             // Arrange
-            var mockId = Guid.NewGuid();
-            var mockSessionAdapter = new MockSessionAdapter { MockId = mockId };
+            Guid mockId = Guid.NewGuid();
+            var mockSessionAdapter = new MockSessionAdapter();
+            mockSessionAdapter.MockId = mockId;
+
             var service = new SessionService(mockSessionAdapter);
 
             // Act
@@ -131,6 +134,7 @@ namespace Tests
 
         public SessionService(MockSessionAdapter mockSessionAdapter)
         {
+            sessionRepository = new MockSessionRepository();
             this.mockSessionAdapter = mockSessionAdapter;
         }
 

@@ -197,7 +197,7 @@ namespace UnitTests.UpgradeRequests
                 BEGIN
                     CREATE TABLE UpgradeRequests (
                         RequestId INT PRIMARY KEY IDENTITY(1,1),
-                        RequestingUserId INT NOT NULL,
+                        RequestingUserId UNIQUEIDENTIFIER NOT NULL,
                         RequestingUserName NVARCHAR(100) NOT NULL
                     )
                 END", conn);

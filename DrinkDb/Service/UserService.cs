@@ -37,7 +37,7 @@ namespace DrinkDb_Auth.Service
 
         public User GetUserById(Guid userId)
         {
-            return userRepository.GetUserById(userId) ?? throw new ArgumentException(UserNotFoundMessage, nameof(userId));
+            return userRepository.GetUserById(userId) ?? throw new UserServiceException($"Failed to retrieve user with ID {userId}.", new ArgumentException(UserNotFoundMessage, nameof(userId)));
         }
 
         public User GetUserByUsername(string username)

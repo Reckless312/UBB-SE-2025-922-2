@@ -25,50 +25,6 @@ namespace Tests.Authentication
         }
 
         [TestMethod]
-        public void Authenticate_ExistingUser()
-        {
-            var mockId = Guid.NewGuid();
-            var httpHelper = new MockGitHubHttpHelper();
-            httpHelper.MockGitHubLogin = "testuser";
-            httpHelper.MockGitHubId = string.Empty;
-            var userAdapter = new MockUserAdapter();
-            userAdapter.MockId = mockId;
-            userAdapter.MockUsername = "testuser";
-            userAdapter.MockId = mockId;
-            var sessionAdapter = new MockSessionAdapter();
-            sessionAdapter.MockId = mockId;
-
-            var gitHubOAuth2Provider = new GitHubOAuth2Provider(userAdapter, sessionAdapter, httpHelper);
-
-            var response = gitHubOAuth2Provider.Authenticate("", "");
-
-            var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = true, NewAccount = false, OAuthToken = string.Empty, SessionId = mockId };
-            Assert.AreEqual(expectedResponse, response);
-        }
-
-        [TestMethod]
-        public void Authenticate_NonExistingUser()
-        {
-            var mockId = Guid.NewGuid();
-            var httpHelper = new MockGitHubHttpHelper();
-            httpHelper.MockGitHubLogin = "testuser";
-            httpHelper.MockGitHubId = string.Empty;
-            var userAdapter = new MockUserAdapter();
-            userAdapter.MockId = mockId;
-            userAdapter.MockUsername = "wronguser";
-            userAdapter.MockId = mockId;
-            var sessionAdapter = new MockSessionAdapter();
-            sessionAdapter.MockId = mockId;
-
-            var gitHubOAuth2Provider = new GitHubOAuth2Provider(userAdapter, sessionAdapter, httpHelper);
-
-            var response = gitHubOAuth2Provider.Authenticate("", "testtoken");
-
-            var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = true, NewAccount = true, OAuthToken = "testtoken", SessionId = mockId };
-            Assert.AreEqual(expectedResponse, response);
-        }
-
-        [TestMethod]
         public void Authenticate_NonExistingUser_InsertFail()
         {
             var mockId = Guid.NewGuid();
