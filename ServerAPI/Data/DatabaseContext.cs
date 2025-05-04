@@ -39,11 +39,7 @@ namespace ServerAPI.Data
                 user.Property(currentUser => currentUser.NumberOfDeletedReviews).IsRequired();
                 user.Property(currentUser => currentUser.HasSubmittedAppeal).IsRequired();
                 user.HasMany(currentUser => currentUser.AssignedRoles)
-                         .WithMany()
-                         .UsingEntity<Dictionary<string, object>>(
-                             "UserRole",
-                             j => j.HasOne<Role>().WithMany().HasForeignKey("RoleId"),
-                             j => j.HasOne<User>().WithMany().HasForeignKey("UserId"));
+                         .WithMany();
             });
 
             // configure role

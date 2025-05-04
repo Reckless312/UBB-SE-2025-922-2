@@ -17,6 +17,8 @@ using Repository.AdminDashboard;
 using DrinkDb_Auth.ProxyRepository.AdminDashboard;
 using Org.BouncyCastle.Tls;
 using DrinkDb_Auth.ProxyRepository.Authentification;
+using System.Collections.Generic;
+using DataAccess.Model.AdminDashboard;
 
 namespace DrinkDb_Auth.Service.Authentication
 {
@@ -142,6 +144,9 @@ namespace DrinkDb_Auth.Service.Authentication
                     UserId = Guid.NewGuid(),
                     TwoFASecret = string.Empty
                 };
+                user.AssignedRoles = new List<Role>();
+                user.NumberOfDeletedReviews = 0;
+                user.EmailAddress = string.Empty;
                 userRepository.CreateUser(user);
                 Session session = sessionRepository.CreateSession(user.UserId).Result;
                 return new AuthenticationResponse

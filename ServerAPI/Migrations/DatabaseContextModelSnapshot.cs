@@ -158,19 +158,19 @@ namespace ServerAPI.Migrations
                     b.ToTable("OffensiveWords");
                 });
 
-            modelBuilder.Entity("UserRole", b =>
+            modelBuilder.Entity("RoleUser", b =>
                 {
-                    b.Property<int>("RoleId")
+                    b.Property<int>("AssignedRolesRoleType")
                         .HasColumnType("int");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("RoleId", "UserId");
+                    b.HasKey("AssignedRolesRoleType", "UserId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserRole");
+                    b.ToTable("RoleUser");
                 });
 
             modelBuilder.Entity("DataAccess.Model.AdminDashboard.Review", b =>
@@ -200,11 +200,11 @@ namespace ServerAPI.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("UserRole", b =>
+            modelBuilder.Entity("RoleUser", b =>
                 {
                     b.HasOne("DataAccess.Model.AdminDashboard.Role", null)
                         .WithMany()
-                        .HasForeignKey("RoleId")
+                        .HasForeignKey("AssignedRolesRoleType")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
