@@ -97,11 +97,11 @@ public class EmailJob : IJob
         DateTime reportDate = DateTime.Now;
         DateTime yesterday = reportDate.AddDays(-1);
         List<User> adminUsers = this.userService.GetAdminUsers().Result;
-        int activeUsersCount = this.userService.GetAdminUsers().Result.Count() + this.userService.GetRegularUsers().Result.Count();
+        int activeUsersCount = this.userService.GetAdminUsers().Result.Count() + this.userService.GetRegularUsers().Result.Count;
         int bannedUsersCount = this.userService.GetBannedUsers().Result.Count();
-        int numberOfNewReviews = this.reviewService.GetReviewsSince(yesterday).Result.Count;
-        double averageRating = this.reviewService.GetAverageRatingForVisibleReviews().Result;
-        List<Review> recentReviews = this.reviewService.GetReviewsForReport().Result;
+        int numberOfNewReviews = this.reviewService.GetReviewsSince(yesterday).Count;
+        double averageRating = this.reviewService.GetAverageRatingForVisibleReviews();
+        List<Review> recentReviews = this.reviewService.GetReviewsForReport();
 
         return new AdminReportData(reportDate, adminUsers, activeUsersCount, bannedUsersCount, numberOfNewReviews, averageRating, recentReviews);
     }

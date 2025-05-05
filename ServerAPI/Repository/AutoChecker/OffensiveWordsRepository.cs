@@ -25,7 +25,7 @@ namespace ServerAPI.Repository.AutoChecker
             this.databaseContext = databaseContext;
         }
 
-        public async Task<HashSet<string>> LoadOffensiveWords()
+        public HashSet<string> LoadOffensiveWords()
         {
             return databaseContext.OffensiveWords
                 .Select(w => w.Word)

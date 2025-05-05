@@ -50,23 +50,23 @@
 
         public async Task<List<User>> GetAllUsers()
         {
-            var response = await this.httpClient.GetAsync(ApiRoute);
+            var response = this.httpClient.GetAsync(ApiRoute).Result;
             response.EnsureSuccessStatusCode();
-            var users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
+            var users =  response.Content.ReadFromJsonAsync<List<User>>(jsonOptions).Result;
             return users ?? new List<User>();
         }
 
         public async Task<List<User>> GetBannedUsersWhoHaveSubmittedAppeals()
         {
-            var response = await this.httpClient.GetAsync($"{ApiRoute}/banned/appealed");
+            var response = this.httpClient.GetAsync($"{ApiRoute}/banned/appealed").Result;
             response.EnsureSuccessStatusCode();
-            var users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
+            var users = response.Content.ReadFromJsonAsync<List<User>>(jsonOptions).Result;
             return users ?? new List<User>();
         }
 
         public async Task<RoleType> GetHighestRoleTypeForUser(Guid userId)
         {
-            var response = await this.httpClient.GetAsync($"{ApiRoute}/byId/{userId}/role");
+            var response = this.httpClient.GetAsync($"{ApiRoute}/byId/{userId}/role").Result;
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<RoleType>(jsonOptions);
         }

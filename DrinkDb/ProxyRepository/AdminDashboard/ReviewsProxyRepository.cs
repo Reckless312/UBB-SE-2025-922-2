@@ -30,9 +30,9 @@
 
         public async Task<List<Review>> GetAllReviews()
         {
-            var response = await this.httpClient.GetAsync(ApiRoute);
+            var response = this.httpClient.GetAsync(ApiRoute).Result;
             response.EnsureSuccessStatusCode();
-            List<Review> reviews = await response.Content.ReadFromJsonAsync<List<Review>>();
+            List<Review> reviews = response.Content.ReadFromJsonAsync<List<Review>>().Result;
             return reviews ?? new List<Review>();
 
         }
@@ -44,9 +44,9 @@
 
         public async Task<List<Review>> GetFlaggedReviews(int minFlags)
         {
-            var response = await this.httpClient.GetAsync(ApiRoute);
+            var response = this.httpClient.GetAsync(ApiRoute).Result;
             response.EnsureSuccessStatusCode();
-            List<Review> reviews = await response.Content.ReadFromJsonAsync<List<Review>>() ?? new List<Review>();
+            List<Review> reviews = response.Content.ReadFromJsonAsync<List<Review>>().Result ?? new List<Review>();
 
             return reviews.Where(review => review.NumberOfFlags >= minFlags && !review.IsHidden).ToList() ?? new List<Review>();
         }

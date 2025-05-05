@@ -19,7 +19,7 @@ namespace ServerAPI.Controllers
         [HttpGet("")]
         public async Task<IEnumerable<Review>> GetAll()
         {
-            return await repository.GetAllReviews();
+            return repository.GetAllReviews().Result;
         }
 
         [HttpGet("since")]
@@ -47,9 +47,9 @@ namespace ServerAPI.Controllers
         }
 
         [HttpGet("flagged")]
-        public async Task<IEnumerable<Review>> GetFlaggedReviews([FromQuery] int minFlags)
+        public IEnumerable<Review> GetFlaggedReviews([FromQuery] int minFlags)
         {
-            return await repository.GetFlaggedReviews(minFlags);
+            return  repository.GetFlaggedReviews(minFlags).Result;
         }
 
         [HttpGet("byUser")]

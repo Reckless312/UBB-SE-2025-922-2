@@ -21,77 +21,77 @@ namespace DrinkDb_Auth.Service.AdminDashboard
             this.reviewsRepository = reviewsRepository;
         }
 
-        public async Task ResetReviewFlags(int reviewId)
+        public void ResetReviewFlags(int reviewId)
         {
-            await reviewsRepository.UpdateNumberOfFlagsForReview(reviewId, 0);
+            reviewsRepository.UpdateNumberOfFlagsForReview(reviewId, 0);
         }
 
-        public async Task HideReview(int reviewId)
+        public void HideReview(int reviewId)
         {
-             await reviewsRepository.UpdateReviewVisibility(reviewId, true);
+             reviewsRepository.UpdateReviewVisibility(reviewId, true);
         }
 
-        public async Task<List<Review>> GetFlaggedReviews()
+        public List<Review> GetFlaggedReviews()
         {
-            List<Review> reviews = await reviewsRepository.GetAllReviews();
+            List<Review> reviews = reviewsRepository.GetAllReviews().Result;
             return reviews.Where(review => review.NumberOfFlags > 0).ToList();
         }
 
-        public async Task<List<Review>> GetHiddenReviews()
+        public List<Review> GetHiddenReviews()
         {
 
-            List<Review> reviews = await reviewsRepository.GetAllReviews();
+            List<Review> reviews = reviewsRepository.GetAllReviews().Result;
             return reviews.Where(review => review.IsHidden == true).ToList();
         }
 
-        public async Task<List<Review>> GetAllReviews()
+        public List<Review> GetAllReviews()
         {
-            return await reviewsRepository.GetAllReviews();
+            return  reviewsRepository.GetAllReviews().Result;
         }
 
-        public async Task<List<Review>> GetReviewsSince(DateTime date)
+        public List<Review> GetReviewsSince(DateTime date)
         {
-            return await reviewsRepository.GetReviewsSince(date);
+            return reviewsRepository.GetReviewsSince(date).Result;
         }
 
-        public async Task<double> GetAverageRatingForVisibleReviews()
+        public double GetAverageRatingForVisibleReviews()
         {
-            return await reviewsRepository.GetAverageRatingForVisibleReviews();
+            return reviewsRepository.GetAverageRatingForVisibleReviews().Result;
         }
 
-        public async Task<List<Review>> GetMostRecentReviews(int count)
+        public List<Review> GetMostRecentReviews(int count)
         {
-            return await reviewsRepository.GetMostRecentReviews(count);
+            return reviewsRepository.GetMostRecentReviews(count).Result;
         }
 
-        public async Task<int> GetReviewCountAfterDate(DateTime date)
+        public int GetReviewCountAfterDate(DateTime date)
         {
-            return await reviewsRepository.GetReviewCountAfterDate(date);
+            return reviewsRepository.GetReviewCountAfterDate(date).Result;
         }
 
-        public async Task<List<Review>> GetReviewsByUser(Guid userId)
+        public List<Review> GetReviewsByUser(Guid userId)
         {
-            return await reviewsRepository.GetReviewsByUser(userId);
+            return reviewsRepository.GetReviewsByUser(userId).Result;
         }
 
-        public async Task<List<Review>> GetReviewsForReport()
+        public List<Review> GetReviewsForReport()
         {
             DateTime date = DateTime.Now.AddDays(-1);
-            int count = await reviewsRepository.GetReviewCountAfterDate(date);
+            int count = reviewsRepository.GetReviewCountAfterDate(date).Result;
 
-            List<Review> reviews = await reviewsRepository.GetMostRecentReviews(count);
+            List<Review> reviews = reviewsRepository.GetMostRecentReviews(count).Result;
             return reviews ?? [];
         }
 
-        public async Task<List<Review>> FilterReviewsByContent(string content)
+        public List<Review> FilterReviewsByContent(string content)
         {
             if (string.IsNullOrEmpty(content))
             {
-                return await GetFlaggedReviews();
+                return GetFlaggedReviews();
             }
 
             content = content.ToLower();
-            List<Review> reviews = await GetFlaggedReviews();
+            List<Review> reviews = GetFlaggedReviews();
             return reviews.Where(review => review.Content.ToLower().Contains(content)).ToList();
         }
 

@@ -54,12 +54,15 @@ namespace DrinkDb_Auth.ProxyRepository.AutoChecker
             }
         }
 
-        public async Task<HashSet<string>> LoadOffensiveWords()
+        public HashSet<string> LoadOffensiveWords()
         {
-            var response = await this.httpClient.GetAsync(ApiBaseRoute);
+            var response = this.httpClient.GetAsync(ApiBaseRoute).Result;
             response.EnsureSuccessStatusCode();
-            HashSet<OffensiveWord> offensiveWords = await response.Content.ReadFromJsonAsync<HashSet<OffensiveWord>>() ?? new HashSet<OffensiveWord>();
-            return (HashSet<string>)(offensiveWords.Select(word => word.Word) ?? new HashSet<string>());
+            HashSet<OffensiveWord> offensiveWords = response.Content.ReadFromJsonAsync<HashSet<OffensiveWord>>().Result ?? new HashSet<OffensiveWord>();
+            HashSet<string> wordsAsStrings = new HashSet<string>();
+            foreach (OffensiveWord word in offensiveWords)
+                wordsAsStrings.Add(word.Word);
+            return wordsAsStrings;
         }
     }
 }

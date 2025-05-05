@@ -375,7 +375,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// </summary>
         public void LoadFlaggedReviews()
         {
-            FlaggedReviews = new ObservableCollection<Review>(reviewsService.GetFlaggedReviews().Result);
+            FlaggedReviews = new ObservableCollection<Review>(reviewsService.GetFlaggedReviews());
         }
 
         /// <summary>
@@ -418,7 +418,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         public void FilterReviews(string filter)
         {
             FlaggedReviews = new ObservableCollection<Review>(
-                reviewsService.FilterReviewsByContent(filter).Result);
+                reviewsService.FilterReviewsByContent(filter));
         }
 
         /// <summary>
@@ -483,7 +483,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// <returns>A list of messages from the checker.</returns>
         public List<string> RunAutoCheck()
         {
-            List<Review> reviews = reviewsService.GetFlaggedReviews().Result;
+            List<Review> reviews = reviewsService.GetFlaggedReviews();
             List<string> messages = checkersService.RunAutoCheck(reviews);
             LoadFlaggedReviews();
             LoadStatistics();
@@ -542,7 +542,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// <returns>A list of reviews by the user.</returns>
         public List<Review> GetUserReviews(Guid userId)
         {
-            return reviewsService.GetReviewsByUser(userId).Result;
+            return reviewsService.GetReviewsByUser(userId);
         }
 
         /// <summary>
@@ -737,9 +737,9 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// </summary>
         private void LoadBarChart()
         {
-            int rejectedCount = reviewsService.GetHiddenReviews().Result.Count;
-            int pendingCount = reviewsService.GetFlaggedReviews().Result.Count;
-            int totalCount = reviewsService.GetAllReviews().Result.Count;
+            int rejectedCount = reviewsService.GetHiddenReviews().Count;
+            int pendingCount = reviewsService.GetFlaggedReviews().Count;
+            int totalCount = reviewsService.GetAllReviews().Count;
 
             BarChartSeries = new ISeries[]
             {

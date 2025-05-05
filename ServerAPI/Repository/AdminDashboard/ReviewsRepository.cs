@@ -44,14 +44,7 @@ namespace Repository.AdminDashboard
 
         public async Task<List<Review>> GetAllReviews()
         {
-            try
-            {
-                return await _context.Reviews.ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException("Failed to retrieve all reviews.", ex);
-            }
+            return  _context.Reviews.ToListAsync().Result;
         }
 
         public async Task<List<Review>> GetReviewsSince(DateTime date)
@@ -123,9 +116,9 @@ namespace Repository.AdminDashboard
         {
             try
             {
-                return await _context.Reviews
+                return _context.Reviews
                     .Where(review => review.NumberOfFlags >= minFlags && !review.IsHidden)
-                    .ToListAsync();
+                    .ToListAsync().Result;
             }
             catch (Exception ex)
             {
