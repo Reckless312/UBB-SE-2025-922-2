@@ -19,19 +19,19 @@ namespace ServerAPI.Controllers
         [HttpGet]
         public async Task<IEnumerable<UpgradeRequest>> GetAll()
         {
-            return await repository.RetrieveAllUpgradeRequests();
+            return repository.RetrieveAllUpgradeRequests().Result;
         }
 
         [HttpDelete("{id}/delete")]
         public async Task Delete(int id)
         {
-            await repository.RemoveUpgradeRequestByIdentifier(id);
+            repository.RemoveUpgradeRequestByIdentifier(id);
         }
 
         [HttpGet("{id}")]
         public async Task<UpgradeRequest> Get(int id)
         {
-            return await repository.RetrieveUpgradeRequestByIdentifier(id);
+            return repository.RetrieveUpgradeRequestByIdentifier(id).Result;
         }
     }
 }

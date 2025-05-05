@@ -391,7 +391,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// </summary>
         public void LoadRoleRequests()
         {
-            UpgradeRequests = new ObservableCollection<UpgradeRequest>(requestsService.RetrieveAllUpgradeRequests().Result);
+            UpgradeRequests = new ObservableCollection<UpgradeRequest>(requestsService.RetrieveAllUpgradeRequests());
         }
 
         /// <summary>
@@ -572,7 +572,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// <returns>The role name.</returns>
         public string GetRoleNameBasedOnID(RoleType roleType)
         {
-            return requestsService.GetRoleNameBasedOnIdentifier(roleType).Result;
+            return requestsService.GetRoleNameBasedOnIdentifier(roleType);
         }
 
         /// <summary>

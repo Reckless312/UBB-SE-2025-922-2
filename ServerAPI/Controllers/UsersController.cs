@@ -53,9 +53,6 @@ namespace ServerAPI.Controllers
         [HttpPatch("byId/{userID}/addRole")]
         public void AddRoleToUser(Guid userID, [FromBody] Role role)
         {
-            // change function to:
-            // return repository.AddRoleToUser(userID, role) == null ? NotFound() : Ok() ;
-            // when AddRoleToUser is changed to return null
             repository.AddRoleToUser(userID, role);
         }
 

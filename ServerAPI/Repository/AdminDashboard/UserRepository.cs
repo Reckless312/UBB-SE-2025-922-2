@@ -118,22 +118,10 @@
         /// <exception cref="RepositoryException">Thrown when the user does not exist or an error occurs.</exception>
         public async Task AddRoleToUser(Guid userId, Role roleToAdd)
         {
-            try
-            {
-                User user = await GetUserById(userId);
-                if (user == null)
-                {
-                    throw new ArgumentException($"No user found with ID {userId}");
-                }
-
-                user.AssignedRoles.Add(roleToAdd);
-                _context.Users.Update(user);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException($"Failed to add role to user with ID {userId}.", ex);
-            }
+            User user = GetUserById(userId).Result;
+            user.AssignedRoles.Add(roleToAdd);
+            _context.Users.Update(user);
+            _context.SaveChangesAsync();
         }
 
         /// <summary>

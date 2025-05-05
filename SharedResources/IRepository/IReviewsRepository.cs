@@ -92,7 +92,7 @@
         /// </summary>
         /// <param name="reviewID">The ID of the review to remove.</param>
         /// <returns>True if the review was removed, false otherwise.</returns>
-        Task<bool> RemoveReviewById(int reviewID);
+        Task RemoveReviewById(int reviewID);
 
         /// <summary>
         /// Gets all hidden reviews.

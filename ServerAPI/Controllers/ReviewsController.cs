@@ -61,19 +61,19 @@ namespace ServerAPI.Controllers
         [HttpGet("{id}")]
         public async Task<Review> GetReviewById(int id)
         {
-            return await repository.GetReviewById(id);
+            return  repository.GetReviewById(id).Result;
         }
 
         [HttpPatch("{id}/updateFlags")]
-        public async Task UpdateNumberOfFlagsForReview(int id, [FromQuery] int numberOfFlags)
+        public async Task UpdateNumberOfFlagsForReview(int id, [FromBody] int numberOfFlags)
         {
-            await repository.UpdateNumberOfFlagsForReview(id, numberOfFlags);
+             repository.UpdateNumberOfFlagsForReview(id, numberOfFlags);
         }
 
         [HttpPatch("{id}/updateVisibility")]
-        public async Task UpdateReviewVisibility(int id, [FromQuery] bool isHidden)
+        public async Task UpdateReviewVisibility(int id, [FromBody] bool isHidden)
         {
-            await repository.UpdateReviewVisibility(id, isHidden);
+            repository.UpdateReviewVisibility(id, isHidden);
         }
 
         [HttpPost("add")]
@@ -83,9 +83,9 @@ namespace ServerAPI.Controllers
         }
 
         [HttpDelete("{id}/delete")]
-        public async Task<bool> RemoveReviewById(int id)
+        public async Task RemoveReviewById(int id)
         {
-            return await repository.RemoveReviewById(id);
+            repository.RemoveReviewById(id);
         }
 
         [HttpGet("hidden")]

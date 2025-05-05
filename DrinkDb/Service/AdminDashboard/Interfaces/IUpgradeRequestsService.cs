@@ -10,10 +10,9 @@ namespace DrinkDb_Auth.Service.AdminDashboard.Interfaces
 
     public interface IUpgradeRequestsService
     {
-        Task<List<UpgradeRequest>> RetrieveAllUpgradeRequests();
+        List<UpgradeRequest> RetrieveAllUpgradeRequests();
+        void ProcessUpgradeRequest(bool isRequestAccepted, int upgradeRequestIdentifier);
 
-        Task ProcessUpgradeRequest(bool isRequestAccepted, int upgradeRequestIdentifier);
-
-        Task<string> GetRoleNameBasedOnIdentifier(RoleType roleType);
+        string GetRoleNameBasedOnIdentifier(RoleType roleType);
     }
 }

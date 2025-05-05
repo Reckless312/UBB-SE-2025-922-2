@@ -25,55 +25,21 @@ namespace Repository.AdminDashboard
 
         public async Task<List<UpgradeRequest>> RetrieveAllUpgradeRequests()
         {
-            try
-            {
-                return await _context.UpgradeRequests.ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException("Failed to retrieve all upgrade requests.", ex);
-            }
+            return _context.UpgradeRequests.ToListAsync().Result;
         }
 
         public async Task RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
         {
-            try
-            {
-                var upgradeRequest = await _context.UpgradeRequests
-                    .FirstOrDefaultAsync(ur => ur.UpgradeRequestId == upgradeRequestIdentifier);
-
-                if (upgradeRequest == null)
-                {
-                    throw new ArgumentException($"No upgrade request found with ID {upgradeRequestIdentifier}");
-                }
-
+                var upgradeRequest =  _context.UpgradeRequests.FirstOrDefaultAsync(ur => ur.UpgradeRequestId == upgradeRequestIdentifier).Result;
                 _context.UpgradeRequests.Remove(upgradeRequest);
                 _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException($"Failed to remove upgrade request with ID {upgradeRequestIdentifier}.", ex);
-            }
+          
         }
 
         public async Task<UpgradeRequest> RetrieveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
         {
-            try
-            {
-                var upgradeRequest = await _context.UpgradeRequests
-                    .FirstOrDefaultAsync(ur => ur.UpgradeRequestId == upgradeRequestIdentifier);
-
-                if (upgradeRequest == null)
-                {
-                    throw new ArgumentException($"No upgrade request found with ID {upgradeRequestIdentifier}");
-                }
-
-                return upgradeRequest;
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException($"Failed to retrieve upgrade request with ID {upgradeRequestIdentifier}.", ex);
-            }
+            var upgradeRequest = _context.UpgradeRequests.FirstOrDefaultAsync(ur => ur.UpgradeRequestId == upgradeRequestIdentifier).Result;
+            return upgradeRequest;
         }
     }
 }

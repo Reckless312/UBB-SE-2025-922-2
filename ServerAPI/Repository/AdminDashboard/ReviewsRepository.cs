@@ -21,215 +21,113 @@ namespace Repository.AdminDashboard
 
         public ReviewsRepository(DatabaseContext context)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _context = context;
         }
 
         public async Task LoadReviews(IEnumerable<Review> reviewsToLoad)
         {
-            try
-            {
-                if (reviewsToLoad == null)
-                {
-                    throw new ArgumentNullException(nameof(reviewsToLoad));
-                }
 
-                await _context.Reviews.AddRangeAsync(reviewsToLoad);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException("Failed to load reviews.", ex);
-            }
+
+            _context.Reviews.AddRangeAsync(reviewsToLoad);
+            _context.SaveChangesAsync();
         }
 
         public async Task<List<Review>> GetAllReviews()
         {
-            return  _context.Reviews.ToListAsync().Result;
+            return _context.Reviews.ToListAsync().Result;
         }
 
         public async Task<List<Review>> GetReviewsSince(DateTime date)
         {
-            try
-            {
-                return await _context.Reviews
-                    .Where(review => review.CreatedDate >= date && !review.IsHidden)
-                    .OrderByDescending(review => review.CreatedDate)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException($"Failed to retrieve reviews since {date}.", ex);
-            }
+            return _context.Reviews
+                .Where(review => review.CreatedDate >= date && !review.IsHidden)
+                .OrderByDescending(review => review.CreatedDate)
+                .ToListAsync().Result;
         }
 
         public async Task<double> GetAverageRatingForVisibleReviews()
         {
-            try
-            {
-                var visibleReviews = await _context.Reviews
-                    .Where(review => !review.IsHidden)
-                    .ToListAsync();
+            var visibleReviews = _context.Reviews
+                .Where(review => !review.IsHidden)
+                .ToListAsync().Result;
 
-                if (!visibleReviews.Any())
-                {
-                    return 0.0;
-                }
-
-                return Math.Round(visibleReviews.Average(r => r.Rating), 1);
-            }
-            catch (Exception ex)
+            if (!visibleReviews.Any())
             {
-                throw new RepositoryException("Failed to calculate the average rating for visible reviews.", ex);
+                return 0.0;
             }
+            return Math.Round(visibleReviews.Average(r => r.Rating), 1);
         }
 
         public async Task<List<Review>> GetMostRecentReviews(int count)
         {
-            try
-            {
-                return await _context.Reviews
-                    .Where(review => !review.IsHidden)
-                    .OrderByDescending(review => review.CreatedDate)
-                    .Take(count)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException($"Failed to retrieve the most recent {count} reviews.", ex);
-            }
+            return _context.Reviews
+                .Where(review => !review.IsHidden)
+                .OrderByDescending(review => review.CreatedDate)
+                .Take(count)
+                .ToListAsync().Result;
         }
 
         public async Task<int> GetReviewCountAfterDate(DateTime date)
         {
-            try
-            {
-                return await _context.Reviews
-                    .CountAsync(review => review.CreatedDate >= date && !review.IsHidden);
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException($"Failed to count reviews after {date}.", ex);
-            }
+            return _context.Reviews
+                .CountAsync(review => review.CreatedDate >= date && !review.IsHidden).Result;
         }
 
         public async Task<List<Review>> GetFlaggedReviews(int minFlags)
         {
-            try
-            {
-                return _context.Reviews
-                    .Where(review => review.NumberOfFlags >= minFlags && !review.IsHidden)
-                    .ToListAsync().Result;
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException($"Failed to retrieve flagged reviews with at least {minFlags} flags.", ex);
-            }
+            return _context.Reviews
+                .Where(review => review.NumberOfFlags >= minFlags && !review.IsHidden)
+                .ToListAsync().Result;
         }
 
         public async Task<List<Review>> GetReviewsByUser(Guid userId)
         {
-            try
-            {
-                return await _context.Reviews
-                    .Where(review => review.UserId == userId && !review.IsHidden)
-                    .OrderByDescending(review => review.CreatedDate)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException($"Failed to retrieve reviews for user with ID {userId}.", ex);
-            }
+            return _context.Reviews
+                .Where(review => review.UserId == userId && !review.IsHidden)
+                .OrderByDescending(review => review.CreatedDate)
+                .ToListAsync().Result;
         }
 
         public async Task<Review> GetReviewById(int reviewId)
         {
-            try
-            {
-                var review = await _context.Reviews.FirstOrDefaultAsync(r => r.ReviewId == reviewId);
-
-                if (review == null)
-                {
-                    throw new ArgumentException($"No review found with ID {reviewId}");
-                }
-
-                return review;
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException($"Failed to retrieve review with ID {reviewId}.", ex);
-            }
+            return _context.Reviews.FirstOrDefaultAsync(r => r.ReviewId == reviewId).Result;
         }
 
         public async Task UpdateReviewVisibility(int reviewId, bool isHidden)
         {
-            try
-            {
-                var review = await GetReviewById(reviewId);
-                review.IsHidden = isHidden;
-                _context.Reviews.Update(review);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException($"Failed to update visibility for review with ID {reviewId}.", ex);
-            }
+            var review = _context.Reviews.FindAsync(reviewId).Result;
+            review.IsHidden = isHidden;
+            _context.Reviews.Update(review);
+            _context.SaveChangesAsync();
         }
 
         public async Task UpdateNumberOfFlagsForReview(int reviewId, int numberOfFlags)
         {
-            try
-            {
-                var review = await GetReviewById(reviewId);
-                review.NumberOfFlags = numberOfFlags;
-                _context.Reviews.Update(review);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException($"Failed to update flags for review with ID {reviewId}.", ex);
-            }
+            Review review = _context.Reviews.FindAsync(reviewId).Result;
+            review.NumberOfFlags = numberOfFlags;
+            _context.Reviews.Update(review);
+            _context.SaveChangesAsync();
         }
 
         public async Task<int> AddReview(Review review)
         {
-            try
-            {
-                await _context.Reviews.AddAsync(review);
-                await _context.SaveChangesAsync();
-                return review.ReviewId;
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException("Failed to add a new review.", ex);
-            }
+            _context.Reviews.AddAsync(review);
+            _context.SaveChangesAsync();
+            return review.ReviewId;
         }
 
-        public async Task<bool> RemoveReviewById(int reviewId)
+        public async Task RemoveReviewById(int reviewId)
         {
-            try
-            {
-                var review = await GetReviewById(reviewId);
-                _context.Reviews.Remove(review);
-                return await _context.SaveChangesAsync() > 0;
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException($"Failed to remove review with ID {reviewId}.", ex);
-            }
+            var review = GetReviewById(reviewId).Result;
+            _context.Reviews.Remove(review);
+            _context.SaveChangesAsync();
         }
 
         public async Task<List<Review>> GetHiddenReviews()
         {
-            try
-            {
-                return await _context.Reviews
-                    .Where(review => review.IsHidden)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException("Failed to retrieve hidden reviews.", ex);
-            }
+            return _context.Reviews
+                .Where(review => review.IsHidden)
+                .ToListAsync().Result;
         }
     }
 }

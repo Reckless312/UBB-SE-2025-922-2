@@ -243,11 +243,6 @@ namespace DrinkDb_Auth.Service
             try
             {
                 User? user = await userRepository.GetUserById(userId);
-                if (user == null)
-                {
-                    throw new ArgumentException($"User with ID {userId} not found.", nameof(userId));
-                }
-
                 if (roleType == RoleType.Banned)
                 {
                     bool hasBannedRole = false;
