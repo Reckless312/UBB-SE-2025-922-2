@@ -6,7 +6,7 @@ using IRepository;
 using Moq;
 using NUnit.Framework;
 
-namespace Tests.Authentication
+namespace TestTest.Authentication.LinkedIn
 {
     [TestFixture]
     public class LinkedInOAuthHelperTests

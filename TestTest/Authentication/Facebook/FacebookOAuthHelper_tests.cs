@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ImdbForDrinksTestProject.Repositories
+namespace TestTest.Authentication.Facebook
 {
-    class UserRepoTests
+    internal class FacebookOAuthHelper_tests
     {
     }
 }

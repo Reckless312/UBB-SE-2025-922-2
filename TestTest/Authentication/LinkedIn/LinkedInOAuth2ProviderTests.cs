@@ -12,7 +12,7 @@ using Moq;
 using Moq.Protected;
 using NUnit.Framework;
 
-namespace Tests.Authentication
+namespace TestTest.Authentication.LinkedIn
 {
     [TestFixture]
     public class LinkedInOAuth2ProviderTests

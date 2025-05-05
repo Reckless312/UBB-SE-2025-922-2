@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using DrinkDb_Auth.AuthProviders.LinkedIn;
 using NUnit.Framework;
 
-namespace Tests.Authentication
+namespace TestTest.Authentication.LinkedIn
 {
     [TestFixture]
     public class LinkedInLocalOAuthServerTests

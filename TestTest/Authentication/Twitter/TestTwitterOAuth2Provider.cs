@@ -13,7 +13,7 @@ using DataAccess.Model;
 using DrinkDb_Auth.AuthProviders.Twitter;
 using System.Collections.Generic;
 
-namespace Tests.Authentication
+namespace TestTest.Authentication.Twitter
 {
     [TestClass]
     public class TestTwitterOAuth2Provider
@@ -24,7 +24,7 @@ namespace Tests.Authentication
             public HttpResponseMessage UserInfoResponse { get; set; } = new();
             public Exception? ThrowException { get; set; }
 
-            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
                 if (ThrowException != null)
                 {

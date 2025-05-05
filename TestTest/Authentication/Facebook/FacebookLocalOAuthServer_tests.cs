@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using DrinkDb_Auth.AuthProviders.Facebook;
 using NUnit.Framework;
 
-namespace Tests.Authentication
+namespace TestTest.Authentication.Facebook
 {
     [TestFixture]
     public class FacebookLocalOAuthServerTests

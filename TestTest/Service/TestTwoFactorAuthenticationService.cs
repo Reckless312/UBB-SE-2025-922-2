@@ -8,8 +8,9 @@ using DrinkDb_Auth.Service.Authentication.Components;
 using DrinkDb_Auth.Service.Authentication;
 using DrinkDb_Auth.View.Authentication.Interfaces;
 using DataAccess.Model.Authentication;
+using TestTest.Authentication.Google;
 
-namespace Tests.Authentication
+namespace TestTest.Service
 {
     [TestClass]
     public sealed class TestTwoFactorAuthenticationService

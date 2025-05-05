@@ -6,7 +6,7 @@ using DrinkDb_Auth.OAuthProviders;
 using IRepository;
 using DataAccess.Model.Authentication;
 
-namespace Tests.Authentication
+namespace TestTest.Authentication.LinkedIn
 {
     /// <summary>
     /// A testable version of LinkedInOAuth2Provider that allows injecting dependencies

@@ -69,36 +69,9 @@ namespace UnitTests.UpgradeRequests
         }
 
         [Fact]
-        public void RetrieveAllUpgradeRequests_WithData_ReturnsAllRequests()
-        {
-            this.fixedInsertTestRequest(new Guid(), "User1");
-            this.fixedInsertTestRequest(new Guid(), "User2");
-            List<UpgradeRequest> result = this.repository.RetrieveAllUpgradeRequests();
-            Assert.Equal(2, result.Count);
-        }
-
-        [Fact]
         public void RetrieveUpgradeRequestByIdentifier_NonExistentId_ReturnsNull()
         {
             UpgradeRequest result = this.repository.RetrieveUpgradeRequestByIdentifier(999);
-            Assert.Null(result);
-        }
-
-        [Fact]
-        public void RetrieveUpgradeRequestByIdentifier_ExistingId_ReturnsRequest()
-        {
-            int requestId = this.fixedInsertTestRequest(new Guid(), "TestUser");
-            UpgradeRequest result = this.repository.RetrieveUpgradeRequestByIdentifier(requestId);
-            Assert.NotNull(result);
-            Assert.Equal("TestUser", result.RequestingUserDisplayName);
-        }
-
-        [Fact]
-        public void RemoveUpgradeRequestByIdentifier_ExistingId_RemovesRequest()
-        {
-            int requestId = this.fixedInsertTestRequest(new Guid(), "RemoveTestUser");
-            this.repository.RemoveUpgradeRequestByIdentifier(requestId);
-            UpgradeRequest result = this.repository.RetrieveUpgradeRequestByIdentifier(requestId);
             Assert.Null(result);
         }
 

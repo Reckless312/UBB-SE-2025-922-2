@@ -13,7 +13,7 @@ using Moq.Protected;
 using NUnit.Framework;
 using Tests;
 
-namespace Tests.Authentication
+namespace TestTest.Authentication.Facebook
 {
     [TestFixture]
     public class FacebookOAuth2ProviderTests
