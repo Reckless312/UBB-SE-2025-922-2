@@ -3,75 +3,138 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net.Http;
+    using System.Net.Http.Json;
     using System.Text;
     using System.Threading.Tasks;
     using DataAccess.Model.AdminDashboard;
     using IRepository;
+
     public class ReviewsProxyRepository : IReviewsRepository
     {
-        public int AddReview(Review review)
+        private const string ApiRoute = "reviews";
+        private readonly HttpClient httpClient;
+
+        public ReviewsProxyRepository(string baseApiUrl)
         {
-            throw new NotImplementedException();
+            this.httpClient = new HttpClient();
+            this.httpClient.BaseAddress = new Uri(baseApiUrl);
         }
 
-        public List<Review> GetAllReviews()
+        public async Task<int> AddReview(Review review)
         {
-            throw new NotImplementedException();
+            var response = httpClient.PostAsJsonAsync(ApiRoute, review).Result;
+            response.EnsureSuccessStatusCode();
+            return review.ReviewId + 1;
         }
 
-        public double GetAverageRatingForVisibleReviews()
+        public async Task<List<Review>> GetAllReviews()
         {
-            throw new NotImplementedException();
+            var response = this.httpClient.GetAsync(ApiRoute).Result;
+            response.EnsureSuccessStatusCode();
+            List<Review> reviews = response.Content.ReadFromJsonAsync<List<Review>>().Result;
+            return reviews ?? new List<Review>();
+
         }
 
-        public List<Review> GetFlaggedReviews(int minFlags)
+        public async Task<double> GetAverageRatingForVisibleReviews()
         {
-            throw new NotImplementedException();
+            List<Review> reviews = this.GetAllReviews().Result;
+            double average = 0;
+            int numberOfVisibleReviews = 0;
+            foreach(Review review in reviews)
+            {
+                if (review.IsHidden == false)
+                { 
+                    average += review.Rating;
+                    numberOfVisibleReviews++;
+                }
+            }
+            return average / numberOfVisibleReviews;
         }
 
-        public List<Review> GetHiddenReviews()
+        public async Task<List<Review>> GetFlaggedReviews(int minFlags)
         {
-            throw new NotImplementedException();
+            var response = this.httpClient.GetAsync(ApiRoute).Result;
+            response.EnsureSuccessStatusCode();
+            List<Review> reviews = response.Content.ReadFromJsonAsync<List<Review>>().Result ?? new List<Review>();
+
+            return reviews.Where(review => review.NumberOfFlags >= minFlags && !review.IsHidden).ToList() ?? new List<Review>();
         }
 
-        public List<Review> GetMostRecentReviews(int count)
+        public async Task<List<Review>> GetHiddenReviews()
         {
-            throw new NotImplementedException();
+            var response = this.httpClient.GetAsync(ApiRoute).Result;
+            response.EnsureSuccessStatusCode();
+            List<Review> reviews = response.Content.ReadFromJsonAsync<List<Review>>().Result ?? new List<Review>();
+            return reviews.Where(review => review.IsHidden).ToList() ?? new List<Review>();
         }
 
-        public Review GetReviewById(int reviewID)
+        public async Task<List<Review>> GetMostRecentReviews(int count)
         {
-            throw new NotImplementedException();
+            var response = this.httpClient.GetAsync(ApiRoute).Result;
+            response.EnsureSuccessStatusCode();
+            List<Review> reviews = response.Content.ReadFromJsonAsync<List<Review>>().Result ?? new List<Review>();
+
+            return reviews.Where(review => !review.IsHidden).OrderByDescending(review => review.CreatedDate).Take(count).ToList();
         }
 
-        public int GetReviewCountAfterDate(DateTime date)
+        public async Task<Review> GetReviewById(int reviewID)
         {
-            throw new NotImplementedException();
+
+            var response = this.httpClient.GetAsync(ApiRoute).Result;
+            response.EnsureSuccessStatusCode();
+            List<Review> reviews = response.Content.ReadFromJsonAsync<List<Review>>().Result ?? new List<Review>();
+
+            return reviews.Where(review => review.ReviewId == reviewID).First();
         }
 
-        public List<Review> GetReviewsByUser(Guid userId)
+        public async Task<int> GetReviewCountAfterDate(DateTime date)
         {
-            throw new NotImplementedException();
+            var response = this.httpClient.GetAsync(ApiRoute).Result;
+            response.EnsureSuccessStatusCode();
+            List<Review> reviews = response.Content.ReadFromJsonAsync<List<Review>>().Result ?? new List<Review>();
+
+            return reviews.Where(review => review.CreatedDate == date).Count();
         }
 
-        public List<Review> GetReviewsSince(DateTime date)
+        public async Task<List<Review>> GetReviewsByUser(Guid userId)
         {
-            throw new NotImplementedException();
+            var response = this.httpClient.GetAsync(ApiRoute).Result;
+            response.EnsureSuccessStatusCode();
+            List<Review> reviews =  response.Content.ReadFromJsonAsync<List<Review>>().Result ?? new List<Review>();
+
+            return reviews.Where(review => review.UserId == userId).ToList();
         }
 
-        public bool RemoveReviewById(int reviewID)
+        public async Task<List<Review>> GetReviewsSince(DateTime date)
         {
-            throw new NotImplementedException();
+            var response =  this.httpClient.GetAsync(ApiRoute).Result;
+            response.EnsureSuccessStatusCode();
+            List<Review> reviews = response.Content.ReadFromJsonAsync<List<Review>>().Result ?? new List<Review>();
+
+            return reviews.Where(review => review.CreatedDate >= date).ToList();
         }
 
-        public void UpdateNumberOfFlagsForReview(int reviewID, int numberOfFlags)
+        public async Task RemoveReviewById(int reviewID)
         {
-            throw new NotImplementedException();
+            var reviewUrl = $"{ApiRoute}/{reviewID}";
+            var response =  this.httpClient.DeleteAsync(reviewUrl).Result;
+            response.EnsureSuccessStatusCode();
         }
 
-        public void UpdateReviewVisibility(int reviewID, bool isHidden)
+        public async Task UpdateNumberOfFlagsForReview(int reviewID, int numberOfFlags)
         {
-            throw new NotImplementedException();
+            var reviewUrl = $"{ApiRoute}/{reviewID}/updateFlags";
+            var response = httpClient.PatchAsJsonAsync(reviewUrl, numberOfFlags).Result;
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task UpdateReviewVisibility(int reviewID, bool isHidden)
+        {
+            var reviewUrl = $"{ApiRoute}/{reviewID}/updateVisibility";
+            var response = httpClient.PatchAsJsonAsync(reviewUrl, isHidden).Result;
+            response.EnsureSuccessStatusCode();
         }
     }
 }

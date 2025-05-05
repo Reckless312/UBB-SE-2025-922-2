@@ -9,15 +9,16 @@ using DrinkDb_Auth.AuthProviders.LinkedIn;
 using DrinkDb_Auth.AuthProviders.Twitter;
 using DataAccess.Model.Authentication;
 using DrinkDb_Auth.OAuthProviders;
-using DrinkDb_Auth.Repository.AdminDashboard;
 using IRepository;
-using DrinkDb_Auth.Repository.Authentication;
 using DrinkDb_Auth.Service.Authentication.Interfaces;
 using Microsoft.UI.Xaml;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
-using System.Net;
-using System.Net.Mail;
-using static QRCoder.PayloadGenerator;
+using Repository.Authentication;
+using Repository.AdminDashboard;
+using DrinkDb_Auth.ProxyRepository.AdminDashboard;
+using Org.BouncyCastle.Tls;
+using DrinkDb_Auth.ProxyRepository.Authentification;
+using System.Collections.Generic;
+using DataAccess.Model.AdminDashboard;
 
 namespace DrinkDb_Auth.Service.Authentication
 {
@@ -50,11 +51,11 @@ namespace DrinkDb_Auth.Service.Authentication
             linkedinLocalServer = new LinkedInLocalOAuthServer("http://localhost:8891/");
             _ = linkedinLocalServer.StartAsync();
 
-            sessionRepository = new SessionRepository();
+            sessionRepository = new SessionProxyRepository();
 
             basicAuthenticationProvider = new BasicAuthenticationProvider();
 
-            userRepository = new UserRepository();
+            userRepository = new UserProxyRepository();
         }
 
         public AuthenticationService(ILinkedInLocalOAuthServer linkedinLocalServer, IGitHubLocalOAuthServer githubLocalServer, IFacebookLocalOAuthServer facebookLocalServer, IUserRepository userRepository, ISessionRepository sessionAdapter, IBasicAuthenticationProvider basicAuthenticationProvider)
@@ -85,7 +86,7 @@ namespace DrinkDb_Auth.Service.Authentication
             if (authResponse.AuthenticationSuccessful)
             {
                 App.CurrentSessionId = authResponse.SessionId;
-                Session session = sessionRepository.GetSession(App.CurrentSessionId);
+                Session session = sessionRepository.GetSession(App.CurrentSessionId).Result;
                 App.CurrentUserId = session.UserId;
             }
 
@@ -99,21 +100,21 @@ namespace DrinkDb_Auth.Service.Authentication
             App.CurrentUserId = Guid.Empty;
         }
 
-        public virtual User GetUser(Guid sessionId)
+        public virtual async Task<User> GetUser(Guid sessionId)
         {
-            Session session = sessionRepository.GetSession(sessionId);
-            return userRepository.GetUserById(session.UserId) ?? throw new UserNotFoundException("User not found");
+            Session session = sessionRepository.GetSession(sessionId).Result;
+            User user = userRepository.GetUserById(session.UserId).Result;
+            return user ?? throw new UserNotFoundException("User not found");
         }
 
-        public AuthenticationResponse AuthWithUserPass(string username, string password)
+        public async Task<AuthenticationResponse> AuthWithUserPass(string username, string password)
         {
             try
             {
                 if (basicAuthenticationProvider.Authenticate(username, password))
                 {
-                    User user = userRepository.GetUserByUsername(username) ?? throw new UserNotFoundException("User not found");
-
-                    Session session = sessionRepository.CreateSession(user.UserId);
+                    User user = await userRepository.GetUserByUsername(username) ?? throw new UserNotFoundException("User not found");
+                    Session session = sessionRepository.CreateSession(user.UserId).Result;
                     return new AuthenticationResponse
                     {
                         AuthenticationSuccessful = true,
@@ -143,10 +144,11 @@ namespace DrinkDb_Auth.Service.Authentication
                     UserId = Guid.NewGuid(),
                     TwoFASecret = string.Empty
                 };
+                user.AssignedRoles = new List<Role>();
+                user.NumberOfDeletedReviews = 0;
                 user.EmailAddress = "ionutcora66@gmail.com";
-
                 userRepository.CreateUser(user);
-                Session session = sessionRepository.CreateSession(user.UserId);
+                Session session = sessionRepository.CreateSession(user.UserId).Result;
                 return new AuthenticationResponse
                 {
                     AuthenticationSuccessful = true,

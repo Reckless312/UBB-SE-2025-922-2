@@ -12,8 +12,8 @@ using ServerAPI.Data;
 namespace ServerAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20250501084936_InitialSchema")]
-    partial class InitialSchema
+    [Migration("20250504162311_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -142,6 +142,23 @@ namespace ServerAPI.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("DataAccess.Model.AutoChecker.OffensiveWord", b =>
+                {
+                    b.Property<int>("OffensiveWordId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OffensiveWordId"));
+
+                    b.Property<string>("Word")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("OffensiveWordId");
+
+                    b.ToTable("OffensiveWords");
                 });
 
             modelBuilder.Entity("RoleUser", b =>

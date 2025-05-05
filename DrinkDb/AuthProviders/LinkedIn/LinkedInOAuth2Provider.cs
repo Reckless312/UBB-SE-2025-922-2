@@ -1,21 +1,25 @@
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
+using DataAccess.Model.AdminDashboard;
 using DataAccess.Model.Authentication;
 using DrinkDb_Auth.OAuthProviders;
-using DrinkDb_Auth.Repository.AdminDashboard;
+using DrinkDb_Auth.ProxyRepository.AdminDashboard;
+using DrinkDb_Auth.ProxyRepository.Authentification;
 using IRepository;
-using DrinkDb_Auth.Repository.Authentication;
 using Microsoft.Data.SqlClient;
+using Repository.AdminDashboard;
+using Repository.Authentication;
 
 namespace DrinkDb_Auth.AuthProviders.LinkedIn
 {
     public class LinkedInOAuth2Provider : GenericOAuth2Provider
     {
-        private readonly static IUserRepository UserRepository = new UserRepository();
-        private readonly static SessionRepository SessionAdapter = new();
+        private readonly static IUserRepository UserRepository = new UserProxyRepository();
+        private readonly static ISessionRepository SessionAdapter = new SessionProxyRepository();
 
         /// <summary>
         /// Performs authentication using the access token, fetches user info via OpenID Connect, and stores/updates the user.
@@ -50,7 +54,7 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
                 };
             }
 
-            var user = UserRepository.GetUserByUsername(name);
+            User user = UserRepository.GetUserByUsername(name).Result;
             if (user == null)
             {
                 User newUser = new User
@@ -61,34 +65,35 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
                     TwoFASecret = string.Empty,
                     EmailAddress = root.GetProperty("email").GetString() ?? string.Empty,
                     NumberOfDeletedReviews = 0,
-                    HasSubmittedAppeal = false
+                    HasSubmittedAppeal = false,
+                    AssignedRoles = new List<Role> { },
                 };
                 UserRepository.CreateUser(newUser);
-                Session session = SessionAdapter.CreateSession(newUser.UserId);
+                Session session = SessionAdapter.CreateSession(newUser.UserId).Result;
                 return new AuthenticationResponse
                 {
                     AuthenticationSuccessful = true,
                     OAuthToken = token,
                     SessionId = session.SessionId,
-                    NewAccount = true
+                    NewAccount = true,
                 };
             }
             else
             {
-                // Update email if it's different
                 string email = root.GetProperty("email").GetString() ?? string.Empty;
                 if (user.EmailAddress != email)
                 {
                     user.EmailAddress = email;
                     UserRepository.UpdateUser(user);
                 }
-                Session session = SessionAdapter.CreateSession(user.UserId);
+
+                Session session = SessionAdapter.CreateSession(user.UserId).Result;
                 return new AuthenticationResponse
                 {
                     AuthenticationSuccessful = true,
                     OAuthToken = token,
                     SessionId = session.SessionId,
-                    NewAccount = false
+                    NewAccount = false,
                 };
             }
         }

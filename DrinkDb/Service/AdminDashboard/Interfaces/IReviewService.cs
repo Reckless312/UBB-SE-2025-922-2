@@ -6,6 +6,7 @@ namespace DrinkDb_Auth.Service.AdminDashboard.Interfaces
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using DataAccess.Model.AdminDashboard;
 
     /// <summary>

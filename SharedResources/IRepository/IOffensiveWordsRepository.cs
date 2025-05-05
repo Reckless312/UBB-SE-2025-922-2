@@ -2,7 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace DrinkDb_Auth.AutoChecker
+namespace IRepository
 {
     using System;
     using System.Collections.Generic;
@@ -14,8 +14,9 @@ namespace DrinkDb_Auth.AutoChecker
     {
         HashSet<string> LoadOffensiveWords();
 
-        void AddWord(string word);
+        Task AddWord(string word);
 
-        void DeleteWord(string word);
+        Task DeleteWord(string word);
+
     }
 }

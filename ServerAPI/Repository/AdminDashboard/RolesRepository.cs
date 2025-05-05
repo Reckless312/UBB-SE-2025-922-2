@@ -7,37 +7,59 @@
     using System.Threading.Tasks;
     using DataAccess.Model.AdminDashboard;
     using IRepository;
+    using Microsoft.EntityFrameworkCore;
+    using ServerAPI.Data;
+    using static Repository.AdminDashboard.UserRepository;
 
     public class RolesRepository : IRolesRepository
     {
-        private readonly List<Role> roles;
+        private readonly DatabaseContext _context;
 
-        public RolesRepository()
+        public RolesRepository(DatabaseContext context)
         {
-            roles = new List<Role>();
-
-            roles.Add(new Role(RoleType.Banned, "Banned"));
-            roles.Add(new Role(RoleType.User, "User"));
-            roles.Add(new Role(RoleType.Admin, "Admin"));
-            roles.Add(new Role(RoleType.Manager, "Manager"));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            if(this.GetAllRoles().Result.Count == 0)
+                InitializeRoles();
         }
 
-        public List<Role> GetAllRoles()
-        {
-            return roles;
-        }
-
-        public Role GetNextRoleInHierarchy(RoleType currentRoleType)
+        public async Task<List<Role>> GetAllRoles()
         {
             try
             {
-                Role nextRole = roles.First(role => role.RoleType == currentRoleType + 1);
+                return await _context.Roles.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new RepositoryException("Failed to retrieve all roles.", ex);
+            }
+        }
+
+        public async Task<Role> GetNextRoleInHierarchy(RoleType currentRoleType)
+        {
+            try
+            {
+                if (currentRoleType.Equals(RoleType.Manager))
+                    return await _context.Roles.FirstOrDefaultAsync(role => role.RoleType == currentRoleType);
+                var nextRole = await _context.Roles.FirstOrDefaultAsync(role => role.RoleType == currentRoleType + 1);
                 return nextRole;
             }
-            catch (InvalidOperationException)
+            catch (Exception ex)
             {
-                throw new InvalidOperationException($"No next role exists for {currentRoleType}");
+                throw new RepositoryException($"Failed to retrieve the next role in hierarchy for {currentRoleType}.", ex);
             }
+        }
+
+        private void InitializeRoles() {
+            this.AddRole(RoleType.Banned, "Banned");
+            this.AddRole(RoleType.User, "User");
+            this.AddRole(RoleType.Admin, "Admin");
+            this.AddRole(RoleType.Manager, "Manager");
+        }
+
+        private void AddRole(RoleType roleType, string roleName) {
+
+            _context.Roles.Add(new Role(roleType, roleName));
+            _context.SaveChanges();
         }
     }
 }

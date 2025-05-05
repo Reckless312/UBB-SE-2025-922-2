@@ -1,14 +1,16 @@
 using System;
+using DataAccess.Model.AdminDashboard;
+using System.Collections.Generic;
 using DataAccess.Model.Authentication;
 using DrinkDb_Auth.OAuthProviders;
-using DrinkDb_Auth.Repository.AdminDashboard;
+using DrinkDb_Auth.ProxyRepository.AdminDashboard;
+using DrinkDb_Auth.ProxyRepository.Authentification;
 using IRepository;
-using DrinkDb_Auth.Repository.Authentication;
 using System.Net.Http;
 using System.Text.Json;
 using System.Linq;
-using System.Data.SqlClient;
-using System.Configuration;
+using Repository.AdminDashboard;
+using Repository.Authentication;
 
 namespace DrinkDb_Auth.AuthProviders.Github
 {
@@ -20,8 +22,8 @@ namespace DrinkDb_Auth.AuthProviders.Github
 
         public GitHubOAuth2Provider()
         {
-            userRepository = new UserRepository();
-            sessionRepository = new SessionRepository();
+            userRepository = new UserProxyRepository();
+            sessionRepository = new SessionProxyRepository();
             gitHubHttpHelper = new GitHubHttpHelper();
         }
 
@@ -53,16 +55,15 @@ namespace DrinkDb_Auth.AuthProviders.Github
                 if (UserExists(gitHubLogin))
                 {
                     // User exists, so proceed.
-                    User user = userRepository.GetUserByUsername(gitHubLogin) ?? throw new Exception("User not found");
+                    User user = userRepository.GetUserByUsername(gitHubLogin).Result ?? throw new Exception("User not found");
 
-                    // Update email if it's different
                     if (user.EmailAddress != email)
                     {
                         user.EmailAddress = email;
                         userRepository.UpdateUser(user);
                     }
 
-                    Session session = sessionRepository.CreateSession(user.UserId);
+                    Session session = sessionRepository.CreateSession(user.UserId).Result;
 
                     return new AuthenticationResponse
                     {
@@ -79,7 +80,7 @@ namespace DrinkDb_Auth.AuthProviders.Github
                     if (newUserId != Guid.Empty)
                     {
                         // Successfully inserted, so login is successful.
-                        Session session = sessionRepository.CreateSession(newUserId);
+                        Session session = sessionRepository.CreateSession(newUserId).Result;
                         return new AuthenticationResponse
                         {
                             AuthenticationSuccessful = true,
@@ -158,7 +159,7 @@ namespace DrinkDb_Auth.AuthProviders.Github
         {
             try
             {
-                User? user = userRepository.GetUserByUsername(gitHubLogin);
+                User? user = userRepository.GetUserByUsername(gitHubLogin).Result;
                 if (user != null)
                 {
                     return true;
@@ -182,6 +183,9 @@ namespace DrinkDb_Auth.AuthProviders.Github
                     TwoFASecret = string.Empty,
                     PasswordHash = string.Empty,
                     EmailAddress = email,
+                    NumberOfDeletedReviews = 0,
+                    HasSubmittedAppeal = false,
+                    AssignedRoles = new List<Role> { },
                 };
                 userRepository.CreateUser(newUser);
                 return newUser.UserId;

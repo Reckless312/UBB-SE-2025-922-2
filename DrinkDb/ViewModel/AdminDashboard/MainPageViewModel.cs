@@ -323,7 +323,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// </summary>
         public void LoadAppeals()
         {
-            AppealsUsers = new ObservableCollection<User>(userService.GetBannedUsersWhoHaveSubmittedAppeals());
+            AppealsUsers = new ObservableCollection<User>(userService.GetBannedUsersWhoHaveSubmittedAppeals().Result);
         }
 
         /// <summary>
@@ -366,7 +366,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
 
             filter = filter.ToLower();
             AppealsUsers = new ObservableCollection<User>(
-                userService.GetBannedUsersWhoHaveSubmittedAppeals()
+                userService.GetBannedUsersWhoHaveSubmittedAppeals().Result
                     .Where(user =>
                         user.EmailAddress.ToLower().Contains(filter) ||
                         user.Username.ToLower().Contains(filter) ||
@@ -479,7 +479,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// <returns>The user object.</returns>
         public User GetUserById(Guid userId)
         {
-            return userService.GetUserById(userId);
+            return userService.GetUserById(userId).Result;
         }
 
         /// <summary>
@@ -489,7 +489,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// <returns>The highest role type.</returns>
         public RoleType GetHighestRoleTypeForUser(Guid userId)
         {
-            return userService.GetHighestRoleTypeForUser(userId);
+            return userService.GetHighestRoleTypeForUser(userId).Result;
         }
 
         /// <summary>
@@ -570,7 +570,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         }
 
         /// <summary>
-        /// Formats the user status display text.
+        /// Formats the user status display tex
         /// </summary>
         /// <param name="user">The user to display status for.</param>
         /// <param name="isBanned">Whether the user is banned.</param>

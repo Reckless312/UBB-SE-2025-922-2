@@ -2,8 +2,6 @@ namespace DrinkDb_Auth.Service.AdminDashboard.Components
 {
     using System;
     using System.Collections.Generic;
-    using static DrinkDb_Auth.Repository.AdminDashboard.UserRepository;
-
     /// <summary>
     /// Exception class for user service-related errors.
     /// </summary>

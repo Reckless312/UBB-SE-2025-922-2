@@ -4,29 +4,22 @@ using System.Text.Json;
 using DrinkDb_Auth.OAuthProviders;
 using Windows.Networking.Sockets;
 using DataAccess.Model.Authentication;
-using DrinkDb_Auth.Repository.Authentication;
 using IRepository;
-using DrinkDb_Auth.Repository.AdminDashboard;
+using Repository.AdminDashboard;
+using Repository.Authentication;
+using DrinkDb_Auth.ProxyRepository.Authentification;
+using DrinkDb_Auth.ProxyRepository.AdminDashboard;
+using DataAccess.Model.AdminDashboard;
+using System.Collections.Generic;
 
 namespace DrinkDb_Auth.AuthProviders.Facebook
 {
     public class FacebookOAuth2Provider : GenericOAuth2Provider
     {
-        private readonly IUserRepository userRepository;
-        private readonly ISessionRepository sessionRepository;
-
         public FacebookOAuth2Provider()
         {
-            userRepository = new UserRepository();
-            sessionRepository = new SessionRepository();
         }
-
-        public FacebookOAuth2Provider(IUserRepository userRepository, ISessionRepository sessionRepository)
-        {
-            this.userRepository = userRepository;
-            this.sessionRepository = sessionRepository;
-        }
-
+        private static readonly SessionProxyRepository SessionProxy = new ();
         public AuthenticationResponse Authenticate(string userId, string token)
         {
             try
@@ -46,22 +39,15 @@ namespace DrinkDb_Auth.AuthProviders.Facebook
                             string fbName = doc.GetProperty("name").GetString() ?? throw new Exception("Facebook name is null.");
                             string email = doc.GetProperty("email").GetString() ?? string.Empty;
 
-                            // Check if user exists
-                            var user = userRepository.GetUserByUsername(fbName);
-                            if (user == null)
-                            {
-                                // Create new user
-                                User newUser = new()
-                                {
-                                    UserId = Guid.NewGuid(),
-                                    Username = fbName,
-                                    PasswordHash = string.Empty,
-                                    TwoFASecret = string.Empty,
-                                    EmailAddress = email
-                                };
-                                userRepository.CreateUser(newUser);
-                                Session session = sessionRepository.CreateSession(newUser.UserId);
+                            // store or update user in DB - UserService
+                            bool isNewAccount = StoreOrUpdateUserInDb(fbId, fbName, email);
 
+                            User user = UserRepository.GetUserByUsername(fbName).Result ?? throw new Exception("User not found");
+
+                            Session session = SessionProxy.CreateSession(user.UserId).Result;
+
+                            if (isNewAccount)
+                            {
                                 return new AuthenticationResponse
                                 {
                                     AuthenticationSuccessful = true,
@@ -72,15 +58,6 @@ namespace DrinkDb_Auth.AuthProviders.Facebook
                             }
                             else
                             {
-                                // Update email if it's different
-                                if (user.EmailAddress != email)
-                                {
-                                    user.EmailAddress = email;
-                                    userRepository.UpdateUser(user);
-                                }
-
-                                Session session = sessionRepository.CreateSession(user.UserId);
-
                                 return new AuthenticationResponse
                                 {
                                     AuthenticationSuccessful = true,
@@ -109,6 +86,34 @@ namespace DrinkDb_Auth.AuthProviders.Facebook
                     SessionId = Guid.Empty,
                     NewAccount = false
                 };
+            }
+        }
+        private static readonly IUserRepository UserRepository = new UserProxyRepository();
+        private bool StoreOrUpdateUserInDb(string fbId, string fbName, string email)
+        {
+            User user = UserRepository.GetUserByUsername(fbName).Result;
+
+            if (user == null)
+            {
+                UserRepository.CreateUser(new User
+                {
+                    Username = fbName,
+                    PasswordHash = string.Empty,
+                    UserId = Guid.NewGuid(),
+                    TwoFASecret = string.Empty,
+                    EmailAddress = email,
+                    NumberOfDeletedReviews = 0,
+                    HasSubmittedAppeal = false,
+                    AssignedRoles = new List<Role> { },
+                });
+                return true;
+            }
+            else
+            {
+                user.Username = fbName;
+                user.EmailAddress = email;
+                UserRepository.UpdateUser(user);
+                return false;
             }
         }
     }

@@ -5,6 +5,7 @@
 namespace DrinkDb_Auth.Converters
 {
     using System;
+    using DataAccess.Model.Authentication;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using Microsoft.UI.Xaml.Data;
 
@@ -39,7 +40,7 @@ namespace DrinkDb_Auth.Converters
             {
                 try
                 {
-                    var user = userService.GetUserById(userId);
+                    User user = userService.GetUserById(userId).Result;
                     return string.IsNullOrEmpty(user?.Username) ? $"User {userId}" : user.Username;
                 }
                 catch

@@ -141,6 +141,23 @@ namespace ServerAPI.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("DataAccess.Model.AutoChecker.OffensiveWord", b =>
+                {
+                    b.Property<int>("OffensiveWordId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OffensiveWordId"));
+
+                    b.Property<string>("Word")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("OffensiveWordId");
+
+                    b.ToTable("OffensiveWords");
+                });
+
             modelBuilder.Entity("RoleUser", b =>
                 {
                     b.Property<int>("AssignedRolesRoleType")

@@ -48,7 +48,7 @@ namespace DrinkDb_Auth
             {
                 // Retrieve the user from the database using your UserService.
                 var userService = new UserService();
-                currentUser = userService.GetUserById(currentUserId);
+                currentUser = userService.GetUserById(currentUserId).Result;
 
                 // Update UI with the retrieved data.
                 if (currentUser != null)

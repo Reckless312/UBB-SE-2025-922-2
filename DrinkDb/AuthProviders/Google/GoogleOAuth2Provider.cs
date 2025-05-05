@@ -13,8 +13,10 @@ using Microsoft.AspNetCore.Http;
 using DrinkDb_Auth.OAuthProviders;
 using DataAccess.Model.Authentication;
 using IRepository;
-using DrinkDb_Auth.Repository.AdminDashboard;
-using DrinkDb_Auth.Repository.Authentication;
+using Repository.Authentication;
+using Repository.AdminDashboard;
+using DrinkDb_Auth.ProxyRepository.Authentification;
+using DrinkDb_Auth.ProxyRepository.AdminDashboard;
 
 namespace DrinkDb_Auth.AuthProviders.Google
 {
@@ -39,18 +41,18 @@ namespace DrinkDb_Auth.AuthProviders.Google
 
         private readonly string[] userResourcesScope = { "profile", "email" };
         private HttpClient httpClient;
-        private static readonly ISessionRepository SessionRepository = new SessionRepository();
-        private static readonly IUserRepository UserRepository = new UserRepository();
-        private Guid EnsureUserExists(string identifier, string email, string name)
+        private static readonly ISessionRepository SessionRepository = new SessionProxyRepository();
+        private static readonly IUserRepository UserRepository = new UserProxyRepository();
+        private async Task<Guid> EnsureUserExists(string identifier, string email, string name)
         {
             // Use provider's display name as username, like Facebook/GitHub
-            User? user = UserRepository.GetUserByUsername(name);
+            User? user = await UserRepository.GetUserByUsername(name);
             Guid userId;
             if (user == null)
             {
                 userId = Guid.NewGuid();
                 User newUser = new User { UserId = userId, Username = name, PasswordHash = string.Empty, TwoFASecret = null, EmailAddress = email };
-                UserRepository.CreateUser(newUser);
+                await UserRepository.CreateUser(newUser);
             }
             else
             {
@@ -59,7 +61,7 @@ namespace DrinkDb_Auth.AuthProviders.Google
                 if (user.EmailAddress != email)
                 {
                     user.EmailAddress = email;
-                    UserRepository.UpdateUser(user);
+                    await UserRepository.UpdateUser(user);
                 }
             }
             return userId;
@@ -171,8 +173,8 @@ namespace DrinkDb_Auth.AuthProviders.Google
                                         }
 
                                         userInformation = ExtractUserInfoFromIdToken(tokenResult.IdToken);
-                                        userId = EnsureUserExists(userInformation.Identifier, httpClientInformation.Email, httpClientInformation.Name);
-                                        return new AuthenticationResponse { AuthenticationSuccessful = true, OAuthToken = tokenResult.AccessToken, SessionId = SessionRepository.CreateSession(userId).SessionId, NewAccount = false };
+                                        userId = await EnsureUserExists(userInformation.Identifier, httpClientInformation.Email, httpClientInformation.Name);
+                                        return new AuthenticationResponse { AuthenticationSuccessful = true, OAuthToken = tokenResult.AccessToken, SessionId = SessionRepository.CreateSession(userId).Result.SessionId, NewAccount = false };
                                     case false:
                                         if (string.IsNullOrEmpty(tokenResult.IdToken))
                                         {
@@ -188,8 +190,8 @@ namespace DrinkDb_Auth.AuthProviders.Google
                         catch
                         {
                             userInformation = ExtractUserInfoFromIdToken(tokenResult.IdToken);
-                            userId = EnsureUserExists(userInformation.Identifier, userInformation.Email, userInformation.Name);
-                            return new AuthenticationResponse { AuthenticationSuccessful = true, OAuthToken = tokenResult.AccessToken, SessionId = SessionRepository.CreateSession(userId).SessionId, NewAccount = false };
+                            userId = await EnsureUserExists(userInformation.Identifier, userInformation.Email, userInformation.Name);
+                            return new AuthenticationResponse { AuthenticationSuccessful = true, OAuthToken = tokenResult.AccessToken, SessionId = SessionRepository.CreateSession(userId).Result.SessionId, NewAccount = false };
                         }
                     case false:
                         throw new Exception("Trigger Catch | Repeated code to attempt a failed authentication");

@@ -10,23 +10,26 @@
     using System.Text.Json.Serialization;
     using System.Threading;
     using System.Threading.Tasks;
+    using DataAccess.Model.AdminDashboard;
     using DataAccess.Model.Authentication;
     using DrinkDb_Auth.OAuthProviders;
-    using DrinkDb_Auth.Repository.AdminDashboard;
-    using DrinkDb_Auth.Repository.Authentication;
+    using DrinkDb_Auth.ProxyRepository.AdminDashboard;
+    using DrinkDb_Auth.ProxyRepository.Authentification;
     using IRepository;
     using Microsoft.UI.Dispatching;
     using Microsoft.UI.Xaml;
     using Microsoft.UI.Xaml.Controls;
     using Microsoft.Web.WebView2.Core;
+    using Repository.AdminDashboard;
+    using Repository.Authentication;
 
     /// <summary>
     /// A PKCE-based OAuth 2.0 flow for Twitter in a WinUI desktop app.
     /// </summary>
     public class TwitterOAuth2Provider : GenericOAuth2Provider, ITwitterOAuth2Provider
     {
-        private static readonly IUserRepository UserRepository = new UserRepository();
-        private static readonly SessionRepository SessionAdapter = new ();
+        private static readonly IUserRepository UserRepository = new UserProxyRepository();
+        private static readonly ISessionRepository SessionAdapter = new SessionProxyRepository();
         // ▼▼▼ 1) Set these appropriately ▼▼▼
 
         // In "Native App" flows, we typically do NOT use a Client Secret.
@@ -202,17 +205,20 @@
 
                     var twitterUserInfoObject = System.Text.Json.JsonSerializer.Deserialize<TwitterUserInfoResponse>(userInfoResponseBody);
                     System.Diagnostics.Debug.WriteLine($"Authenticated user: {twitterUserInfoObject?.Data.Id} ({twitterUserInfoObject?.Data.Username})");
-                    User? user = UserRepository.GetUserByUsername(twitterUserInfoObject?.Data.Username ?? throw new Exception("user not found in json response payload for Twitter authentication"));
+                    User? user = UserRepository.GetUserByUsername(twitterUserInfoObject?.Data.Username ?? throw new Exception("user not found in json response payload for Twitter authentication")).Result;
                     if (user == null)
                     {
                         // Create a new user
                         user = new User
                         {
-                            Username = twitterUserInfoObject?.Data.Username ?? throw new Exception("user not found in json response payload for Twitter authentication"),
+                            Username = twitterUserInfoObject?.Data.Username,
                             PasswordHash = string.Empty,
                             UserId = Guid.NewGuid(),
                             TwoFASecret = string.Empty,
                             EmailAddress = "ionutcora66@gmail.com",
+                            NumberOfDeletedReviews = 0,
+                            HasSubmittedAppeal = false,
+                            AssignedRoles = new List<Role> { },
                         };
                         UserRepository.CreateUser(user);
                     }
@@ -222,7 +228,7 @@
                         UserRepository.UpdateUser(user);
                     }
 
-                    Session userSession = SessionAdapter.CreateSession(user.UserId);
+                    Session userSession = SessionAdapter.CreateSession(user.UserId).Result;
                     return new AuthenticationResponse
                     {
                         OAuthToken = twitterTokenResult.AccessToken,
