@@ -17,12 +17,12 @@ builder.Services.AddSwaggerGen();
 // Add database context to server
 builder.Services.AddDbContext<DatabaseContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped<IOffensiveWordsRepository, OffensiveWordsRepository>();
-builder.Services.AddScoped<IUpgradeRequestsRepository, UpgradeRequestsRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRolesRepository, RolesRepository>();
 builder.Services.AddScoped<IReviewsRepository, ReviewsRepository>();
 builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+builder.Services.AddScoped<IOffensiveWordsRepository, OffensiveWordsRepository>();
+builder.Services.AddScoped<IUpgradeRequestsRepository, UpgradeRequestsRepository>();
 
 
 var app = builder.Build();

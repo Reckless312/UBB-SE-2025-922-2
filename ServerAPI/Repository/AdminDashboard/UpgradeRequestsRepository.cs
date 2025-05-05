@@ -48,7 +48,7 @@ namespace Repository.AdminDashboard
                 }
 
                 _context.UpgradeRequests.Remove(upgradeRequest);
-                await _context.SaveChangesAsync();
+                _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {

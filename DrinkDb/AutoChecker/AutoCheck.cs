@@ -8,6 +8,7 @@ namespace DrinkDb_Auth.AutoChecker
     using System.Collections.Generic;
     using System.Data;
     using System.Linq;
+    using DrinkDb_Auth.ProxyRepository.AutoChecker;
     using IRepository;
     using Microsoft.Data.SqlClient;
 
@@ -21,7 +22,10 @@ namespace DrinkDb_Auth.AutoChecker
         private readonly HashSet<string> offensiveWords;
 
         private static readonly char[] WordDelimiters = new[] { ' ', ',', '.', '!', '?', ';', ':', '\n', '\r', '\t' };
-
+        public AutoCheck() {
+            this.repository = new OffensiveWordsProxyRepository();
+            this.offensiveWords = this.repository.LoadOffensiveWords();
+        }
         public AutoCheck(IOffensiveWordsRepository repository)
         {
             this.repository = repository ?? throw new ArgumentNullException(nameof(repository));

@@ -645,7 +645,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         }
 
         /// <summary>
-        /// Formats the user status display text.
+        /// Formats the user status display tex
         /// </summary>
         /// <param name="user">The user to display status for.</param>
         /// <param name="isBanned">Whether the user is banned.</param>

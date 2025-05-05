@@ -1,6 +1,7 @@
 ﻿using DataAccess.Model.AutoChecker;
 using IRepository;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol.Core.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,8 +14,14 @@ namespace DrinkDb_Auth.ProxyRepository.AutoChecker
 {
     public class OffensiveWordsProxyRepository : IOffensiveWordsRepository
     {
-        private const string ApiBaseRoute = "offenssiveWords";
+        private const string ApiBaseRoute = "offensiveWords";
         private HttpClient httpClient;
+
+        public OffensiveWordsProxyRepository()
+        {
+            this.httpClient = new HttpClient();
+            this.httpClient.BaseAddress = new Uri("http://localhost:5280/");
+        }
 
         public OffensiveWordsProxyRepository(string baseApiUrl) {
             this.httpClient  = new HttpClient();
@@ -24,16 +31,18 @@ namespace DrinkDb_Auth.ProxyRepository.AutoChecker
         public async Task AddWord(string word)
         {
 
-            var response = await this.httpClient.GetAsync(ApiBaseRoute);
+            var response = this.httpClient.GetAsync(ApiBaseRoute).Result;
             response.EnsureSuccessStatusCode();
 
-            HashSet<OffensiveWord> offensiveWords = await response.Content.ReadFromJsonAsync<HashSet<OffensiveWord>>() ?? new HashSet<OffensiveWord>();
-
-            OffensiveWord? searchedWord = offensiveWords.FirstOrDefault(currentWord => string.Equals(currentWord.Word, word, StringComparison.OrdinalIgnoreCase));
+            List<OffensiveWord> offensiveWords = response.Content.ReadFromJsonAsync<List<OffensiveWord>>().Result ?? new List<OffensiveWord>();
+            OffensiveWord? searchedWord  = null;
+            foreach (OffensiveWord offensive in offensiveWords)
+                if (offensive.Word == word)
+                    searchedWord = offensive;
 
             if (searchedWord == null)
             {
-                response = await this.httpClient.PostAsJsonAsync(ApiBaseRoute, word);
+                response = this.httpClient.PostAsJsonAsync($"{ApiBaseRoute}/add", new OffensiveWord { Word = word }).Result;
                 response.EnsureSuccessStatusCode();
              }
         }
@@ -43,13 +52,14 @@ namespace DrinkDb_Auth.ProxyRepository.AutoChecker
             var response = await this.httpClient.GetAsync(ApiBaseRoute);
             response.EnsureSuccessStatusCode();
 
-            HashSet<OffensiveWord> offensiveWords = await response.Content.ReadFromJsonAsync<HashSet<OffensiveWord>>() ?? new HashSet<OffensiveWord>();
-
-            OffensiveWord? searchedWord = offensiveWords.FirstOrDefault(currentWord => string.Equals(currentWord.Word, word, StringComparison.OrdinalIgnoreCase));
-
+            List<OffensiveWord> offensiveWords = response.Content.ReadFromJsonAsync<List<OffensiveWord>>().Result ?? new List<OffensiveWord>();
+            OffensiveWord? searchedWord = null;
+            foreach (OffensiveWord offensive in offensiveWords)
+                if (offensive.Word == word)
+                    searchedWord = offensive;
             if (searchedWord != null)
             {
-                response = await this.httpClient.DeleteAsync($"{ApiBaseRoute}/{searchedWord.OffensiveWordId}");
+                response = this.httpClient.DeleteAsync($"{ApiBaseRoute}/delete/{word}").Result;
                 response.EnsureSuccessStatusCode();
             }
         }
@@ -58,7 +68,7 @@ namespace DrinkDb_Auth.ProxyRepository.AutoChecker
         {
             var response = this.httpClient.GetAsync(ApiBaseRoute).Result;
             response.EnsureSuccessStatusCode();
-            HashSet<OffensiveWord> offensiveWords = response.Content.ReadFromJsonAsync<HashSet<OffensiveWord>>().Result ?? new HashSet<OffensiveWord>();
+             List < OffensiveWord > offensiveWords = response.Content.ReadFromJsonAsync<List<OffensiveWord>>().Result ?? new List<OffensiveWord>();
             HashSet<string> wordsAsStrings = new HashSet<string>();
             foreach (OffensiveWord word in offensiveWords)
                 wordsAsStrings.Add(word.Word);
