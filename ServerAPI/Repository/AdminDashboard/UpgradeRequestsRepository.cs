@@ -30,7 +30,8 @@ namespace Repository.AdminDashboard
 
         public async Task RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
         {
-                var upgradeRequest =  _context.UpgradeRequests.FirstOrDefaultAsync(ur => ur.UpgradeRequestId == upgradeRequestIdentifier).Result;
+                List<UpgradeRequest> upgradeRequests =  _context.UpgradeRequests.ToListAsync().Result;
+                UpgradeRequest upgradeRequest = upgradeRequests.Where(upgrade => upgrade.UpgradeRequestId == upgradeRequestIdentifier).First();
                 _context.UpgradeRequests.Remove(upgradeRequest);
                 _context.SaveChangesAsync();
           

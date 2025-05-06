@@ -215,10 +215,10 @@
                             PasswordHash = string.Empty,
                             UserId = Guid.NewGuid(),
                             TwoFASecret = string.Empty,
-                            EmailAddress = "ionutcora66@gmail.com",
+                            EmailAddress = "cevaemail",
                             NumberOfDeletedReviews = 0,
                             HasSubmittedAppeal = false,
-                            AssignedRole = new Role(RoleType.User, "User"),
+                            AssignedRole = RoleType.Admin,
                             FullName = twitterUserInfoObject?.Data.Username,
                         };
                         UserRepository.CreateUser(user);

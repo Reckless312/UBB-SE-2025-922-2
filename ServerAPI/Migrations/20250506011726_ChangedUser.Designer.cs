@@ -12,8 +12,8 @@ using ServerAPI.Data;
 namespace ServerAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20250505235935_ChangedUser4")]
-    partial class ChangedUser4
+    [Migration("20250506011726_ChangedUser")]
+    partial class ChangedUser
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -72,6 +72,28 @@ namespace ServerAPI.Migrations
                     b.HasKey("RoleType");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            RoleType = 0,
+                            RoleName = "Banned"
+                        },
+                        new
+                        {
+                            RoleType = 1,
+                            RoleName = "User"
+                        },
+                        new
+                        {
+                            RoleType = 2,
+                            RoleName = "Admin"
+                        },
+                        new
+                        {
+                            RoleType = 3,
+                            RoleName = "Manager"
+                        });
                 });
 
             modelBuilder.Entity("DataAccess.Model.AdminDashboard.UpgradeRequest", b =>
@@ -118,6 +140,9 @@ namespace ServerAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("AssignedRoleRoleType")
+                        .HasColumnType("int");
+
                     b.Property<string>("EmailAddress")
                         .HasColumnType("nvarchar(max)");
 
@@ -134,9 +159,6 @@ namespace ServerAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("RoleType")
-                        .HasColumnType("int");
-
                     b.Property<string>("TwoFASecret")
                         .HasColumnType("nvarchar(max)");
 
@@ -147,7 +169,7 @@ namespace ServerAPI.Migrations
 
                     b.HasKey("UserId");
 
-                    b.HasIndex("RoleType");
+                    b.HasIndex("AssignedRoleRoleType");
 
                     b.ToTable("Users");
                 });
@@ -200,7 +222,7 @@ namespace ServerAPI.Migrations
                 {
                     b.HasOne("DataAccess.Model.AdminDashboard.Role", "AssignedRole")
                         .WithMany()
-                        .HasForeignKey("RoleType");
+                        .HasForeignKey("AssignedRoleRoleType");
 
                     b.Navigation("AssignedRole");
                 });

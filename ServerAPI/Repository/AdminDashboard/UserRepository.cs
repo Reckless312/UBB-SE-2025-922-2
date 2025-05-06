@@ -53,7 +53,7 @@
             try
             {
                 return await _context.Users
-                    .Where(user => user.AssignedRole.RoleType == roleType)
+                    .Where(user => user.AssignedRole == roleType)
                     .ToListAsync();
             }
             catch (Exception ex)
@@ -73,7 +73,7 @@
             try
             {
                 User user = await GetUserById(userId);
-                return user.AssignedRole.RoleType;
+                return user.AssignedRole;
             }
             catch (ArgumentException ex)
             {
@@ -93,7 +93,7 @@
         public async Task<List<User>> GetBannedUsersWhoHaveSubmittedAppeals()
         {
              return await _context.Users
-                .Where(user => user.HasSubmittedAppeal && user.AssignedRole.RoleType == RoleType.Banned).ToListAsync();
+                .Where(user => user.HasSubmittedAppeal && user.AssignedRole == RoleType.Banned).ToListAsync();
            
         }
 
@@ -106,9 +106,9 @@
         public async Task ChangeRoleToUser(Guid userId, Role roleToAdd)
         {
             User user = GetUserById(userId).Result;
-            user.AssignedRole = roleToAdd;
+            user.AssignedRole = roleToAdd.RoleType;
             _context.Users.Update(user);
-            _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
 
         /// <summary>
@@ -187,15 +187,9 @@
 
         public async Task<bool> CreateUser(User user)
         {
-            try
-            {
-                _context.Users.Add(user);
-                return await _context.SaveChangesAsync() > 0;
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException("Failed to create a new user.", ex);
-            }
+            _context.Users.Add(user);
+            return _context.SaveChangesAsync().Result > 0;
+            
         }
 
         public virtual async Task<bool> ValidateAction(Guid userId, string resource, string action)

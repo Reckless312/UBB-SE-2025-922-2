@@ -12,8 +12,8 @@ using ServerAPI.Data;
 namespace ServerAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20250504162311_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250506005116_ChangedUser9")]
+    partial class ChangedUser9
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -118,7 +118,13 @@ namespace ServerAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("AssignedRoleRoleType")
+                        .HasColumnType("int");
+
                     b.Property<string>("EmailAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FullName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("HasSubmittedAppeal")
@@ -141,6 +147,8 @@ namespace ServerAPI.Migrations
 
                     b.HasKey("UserId");
 
+                    b.HasIndex("AssignedRoleRoleType");
+
                     b.ToTable("Users");
                 });
 
@@ -159,21 +167,6 @@ namespace ServerAPI.Migrations
                     b.HasKey("OffensiveWordId");
 
                     b.ToTable("OffensiveWords");
-                });
-
-            modelBuilder.Entity("RoleUser", b =>
-                {
-                    b.Property<int>("AssignedRolesRoleType")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("AssignedRolesRoleType", "UserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("RoleUser");
                 });
 
             modelBuilder.Entity("DataAccess.Model.AdminDashboard.Review", b =>
@@ -203,19 +196,13 @@ namespace ServerAPI.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("RoleUser", b =>
+            modelBuilder.Entity("DataAccess.Model.Authentication.User", b =>
                 {
-                    b.HasOne("DataAccess.Model.AdminDashboard.Role", null)
+                    b.HasOne("DataAccess.Model.AdminDashboard.Role", "AssignedRole")
                         .WithMany()
-                        .HasForeignKey("AssignedRolesRoleType")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AssignedRoleRoleType");
 
-                    b.HasOne("DataAccess.Model.Authentication.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("AssignedRole");
                 });
 #pragma warning restore 612, 618
         }

@@ -5,7 +5,7 @@
 namespace ServerAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class ChangedUser4 : Migration
+    public partial class ChangedUser7 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -104,7 +104,7 @@ namespace DrinkDb_Auth.AuthProviders.Facebook
                     EmailAddress = email,
                     NumberOfDeletedReviews = 0,
                     HasSubmittedAppeal = false,
-                    AssignedRole = new Role(RoleType.User, "User"),
+                    AssignedRole = RoleType.User,
                     FullName = fbName
                 });
                 return true;

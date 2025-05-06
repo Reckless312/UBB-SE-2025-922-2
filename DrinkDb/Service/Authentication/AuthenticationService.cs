@@ -146,7 +146,7 @@ namespace DrinkDb_Auth.Service.Authentication
                     FullName = username,
 
                 };
-                user.AssignedRole = new Role(RoleType.User, "User");
+                user.AssignedRole = RoleType.User;
                 user.NumberOfDeletedReviews = 0;
                 user.EmailAddress = "ionutcora66@gmail.com";
                 userRepository.CreateUser(user);

@@ -12,8 +12,8 @@ using ServerAPI.Data;
 namespace ServerAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20250505223022_ChangedUser")]
-    partial class ChangedUser
+    [Migration("20250506022545_ChangedUser8942")]
+    partial class ChangedUser8942
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -72,6 +72,28 @@ namespace ServerAPI.Migrations
                     b.HasKey("RoleType");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            RoleType = 0,
+                            RoleName = "Banned"
+                        },
+                        new
+                        {
+                            RoleType = 1,
+                            RoleName = "User"
+                        },
+                        new
+                        {
+                            RoleType = 2,
+                            RoleName = "Admin"
+                        },
+                        new
+                        {
+                            RoleType = 3,
+                            RoleName = "Manager"
+                        });
                 });
 
             modelBuilder.Entity("DataAccess.Model.AdminDashboard.UpgradeRequest", b =>
@@ -117,6 +139,11 @@ namespace ServerAPI.Migrations
                     b.Property<Guid>("UserId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AssignedRole")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<string>("EmailAddress")
                         .HasColumnType("nvarchar(max)");
@@ -164,21 +191,6 @@ namespace ServerAPI.Migrations
                     b.ToTable("OffensiveWords");
                 });
 
-            modelBuilder.Entity("RoleUser", b =>
-                {
-                    b.Property<int>("AssignedRolesRoleType")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("AssignedRolesRoleType", "UserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("RoleUser");
-                });
-
             modelBuilder.Entity("DataAccess.Model.AdminDashboard.Review", b =>
                 {
                     b.HasOne("DataAccess.Model.Authentication.User", null)
@@ -199,21 +211,6 @@ namespace ServerAPI.Migrations
 
             modelBuilder.Entity("DataAccess.Model.Authentication.Session", b =>
                 {
-                    b.HasOne("DataAccess.Model.Authentication.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("RoleUser", b =>
-                {
-                    b.HasOne("DataAccess.Model.AdminDashboard.Role", null)
-                        .WithMany()
-                        .HasForeignKey("AssignedRolesRoleType")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("DataAccess.Model.Authentication.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")

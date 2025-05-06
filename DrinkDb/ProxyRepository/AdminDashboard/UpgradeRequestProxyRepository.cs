@@ -23,7 +23,7 @@
 
         public async Task RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
         {
-            var response = this.httpClient.DeleteAsync(ApiBaseRoute + "/" + upgradeRequestIdentifier).Result;
+            var response = this.httpClient.DeleteAsync(ApiBaseRoute + "/" + upgradeRequestIdentifier + "/delete").Result;
             response.EnsureSuccessStatusCode();
         }
 

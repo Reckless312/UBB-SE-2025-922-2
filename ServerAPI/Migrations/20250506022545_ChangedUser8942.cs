@@ -5,7 +5,7 @@
 namespace ServerAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class ChangedUser3 : Migration
+    public partial class ChangedUser8942 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -23,45 +23,25 @@ namespace ServerAPI.Migrations
                 table: "Users");
 
             migrationBuilder.AddColumn<int>(
-                name: "RoleType",
+                name: "AssignedRole",
                 table: "Users",
                 type: "int",
-                nullable: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_RoleType",
-                table: "Users",
-                column: "RoleType");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Users_Roles_RoleType",
-                table: "Users",
-                column: "RoleType",
-                principalTable: "Roles",
-                principalColumn: "RoleType");
+                nullable: false,
+                defaultValue: 1);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Users_Roles_RoleType",
-                table: "Users");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Users_RoleType",
-                table: "Users");
-
             migrationBuilder.DropColumn(
-                name: "RoleType",
+                name: "AssignedRole",
                 table: "Users");
 
             migrationBuilder.AddColumn<int>(
                 name: "AssignedRoleRoleType",
                 table: "Users",
                 type: "int",
-                nullable: false,
-                defaultValue: 0);
+                nullable: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_AssignedRoleRoleType",
@@ -73,8 +53,7 @@ namespace ServerAPI.Migrations
                 table: "Users",
                 column: "AssignedRoleRoleType",
                 principalTable: "Roles",
-                principalColumn: "RoleType",
-                onDelete: ReferentialAction.Cascade);
+                principalColumn: "RoleType");
         }
     }
 }

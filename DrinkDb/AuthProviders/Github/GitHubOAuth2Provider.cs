@@ -185,7 +185,7 @@ namespace DrinkDb_Auth.AuthProviders.Github
                     EmailAddress = email,
                     NumberOfDeletedReviews = 0,
                     HasSubmittedAppeal = false,
-                    AssignedRole = new Role(RoleType.User, "User"),
+                    AssignedRole = RoleType.Manager,
                     FullName = gitHubLogin.Trim()
                 };
                 userRepository.CreateUser(newUser);

@@ -4,7 +4,7 @@ namespace DataAccess.Model.Authentication
 {
     public class User
     {
-        public User(Guid userId, string emailAddress, string userName, int numberOfDeletedReviews, bool hasSubmittedAppeal, Role assignedRole, string fullName)
+        public User(Guid userId, string emailAddress, string userName, int numberOfDeletedReviews, bool hasSubmittedAppeal, RoleType assignedRole, string fullName)
         {
             this.UserId = userId;
             this.EmailAddress = emailAddress;
@@ -14,7 +14,7 @@ namespace DataAccess.Model.Authentication
             this.AssignedRole = assignedRole;
             this.FullName = fullName;
         }
-        public User() { AssignedRole = new Role(RoleType.User, "User"); }
+        public User() { AssignedRole = RoleType.User; }
         public required Guid UserId { get; set; }
 
         public required string Username { get; set; }
@@ -29,7 +29,7 @@ namespace DataAccess.Model.Authentication
 
         public bool HasSubmittedAppeal { get; set; }
 
-        public Role AssignedRole { get; set; }
+        public RoleType AssignedRole { get; set; }
         public string FullName { get; set; }
 
         public void Returns(User user)

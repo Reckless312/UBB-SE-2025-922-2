@@ -39,8 +39,7 @@ namespace ServerAPI.Data
                 user.Property(currentUser => currentUser.NumberOfDeletedReviews).IsRequired();
                 user.Property(currentUser => currentUser.HasSubmittedAppeal).IsRequired();
                 user.Property(currentUser => currentUser.FullName).IsRequired(false);
-                user.HasOne(currentUser => currentUser.AssignedRole).WithMany() 
-                            .HasForeignKey("RoleType").IsRequired(false);
+                user.Property(currentUser => currentUser.AssignedRole).HasDefaultValue(RoleType.User);
             });
 
             // configure role
@@ -49,7 +48,12 @@ namespace ServerAPI.Data
                 role.HasKey(currentRole => currentRole.RoleType);
                 role.Property(currentRole => currentRole.RoleName).IsRequired().HasMaxLength(10);
             });
-
+            modelBuilder.Entity<Role>().HasData(
+                new Role(RoleType.Banned, "Banned"), 
+                new Role(RoleType.User, "User"), 
+                new Role(RoleType.Admin, "Admin"), 
+                new Role(RoleType.Manager, "Manager")
+             );
             // configure upgrade request
             modelBuilder.Entity<UpgradeRequest>(request =>
             {
@@ -83,6 +87,7 @@ namespace ServerAPI.Data
                 word.HasKey(offensiveWord => offensiveWord.OffensiveWordId);
                 word.Property(offensiveWord => offensiveWord.Word);
             });
+
         }
     }
 }

@@ -15,6 +15,7 @@
     {
         private readonly DatabaseContext _context;
 
+
         public RolesRepository(DatabaseContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));

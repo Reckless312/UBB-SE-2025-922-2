@@ -12,8 +12,8 @@ using ServerAPI.Data;
 namespace ServerAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20250505230950_ChangedUser3")]
-    partial class ChangedUser3
+    [Migration("20250506004725_ChangedUser8")]
+    partial class ChangedUser8
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -118,6 +118,9 @@ namespace ServerAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("AssignedRoleRoleType")
+                        .HasColumnType("int");
+
                     b.Property<string>("EmailAddress")
                         .HasColumnType("nvarchar(max)");
 
@@ -134,9 +137,6 @@ namespace ServerAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("RoleType")
-                        .HasColumnType("int");
-
                     b.Property<string>("TwoFASecret")
                         .HasColumnType("nvarchar(max)");
 
@@ -147,7 +147,7 @@ namespace ServerAPI.Migrations
 
                     b.HasKey("UserId");
 
-                    b.HasIndex("RoleType");
+                    b.HasIndex("AssignedRoleRoleType");
 
                     b.ToTable("Users");
                 });
@@ -200,7 +200,7 @@ namespace ServerAPI.Migrations
                 {
                     b.HasOne("DataAccess.Model.AdminDashboard.Role", "AssignedRole")
                         .WithMany()
-                        .HasForeignKey("RoleType");
+                        .HasForeignKey("AssignedRoleRoleType");
 
                     b.Navigation("AssignedRole");
                 });

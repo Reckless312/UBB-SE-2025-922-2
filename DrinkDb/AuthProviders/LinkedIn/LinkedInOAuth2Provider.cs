@@ -66,9 +66,10 @@ namespace DrinkDb_Auth.AuthProviders.LinkedIn
                     EmailAddress = root.GetProperty("email").GetString() ?? string.Empty,
                     NumberOfDeletedReviews = 0,
                     HasSubmittedAppeal = false,
-                    AssignedRole = new Role(RoleType.User, "User"),
-                    FullName = name
+                    AssignedRole = RoleType.User,
+                    FullName = name,
                 };
+
                 UserRepository.CreateUser(newUser);
                 Session session = SessionAdapter.CreateSession(newUser.UserId).Result;
                 return new AuthenticationResponse

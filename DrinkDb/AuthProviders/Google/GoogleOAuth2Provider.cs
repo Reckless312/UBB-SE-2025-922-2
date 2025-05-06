@@ -51,7 +51,7 @@ namespace DrinkDb_Auth.AuthProviders.Google
             if (user == null)
             {
                 userId = Guid.NewGuid();
-                User newUser = new User { UserId = userId, Username = name, PasswordHash = string.Empty, TwoFASecret = null, EmailAddress = email , FullName=name};
+                User newUser = new User { UserId = userId, Username = name, PasswordHash = string.Empty, TwoFASecret = null, EmailAddress = email , FullName=name, AssignedRole = DataAccess.Model.AdminDashboard.RoleType.Banned};
                 await UserRepository.CreateUser(newUser);
             }
             else

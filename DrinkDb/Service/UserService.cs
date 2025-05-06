@@ -252,7 +252,7 @@ namespace DrinkDb_Auth.Service
                 if (roleType == RoleType.Banned)
                 {
                     bool hasBannedRole = false;
-                    if (user.AssignedRole.RoleType == RoleType.Banned)
+                    if (user.AssignedRole == RoleType.Banned)
                     {
                         hasBannedRole = true;
                     }

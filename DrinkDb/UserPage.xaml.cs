@@ -72,11 +72,11 @@ namespace DrinkDb_Auth
                 StatusTextBlock.Text = string.Empty;
             }
 
-            Role userRole = this.currentUser.AssignedRole;
+            RoleType userRole = this.currentUser.AssignedRole;
 
             bool isAdmin = false;
 
-            if (userRole.RoleType == RoleType.Admin)
+            if (userRole == RoleType.Admin)
             {
                 isAdmin = true;
             }
