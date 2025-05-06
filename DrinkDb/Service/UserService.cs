@@ -246,33 +246,32 @@ namespace DrinkDb_Auth.Service
 
         public async Task UpdateUserRole(Guid userId, RoleType roleType)
         {
-            try
+            User? user = await userRepository.GetUserById(userId);
+            if (roleType == RoleType.Banned)
             {
-                User? user = await userRepository.GetUserById(userId);
-                if (roleType == RoleType.Banned)
+                bool hasBannedRole = false;
+                if (user.AssignedRole == RoleType.Banned)
                 {
-                    bool hasBannedRole = false;
-                    if (user.AssignedRole == RoleType.Banned)
-                    {
-                        hasBannedRole = true;
-                    }
-                    if (!hasBannedRole)
-                    {
-                        await userRepository.ChangeRoleToUser(userId, new Role(RoleType.Banned, "Banned"));
-                    }
+                    hasBannedRole = true;
                 }
-                else
+                if (!hasBannedRole)
                 {
-                    await userRepository.ChangeRoleToUser(userId, new Role(roleType, roleType.ToString()));
+                    user.AssignedRole = RoleType.Banned;
                 }
+            }
+            else
+            {
+                user.AssignedRole = roleType;
+            }
+            userRepository.UpdateUser(user);
+        }
 
-                // Update the user after modifying roles
-                await userRepository.UpdateUser(user);
-            }
-            catch (Exception ex) when (!(ex is ArgumentException))
-            {
-                throw new UserServiceException($"Failed to update role to {roleType} for user with ID {userId}", ex);
-            }
+        public void UpdateUserAppleaed(User user, bool newValue)
+        {
+
+            //User? currentUser = userRepository.GetUserById(user.UserId).Result;
+            user.HasSubmittedAppeal = newValue;
+            userRepository.UpdateUser(user);
         }
     }
 }

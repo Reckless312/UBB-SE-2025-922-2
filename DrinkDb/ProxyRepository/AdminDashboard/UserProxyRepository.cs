@@ -79,7 +79,7 @@
                 return null;
 
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<User>(jsonOptions);
+            return response.Content.ReadFromJsonAsync<User>(jsonOptions).Result;
         }
 
         public async Task<User?> GetUserByUsername(string username)
@@ -123,7 +123,7 @@
         {
             var response = this.httpClient.PatchAsJsonAsync($"{ApiRoute}/{user.UserId}/updateUser", user).Result;
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<bool>();
+            return response.Content.ReadFromJsonAsync<bool>().Result;
         }
 
         public async Task<bool> ValidateAction(Guid userId, string resource, string action)

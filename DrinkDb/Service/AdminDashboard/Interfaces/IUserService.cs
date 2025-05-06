@@ -118,5 +118,6 @@ namespace DrinkDb_Auth.Service.AdminDashboard.Interfaces
         /// Logs out the current user.
         /// </summary>
         void LogoutUser();
+        void UpdateUserAppleaed(User user, bool newValue);
     }
 }

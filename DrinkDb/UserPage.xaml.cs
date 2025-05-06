@@ -80,8 +80,13 @@ namespace DrinkDb_Auth
             {
                 isAdmin = true;
             }
+            bool isManager = false;
 
-            if (!isAdmin)
+            if (userRole == RoleType.Manager)
+            {
+                isManager = true;
+            }
+            if (!isAdmin&&!isManager)
             {
                 this.AdminDashboardButton.Visibility = Visibility.Collapsed;
             }

@@ -528,6 +528,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             }
 
             UpdateUserRole(user, RoleType.Banned);
+            UpdateUserHasAppealed(user, false);
             IsAppealUserBanned = true;
             UserStatusDisplay = GetUserStatusDisplay(user, true);
         }
@@ -544,8 +545,14 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             }
 
             UpdateUserRole(user, RoleType.User);
+            UpdateUserHasAppealed(user, false);
             IsAppealUserBanned = false;
             UserStatusDisplay = GetUserStatusDisplay(user, false);
+        }
+
+        private void UpdateUserHasAppealed(User user, bool newValue)
+        {
+            userService.UpdateUserAppleaed(user,newValue);
         }
 
         /// <summary>
