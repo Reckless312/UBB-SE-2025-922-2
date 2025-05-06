@@ -14,7 +14,7 @@ namespace UnitTests.Users
     using IRepository;
     using Moq;
     using Xunit;
-    using static DrinkDb_Auth.Repository.AdminDashboard.UserRepository;
+    using static DrinkDb_Auth.ProxyRepository.AdminDashboard.UserProxyRepository;
 
     /// <summary>
     /// Unit tests for the <see cref="UserService"/> class.
@@ -54,17 +54,17 @@ namespace UnitTests.Users
             var mockUserRepository = new Mock<IUserRepository>();
             var users = new List<User>
             {
-                new User { UserId = Guid.NewGuid(), EmailAddress = String.Empty, Username = "User One", NumberOfDeletedReviews = 0, AssignedRoles = new List<Role>(), PasswordHash = String.Empty, TwoFASecret = String.Empty, FullName = "User One" },
-                new User {  UserId = Guid.NewGuid(), EmailAddress = String.Empty, Username = "User Two", NumberOfDeletedReviews = 0, AssignedRoles = new List<Role>(), PasswordHash = String.Empty, TwoFASecret = String.Empty, FullName = "User Two" }
+                new User { UserId = Guid.NewGuid(), EmailAddress = String.Empty, Username = "User One", NumberOfDeletedReviews = 0, AssignedRole = RoleType.User, PasswordHash = String.Empty, TwoFASecret = String.Empty, FullName = "User One" },
+                new User {  UserId = Guid.NewGuid(), EmailAddress = String.Empty, Username = "User Two", NumberOfDeletedReviews = 0, AssignedRole = RoleType.Admin, PasswordHash = String.Empty, TwoFASecret = String.Empty, FullName = "User Two" }
             };
-            mockUserRepository.Setup(repo => repo.GetAllUsers()).Returns(users);
+            mockUserRepository.Setup(repo => repo.GetAllUsers()).ReturnsAsync(users);
 
             var userService1 = new UserService(mockUserRepository.Object);
 
-            var result = userService1.GetAllUsers();
+            var result = userService1.GetAllUsers().Result;
 
             Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
+            Assert.Equal(2, result.Count());
             Assert.Equal("User One", result[0].FullName);
         }
 
@@ -72,12 +72,12 @@ namespace UnitTests.Users
         /// Verifies that <see cref="UserService.GetAllUsers"/> throws a <see cref="UserServiceException"/> when the repository throws an exception.
         /// </summary>
         [Fact]
-        public void GetAllUsers_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
+        public async Task GetAllUsers_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
         {
-            this.mockUserRepository.Setup(repo => repo.GetAllUsers()).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetAllUsers());
+            this.mockUserRepository.Setup(repo => repo.GetAllUsers()).Throws(new Exception("Repository error", new Exception("Inner exception")));
+            UserServiceException exception = await Assert.ThrowsAsync<UserServiceException>(async() => this.userService.GetAllUsers());
             Assert.Equal("Failed to retrieve all users.", exception.Message);
-            Assert.IsType<RepositoryException>(exception.InnerException);
+            Assert.IsType<Exception>(exception.InnerException);
         }
 
         /// <summary>
@@ -86,8 +86,8 @@ namespace UnitTests.Users
         [Fact]
         public void GetAllUsers_ShouldReturnEmptyList_WhenRepositoryReturnsNoUsers()
         {
-            this.mockUserRepository.Setup(repo => repo.GetAllUsers()).Returns(new List<User>());
-            List<User> result = this.userService.GetAllUsers();
+            this.mockUserRepository.Setup(repo => repo.GetAllUsers()).ReturnsAsync(new List<User>());
+            List<User> result = this.userService.GetAllUsers().Result;
             Assert.NotNull(result);
             Assert.Empty(result);
         }
@@ -96,9 +96,9 @@ namespace UnitTests.Users
         /// Verifies that <see cref="UserService.GetActiveUsersByRoleType"/> throws an <see cref="ArgumentException"/> when the role type is invalid.
         /// </summary>
         [Fact]
-        public void GetActiveUsersByRoleType_ShouldThrowArgumentException_WhenRoleTypeIsInvalid()
+        public async Task GetActiveUsersByRoleType_ShouldThrowArgumentException_WhenRoleTypeIsInvalid()
         {
-            var exception = Assert.Throws<ArgumentException>(() => this.userService.GetActiveUsersByRoleType(0));
+            var exception = await Assert.ThrowsAsync<ArgumentException>(async() => this.userService.GetActiveUsersByRoleType(0));
             Assert.Equal("Permission ID must be positive", exception.Message);
         }
 
@@ -121,10 +121,10 @@ namespace UnitTests.Users
             };
 
             // Mock the repository to return the User object
-            this.mockUserRepository.Setup(repository => repository.GetUserById(userId)).Returns(user);
+            this.mockUserRepository.Setup(repository => repository.GetUserById(userId)).ReturnsAsync(user);
 
             // Call the method under test
-            var result = this.userService.GetUserById(userId);
+            var result = this.userService.GetUserById(userId).Result;
 
             // Assert the result
             Assert.NotNull(result);
@@ -135,18 +135,18 @@ namespace UnitTests.Users
         /// Verifies that <see cref="UserService.GetUserById"/> throws a <see cref="UserServiceException"/> when the repository returns null.
         /// </summary>
         [Fact]
-        public void GetUserById_ShouldThrowUserServiceException_WhenRepositoryReturnsNull()
+        public async Task GetUserById_ShouldThrowUserServiceException_WhenRepositoryReturnsNull()
         {
             // Use Guid.NewGuid() instead of the default constructor
             Guid id = Guid.NewGuid();
 
             // Mock the repository to return null
             this.mockUserRepository
-                .Setup(repository => repository.GetUserById(id))
+                .Setup(repository => repository.GetUserById(id).Result)
                 .Returns((User)null);
 
             // Assert that the exception is thrown
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetUserById(id));
+            UserServiceException exception = await Assert.ThrowsAsync<UserServiceException>(async () => await this.userService.GetUserById(id));
             Assert.Equal("Failed to retrieve user with ID " + id.ToString() + ".", exception.Message);
         }
 
@@ -157,8 +157,8 @@ namespace UnitTests.Users
         public void GetBannedUsers_ShouldReturnBannedUsers()
         {
             List<User> users = new List<User> { new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), FullName = "Banned User" } };
-            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.Banned)).Returns(users);
-            List<User> result = this.userService.GetBannedUsers();
+            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.Banned)).ReturnsAsync(users);
+            List<User> result = this.userService.GetBannedUsers().Result;
             Assert.NotNull(result);
             Assert.Single(result);
             Assert.Equal("Banned User", result[0].FullName);
@@ -168,13 +168,13 @@ namespace UnitTests.Users
         /// Verifies that <see cref="UserService.GetBannedUsers"/> throws a <see cref="UserServiceException"/> when the repository throws an exception.
         /// </summary>
         [Fact]
-        public void GetBannedUsers_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
+        public async Task GetBannedUsers_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
         {
-            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.Banned)).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
+            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.Banned)).Throws(new Exception("Repository error", new Exception("Inner exception")));
 
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetBannedUsers());
+            UserServiceException exception = await Assert.ThrowsAsync<UserServiceException>(() => this.userService.GetBannedUsers());
             Assert.Equal("Failed to get banned users", exception.Message);
-            Assert.IsType<RepositoryException>(exception.InnerException);
+            Assert.IsType<Exception>(exception.InnerException);
         }
 
         /// <summary>
@@ -183,8 +183,8 @@ namespace UnitTests.Users
         [Fact]
         public void GetBannedUsers_ShouldReturnEmptyList_WhenRepositoryReturnsNoUsers()
         {
-            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.Banned)).Returns(new List<User>());
-            List<User> result = this.userService.GetBannedUsers();
+            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.Banned)).ReturnsAsync(new List<User>());
+            List<User> result = this.userService.GetBannedUsers().Result;
             Assert.NotNull(result);
             Assert.Empty(result);
         }
@@ -195,8 +195,8 @@ namespace UnitTests.Users
         [Fact]
         public void GetHighestRoleTypeForUser_ShouldReturnCorrectRoleType()
         {
-            this.mockUserRepository.Setup(repository => repository.GetRoleTypeForUser(new Guid())).Returns(RoleType.Admin);
-            RoleType result = this.userService.GetHighestRoleTypeForUser(new Guid());
+            this.mockUserRepository.Setup(repository => repository.GetRoleTypeForUser(new Guid())).ReturnsAsync(RoleType.Admin);
+            RoleType result = this.userService.GetHighestRoleTypeForUser(new Guid()).Result;
             Assert.Equal(RoleType.Admin, result);
         }
 
@@ -204,14 +204,14 @@ namespace UnitTests.Users
         /// Verifies that <see cref="UserService.GetHighestRoleTypeForUser"/> throws a <see cref="UserServiceException"/> when the repository throws an exception.
         /// </summary>
         [Fact]
-        public void GetHighestRoleTypeForUser_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
+        public async Task GetHighestRoleTypeForUser_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
         {
             var id = new Guid();
-            this.mockUserRepository.Setup(repo => repo.GetRoleTypeForUser(id)).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
+            this.mockUserRepository.Setup(repo => repo.GetRoleTypeForUser(id)).Throws(new Exception("Repository error", new Exception("Inner exception")));
 
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetHighestRoleTypeForUser(id));
+            UserServiceException exception = await Assert.ThrowsAsync<UserServiceException>(() => this.userService.GetHighestRoleTypeForUser(id));
             Assert.Equal("Failed to retrieve the highest role type for user with ID " + id.ToString() + ".", exception.Message);
-            Assert.IsType<RepositoryException>(exception.InnerException);
+            Assert.IsType<Exception>(exception.InnerException);
         }
 
         /// <summary>
@@ -220,8 +220,8 @@ namespace UnitTests.Users
         [Fact]
         public void GetHighestRoleTypeForUser_ShouldReturnDefaultRole_WhenRepositoryReturnsDefault()
         {
-            this.mockUserRepository.Setup(repository => repository.GetRoleTypeForUser(new Guid())).Returns(RoleType.Banned);
-            RoleType result = this.userService.GetHighestRoleTypeForUser(new Guid());
+            this.mockUserRepository.Setup(repository => repository.GetRoleTypeForUser(new Guid())).ReturnsAsync(RoleType.Banned);
+            RoleType result = this.userService.GetHighestRoleTypeForUser(new Guid()).Result;
             Assert.Equal(RoleType.Banned, result);
         }
 
@@ -232,8 +232,8 @@ namespace UnitTests.Users
         public void GetUsersByRoleType_ShouldReturnCorrectUsers()
         {
             List<User> users = new List<User> { new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), FullName = "User One" } };
-            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.User)).Returns(users);
-            List<User> result = this.userService.GetUsersByRoleType(RoleType.User);
+            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.User)).ReturnsAsync(users);
+            List<User> result = this.userService.GetUsersByRoleType(RoleType.User).Result;
             Assert.NotNull(result);
             Assert.Single(result);
             Assert.Equal("User One", result[0].FullName);
@@ -243,13 +243,13 @@ namespace UnitTests.Users
         /// Verifies that <see cref="UserService.GetUsersByRoleType"/> throws a <see cref="UserServiceException"/> when the repository throws an exception.
         /// </summary>
         [Fact]
-        public void GetUsersByRoleType_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
+        public async Task GetUsersByRoleType_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
         {
-            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.User)).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
+            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.User)).Throws(new Exception("Repository error", new Exception("Inner exception")));
 
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetUsersByRoleType(RoleType.User));
+            UserServiceException exception = await Assert.ThrowsAsync<UserServiceException>(() => this.userService.GetUsersByRoleType(RoleType.User));
             Assert.Equal("Failed to retrieve users by role type 'User'.", exception.Message);
-            Assert.IsType<RepositoryException>(exception.InnerException);
+            Assert.IsType<Exception>(exception.InnerException);
         }
 
         /// <summary>
@@ -258,8 +258,8 @@ namespace UnitTests.Users
         [Fact]
         public void GetUsersByRoleType_ShouldReturnEmptyList_WhenRepositoryReturnsNoUsers()
         {
-            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.User)).Returns(new List<User>());
-            List<User> result = this.userService.GetUsersByRoleType(RoleType.User);
+            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.User)).ReturnsAsync(new List<User>());
+            List<User> result = this.userService.GetUsersByRoleType(RoleType.User).Result;
             Assert.NotNull(result);
             Assert.Empty(result);
         }
@@ -271,8 +271,8 @@ namespace UnitTests.Users
         public void GetRegularUsers_ShouldReturnCorrectUsers()
         {
             List<User> users = new List<User> { new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), FullName = "Regular User" } };
-            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.User)).Returns(users);
-            List<User> result = this.userService.GetRegularUsers();
+            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.User)).ReturnsAsync(users);
+            List<User> result = this.userService.GetRegularUsers().Result;
             Assert.NotNull(result);
             Assert.Single(result);
             Assert.Equal("Regular User", result[0].FullName);
@@ -282,12 +282,12 @@ namespace UnitTests.Users
         /// Verifies that <see cref="UserService.GetRegularUsers"/> throws a <see cref="UserServiceException"/> when the repository throws an exception.
         /// </summary>
         [Fact]
-        public void GetRegularUsers_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
+        public async Task GetRegularUsers_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
         {
-            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.User)).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetRegularUsers());
+            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.User)).Throws(new Exception("Repository error", new Exception("Inner exception")));
+            UserServiceException exception = await Assert.ThrowsAsync<UserServiceException>(() => this.userService.GetRegularUsers());
             Assert.Equal("Failed to retrieve regular users.", exception.Message);
-            Assert.IsType<RepositoryException>(exception.InnerException);
+            Assert.IsType<Exception>(exception.InnerException);
         }
 
         /// <summary>
@@ -297,8 +297,8 @@ namespace UnitTests.Users
         public void GetManagers_ShouldReturnCorrectUsers()
         {
             var users = new List<User> { new User {Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), FullName = "Manager User" } };
-            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.Manager)).Returns(users);
-            List<User> result = this.userService.GetManagers();
+            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.Manager)).ReturnsAsync(users);
+            List<User> result = this.userService.GetManagers().Result;
             Assert.NotNull(result);
             Assert.Single(result);
             Assert.Equal("Manager User", result[0].FullName);
@@ -308,12 +308,12 @@ namespace UnitTests.Users
         /// Verifies that <see cref="UserService.GetManagers"/> throws a <see cref="UserServiceException"/> when the repository throws an exception.
         /// </summary>
         [Fact]
-        public void GetManagers_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
+        public async Task GetManagers_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
         {
-            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.Manager)).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetManagers());
+            this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.Manager)).Throws(new Exception("Repository error", new Exception("Inner exception")));
+            UserServiceException exception = await Assert.ThrowsAsync<UserServiceException>(() => this.userService.GetManagers());
             Assert.Equal("Failed to retrieve manager users.", exception.Message);
-            Assert.IsType<RepositoryException>(exception.InnerException);
+            Assert.IsType<Exception>(exception.InnerException);
         }
 
         /// <summary>
@@ -323,8 +323,8 @@ namespace UnitTests.Users
         public void GetBannedUsersWhoHaveSubmittedAppeals_ShouldReturnCorrectUsers()
         {
             List<User> users = new List<User> { new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), FullName = "Banned User", HasSubmittedAppeal = true } };
-            this.mockUserRepository.Setup(repo => repo.GetBannedUsersWhoHaveSubmittedAppeals()).Returns(users);
-            List<User> result = this.userService.GetBannedUsersWhoHaveSubmittedAppeals();
+            this.mockUserRepository.Setup(repo => repo.GetBannedUsersWhoHaveSubmittedAppeals()).ReturnsAsync(users);
+            List<User> result = this.userService.GetBannedUsersWhoHaveSubmittedAppeals().Result;
             Assert.NotNull(result);
             Assert.Single(result);
             Assert.Equal("Banned User", result[0].FullName);
@@ -334,12 +334,12 @@ namespace UnitTests.Users
         /// Verifies that <see cref="UserService.GetBannedUsersWhoHaveSubmittedAppeals"/> returns an empty list when the repository returns no users.
         /// </summary>
         [Fact]
-        public void GetBannedUsersWhoHaveSubmittedAppeals_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
+        public async Task GetBannedUsersWhoHaveSubmittedAppeals_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
         {
-            this.mockUserRepository.Setup(repo => repo.GetBannedUsersWhoHaveSubmittedAppeals()).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetBannedUsersWhoHaveSubmittedAppeals());
+            this.mockUserRepository.Setup(repo => repo.GetBannedUsersWhoHaveSubmittedAppeals()).Throws(new Exception("Repository error", new Exception("Inner exception")));
+            UserServiceException exception = await Assert.ThrowsAsync<UserServiceException>(() => this.userService.GetBannedUsersWhoHaveSubmittedAppeals());
             Assert.Equal("Failed to retrieve banned users who have submitted appeals.", exception.Message);
-            Assert.IsType<RepositoryException>(exception.InnerException);
+            Assert.IsType<Exception>(exception.InnerException);
         }
 
         /// <summary>
@@ -348,8 +348,8 @@ namespace UnitTests.Users
         [Fact]
         public void GetBannedUsersWhoHaveSubmittedAppeals_ShouldReturnEmptyList_WhenRepositoryReturnsNoUsers()
         {
-            this.mockUserRepository.Setup(repository => repository.GetBannedUsersWhoHaveSubmittedAppeals()).Returns(new List<User>());
-            List<User> result = this.userService.GetBannedUsersWhoHaveSubmittedAppeals();
+            this.mockUserRepository.Setup(repository => repository.GetBannedUsersWhoHaveSubmittedAppeals()).ReturnsAsync(new List<User>());
+            List<User> result = this.userService.GetBannedUsersWhoHaveSubmittedAppeals().Result;
             Assert.NotNull(result);
             Assert.Empty(result);
         }
@@ -376,10 +376,10 @@ namespace UnitTests.Users
             // Mock the repository to return the User object
             this.mockUserRepository
                 .Setup(repository => repository.GetUserById(userId))
-                .Returns(user);
+                .ReturnsAsync(user);
 
             // Call the method under test
-            string result = this.userService.GetUserFullNameById(userId);
+            string result = this.userService.GetUserFullNameById(userId).Result;
 
             // Assert the result
             Assert.Equal("User One", result);
@@ -389,24 +389,24 @@ namespace UnitTests.Users
         /// Verifies that <see cref="UserService.GetUserFullNameById"/> throws a <see cref="UserServiceException"/> when the repository throws an exception.
         /// </summary>
         [Fact]
-        public void GetUserFullNameById_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
+        public async Task GetUserFullNameById_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
         {
             var id = new Guid();
-            this.mockUserRepository.Setup(repository => repository.GetUserById(id)).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetUserFullNameById(id));
+            this.mockUserRepository.Setup(repository => repository.GetUserById(id)).Throws(new Exception("Repository error", new Exception("Inner exception")));
+            UserServiceException exception = await Assert.ThrowsAsync<UserServiceException>(() => this.userService.GetUserFullNameById(id));
             Assert.Equal("Failed to retrieve the full name of the user with ID " + id.ToString() + ".", exception.Message);
-            Assert.IsType<RepositoryException>(exception.InnerException);
+            Assert.IsType<Exception>(exception.InnerException);
         }
 
         /// <summary>
         /// Verifies that <see cref="UserService.GetUserFullNameById"/> throws a <see cref="UserServiceException"/> when the repository returns null.
         /// </summary>
         [Fact]
-        public void GetUserFullNameById_ShouldThrowUserServiceException_WhenRepositoryReturnsNull()
+        public async Task GetUserFullNameById_ShouldThrowUserServiceException_WhenRepositoryReturnsNull()
         {
             var id = new Guid();
-            this.mockUserRepository.Setup(repository => repository.GetUserById(id)).Returns((User)null);
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetUserFullNameById(id));
+            this.mockUserRepository.Setup(repository => repository.GetUserById(id)).ReturnsAsync((User)null);
+            UserServiceException exception = await Assert.ThrowsAsync<UserServiceException>(() => this.userService.GetUserFullNameById(id));
             Assert.Equal("Failed to retrieve the full name of the user with ID " + id.ToString() + ".", exception.Message);
         }
 
@@ -416,7 +416,7 @@ namespace UnitTests.Users
         [Fact]
         public void UpdateUserRole_ShouldDoNothing_WhenUserDoesNotExist()
         {
-            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Returns((User)null);
+            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).ReturnsAsync((User)null);
 
             this.userService.UpdateUserRole(new Guid(), RoleType.Banned);
 
@@ -429,11 +429,10 @@ namespace UnitTests.Users
         [Fact]
         public void UpdateUserRole_ShouldNotAddBannedRole_WhenUserAlreadyHasBannedRole()
         {
-            User user = new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), AssignedRoles = new List<Role> { new Role(RoleType.Banned, "Banned") } };
-            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Returns(user);
+            User user = new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), AssignedRole = RoleType.Banned };
+            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).ReturnsAsync(user);
             this.userService.UpdateUserRole(new Guid(), RoleType.Banned);
-            Assert.Single(user.AssignedRoles);
-            Assert.Equal(RoleType.Banned, user.AssignedRoles[0].RoleType);
+            Assert.Equal(RoleType.Banned, user.AssignedRole);
             this.mockUserRepository.Verify(repository => repository.ChangeRoleToUser(It.IsAny<Guid>(), It.IsAny<Role>()), Times.Never);
         }
 
@@ -443,8 +442,8 @@ namespace UnitTests.Users
         [Fact]
         public void UpdateUserRole_ShouldSetRoleToBanned_WhenUserDoesNotHaveBannedRole()
         {
-            User user = new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), AssignedRoles = new List<Role> { new Role(RoleType.User, "User") } };
-            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Returns(user);
+            User user = new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), AssignedRole = RoleType.User };
+            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).ReturnsAsync(user);
             this.userService.UpdateUserRole(new Guid(), RoleType.Banned);
             this.mockUserRepository.Verify(repository => repository.ChangeRoleToUser(new Guid(), It.Is<Role>(r => r.RoleType == RoleType.Banned && r.RoleName == "Banned")), Times.Once);
         }
@@ -455,8 +454,8 @@ namespace UnitTests.Users
         [Fact]
         public void UpdateUserRole_ShouldSetRoleToUser_WhenRoleTypeIsUser()
         {
-            User user = new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), AssignedRoles = new List<Role> { new Role(RoleType.Banned, "Banned") } };
-            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Returns(user);
+            User user = new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), AssignedRole = RoleType.Banned };
+            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).ReturnsAsync(user);
             this.userService.UpdateUserRole(new Guid(), RoleType.User);
             this.mockUserRepository.Verify(repo => repo.ChangeRoleToUser(new Guid(), It.Is<Role>(r => r.RoleType == RoleType.User && r.RoleName == "User")), Times.Once);
         }
@@ -465,12 +464,12 @@ namespace UnitTests.Users
         /// Verifies that <see cref="UserService.UpdateUserRole"/> throws a <see cref="UserServiceException"/> when the repository throws an exception.
         /// </summary>
         [Fact]
-        public void UpdateUserRole_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
+        public async Task UpdateUserRole_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
         {
-            this.mockUserRepository.Setup(repo => repo.GetUserById(new Guid())).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
-            UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.UpdateUserRole(new Guid(), RoleType.Banned));
+            this.mockUserRepository.Setup(repo => repo.GetUserById(new Guid())).Throws(new Exception("Repository error", new Exception("Inner exception")));
+            UserServiceException exception = await Assert.ThrowsAsync<UserServiceException>(() => this.userService.UpdateUserRole(new Guid(), RoleType.Banned));
             Assert.Equal("Failed to update user role", exception.Message);
-            Assert.IsType<RepositoryException>(exception.InnerException);
+            Assert.IsType<Exception>(exception.InnerException);
         }
     }
 }
