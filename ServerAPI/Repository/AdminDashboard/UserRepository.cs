@@ -53,7 +53,7 @@
             try
             {
                 return await _context.Users
-                    .Where(user => user.AssignedRoles.Any(role => role.RoleType == roleType))
+                    .Where(user => user.AssignedRole.RoleType == roleType)
                     .ToListAsync();
             }
             catch (Exception ex)
@@ -68,17 +68,12 @@
         /// <param name="userId">The ID of the user.</param>
         /// <returns>The highest role type assigned to the user.</returns>
         /// <exception cref="RepositoryException">Thrown when the user has no roles or does not exist.</exception>
-        public async Task<RoleType> GetHighestRoleTypeForUser(Guid userId)
+        public async Task<RoleType> GetRoleTypeForUser(Guid userId)
         {
             try
             {
                 User user = await GetUserById(userId);
-                if (user.AssignedRoles == null || !user.AssignedRoles.Any())
-                {
-                    throw new ArgumentException($"No roles found for user with ID {userId}");
-                }
-
-                return user.AssignedRoles.Max(role => role.RoleType);
+                return user.AssignedRole.RoleType;
             }
             catch (ArgumentException ex)
             {
@@ -97,17 +92,9 @@
         /// <exception cref="RepositoryException">Thrown when an error occurs while retrieving users.</exception>
         public async Task<List<User>> GetBannedUsersWhoHaveSubmittedAppeals()
         {
-            try
-            {
-                return await _context.Users
-                    .Where(user => user.HasSubmittedAppeal &&
-                                   user.AssignedRoles.Any(role => role.RoleType == RoleType.Banned))
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException("Failed to retrieve banned users who have submitted appeals.", ex);
-            }
+             return await _context.Users
+                .Where(user => user.HasSubmittedAppeal && user.AssignedRole.RoleType == RoleType.Banned).ToListAsync();
+           
         }
 
         /// <summary>
@@ -116,10 +103,10 @@
         /// <param name="userId">The ID of the user to add the role to.</param>
         /// <param name="roleToAdd">The role to add to the user.</param>
         /// <exception cref="RepositoryException">Thrown when the user does not exist or an error occurs.</exception>
-        public async Task AddRoleToUser(Guid userId, Role roleToAdd)
+        public async Task ChangeRoleToUser(Guid userId, Role roleToAdd)
         {
             User user = GetUserById(userId).Result;
-            user.AssignedRoles.Add(roleToAdd);
+            user.AssignedRole = roleToAdd;
             _context.Users.Update(user);
             _context.SaveChangesAsync();
         }
@@ -159,29 +146,12 @@
 
         public virtual async Task<User?> GetUserById(Guid userId)
         {
-            try
-            {
-                return await _context.Users.Include(user => user.AssignedRoles)
-                    .FirstOrDefaultAsync(user => user.UserId == userId);
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException($"Failed to retrieve user with id '{userId}'.", ex);
-            }
+            return _context.Users.Where(user => user.UserId == userId).First();
         }
 
         public virtual async Task<User?> GetUserByUsername(string username)
         {
-            try
-            {
-                return await _context.Users
-                    .Include(user => user.AssignedRoles)
-                    .FirstOrDefaultAsync(user => user.Username == username);
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException($"Failed to retrieve user with username '{username}'.", ex);
-            }
+                return _context.Users.Where(user => user.Username == username).First();
         }
 
         public async Task<bool> UpdateUser(User user)

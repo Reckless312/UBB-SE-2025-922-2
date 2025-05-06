@@ -21,9 +21,9 @@ namespace IRepository
 
         public Task<List<User>> GetUsersByRoleType(RoleType roleType);
 
-        public Task<RoleType> GetHighestRoleTypeForUser(Guid userId);
+        public Task<RoleType> GetRoleTypeForUser(Guid userId);
 
-        public Task AddRoleToUser(Guid userID, Role roleToAdd);
+        public Task ChangeRoleToUser(Guid userID, Role roleToAdd);
 
         public Task<List<User>> GetAllUsers();
         public Task<bool> ValidateAction(Guid userId, string resource, string action);

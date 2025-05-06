@@ -34,7 +34,7 @@
             {
                 Guid requestingUserIdentifier = pendingUpgradeRequests[i].RequestingUserIdentifier;
 
-                if (this.userRepository.GetHighestRoleTypeForUser(requestingUserIdentifier).Result == RoleType.Banned)
+                if (this.userRepository.GetRoleTypeForUser(requestingUserIdentifier).Result == RoleType.Banned)
                 {
                     this.upgradeRequestsRepository.RemoveUpgradeRequestByIdentifier(pendingUpgradeRequests[i].UpgradeRequestId);
                 }
@@ -59,9 +59,9 @@
             {
                 UpgradeRequest currentUpgradeRequest = this.upgradeRequestsRepository.RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier).Result;
                 Guid requestingUserIdentifier = currentUpgradeRequest.RequestingUserIdentifier;
-                RoleType currentHighestRoleType = this.userRepository.GetHighestRoleTypeForUser(requestingUserIdentifier).Result;
+                RoleType currentHighestRoleType = this.userRepository.GetRoleTypeForUser(requestingUserIdentifier).Result;
                 Role nextRoleLevel = this.rolesRepository.GetNextRoleInHierarchy(currentHighestRoleType).Result;
-                this.userRepository.AddRoleToUser(requestingUserIdentifier, nextRoleLevel);
+                this.userRepository.ChangeRoleToUser(requestingUserIdentifier, nextRoleLevel);
             }
 
             this.upgradeRequestsRepository.RemoveUpgradeRequestByIdentifier(upgradeRequestIdentifier);

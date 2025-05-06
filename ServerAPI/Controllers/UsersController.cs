@@ -46,14 +46,14 @@ namespace ServerAPI.Controllers
         [HttpGet("byId/{userId}/role")]
         public ActionResult<RoleType> GetHighestRoleTypeForUser(Guid userId)
         {
-            var role = repository.GetHighestRoleTypeForUser(userId);
+            var role = repository.GetRoleTypeForUser(userId);
             return role == null ? NotFound() :  role.Result;
         }
 
         [HttpPatch("byId/{userID}/addRole")]
         public void AddRoleToUser(Guid userID, [FromBody] Role role)
         {
-            repository.AddRoleToUser(userID, role);
+            repository.ChangeRoleToUser(userID, role);
         }
 
         [HttpGet("byId/{userID}")]
@@ -70,14 +70,14 @@ namespace ServerAPI.Controllers
             return user;
         }
 
-        [HttpPatch("updateUser")]
-        public bool UpdateUser([FromBody] User user)
+        [HttpPatch("{userId}/updateUser")]
+        public bool UpdateUser(Guid userId,[FromBody] User user)
         {
             return repository.UpdateUser(user).Result;
         }
 
         [HttpPost("add")]
-        public bool CreateUser([FromBody] User user)
+        public bool CreateUser(User user)
         {
             return repository.CreateUser(user).Result;
         }

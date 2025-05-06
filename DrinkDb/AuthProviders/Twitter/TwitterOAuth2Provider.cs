@@ -218,7 +218,8 @@
                             EmailAddress = "ionutcora66@gmail.com",
                             NumberOfDeletedReviews = 0,
                             HasSubmittedAppeal = false,
-                            AssignedRoles = new List<Role> { },
+                            AssignedRole = new Role(RoleType.User, "User"),
+                            FullName = twitterUserInfoObject?.Data.Username,
                         };
                         UserRepository.CreateUser(user);
                     }

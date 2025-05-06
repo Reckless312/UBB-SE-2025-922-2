@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ServerAPI.Data;
 
@@ -11,9 +12,11 @@ using ServerAPI.Data;
 namespace ServerAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250505225531_ChangedUser2")]
+    partial class ChangedUser2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -115,6 +118,9 @@ namespace ServerAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("AssignedRoleRoleType")
+                        .HasColumnType("int");
+
                     b.Property<string>("EmailAddress")
                         .HasColumnType("nvarchar(max)");
 
@@ -131,9 +137,6 @@ namespace ServerAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("RoleType")
-                        .HasColumnType("int");
-
                     b.Property<string>("TwoFASecret")
                         .HasColumnType("nvarchar(max)");
 
@@ -144,7 +147,7 @@ namespace ServerAPI.Migrations
 
                     b.HasKey("UserId");
 
-                    b.HasIndex("RoleType");
+                    b.HasIndex("AssignedRoleRoleType");
 
                     b.ToTable("Users");
                 });
@@ -197,7 +200,9 @@ namespace ServerAPI.Migrations
                 {
                     b.HasOne("DataAccess.Model.AdminDashboard.Role", "AssignedRole")
                         .WithMany()
-                        .HasForeignKey("RoleType");
+                        .HasForeignKey("AssignedRoleRoleType")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("AssignedRole");
                 });

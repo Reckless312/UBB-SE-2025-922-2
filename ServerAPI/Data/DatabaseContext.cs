@@ -38,7 +38,9 @@ namespace ServerAPI.Data
                 user.Property(currentUser => currentUser.EmailAddress).IsRequired(false);
                 user.Property(currentUser => currentUser.NumberOfDeletedReviews).IsRequired();
                 user.Property(currentUser => currentUser.HasSubmittedAppeal).IsRequired();
-                user.HasMany(currentUser => currentUser.AssignedRoles).WithMany();
+                user.Property(currentUser => currentUser.FullName).IsRequired(false);
+                user.HasOne(currentUser => currentUser.AssignedRole).WithMany() 
+                            .HasForeignKey("RoleType").IsRequired(false);
             });
 
             // configure role

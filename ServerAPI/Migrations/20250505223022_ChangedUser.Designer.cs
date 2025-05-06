@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ServerAPI.Data;
 
@@ -11,9 +12,11 @@ using ServerAPI.Data;
 namespace ServerAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250505223022_ChangedUser")]
+    partial class ChangedUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -131,9 +134,6 @@ namespace ServerAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("RoleType")
-                        .HasColumnType("int");
-
                     b.Property<string>("TwoFASecret")
                         .HasColumnType("nvarchar(max)");
 
@@ -143,8 +143,6 @@ namespace ServerAPI.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("UserId");
-
-                    b.HasIndex("RoleType");
 
                     b.ToTable("Users");
                 });
@@ -164,6 +162,21 @@ namespace ServerAPI.Migrations
                     b.HasKey("OffensiveWordId");
 
                     b.ToTable("OffensiveWords");
+                });
+
+            modelBuilder.Entity("RoleUser", b =>
+                {
+                    b.Property<int>("AssignedRolesRoleType")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("AssignedRolesRoleType", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RoleUser");
                 });
 
             modelBuilder.Entity("DataAccess.Model.AdminDashboard.Review", b =>
@@ -193,13 +206,19 @@ namespace ServerAPI.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("DataAccess.Model.Authentication.User", b =>
+            modelBuilder.Entity("RoleUser", b =>
                 {
-                    b.HasOne("DataAccess.Model.AdminDashboard.Role", "AssignedRole")
+                    b.HasOne("DataAccess.Model.AdminDashboard.Role", null)
                         .WithMany()
-                        .HasForeignKey("RoleType");
+                        .HasForeignKey("AssignedRolesRoleType")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("AssignedRole");
+                    b.HasOne("DataAccess.Model.Authentication.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

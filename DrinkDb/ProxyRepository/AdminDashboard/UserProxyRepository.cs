@@ -34,7 +34,7 @@
             };
         }
 
-        public async Task AddRoleToUser(Guid userId, Role roleToAdd)
+        public async Task ChangeRoleToUser(Guid userId, Role roleToAdd)
         {
             var userUrl = $"{ApiRoute}/byId/{userId}/addRole";
             var response = this.httpClient.PatchAsJsonAsync(userUrl, roleToAdd).Result;
@@ -64,7 +64,7 @@
             return users ?? new List<User>();
         }
 
-        public async Task<RoleType> GetHighestRoleTypeForUser(Guid userId)
+        public async Task<RoleType> GetRoleTypeForUser(Guid userId)
         {
             var response = this.httpClient.GetAsync($"{ApiRoute}/byId/{userId}/role").Result;
             response.EnsureSuccessStatusCode();
@@ -84,15 +84,23 @@
 
         public async Task<User?> GetUserByUsername(string username)
         {
-            var response = this.httpClient.GetAsync($"{ApiRoute}/byUserName/{username}").Result;
-            response.EnsureSuccessStatusCode();
-            try
+            List<User> users = GetAllUsers().Result;
+            foreach (User user in users)
             {
-                return await response.Content.ReadFromJsonAsync<User>(jsonOptions);
+                if (user.Username == username)
+                    return user;
             }
-            catch (Exception) {
-                return null;
-            }
+            return null;
+
+            //var response = this.httpClient.GetAsync($"{ApiRoute}/byUserName/{username}").Result;
+            //response.EnsureSuccessStatusCode();
+            //try
+            //{
+            //    return await response.Content.ReadFromJsonAsync<User>(jsonOptions);
+            //}
+            //catch (Exception) {
+            //    return null;
+            //}
         }
 
         public async Task<List<User>> GetUsersByRoleType(RoleType roleType)
@@ -113,7 +121,7 @@
 
         public async Task<bool> UpdateUser(User user)
         {
-            var response = this.httpClient.PatchAsJsonAsync($"{ApiRoute}/updateUser", user).Result;
+            var response = this.httpClient.PatchAsJsonAsync($"{ApiRoute}/{user.UserId}/updateUser", user).Result;
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<bool>();
         }

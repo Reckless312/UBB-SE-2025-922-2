@@ -200,7 +200,7 @@ namespace DrinkDb_Auth.Service
         {
             try
             {
-                return await userRepository.GetHighestRoleTypeForUser(userId);
+                return await userRepository.GetRoleTypeForUser(userId);
             }
             catch (Exception ex)
             {
@@ -252,25 +252,18 @@ namespace DrinkDb_Auth.Service
                 if (roleType == RoleType.Banned)
                 {
                     bool hasBannedRole = false;
-                    foreach (Role role in user.AssignedRoles)
+                    if (user.AssignedRole.RoleType == RoleType.Banned)
                     {
-                        if (role.RoleType == RoleType.Banned)
-                        {
-                            hasBannedRole = true;
-                            break;
-                        }
+                        hasBannedRole = true;
                     }
-
                     if (!hasBannedRole)
                     {
-                        user.AssignedRoles.Clear();
-                        await userRepository.AddRoleToUser(userId, new Role(RoleType.Banned, "Banned"));
+                        await userRepository.ChangeRoleToUser(userId, new Role(RoleType.Banned, "Banned"));
                     }
                 }
                 else
                 {
-                    user.AssignedRoles.Clear();
-                    await userRepository.AddRoleToUser(userId, new Role(roleType, roleType.ToString()));
+                    await userRepository.ChangeRoleToUser(userId, new Role(roleType, roleType.ToString()));
                 }
 
                 // Update the user after modifying roles

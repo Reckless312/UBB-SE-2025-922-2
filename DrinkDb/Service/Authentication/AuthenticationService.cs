@@ -137,14 +137,16 @@ namespace DrinkDb_Auth.Service.Authentication
             catch (UserNotFoundException)
             {
                 // create user
-                User user = new ()
+                User user = new()
                 {
                     Username = username,
                     PasswordHash = Convert.ToBase64String(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(password)) ?? throw new Exception("Hashing failed")),
                     UserId = Guid.NewGuid(),
-                    TwoFASecret = string.Empty
+                    TwoFASecret = string.Empty,
+                    FullName = username,
+
                 };
-                user.AssignedRoles = new List<Role>();
+                user.AssignedRole = new Role(RoleType.User, "User");
                 user.NumberOfDeletedReviews = 0;
                 user.EmailAddress = "ionutcora66@gmail.com";
                 userRepository.CreateUser(user);

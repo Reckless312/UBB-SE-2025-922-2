@@ -195,7 +195,7 @@ namespace UnitTests.Users
         [Fact]
         public void GetHighestRoleTypeForUser_ShouldReturnCorrectRoleType()
         {
-            this.mockUserRepository.Setup(repository => repository.GetHighestRoleTypeForUser(new Guid())).Returns(RoleType.Admin);
+            this.mockUserRepository.Setup(repository => repository.GetRoleTypeForUser(new Guid())).Returns(RoleType.Admin);
             RoleType result = this.userService.GetHighestRoleTypeForUser(new Guid());
             Assert.Equal(RoleType.Admin, result);
         }
@@ -207,7 +207,7 @@ namespace UnitTests.Users
         public void GetHighestRoleTypeForUser_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
         {
             var id = new Guid();
-            this.mockUserRepository.Setup(repo => repo.GetHighestRoleTypeForUser(id)).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
+            this.mockUserRepository.Setup(repo => repo.GetRoleTypeForUser(id)).Throws(new RepositoryException("Repository error", new Exception("Inner exception")));
 
             UserServiceException exception = Assert.Throws<UserServiceException>(() => this.userService.GetHighestRoleTypeForUser(id));
             Assert.Equal("Failed to retrieve the highest role type for user with ID " + id.ToString() + ".", exception.Message);
@@ -220,7 +220,7 @@ namespace UnitTests.Users
         [Fact]
         public void GetHighestRoleTypeForUser_ShouldReturnDefaultRole_WhenRepositoryReturnsDefault()
         {
-            this.mockUserRepository.Setup(repository => repository.GetHighestRoleTypeForUser(new Guid())).Returns(RoleType.Banned);
+            this.mockUserRepository.Setup(repository => repository.GetRoleTypeForUser(new Guid())).Returns(RoleType.Banned);
             RoleType result = this.userService.GetHighestRoleTypeForUser(new Guid());
             Assert.Equal(RoleType.Banned, result);
         }
@@ -420,7 +420,7 @@ namespace UnitTests.Users
 
             this.userService.UpdateUserRole(new Guid(), RoleType.Banned);
 
-            this.mockUserRepository.Verify(repository => repository.AddRoleToUser(It.IsAny<Guid>(), It.IsAny<Role>()), Times.Never);
+            this.mockUserRepository.Verify(repository => repository.ChangeRoleToUser(It.IsAny<Guid>(), It.IsAny<Role>()), Times.Never);
         }
 
         /// <summary>
@@ -434,7 +434,7 @@ namespace UnitTests.Users
             this.userService.UpdateUserRole(new Guid(), RoleType.Banned);
             Assert.Single(user.AssignedRoles);
             Assert.Equal(RoleType.Banned, user.AssignedRoles[0].RoleType);
-            this.mockUserRepository.Verify(repository => repository.AddRoleToUser(It.IsAny<Guid>(), It.IsAny<Role>()), Times.Never);
+            this.mockUserRepository.Verify(repository => repository.ChangeRoleToUser(It.IsAny<Guid>(), It.IsAny<Role>()), Times.Never);
         }
 
         /// <summary>
@@ -446,7 +446,7 @@ namespace UnitTests.Users
             User user = new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), AssignedRoles = new List<Role> { new Role(RoleType.User, "User") } };
             this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Returns(user);
             this.userService.UpdateUserRole(new Guid(), RoleType.Banned);
-            this.mockUserRepository.Verify(repository => repository.AddRoleToUser(new Guid(), It.Is<Role>(r => r.RoleType == RoleType.Banned && r.RoleName == "Banned")), Times.Once);
+            this.mockUserRepository.Verify(repository => repository.ChangeRoleToUser(new Guid(), It.Is<Role>(r => r.RoleType == RoleType.Banned && r.RoleName == "Banned")), Times.Once);
         }
 
         /// <summary>
@@ -458,7 +458,7 @@ namespace UnitTests.Users
             User user = new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), AssignedRoles = new List<Role> { new Role(RoleType.Banned, "Banned") } };
             this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).Returns(user);
             this.userService.UpdateUserRole(new Guid(), RoleType.User);
-            this.mockUserRepository.Verify(repo => repo.AddRoleToUser(new Guid(), It.Is<Role>(r => r.RoleType == RoleType.User && r.RoleName == "User")), Times.Once);
+            this.mockUserRepository.Verify(repo => repo.ChangeRoleToUser(new Guid(), It.Is<Role>(r => r.RoleType == RoleType.User && r.RoleName == "User")), Times.Once);
         }
 
         /// <summary>
