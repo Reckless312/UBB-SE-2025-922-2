@@ -98,18 +98,18 @@ namespace Repository.AdminDashboard
         public async Task UpdateReviewVisibility(int reviewId, bool isHidden)
         {
 
-            var review = _context.Reviews.FindAsync(reviewId).Result;
+            var review = _context.Reviews.Find(reviewId);
             review.IsHidden = isHidden;
             _context.Reviews.Update(review);
-            _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
 
         public async Task UpdateNumberOfFlagsForReview(int reviewId, int numberOfFlags)
         {
-            Review review = _context.Reviews.FindAsync(reviewId).Result;
+            Review review = _context.Reviews.Find(reviewId);
             review.NumberOfFlags = numberOfFlags;
             _context.Reviews.Update(review);
-            _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
 
         public async Task<int> AddReview(Review review)

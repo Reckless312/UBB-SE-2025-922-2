@@ -33,7 +33,7 @@ namespace Repository.AdminDashboard
                 List<UpgradeRequest> upgradeRequests =  _context.UpgradeRequests.ToListAsync().Result;
                 UpgradeRequest upgradeRequest = upgradeRequests.Where(upgrade => upgrade.UpgradeRequestId == upgradeRequestIdentifier).First();
                 _context.UpgradeRequests.Remove(upgradeRequest);
-                _context.SaveChangesAsync();
+                _context.SaveChanges();
           
         }
 
