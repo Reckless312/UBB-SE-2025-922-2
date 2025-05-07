@@ -12,11 +12,7 @@ using ServerAPI.Data;
 namespace ServerAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-<<<<<<<< HEAD:ServerAPI/Migrations/20250506154737_InitialCreate.Designer.cs
-    [Migration("20250506154737_InitialCreate")]
-========
     [Migration("20250507105858_InitialCreate")]
->>>>>>>> 80b80cb39b17a0c2de0bb3d41ee61074bb9b3596:ServerAPI/Migrations/20250507105858_InitialCreate.Designer.cs
     partial class InitialCreate
     {
         /// <inheritdoc />

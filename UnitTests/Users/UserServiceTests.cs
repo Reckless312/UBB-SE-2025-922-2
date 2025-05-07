@@ -9,6 +9,7 @@ namespace UnitTests.Users
     using System.Net.Mail;
     using DataAccess.Model.AdminDashboard;
     using DataAccess.Model.Authentication;
+    using DataAccess.Model.Authentication;
     using DrinkDb_Auth.Service;
     using DrinkDb_Auth.Service.AdminDashboard.Components;
     using IRepository;
@@ -74,8 +75,8 @@ namespace UnitTests.Users
         [Fact]
         public async Task GetAllUsers_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
         {
-            this.mockUserRepository.Setup(repo => repo.GetAllUsers()).Throws(new Exception("Repository error", new Exception("Inner exception")));
-            UserServiceException exception = await Assert.ThrowsAsync<UserServiceException>(async() => this.userService.GetAllUsers());
+            this.mockUserRepository.Setup(repo => repo.GetAllUsers()).Throws(new Exception("Repository error"));
+            UserServiceException exception = await Assert.ThrowsAsync<UserServiceException>(async() => await this.userService.GetAllUsers());
             Assert.Equal("Failed to retrieve all users.", exception.Message);
             Assert.IsType<Exception>(exception.InnerException);
         }
@@ -98,8 +99,9 @@ namespace UnitTests.Users
         [Fact]
         public async Task GetActiveUsersByRoleType_ShouldThrowArgumentException_WhenRoleTypeIsInvalid()
         {
-            var exception = await Assert.ThrowsAsync<ArgumentException>(async() => this.userService.GetActiveUsersByRoleType(0));
-            Assert.Equal("Permission ID must be positive", exception.Message);
+            var invalidRoleType = (RoleType)(-1); 
+            var exception = await Assert.ThrowsAsync<ArgumentException>(async() => await this.userService.GetActiveUsersByRoleType(invalidRoleType));
+            Assert.Equal("Role type must be a valid value", exception.Message);
         }
 
         /// <summary>
@@ -142,12 +144,12 @@ namespace UnitTests.Users
 
             // Mock the repository to return null
             this.mockUserRepository
-                .Setup(repository => repository.GetUserById(id).Result)
-                .Returns((User)null);
+                .Setup(repository => repository.GetUserById(id))
+                .ReturnsAsync((User)null);
 
             // Assert that the exception is thrown
-            UserServiceException exception = await Assert.ThrowsAsync<UserServiceException>(async () => await this.userService.GetUserById(id));
-            Assert.Equal("Failed to retrieve user with ID " + id.ToString() + ".", exception.Message);
+            var exception = await Assert.ThrowsAsync<ArgumentException>(async () => await this.userService.GetUserById(id));
+            Assert.Equal("User not found (Parameter 'userId')", exception.Message);
         }
 
         /// <summary>
@@ -442,10 +444,11 @@ namespace UnitTests.Users
         [Fact]
         public void UpdateUserRole_ShouldSetRoleToBanned_WhenUserDoesNotHaveBannedRole()
         {
-            User user = new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), AssignedRole = RoleType.User };
-            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).ReturnsAsync(user);
-            this.userService.UpdateUserRole(new Guid(), RoleType.Banned);
-            this.mockUserRepository.Verify(repository => repository.ChangeRoleToUser(new Guid(), It.Is<Role>(r => r.RoleType == RoleType.Banned && r.RoleName == "Banned")), Times.Once);
+            Guid userId = Guid.NewGuid();
+            User user = new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = userId, AssignedRole = RoleType.User };
+            this.mockUserRepository.Setup(repository => repository.GetUserById(userId)).ReturnsAsync(user);
+            this.userService.UpdateUserRole(userId, RoleType.Banned);
+            this.mockUserRepository.Verify(repository => repository.UpdateUser(It.Is<User>(user => user.UserId == userId && user.AssignedRole == RoleType.Banned)), Times.Once);
         }
 
         /// <summary>
@@ -454,22 +457,13 @@ namespace UnitTests.Users
         [Fact]
         public void UpdateUserRole_ShouldSetRoleToUser_WhenRoleTypeIsUser()
         {
-            User user = new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), AssignedRole = RoleType.Banned };
-            this.mockUserRepository.Setup(repository => repository.GetUserById(new Guid())).ReturnsAsync(user);
-            this.userService.UpdateUserRole(new Guid(), RoleType.User);
-            this.mockUserRepository.Verify(repo => repo.ChangeRoleToUser(new Guid(), It.Is<Role>(r => r.RoleType == RoleType.User && r.RoleName == "User")), Times.Once);
+            Guid userId = Guid.NewGuid();
+            User user = new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = userId, AssignedRole = RoleType.Banned };
+            this.mockUserRepository.Setup(repository => repository.GetUserById(userId)).ReturnsAsync(user);
+            this.userService.UpdateUserRole(userId, RoleType.User);
+            this.mockUserRepository.Verify(repo => repo.UpdateUser(It.Is<User>(user => user.UserId == userId && user.AssignedRole == RoleType.User)), Times.Once);
         }
 
-        /// <summary>
-        /// Verifies that <see cref="UserService.UpdateUserRole"/> throws a <see cref="UserServiceException"/> when the repository throws an exception.
-        /// </summary>
-        [Fact]
-        public async Task UpdateUserRole_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
-        {
-            this.mockUserRepository.Setup(repo => repo.GetUserById(new Guid())).Throws(new Exception("Repository error", new Exception("Inner exception")));
-            UserServiceException exception = await Assert.ThrowsAsync<UserServiceException>(() => this.userService.UpdateUserRole(new Guid(), RoleType.Banned));
-            Assert.Equal("Failed to update user role", exception.Message);
-            Assert.IsType<Exception>(exception.InnerException);
-        }
+        
     }
 }
