@@ -48,7 +48,7 @@ namespace DrinkDb_Auth
             {
                 // Retrieve the user from the database using your UserService.
                 var userService = new UserService();
-                currentUser = userService.GetUserById(currentUserId);
+                currentUser = userService.GetUserById(currentUserId).Result;
 
                 // Update UI with the retrieved data.
                 if (currentUser != null)
@@ -72,19 +72,21 @@ namespace DrinkDb_Auth
                 StatusTextBlock.Text = string.Empty;
             }
 
-            List<Role> userRoles = this.currentUser.AssignedRoles;
+            RoleType userRole = this.currentUser.AssignedRole;
 
             bool isAdmin = false;
 
-            foreach (Role role in userRoles)
+            if (userRole == RoleType.Admin)
             {
-                if (role.RoleType == RoleType.Admin)
-                {
-                    isAdmin = true;
-                }
+                isAdmin = true;
             }
+            bool isManager = false;
 
-            if (!isAdmin)
+            if (userRole == RoleType.Manager)
+            {
+                isManager = true;
+            }
+            if (!isAdmin&&!isManager)
             {
                 this.AdminDashboardButton.Visibility = Visibility.Collapsed;
             }

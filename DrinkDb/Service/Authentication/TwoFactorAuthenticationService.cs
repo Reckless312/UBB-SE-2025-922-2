@@ -2,7 +2,6 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DataAccess.Model.Authentication;
-using DrinkDb_Auth.Repository.AdminDashboard;
 using IRepository;
 using DrinkDb_Auth.Service.Authentication.Components;
 using DrinkDb_Auth.Service.Authentication.Interfaces;
@@ -15,12 +14,14 @@ using DrinkDb_Auth.ViewModel.Authentication;
 using DrinkDb_Auth.ViewModel.Authentication.Interfaces;
 using Microsoft.UI.Xaml;
 using OtpNet;
+using Repository.AdminDashboard;
+using DrinkDb_Auth.ProxyRepository.AdminDashboard;
 
 namespace DrinkDb_Auth.Service.Authentication
 {
     public class TwoFactorAuthenticationService : ITwoFactorAuthenticationService
     {
-        private IUserRepository? userRepository = new UserRepository();
+        private IUserRepository? userRepository = new UserProxyRepository();
         private IKeyGeneration? keyGeneration = new OtpKeyGeneration();
         private IVerify? twoFactorSecretVerifier = new Verify2FactorAuthenticationSecret();
         private IAuthenticationWindowSetup? windowSetup;
@@ -51,7 +52,7 @@ namespace DrinkDb_Auth.Service.Authentication
         }
         public void InitializeOtherComponents(IAuthenticationWindowSetup? windowSetup = null, ITwoFactorAuthenticationView? authenticationWindow = null, IDialog? dialog = null, IDialog? invalidDialog = null)
         {
-            currentUser = userRepository?.GetUserById(userId) ?? throw new ArgumentException("User not found.");
+            currentUser = userRepository?.GetUserById(userId).Result ?? throw new ArgumentException("User not found.");
 
             int keyLength = 42;
             byte[] twoFactorSecret;
@@ -61,6 +62,7 @@ namespace DrinkDb_Auth.Service.Authentication
                 case true:
                     twoFactorSecret = keyGeneration?.GenerateRandomKey(keyLength) ?? throw new InvalidOperationException("Failed to generate 2FA secret.");
                     currentUser.TwoFASecret = Convert.ToBase64String(twoFactorSecret);
+                    userRepository.UpdateUser(currentUser);
                     string? uniformResourceIdentifier = new OtpUri(OtpType.Totp, twoFactorSecret, currentUser.Username, "DrinkDB").ToString();
                     this.windowSetup = windowSetup == null ? new AuthenticationQRCodeAndTextBoxDigits(uniformResourceIdentifier) : windowSetup;
                     this.authenticationWindow = authenticationWindow == null ? new TwoFactorAuthSetupView(this.windowSetup) : authenticationWindow;
@@ -126,7 +128,7 @@ namespace DrinkDb_Auth.Service.Authentication
                         switch (updateDatabase)
                         {
                             case true:
-                                bool result = userRepository?.UpdateUser(user) ?? false;
+                                bool result = userRepository?.UpdateUser(user).Result ?? false;
                                 // Test both branches of updating 2fa
                                 if (!result)
                                 {

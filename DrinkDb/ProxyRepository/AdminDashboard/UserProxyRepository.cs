@@ -3,67 +3,134 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net.Http;
+    using System.Net.Http.Json;
     using System.Text;
+    using System.Text.Json;
     using System.Threading.Tasks;
     using DataAccess.Model.AdminDashboard;
     using DataAccess.Model.Authentication;
     using IRepository;
 
-    internal class UserProxyRepository : IUserRepository
+    public class UserProxyRepository : IUserRepository
     {
-        public void AddRoleToUser(Guid userID, Role roleToAdd)
+        private const string ApiRoute = "users";
+        private readonly HttpClient httpClient;
+        private readonly JsonSerializerOptions jsonOptions;
+
+        public UserProxyRepository()
         {
-            throw new NotImplementedException();
+
+                this.httpClient = new HttpClient();
+                httpClient.BaseAddress = new Uri("http://localhost:5280/");
+        }
+        public UserProxyRepository(string baseRoute)
+        {
+            httpClient = new HttpClient();
+            httpClient.BaseAddress = new Uri(baseRoute);
+            jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
         }
 
-        public bool CreateUser(User user)
+        public async Task ChangeRoleToUser(Guid userId, Role roleToAdd)
         {
-            throw new NotImplementedException();
+            var userUrl = $"{ApiRoute}/byId/{userId}/addRole";
+            var response = this.httpClient.PatchAsJsonAsync(userUrl, roleToAdd).Result;
+            response.EnsureSuccessStatusCode();
         }
 
-        public List<User> GetAllUsers()
+        public async Task<bool> CreateUser(User user)
         {
-            throw new NotImplementedException();
+            var response = this.httpClient.PostAsJsonAsync($"{ApiRoute}/add", user).Result;
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<bool>();
         }
 
-        public List<User> GetBannedUsersWhoHaveSubmittedAppeals()
+        public async Task<List<User>> GetAllUsers()
         {
-            throw new NotImplementedException();
+            var response = this.httpClient.GetAsync(ApiRoute).Result;
+            response.EnsureSuccessStatusCode();
+            var users =  response.Content.ReadFromJsonAsync<List<User>>(jsonOptions).Result;
+            return users ?? new List<User>();
         }
 
-        public RoleType GetHighestRoleTypeForUser(Guid userId)
+        public async Task<List<User>> GetBannedUsersWhoHaveSubmittedAppeals()
         {
-            throw new NotImplementedException();
+            var response = this.httpClient.GetAsync($"{ApiRoute}/banned/appealed").Result;
+            response.EnsureSuccessStatusCode();
+            var users = response.Content.ReadFromJsonAsync<List<User>>(jsonOptions).Result;
+            return users ?? new List<User>();
         }
 
-        public User? GetUserById(Guid userId)
+        public async Task<RoleType> GetRoleTypeForUser(Guid userId)
         {
-            throw new NotImplementedException();
+            var response = this.httpClient.GetAsync($"{ApiRoute}/byId/{userId}/role").Result;
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<RoleType>(jsonOptions);
         }
 
-        public User? GetUserByUsername(string username)
+        public async Task<User?> GetUserById(Guid userId)
         {
-            throw new NotImplementedException();
+            var response = this.httpClient.GetAsync($"{ApiRoute}/byId/{userId}").Result;
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                return null;
+
+            response.EnsureSuccessStatusCode();
+            return response.Content.ReadFromJsonAsync<User>(jsonOptions).Result;
         }
 
-        public List<User> GetUsersByRoleType(RoleType roleType)
+        public async Task<User?> GetUserByUsername(string username)
         {
-            throw new NotImplementedException();
+            List<User> users = GetAllUsers().Result;
+            foreach (User user in users)
+            {
+                if (user.Username == username)
+                    return user;
+            }
+            return null;
+
+            //var response = this.httpClient.GetAsync($"{ApiRoute}/byUserName/{username}").Result;
+            //response.EnsureSuccessStatusCode();
+            //try
+            //{
+            //    return await response.Content.ReadFromJsonAsync<User>(jsonOptions);
+            //}
+            //catch (Exception) {
+            //    return null;
+            //}
         }
 
-        public List<User> GetUsersWhoHaveSubmittedAppeals()
+        public async Task<List<User>> GetUsersByRoleType(RoleType roleType)
         {
-            throw new NotImplementedException();
+            var response = await this.httpClient.GetAsync($"{ApiRoute}/byRole/{roleType}");
+            response.EnsureSuccessStatusCode();
+            var users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
+            return users ?? new List<User>();
         }
 
-        public bool UpdateUser(User user)
+        public async Task<List<User>> GetUsersWhoHaveSubmittedAppeals()
         {
-            throw new NotImplementedException();
+            var response = await this.httpClient.GetAsync($"{ApiRoute}/appealed");
+            response.EnsureSuccessStatusCode();
+            var users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
+            return users ?? new List<User>();
         }
 
-        public bool ValidateAction(Guid userId, string resource, string action)
+        public async Task<bool> UpdateUser(User user)
         {
-            throw new NotImplementedException();
+            var response = this.httpClient.PatchAsJsonAsync($"{ApiRoute}/{user.UserId}/updateUser", user).Result;
+            response.EnsureSuccessStatusCode();
+            return response.Content.ReadFromJsonAsync<bool>().Result;
+        }
+
+        public async Task<bool> ValidateAction(Guid userId, string resource, string action)
+        {
+            var response = await this.httpClient.GetAsync($"{ApiRoute}/validateAction?userID={userId}&resource={resource}&action={action}");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<bool>();
         }
     }
 }

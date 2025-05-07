@@ -7,20 +7,25 @@ namespace ServerAPI.Controllers
 {
 
     [ApiController]
-    [Route("[controller]")]
+    [Route("roles")]
     public class RolesController : ControllerBase
     {
-        private IRolesRepository repository = new RolesRepository();
-        [HttpGet]
-        public IEnumerable<Role> GetAll()
+        private IRolesRepository repository;
+        public RolesController(IRolesRepository repository)
         {
-            return repository.GetAllRoles();
+            this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        }
+
+        [HttpGet]
+        public async Task<IEnumerable<Role>> GetAll()
+        {
+            return await repository.GetAllRoles();
         }
 
         [HttpGet("next")]
-        public Role GetNextRoleInHierarchy([FromQuery] RoleType currentRoleType)
+        public async Task<Role> GetNextRoleInHierarchy([FromQuery] RoleType currentRoleType)
         {
-            return repository.GetNextRoleInHierarchy(currentRoleType);
+            return await repository.GetNextRoleInHierarchy(currentRoleType);
         }
     }
 }

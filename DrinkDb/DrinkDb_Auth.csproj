@@ -67,7 +67,7 @@
   </ItemGroup>
   <ItemGroup>
 	  <PackageReference Include="LightGBM" Version="4.6.0" />
-	  <PackageReference Include="MailKit" Version="4.11.0" />
+	  <PackageReference Include="MailKit" Version="4.12.0" />
 	  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
 	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.4" />
 	  <PackageReference Include="Microsoft.ML" Version="4.0.2" />
@@ -156,9 +156,13 @@
 
 	<ItemGroup>
 	  <Compile Remove="Adapter\**" />
+	  <Compile Remove="Logs\**" />
 	  <EmbeddedResource Remove="Adapter\**" />
+	  <EmbeddedResource Remove="Logs\**" />
 	  <None Remove="Adapter\**" />
+	  <None Remove="Logs\**" />
 	  <Page Remove="Adapter\**" />
+	  <Page Remove="Logs\**" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -168,5 +172,9 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\ServerAPI\ServerAPI.csproj" />
 	  <ProjectReference Include="..\SharedResources\DataAccess.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PRIResource Remove="Logs\**" />
 	</ItemGroup>
 </Project>

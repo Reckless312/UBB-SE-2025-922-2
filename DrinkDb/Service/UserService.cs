@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using DataAccess.Model.AdminDashboard;
 using DataAccess.Model.Authentication;
-using DrinkDb_Auth.Repository.AdminDashboard;
+using DrinkDb_Auth.ProxyRepository.AdminDashboard;
 using IRepository;
 using DrinkDb_Auth.Service.AdminDashboard.Components;
 using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
 using DrinkDb_Auth.Service.Authentication;
-using static DrinkDb_Auth.Repository.AdminDashboard.UserRepository;
+using Repository.AdminDashboard;
 
 namespace DrinkDb_Auth.Service
 {
-    public class UserService: IUserService
+    public class UserService : IUserService
     {
         private readonly IUserRepository userRepository;
         private readonly AuthenticationService authenticationService;
@@ -22,44 +23,89 @@ namespace DrinkDb_Auth.Service
         private const string NullResourceError = "Resource cannot be null or empty.";
         private const string NullActionError = "Action cannot be null or empty.";
 
+        public UserService(IUserRepository userRepository)
+        {
+            this.userRepository = userRepository;
+            this.authenticationService = new AuthenticationService();
+        }
+
         public UserService()
         {
-            // Aici trebuie sa vina proxy ul in final, da momentan se poate testa pe repo ul facut
-            userRepository = new UserRepository();
-            authenticationService = new AuthenticationService();
+            this.userRepository = new UserProxyRepository();
+            this.authenticationService = new AuthenticationService();
         }
 
-        public User GetUserById(Guid userId)
+        // Constructor for dependency injection and testing
+        public UserService(IUserRepository repository, AuthenticationService authService)
         {
-            return userRepository.GetUserById(userId) ?? throw new ArgumentException(UserNotFoundMessage, nameof(userId));
+            userRepository = repository;
+            authenticationService = authService;
         }
 
-        public User GetUserByUsername(string username)
+        public async Task<User> GetUserById(Guid userId)
         {
-            return userRepository.GetUserByUsername(username) ?? throw new ArgumentException(UserNotFoundMessage, nameof(username));
+            try
+            {
+                var user = await userRepository.GetUserById(userId);
+                if (user == null)
+                {
+                    throw new ArgumentException(UserNotFoundMessage, nameof(userId));
+                }
+                return user;
+            }
+            catch (Exception ex) when (!(ex is ArgumentException))
+            {
+                throw new UserServiceException($"Failed to retrieve user with ID {userId}.", ex);
+            }
         }
 
-        public User GetCurrentUser()
+        public async Task<User> GetUserByUsername(string username)
+        {
+            try
+            {
+                var user = await userRepository.GetUserByUsername(username);
+                if (user == null)
+                {
+                    throw new ArgumentException(UserNotFoundMessage, nameof(username));
+                }
+                return user;
+            }
+            catch (Exception ex) when (!(ex is ArgumentException))
+            {
+                throw new UserServiceException($"Failed to retrieve user with username {username}.", ex);
+            }
+        }
+
+        public async Task<User> GetCurrentUser()
         {
             Guid currentSessionId = App.CurrentSessionId;
             if (currentSessionId == Guid.Empty)
             {
                 throw new InvalidOperationException(NoUserLoggedInMessage);
             }
-            return authenticationService.GetUser(currentSessionId);
+            return await authenticationService.GetUser(currentSessionId);
         }
 
-        public bool ValidateAction(Guid userId, string resource, string action)
+        public async Task<bool> ValidateAction(Guid userId, string resource, string action)
         {
             if (string.IsNullOrEmpty(resource))
             {
                 throw new ArgumentException(NullResourceError, nameof(resource));
             }
+
             if (string.IsNullOrEmpty(action))
             {
                 throw new ArgumentException(NullActionError, nameof(action));
             }
-            return userRepository.ValidateAction(userId, resource, action);
+
+            try
+            {
+                return await userRepository.ValidateAction(userId, resource, action);
+            }
+            catch (Exception ex)
+            {
+                throw new UserServiceException($"Failed to validate action '{action}' on resource '{resource}' for user with ID {userId}.", ex);
+            }
         }
 
         public void LogoutUser()
@@ -67,174 +113,165 @@ namespace DrinkDb_Auth.Service
             authenticationService.Logout();
         }
 
-        public List<User> GetAllUsers()
+        public async Task<List<User>> GetAllUsers()
         {
             try
             {
-                return this.userRepository.GetAllUsers();
+                return await userRepository.GetAllUsers();
             }
-            catch (RepositoryException ex)
+            catch (Exception ex)
             {
                 throw new UserServiceException("Failed to retrieve all users.", ex);
             }
         }
 
-        public List<User> GetActiveUsersByRoleType(RoleType roleType)
+        public async Task<List<User>> GetActiveUsersByRoleType(RoleType roleType)
         {
             try
             {
                 return roleType switch
                 {
-                    > 0 => this.userRepository.GetUsersByRoleType(roleType),
-                    _ => throw new ArgumentException("Permission ID must be positive")
+                    > 0 => await userRepository.GetUsersByRoleType(roleType),
+                    _ => throw new ArgumentException("Role type must be a valid value")
                 };
             }
-            catch (RepositoryException ex)
+            catch (Exception ex) when (!(ex is ArgumentException))
             {
-                throw new UserServiceException("Failed to get active users", ex);
+                throw new UserServiceException($"Failed to get active users with role type '{roleType}'", ex);
             }
         }
 
-        public List<User> GetBannedUsers()
+        public async Task<List<User>> GetBannedUsers()
         {
             try
             {
-                return this.userRepository.GetUsersByRoleType(RoleType.Banned);
+                return await userRepository.GetUsersByRoleType(RoleType.Banned);
             }
-            catch (RepositoryException ex)
+            catch (Exception ex)
             {
                 throw new UserServiceException("Failed to get banned users", ex);
             }
         }
 
-        public List<User> GetUsersByRoleType(RoleType roleType)
+        public async Task<List<User>> GetUsersByRoleType(RoleType roleType)
         {
             try
             {
-                return this.userRepository.GetUsersByRoleType(roleType);
+                return await userRepository.GetUsersByRoleType(roleType);
             }
-            catch (RepositoryException ex)
+            catch (Exception ex)
             {
                 throw new UserServiceException($"Failed to retrieve users by role type '{roleType}'.", ex);
             }
         }
 
-        public string GetUserFullNameById(Guid userId)
+        public async Task<string> GetUserFullNameById(Guid userId)
         {
             try
             {
-                User user = this.userRepository.GetUserById(userId);
+                User user = await userRepository.GetUserById(userId);
                 if (user == null)
                 {
-                    throw new UserServiceException($"Failed to retrieve the full name of the user with ID {userId}.", new ArgumentNullException(nameof(user)));
+                    throw new UserServiceException($"Failed to retrieve the full name of the user with ID {userId}.", 
+                        new ArgumentNullException(nameof(user)));
                 }
 
                 return user.Username;
             }
-            catch (RepositoryException ex)
+            catch (Exception ex) when (!(ex is UserServiceException))
             {
                 throw new UserServiceException($"Failed to retrieve the full name of the user with ID {userId}.", ex);
             }
         }
 
-        public List<User> GetBannedUsersWhoHaveSubmittedAppeals()
+        public async Task<List<User>> GetBannedUsersWhoHaveSubmittedAppeals()
         {
             try
             {
-                return this.userRepository.GetBannedUsersWhoHaveSubmittedAppeals();
+                return await userRepository.GetBannedUsersWhoHaveSubmittedAppeals();
             }
-            catch (RepositoryException ex)
+            catch (Exception ex)
             {
                 throw new UserServiceException("Failed to retrieve banned users who have submitted appeals.", ex);
             }
         }
 
-        public RoleType GetHighestRoleTypeForUser(Guid userId)
+        public async Task<RoleType> GetHighestRoleTypeForUser(Guid userId)
         {
             try
             {
-                return this.userRepository.GetHighestRoleTypeForUser(userId);
+                return await userRepository.GetRoleTypeForUser(userId);
             }
-            catch (RepositoryException ex)
+            catch (Exception ex)
             {
                 throw new UserServiceException($"Failed to retrieve the highest role type for user with ID {userId}.", ex);
             }
         }
 
-        public List<User> GetAdminUsers()
+        public async Task<List<User>> GetAdminUsers()
         {
             try
             {
-                return this.userRepository.GetUsersByRoleType(RoleType.Admin);
+                return await userRepository.GetUsersByRoleType(RoleType.Admin);
             }
-            catch (RepositoryException ex)
+            catch (Exception ex)
             {
                 throw new UserServiceException("Failed to retrieve admin users.", ex);
             }
         }
 
-        public List<User> GetRegularUsers()
+        public async Task<List<User>> GetRegularUsers()
         {
             try
             {
-                return this.userRepository.GetUsersByRoleType(RoleType.User);
+                return await userRepository.GetUsersByRoleType(RoleType.User);
             }
-            catch (RepositoryException ex)
+            catch (Exception ex)
             {
                 throw new UserServiceException("Failed to retrieve regular users.", ex);
             }
         }
 
-        public List<User> GetManagers()
+        public async Task<List<User>> GetManagers()
         {
             try
             {
-                return this.userRepository.GetUsersByRoleType(RoleType.Manager);
+                return await userRepository.GetUsersByRoleType(RoleType.Manager);
             }
-            catch (RepositoryException ex)
+            catch (Exception ex)
             {
                 throw new UserServiceException("Failed to retrieve manager users.", ex);
             }
         }
 
-        public void UpdateUserRole(Guid userId, RoleType roleType)
+        public async Task UpdateUserRole(Guid userId, RoleType roleType)
         {
-            try
+            User? user = await userRepository.GetUserById(userId);
+            if (roleType == RoleType.Banned)
             {
-                User? user = this.userRepository.GetUserById(userId);
-                if (user == null)
+                bool hasBannedRole = false;
+                if (user.AssignedRole == RoleType.Banned)
                 {
-                    return;
+                    hasBannedRole = true;
                 }
-
-                if (roleType == RoleType.Banned)
+                if (!hasBannedRole)
                 {
-                    bool hasBannedRole = false;
-                    foreach (Role role in user.AssignedRoles)
-                    {
-                        if (role.RoleType == RoleType.Banned)
-                        {
-                            hasBannedRole = true;
-                            break;
-                        }
-                    }
-
-                    if (!hasBannedRole)
-                    {
-                        user.AssignedRoles.Clear();
-                        this.userRepository.AddRoleToUser(userId, new Role(RoleType.Banned, "Banned"));
-                    }
-                }
-                else
-                {
-                    user.AssignedRoles.Clear();
-                    this.userRepository.AddRoleToUser(userId, new Role(RoleType.User, "User"));
+                    user.AssignedRole = RoleType.Banned;
                 }
             }
-            catch (Exception ex)
+            else
             {
-                throw new UserServiceException("Failed to update user role", ex);
+                user.AssignedRole = roleType;
             }
+            userRepository.UpdateUser(user);
+        }
+
+        public void UpdateUserAppleaed(User user, bool newValue)
+        {
+
+            //User? currentUser = userRepository.GetUserById(user.UserId).Result;
+            user.HasSubmittedAppeal = newValue;
+            userRepository.UpdateUser(user);
         }
     }
 }

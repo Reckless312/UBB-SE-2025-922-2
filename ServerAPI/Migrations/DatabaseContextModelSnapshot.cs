@@ -69,6 +69,28 @@ namespace ServerAPI.Migrations
                     b.HasKey("RoleType");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            RoleType = 0,
+                            RoleName = "Banned"
+                        },
+                        new
+                        {
+                            RoleType = 1,
+                            RoleName = "User"
+                        },
+                        new
+                        {
+                            RoleType = 2,
+                            RoleName = "Admin"
+                        },
+                        new
+                        {
+                            RoleType = 3,
+                            RoleName = "Manager"
+                        });
                 });
 
             modelBuilder.Entity("DataAccess.Model.AdminDashboard.UpgradeRequest", b =>
@@ -115,7 +137,15 @@ namespace ServerAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("AssignedRole")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
                     b.Property<string>("EmailAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FullName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("HasSubmittedAppeal")
@@ -141,19 +171,21 @@ namespace ServerAPI.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("RoleUser", b =>
+            modelBuilder.Entity("DataAccess.Model.AutoChecker.OffensiveWord", b =>
                 {
-                    b.Property<int>("AssignedRolesRoleType")
+                    b.Property<int>("OffensiveWordId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OffensiveWordId"));
 
-                    b.HasKey("AssignedRolesRoleType", "UserId");
+                    b.Property<string>("Word")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("UserId");
+                    b.HasKey("OffensiveWordId");
 
-                    b.ToTable("RoleUser");
+                    b.ToTable("OffensiveWords");
                 });
 
             modelBuilder.Entity("DataAccess.Model.AdminDashboard.Review", b =>
@@ -176,21 +208,6 @@ namespace ServerAPI.Migrations
 
             modelBuilder.Entity("DataAccess.Model.Authentication.Session", b =>
                 {
-                    b.HasOne("DataAccess.Model.Authentication.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("RoleUser", b =>
-                {
-                    b.HasOne("DataAccess.Model.AdminDashboard.Role", null)
-                        .WithMany()
-                        .HasForeignKey("AssignedRolesRoleType")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("DataAccess.Model.Authentication.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")

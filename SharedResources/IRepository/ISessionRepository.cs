@@ -5,9 +5,9 @@ namespace IRepository
 {
     public interface ISessionRepository
     {
-        public Session CreateSession(Guid userId);
-        public bool EndSession(Guid sessionId);
-        public Session GetSession(Guid sessionId);
-        public Session GetSessionByUserId(Guid userId);
+        public Task<Session> CreateSession(Guid userId);
+        public Task<bool> EndSession(Guid sessionId);
+        public Task<Session> GetSession(Guid sessionId);
+        public Task<Session> GetSessionByUserId(Guid userId);
     }
 }

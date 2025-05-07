@@ -20,14 +20,14 @@ namespace IRepository
         /// gets update requests.
         /// </summary>
         /// <returns>list of requests.</returns>
-        List<UpgradeRequest> RetrieveAllUpgradeRequests();
+        Task<List<UpgradeRequest>> RetrieveAllUpgradeRequests();
 
         /// <summary>
         /// removes a request from repo.
         /// </summary>
         /// <param name="upgradeRequestIdentifier">the request to be removed.</param>
-        void RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier);
+        Task RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier);
 
-        UpgradeRequest RetrieveUpgradeRequestByIdentifier(int upgradeRequestIdentifier);
+        Task<UpgradeRequest> RetrieveUpgradeRequestByIdentifier(int upgradeRequestIdentifier);
     }
 }

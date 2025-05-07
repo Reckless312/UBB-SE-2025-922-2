@@ -6,26 +6,32 @@ using IRepository;
 namespace ServerAPI.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("upgradeRequests")]
     public class UpgradeRequestsController : ControllerBase
     {
-        IUpgradeRequestsRepository repository = new UpgradeRequestsRepository(new SqlConnectionFactory("Data Source=CORA\\MSSQLSERVER01; Initial Catalog = DrinkDB_Dev; Integrated Security = True; Trust Server Certificate = True"));
-        [HttpGet]
-        public IEnumerable<UpgradeRequest> GetAll()
+        IUpgradeRequestsRepository repository;
+
+        public UpgradeRequestsController(IUpgradeRequestsRepository repository)
         {
-            return repository.RetrieveAllUpgradeRequests();
+            this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        }
+
+        [HttpGet]
+        public async Task<IEnumerable<UpgradeRequest>> GetAll()
+        {
+            return repository.RetrieveAllUpgradeRequests().Result;
         }
 
         [HttpDelete("{id}/delete")]
-        public void Delete(int id)
+        public async Task Delete(int id)
         {
             repository.RemoveUpgradeRequestByIdentifier(id);
         }
 
         [HttpGet("{id}")]
-        public UpgradeRequest Get(int id)
+        public async Task<UpgradeRequest> Get(int id)
         {
-            return repository.RetrieveUpgradeRequestByIdentifier(id);
+            return repository.RetrieveUpgradeRequestByIdentifier(id).Result;
         }
     }
 }

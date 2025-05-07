@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Threading.Tasks;
 using DrinkDb_Auth.OAuthProviders;
-using DrinkDb_Auth.Repository.Authentication;
+using DrinkDb_Auth.ProxyRepository.Authentification;
+using Repository.Authentication;
 
 namespace DrinkDb_Auth.AuthProviders.Facebook
 {
     public class FacebookOAuthHelper : IFacebookOAuthHelper
     {
         private static readonly FacebookOAuth2Provider FacebookOAuth2Provider = new ();
-        private static readonly SessionRepository SessionAdapter = new ();
+        private static readonly SessionProxyRepository SessionAdapter = new ();
 
         private const string ClientId = "667671795847732";
         private string redirectUri = "http://localhost:8888/auth";

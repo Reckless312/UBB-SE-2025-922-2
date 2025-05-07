@@ -7,6 +7,7 @@ namespace DrinkDb_Auth.Service.AdminDashboard
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using DataAccess.Model.AdminDashboard;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using IRepository;
@@ -27,56 +28,59 @@ namespace DrinkDb_Auth.Service.AdminDashboard
 
         public void HideReview(int reviewId)
         {
-            reviewsRepository.UpdateReviewVisibility(reviewId, true);
+             reviewsRepository.UpdateReviewVisibility(reviewId, true);
         }
 
         public List<Review> GetFlaggedReviews()
         {
-            return reviewsRepository.GetAllReviews().Where(review => review.NumberOfFlags > 0).ToList();
+            List<Review> reviews = reviewsRepository.GetAllReviews().Result;
+            return reviews.Where(review => review.NumberOfFlags > 0).ToList();
         }
 
         public List<Review> GetHiddenReviews()
         {
-            return reviewsRepository.GetAllReviews().Where(review => review.IsHidden == true).ToList();
+
+            List<Review> reviews = reviewsRepository.GetAllReviews().Result;
+            return reviews.Where(review => review.IsHidden == true).ToList();
         }
 
         public List<Review> GetAllReviews()
         {
-            return reviewsRepository.GetAllReviews();
+            return  reviewsRepository.GetAllReviews().Result;
         }
 
         public List<Review> GetReviewsSince(DateTime date)
         {
-            return reviewsRepository.GetReviewsSince(date);
+            return reviewsRepository.GetReviewsSince(date).Result;
         }
 
         public double GetAverageRatingForVisibleReviews()
         {
-            return reviewsRepository.GetAverageRatingForVisibleReviews();
+            return reviewsRepository.GetAverageRatingForVisibleReviews().Result;
         }
 
         public List<Review> GetMostRecentReviews(int count)
         {
-            return reviewsRepository.GetMostRecentReviews(count);
+            return reviewsRepository.GetMostRecentReviews(count).Result;
         }
 
         public int GetReviewCountAfterDate(DateTime date)
         {
-            return reviewsRepository.GetReviewCountAfterDate(date);
+            return reviewsRepository.GetReviewCountAfterDate(date).Result;
         }
 
         public List<Review> GetReviewsByUser(Guid userId)
         {
-            return reviewsRepository.GetReviewsByUser(userId);
+            return reviewsRepository.GetReviewsByUser(userId).Result;
         }
 
         public List<Review> GetReviewsForReport()
         {
             DateTime date = DateTime.Now.AddDays(-1);
-            int count = reviewsRepository.GetReviewCountAfterDate(date);
+            int count = reviewsRepository.GetReviewCountAfterDate(date).Result;
 
-            List<Review> reviews = reviewsRepository.GetMostRecentReviews(count);
-            return reviews??[];
+            List<Review> reviews = reviewsRepository.GetMostRecentReviews(count).Result;
+            return reviews ?? [];
         }
 
         public List<Review> FilterReviewsByContent(string content)
@@ -87,9 +91,8 @@ namespace DrinkDb_Auth.Service.AdminDashboard
             }
 
             content = content.ToLower();
-            return GetFlaggedReviews()
-                .Where(review => review.Content.ToLower().Contains(content))
-                .ToList();
+            List<Review> reviews = GetFlaggedReviews();
+            return reviews.Where(review => review.Content.ToLower().Contains(content)).ToList();
         }
 
         /*

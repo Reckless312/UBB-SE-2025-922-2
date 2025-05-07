@@ -16,6 +16,27 @@ using DataAccess.Model.AdminDashboard;
 
 namespace Tests
 {
+    public class MockSessionRepository : ISessionRepository
+    {
+        public Guid MockId { get; set; }
+        public Session CreateSession(Guid userId)
+        {
+            return Session.CreateSessionWithIds(MockId, MockId);
+        }
+        public bool EndSession(Guid sessionId)
+        {
+            return true; // Assuming session ends successfully in the mock
+        }
+        public Session GetSession(Guid sessionId)
+        {
+            return new Session { SessionId = sessionId, UserId = MockId }; // Mock implementation
+        }
+        public Session GetSessionByUserId(Guid userId)
+        {
+            return new Session { SessionId = MockId, UserId = userId }; // Mock implementation
+        }
+    }
+
     public class MockSessionAdapter : ISessionRepository
     {
         public Guid MockId { get; set; }

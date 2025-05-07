@@ -3,6 +3,8 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net.Http;
+    using System.Net.Http.Json;
     using System.Text;
     using System.Threading.Tasks;
     using DataAccess.Model.AdminDashboard;
@@ -10,19 +12,34 @@
 
     public class UpgradeRequestProxyRepository : IUpgradeRequestsRepository
     {
-        public void RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
+        private const string ApiBaseRoute = "upgradeRequests";
+        private HttpClient httpClient;
+
+        public UpgradeRequestProxyRepository(string baseApiUrl)
         {
-            throw new NotImplementedException();
+            this.httpClient = new HttpClient();
+            this.httpClient.BaseAddress = new Uri(baseApiUrl);
         }
 
-        public List<UpgradeRequest> RetrieveAllUpgradeRequests()
+        public async Task RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
         {
-            throw new NotImplementedException();
+            var response = this.httpClient.DeleteAsync(ApiBaseRoute + "/" + upgradeRequestIdentifier + "/delete").Result;
+            response.EnsureSuccessStatusCode();
         }
 
-        public UpgradeRequest RetrieveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
+        public async Task<List<UpgradeRequest>> RetrieveAllUpgradeRequests()
         {
-            throw new NotImplementedException();
+            var response = this.httpClient.GetAsync(ApiBaseRoute).Result;
+            response.EnsureSuccessStatusCode();
+            List<UpgradeRequest> upgradeRequests = response.Content.ReadFromJsonAsync<List<UpgradeRequest>>().Result ?? new List<UpgradeRequest>();
+            return upgradeRequests;
+        }
+
+        public async Task<UpgradeRequest> RetrieveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
+        {
+            var response = this.httpClient.GetAsync(ApiBaseRoute + "/" + upgradeRequestIdentifier).Result;
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<UpgradeRequest>();
         }
     }
 }

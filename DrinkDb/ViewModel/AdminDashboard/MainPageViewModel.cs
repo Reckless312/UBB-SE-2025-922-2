@@ -16,6 +16,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
     using DataAccess.Model.Authentication;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using DrinkDb_Auth.ViewModel.AdminDashboard.Components;
+    using DrinkDb_Auth.Service;
 
     /// <summary>
     /// View model for the main page that handles review moderation and user management.
@@ -323,7 +324,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// </summary>
         public void LoadAppeals()
         {
-            AppealsUsers = new ObservableCollection<User>(userService.GetBannedUsersWhoHaveSubmittedAppeals());
+            AppealsUsers = new ObservableCollection<User>(userService.GetBannedUsersWhoHaveSubmittedAppeals().Result);
         }
 
         /// <summary>
@@ -366,7 +367,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
 
             filter = filter.ToLower();
             AppealsUsers = new ObservableCollection<User>(
-                userService.GetBannedUsersWhoHaveSubmittedAppeals()
+                userService.GetBannedUsersWhoHaveSubmittedAppeals().Result
                     .Where(user =>
                         user.EmailAddress.ToLower().Contains(filter) ||
                         user.Username.ToLower().Contains(filter) ||
@@ -446,10 +447,41 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// </summary>
         /// <param name="approve">Whether to approve the request.</param>
         /// <param name="requestId">The ID of the request.</param>
-        public void HandleUpgradeRequest(bool approve, int requestId)
+        // Add this method to your MainPageViewModel class
+
+        /// <summary>
+        /// Handles the upgrade request synchronously.
+        /// </summary>
+        /// <param name="isAccepted">Whether the request was accepted.</param>
+        /// <param name="requestId">The ID of the upgrade request.</param>
+        public void HandleUpgradeRequest(bool isAccepted, int requestId)
         {
-            requestsService.ProcessUpgradeRequest(approve, requestId);
-            LoadRoleRequests();
+            try
+            {
+                // Call the synchronous method on the service
+                requestsService.ProcessUpgradeRequest(isAccepted, requestId);
+
+                // Refresh the UI on the UI thread
+                // This approach uses the dispatcher to update UI after processing
+                Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread()?.TryEnqueue(() =>
+                {
+                    // Refresh your data - reload upgrade requests using the synchronous method
+                    var requests = requestsService.RetrieveAllUpgradeRequests();
+
+                    // Update your property that holds the requests
+                    // Assuming you have a property called UpgradeRequests
+                    UpgradeRequests = new System.Collections.ObjectModel.ObservableCollection<UpgradeRequest>(requests);
+
+                    // Notify UI of changes
+                    OnPropertyChanged(nameof(UpgradeRequests));
+                });
+            }
+            catch (Exception ex)
+            {
+                // Log exception
+                System.Diagnostics.Debug.WriteLine($"Error processing upgrade request: {ex.Message}");
+                throw; // Let caller handle the exception
+            }
         }
 
         /// <summary>
@@ -479,7 +511,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// <returns>The user object.</returns>
         public User GetUserById(Guid userId)
         {
-            return userService.GetUserById(userId);
+            return userService.GetUserById(userId).Result;
         }
 
         /// <summary>
@@ -489,7 +521,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         /// <returns>The highest role type.</returns>
         public RoleType GetHighestRoleTypeForUser(Guid userId)
         {
-            return userService.GetHighestRoleTypeForUser(userId);
+            return userService.GetHighestRoleTypeForUser(userId).Result;
         }
 
         /// <summary>
@@ -528,6 +560,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             }
 
             UpdateUserRole(user, RoleType.Banned);
+            UpdateUserHasAppealed(user, false);
             IsAppealUserBanned = true;
             UserStatusDisplay = GetUserStatusDisplay(user, true);
         }
@@ -544,8 +577,14 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             }
 
             UpdateUserRole(user, RoleType.User);
+            UpdateUserHasAppealed(user, false);
             IsAppealUserBanned = false;
             UserStatusDisplay = GetUserStatusDisplay(user, false);
+        }
+
+        private void UpdateUserHasAppealed(User user, bool newValue)
+        {
+            userService.UpdateUserAppleaed(user,newValue);
         }
 
         /// <summary>
@@ -570,7 +609,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         }
 
         /// <summary>
-        /// Formats the user status display text.
+        /// Formats the user status display tex
         /// </summary>
         /// <param name="user">The user to display status for.</param>
         /// <param name="isBanned">Whether the user is banned.</param>
