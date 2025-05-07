@@ -7,6 +7,8 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using MimeKit;
+    using System.Threading;
 
     public class UpgradeRequestsService : IUpgradeRequestsService
     {
@@ -34,37 +36,106 @@
             {
                 Guid requestingUserIdentifier = pendingUpgradeRequests[i].RequestingUserIdentifier;
 
-                if (this.userRepository.GetRoleTypeForUser(requestingUserIdentifier).Result == RoleType.Banned)
+                // Avoid blocking by using ConfigureAwait(false) but still getting the result
+                RoleType roleType = this.userRepository.GetRoleTypeForUser(requestingUserIdentifier)
+                    .ConfigureAwait(false).GetAwaiter().GetResult();
+
+                if (roleType == RoleType.Banned)
                 {
-                    this.upgradeRequestsRepository.RemoveUpgradeRequestByIdentifier(pendingUpgradeRequests[i].UpgradeRequestId);
+                    this.upgradeRequestsRepository.RemoveUpgradeRequestByIdentifier(pendingUpgradeRequests[i].UpgradeRequestId)
+                        .ConfigureAwait(false).GetAwaiter().GetResult();
                 }
             }
         }
 
         public string GetRoleNameBasedOnIdentifier(RoleType roleType)
         {
-            List<Role> availableRoles = this.rolesRepository.GetAllRoles().Result;
+            List<Role> availableRoles = this.rolesRepository.GetAllRoles()
+                .ConfigureAwait(false).GetAwaiter().GetResult();
             Role matchingRole = availableRoles.First(role => role.RoleType == roleType);
             return matchingRole.RoleName;
         }
 
         public List<UpgradeRequest> RetrieveAllUpgradeRequests()
         {
-            return this.upgradeRequestsRepository.RetrieveAllUpgradeRequests().Result;
+            return this.upgradeRequestsRepository.RetrieveAllUpgradeRequests()
+                .ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
-        public void ProcessUpgradeRequest(bool isRequestAccepted, int upgradeRequestIdentifier)
+        // Implement async version for internal use and future compatibility
+        internal async Task ProcessUpgradeRequestAsync(bool isRequestAccepted, int upgradeRequestIdentifier)
         {
             if (isRequestAccepted)
             {
-                UpgradeRequest currentUpgradeRequest = this.upgradeRequestsRepository.RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier).Result;
+                UpgradeRequest currentUpgradeRequest = await this.upgradeRequestsRepository
+                    .RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier)
+                    .ConfigureAwait(false);
+
                 Guid requestingUserIdentifier = currentUpgradeRequest.RequestingUserIdentifier;
-                RoleType currentHighestRoleType = this.userRepository.GetRoleTypeForUser(requestingUserIdentifier).Result;
-                Role nextRoleLevel = this.rolesRepository.GetNextRoleInHierarchy(currentHighestRoleType).Result;
-                this.userRepository.ChangeRoleToUser(requestingUserIdentifier, nextRoleLevel);
+
+                RoleType currentHighestRoleType = await this.userRepository
+                    .GetRoleTypeForUser(requestingUserIdentifier)
+                    .ConfigureAwait(false);
+
+                Role nextRoleLevel = await this.rolesRepository
+                    .GetNextRoleInHierarchy(currentHighestRoleType)
+                    .ConfigureAwait(false);
+
+                await this.userRepository
+                    .ChangeRoleToUser(requestingUserIdentifier, nextRoleLevel)
+                    .ConfigureAwait(false);
+
+                // --- Always fetch the latest user info from the database ---
+                var user = await this.userRepository
+                    .GetUserById(requestingUserIdentifier)
+                    .ConfigureAwait(false);
+
+                if (user != null && !string.IsNullOrEmpty(user.EmailAddress))
+                {
+                    string htmlBody = $@"
+                 <html>
+                   <body>
+                     <h2>Congratulations!</h2>
+                     <p>Your account has been upgraded.</p>
+                     <p>
+                       <b>Username:</b> {user.Username}<br>
+                       <b>New Role:</b> {nextRoleLevel.RoleName}<br>
+                       <b>Date:</b> {DateTime.Now:yyyy-MM-dd HH:mm}
+                     </p>
+                     <p>Thank you for being part of our community!</p>
+                   </body>
+                 </html>";
+
+                    var message = new MimeMessage();
+                    message.From.Add(new MailboxAddress("System Admin", "your-admin-email@example.com"));
+                    message.To.Add(new MailboxAddress(user.Username, user.EmailAddress));
+                    message.Subject = "Your Account Has Been Upgraded!";
+                    var bodyBuilder = new BodyBuilder { HtmlBody = htmlBody };
+                    message.Body = bodyBuilder.ToMessageBody();
+
+                    // Use your existing email sender service
+                    var emailSender = new DrinkDb_Auth.Service.AdminDashboard.Components.SmtpEmailSender();
+                    // Replace with your SMTP credentials
+                    var smtpEmail = Environment.GetEnvironmentVariable("SMTP_MODERATOR_EMAIL");
+                    var smtpPassword = Environment.GetEnvironmentVariable("SMTP_MODERATOR_PASSWORD");
+
+                    await emailSender.SendEmailAsync(message, smtpEmail, smtpPassword).ConfigureAwait(false);
+                }
             }
 
-            this.upgradeRequestsRepository.RemoveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
+            await this.upgradeRequestsRepository
+                .RemoveUpgradeRequestByIdentifier(upgradeRequestIdentifier)
+                .ConfigureAwait(false);
+        }
+
+        // Keep this method synchronous as requested
+        public void ProcessUpgradeRequest(bool isRequestAccepted, int upgradeRequestIdentifier)
+        {
+            // Run the async method on a separate thread to avoid deadlocks
+            Task.Run(() =>
+            {
+                ProcessUpgradeRequestAsync(isRequestAccepted, upgradeRequestIdentifier).Wait();
+            }).Wait();
         }
     }
 }
