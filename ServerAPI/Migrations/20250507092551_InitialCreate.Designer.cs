@@ -12,7 +12,7 @@ using ServerAPI.Data;
 namespace ServerAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20250506154737_InitialCreate")]
+    [Migration("20250507092551_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
