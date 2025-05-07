@@ -1,8 +1,5 @@
-﻿// <copyright file="CheckersService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-using DrinkDb_Auth.Service.AdminDashboard.Components;
+﻿using DrinkDb_Auth.Service.AdminDashboard.Components;
+using System;
 
 namespace DrinkDb_Auth.Service.AdminDashboard
 {
@@ -22,15 +19,11 @@ namespace DrinkDb_Auth.Service.AdminDashboard
 
     public class CheckersService : ICheckersService
     {
-        private static readonly string ModelPath = Path.Combine(GetProjectRoot(), "Models", "curseword_model.zip");
-        private static readonly string ProjectRoot = GetProjectRoot();
-        private static readonly string LogPath = Path.Combine(ProjectRoot, "Logs", "training_log.txt");
         private readonly IReviewService reviewsService;
         private readonly IAutoCheck autoCheck;
 
         public CheckersService(IReviewService reviewsService, IAutoCheck autoCheck)
         {
-            LogToFile(ModelPath);
             this.reviewsService = reviewsService;
             this.autoCheck = autoCheck;
         }
@@ -80,10 +73,9 @@ namespace DrinkDb_Auth.Service.AdminDashboard
                 return;
             }
 
-            bool reviewIsOffensive = CheckReviewWithAI(review.Content);
+            bool reviewIsOffensive = CheckReviewWithAI(review).GetAwaiter().GetResult();
             if (!reviewIsOffensive)
             {
-                Console.WriteLine("Review not found.");
                 return;
             }
 
@@ -92,54 +84,46 @@ namespace DrinkDb_Auth.Service.AdminDashboard
             reviewsService.ResetReviewFlags(review.ReviewId);
         }
 
-        private static void LogToFile(string message)
-        {
-            File.AppendAllText(LogPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}\n");
-        }
-
-        private static string GetProjectRoot([CallerFilePath] string filePath = "")
-        {
-            DirectoryInfo? directory = new FileInfo(filePath).Directory;
-            while (directory != null && !directory.GetFiles("*.csproj").Any())
-            {
-                directory = directory.Parent;
-            }
-
-            return directory?.FullName ?? throw new Exception("Project root not found!");
-        }
-
-        private static bool CheckReviewWithAI(string reviewText)
-        {
-            string analysisReportResult = OffensiveTextDetector.DetectOffensiveContent(reviewText);
-            Console.WriteLine("Hugging Face Response: " + analysisReportResult);
-            float offesiveContentThreshold = 0.1f;
-            float hateSpeachScore = GetConfidenceScoreForHateSpeach(analysisReportResult);
-            return hateSpeachScore >= offesiveContentThreshold;
-        }
-
-        private static float GetConfidenceScoreForHateSpeach(string analisysReportAsJsonString)
+        private async Task<bool> CheckReviewWithAI(Review review)
         {
             try
             {
-                List<List<Dictionary<string, string>>>? analisysReportToList = JsonConvert.DeserializeObject<List<List<Dictionary<string, string>>>>(analisysReportAsJsonString);
-                List<Dictionary<string, string>>? analisysReportToListForCurrentReview = analisysReportToList?.FirstOrDefault() ?? null;
-                if (analisysReportToListForCurrentReview != null && analisysReportToListForCurrentReview.Count != 0)
+                string response = OffensiveTextDetector.DetectOffensiveContent(review.Content);
+
+                if (response.StartsWith("Error:") || response.StartsWith("Exception:"))
                 {
-                    foreach (Dictionary<string, string> statisticForCharacteristic in analisysReportToListForCurrentReview)
+                    return false;
+                }
+
+                try
+                {
+                    var arrayResults = JsonConvert.DeserializeObject<List<List<Dictionary<string, object>>>>(response);
+                    if (arrayResults != null && arrayResults.Count > 0 && arrayResults[0].Count > 0)
                     {
-                        if (statisticForCharacteristic.ContainsKey("label") && statisticForCharacteristic["label"] == "hate" && statisticForCharacteristic.ContainsKey("score"))
+                        var prediction = arrayResults[0][0];
+                        if (prediction.TryGetValue("label", out object labelObj) &&
+                            prediction.TryGetValue("score", out object scoreObj))
                         {
-                            return float.Parse(statisticForCharacteristic["score"]);
+                            string label = labelObj.ToString().ToLower();
+                            double score = Convert.ToDouble(scoreObj);
+
+                            if (label == "offensive" && score > 0.6)
+                            {
+                                return true;
+                            }
                         }
                     }
                 }
+                catch (Exception)
+                {
+                    return false;
+                }
 
-                return 0;
+                return false;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine("Deserialization error: " + ex.Message);
-                return 0;
+                return false;
             }
         }
     }
