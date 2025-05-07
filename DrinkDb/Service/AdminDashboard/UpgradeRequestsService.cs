@@ -106,18 +106,18 @@
                    </body>
                  </html>";
 
-                    var message = new MimeMessage();
+                    MimeMessage message = new MimeMessage();
                     message.From.Add(new MailboxAddress("System Admin", "your-admin-email@example.com"));
                     message.To.Add(new MailboxAddress(user.Username, user.EmailAddress));
                     message.Subject = "Your Account Has Been Upgraded!";
-                    var bodyBuilder = new BodyBuilder { HtmlBody = htmlBody };
+                    MimeKit.BodyBuilder bodyBuilder = new BodyBuilder { HtmlBody = htmlBody };
                     message.Body = bodyBuilder.ToMessageBody();
 
                     // Use your existing email sender service
-                    var emailSender = new DrinkDb_Auth.Service.AdminDashboard.Components.SmtpEmailSender();
+                    DrinkDb_Auth.Service.AdminDashboard.Components.SmtpEmailSender emailSender = new DrinkDb_Auth.Service.AdminDashboard.Components.SmtpEmailSender();
                     // Replace with your SMTP credentials
-                    var smtpEmail = Environment.GetEnvironmentVariable("SMTP_MODERATOR_EMAIL");
-                    var smtpPassword = Environment.GetEnvironmentVariable("SMTP_MODERATOR_PASSWORD");
+                    System.String smtpEmail = Environment.GetEnvironmentVariable("SMTP_MODERATOR_EMAIL");
+                    System.String smtpPassword = Environment.GetEnvironmentVariable("SMTP_MODERATOR_PASSWORD");
 
                     await emailSender.SendEmailAsync(message, smtpEmail, smtpPassword).ConfigureAwait(false);
                 }
@@ -128,7 +128,7 @@
                 .ConfigureAwait(false);
         }
 
-        // Keep this method synchronous as requested
+       
         public void ProcessUpgradeRequest(bool isRequestAccepted, int upgradeRequestIdentifier)
         {
             // Run the async method on a separate thread to avoid deadlocks
