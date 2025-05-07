@@ -42,4 +42,12 @@ app.MapControllers();
 
 //app.MapRoleEndpoints();
 
+// Seed the database
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<DatabaseContext>();
+    DatabaseSeeder.SeedData(context);
+}
+
 app.Run();
