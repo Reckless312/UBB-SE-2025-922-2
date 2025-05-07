@@ -1,6 +1,7 @@
 ﻿using DataAccess.Model;
 using DataAccess.Model.AdminDashboard;
 using DataAccess.Model.Authentication;
+using IRepository;
 using System;
 using System.Collections.Generic;
 
@@ -73,6 +74,61 @@ namespace Tests.CoraMockUps
         }
 
         public void AddRoleToUser(int v, Role role)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<List<User>> IUserRepository.GetUsersWhoHaveSubmittedAppeals()
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<List<User>> IUserRepository.GetBannedUsersWhoHaveSubmittedAppeals()
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<List<User>> IUserRepository.GetUsersByRoleType(RoleType roleType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<RoleType> GetRoleTypeForUser(Guid userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task ChangeRoleToUser(Guid userID, Role roleToAdd)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<List<User>> IUserRepository.GetAllUsers()
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<bool> IUserRepository.ValidateAction(Guid userId, string resource, string action)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<User?> IUserRepository.GetUserByUsername(string username)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<User?> IUserRepository.GetUserById(Guid userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<bool> IUserRepository.CreateUser(User user)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<bool> IUserRepository.UpdateUser(User user)
         {
             throw new NotImplementedException();
         }
