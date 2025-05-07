@@ -1,6 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
+
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
 namespace ServerAPI.Migrations
 {
@@ -46,17 +49,12 @@ namespace ServerAPI.Migrations
                     EmailAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     NumberOfDeletedReviews = table.Column<int>(type: "int", nullable: false),
                     HasSubmittedAppeal = table.Column<bool>(type: "bit", nullable: false),
-                    RoleType = table.Column<int>(type: "int", nullable: false)
+                    AssignedRole = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
+                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.UserId);
-                    table.ForeignKey(
-                        name: "FK_RoleUser",
-                        column: x => x.RoleType,
-                        principalTable: "Roles",
-                        principalColumn: "RoleType",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -82,30 +80,6 @@ namespace ServerAPI.Migrations
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            //migrationBuilder.CreateTable(
-            //    name: "RoleUser",
-            //    columns: table => new
-            //    {
-            //        AssignedRolesRoleType = table.Column<int>(type: "int", nullable: false),
-            //        UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-            //    },
-            //    constraints: table =>
-            //    {
-            //        table.PrimaryKey("PK_RoleUser", x => new { x.AssignedRolesRoleType, x.UserId });
-            //        table.ForeignKey(
-            //            name: "FK_RoleUser_Roles_AssignedRolesRoleType",
-            //            column: x => x.AssignedRolesRoleType,
-            //            principalTable: "Roles",
-            //            principalColumn: "RoleType",
-            //            onDelete: ReferentialAction.Cascade);
-            //        table.ForeignKey(
-            //            name: "FK_RoleUser_Users_UserId",
-            //            column: x => x.UserId,
-            //            principalTable: "Users",
-            //            principalColumn: "UserId",
-            //            onDelete: ReferentialAction.Cascade);
-            //    });
 
             migrationBuilder.CreateTable(
                 name: "Sessions",
@@ -145,15 +119,21 @@ namespace ServerAPI.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "Roles",
+                columns: new[] { "RoleType", "RoleName" },
+                values: new object[,]
+                {
+                    { 0, "Banned" },
+                    { 1, "User" },
+                    { 2, "Admin" },
+                    { 3, "Manager" }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Reviews_UserId",
                 table: "Reviews",
                 column: "UserId");
-
-            //migrationBuilder.CreateIndex(
-            //    name: "IX_RoleUser_UserId",
-            //    table: "RoleUser",
-            //    column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Sessions_UserId",
@@ -169,7 +149,23 @@ namespace ServerAPI.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "OffensiveWords");
 
+            migrationBuilder.DropTable(
+                name: "Reviews");
+
+            migrationBuilder.DropTable(
+                name: "Roles");
+
+            migrationBuilder.DropTable(
+                name: "Sessions");
+
+            migrationBuilder.DropTable(
+                name: "UpgradeRequests");
+
+            migrationBuilder.DropTable(
+                name: "Users");
         }
     }
 }

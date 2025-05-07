@@ -68,8 +68,16 @@ namespace ServerAPI.Controllers
         [HttpGet("byUserName/{username}")]
         public async Task<ActionResult<User>> GetUserByName(string username)
         {
-            var user = await repository.GetUserByUsername(username);
-            return user == null ? NotFound() : user;
+            try
+            {
+                var user = await repository.GetUserByUsername(username);
+                return user == null ? NotFound() : user;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return NotFound();
+            }
         }
 
         [HttpPatch("{userId}/updateUser")]

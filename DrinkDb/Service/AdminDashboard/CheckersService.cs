@@ -94,7 +94,7 @@ namespace DrinkDb_Auth.Service.AdminDashboard
 
         private static void LogToFile(string message)
         {
-            File.AppendAllText(LogPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}\n");
+            //File.AppendAllText(LogPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}\n");
         }
 
         private static string GetProjectRoot([CallerFilePath] string filePath = "")

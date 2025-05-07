@@ -17,13 +17,8 @@ builder.Services.AddSwaggerGen();
 // Add database context to server
 builder.Services.AddDbContext<DatabaseContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IRolesRepository, RolesRepository>();
-builder.Services.AddScoped<IReviewsRepository, ReviewsRepository>();
-builder.Services.AddScoped<ISessionRepository, SessionRepository>();
-builder.Services.AddScoped<IOffensiveWordsRepository, OffensiveWordsRepository>();
-builder.Services.AddScoped<IUpgradeRequestsRepository, UpgradeRequestsRepository>();
 
+DependencyInjection(builder);
 
 var app = builder.Build();
 
@@ -43,3 +38,13 @@ app.MapControllers();
 //app.MapRoleEndpoints();
 
 app.Run();
+
+static void DependencyInjection(WebApplicationBuilder builder)
+{
+    builder.Services.AddScoped<IUserRepository, UserRepository>();
+    builder.Services.AddScoped<IRolesRepository, RolesRepository>();
+    builder.Services.AddScoped<IReviewsRepository, ReviewsRepository>();
+    builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+    builder.Services.AddScoped<IOffensiveWordsRepository, OffensiveWordsRepository>();
+    builder.Services.AddScoped<IUpgradeRequestsRepository, UpgradeRequestsRepository>();
+}
