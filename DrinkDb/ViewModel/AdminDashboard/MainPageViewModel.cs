@@ -575,9 +575,10 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             {
                 return;
             }
-
             UpdateUserRole(user, RoleType.User);
-            UpdateUserHasAppealed(user, false);
+            User updatedUser = GetUserById(user.UserId);
+            UpdateUserHasAppealed(updatedUser, false);
+            
             IsAppealUserBanned = false;
             UserStatusDisplay = GetUserStatusDisplay(user, false);
         }
