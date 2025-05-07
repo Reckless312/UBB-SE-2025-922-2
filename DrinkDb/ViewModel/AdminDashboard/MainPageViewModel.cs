@@ -469,7 +469,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
                     var requests = requestsService.RetrieveAllUpgradeRequests();
 
                     // Update your property that holds the requests
-                    // Assuming you have a property called UpgradeRequests
+                  
                     UpgradeRequests = new System.Collections.ObjectModel.ObservableCollection<UpgradeRequest>(requests);
 
                     // Notify UI of changes
@@ -478,9 +478,9 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             }
             catch (Exception ex)
             {
-                // Log exception
+                
                 System.Diagnostics.Debug.WriteLine($"Error processing upgrade request: {ex.Message}");
-                throw; // Let caller handle the exception
+               
             }
         }
 
