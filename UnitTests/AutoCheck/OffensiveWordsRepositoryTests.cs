@@ -3,9 +3,11 @@
     using System;
     using System.IO;
     using DrinkDb_Auth.AutoChecker;
-    using DrinkDb_Auth.Repository.AdminDashboard;
+    using DrinkDb_Auth.ProxyRepository.AdminDashboard;
+    using DrinkDb_Auth.ProxyRepository.AutoChecker;
     using Microsoft.Data.SqlClient;
     using Microsoft.Extensions.Configuration;
+    using Repository.AdminDashboard;
     using Xunit;
 
     /// <summary>
@@ -14,8 +16,7 @@
     public class OffensiveWordsRepositoryTests : IDisposable
     {
         private readonly string connectionString;
-        private readonly OffensiveWordsRepository repository;
-        private readonly IDbConnectionFactory connectionFactory;
+        private readonly OffensiveWordsProxyRepository repository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OffensiveWordsRepositoryTests"/> class.
@@ -28,9 +29,9 @@
                 .AddJsonFile("appSettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-            this.connectionString = configurationRoot.GetConnectionString("TestConnection");
-            this.connectionFactory = new SqlConnectionFactory(this.connectionString);
-            this.repository = new OffensiveWordsRepository(this.connectionFactory);
+            string baseApiUrl = configurationRoot["BaseApiUrl"]
+                ?? throw new InvalidOperationException("Base API URL is missing or null");
+            this.repository = new OffensiveWordsProxyRepository(baseApiUrl);
             this.EnsureTableExists();
             this.CleanupTable();
         }
@@ -61,7 +62,7 @@
         {
             this.repository.AddWord("troll");
 
-            var result = this.repository.LoadOffensiveWords();
+            HashSet<string> result = this.repository.LoadOffensiveWords();
 
             Assert.Contains("troll", result, StringComparer.OrdinalIgnoreCase);
         }
@@ -75,27 +76,18 @@
             this.repository.AddWord("annoying");
             this.repository.DeleteWord("annoying");
 
-            var result = this.repository.LoadOffensiveWords();
+            HashSet<string> result = this.repository.LoadOffensiveWords();
 
             Assert.DoesNotContain("annoying", result, StringComparer.OrdinalIgnoreCase);
-        }
-
-        /// <summary>
-        /// Verifies that the repository constructor throws an exception if the connection factory is null.
-        /// </summary>
-        [Fact]
-        public void Constructor_NullConnectionFactory_ThrowsArgumentNullException()
-        {
-            Assert.Throws<ArgumentNullException>(() => new OffensiveWordsRepository(null));
         }
 
         /// <summary>
         /// Ensures that adding a null word does not throw an exception.
         /// </summary>
         [Fact]
-        public void AddWord_NullWord_DoesNotThrow()
+        public async Task AddWord_NullWord_DoesNotThrow()
         {
-            var exception = Record.Exception(() => this.repository.AddWord(null));
+            Exception? exception = await Record.ExceptionAsync(() => this.repository.AddWord(null!));
             Assert.Null(exception);
         }
 
@@ -103,9 +95,9 @@
         /// Ensures that adding an empty string does not throw an exception.
         /// </summary>
         [Fact]
-        public void AddWord_EmptyWord_DoesNotThrow()
+        public async Task AddWord_EmptyWord_DoesNotThrow()
         {
-            var exception = Record.Exception(() => this.repository.AddWord(string.Empty));
+            Exception? exception = await Record.ExceptionAsync(() => this.repository.AddWord(string.Empty));
             Assert.Null(exception);
         }
 
@@ -113,9 +105,9 @@
         /// Ensures that adding a whitespace-only string does not throw an exception.
         /// </summary>
         [Fact]
-        public void AddWord_WhitespaceWord_DoesNotThrow()
+        public async Task AddWord_WhitespaceWord_DoesNotThrow()
         {
-            var exception = Record.Exception(() => this.repository.AddWord("   "));
+            Exception? exception = await Record.ExceptionAsync(() => this.repository.AddWord("   "));
             Assert.Null(exception);
         }
 
@@ -123,9 +115,9 @@
         /// Ensures that deleting a null word does not throw an exception.
         /// </summary>
         [Fact]
-        public void DeleteWord_NullWord_DoesNotThrow()
+        public async Task DeleteWord_NullWord_DoesNotThrow()
         {
-            var exception = Record.Exception(() => this.repository.DeleteWord(null));
+            Exception? exception = await Record.ExceptionAsync(() => this.repository.DeleteWord(null!));
             Assert.Null(exception);
         }
 
@@ -133,9 +125,9 @@
         /// Ensures that deleting an empty word does not throw an exception.
         /// </summary>
         [Fact]
-        public void DeleteWord_EmptyWord_DoesNotThrow()
+        public async Task DeleteWord_EmptyWord_DoesNotThrow()
         {
-            var exception = Record.Exception(() => this.repository.DeleteWord(string.Empty));
+            Exception? exception = await Record.ExceptionAsync(() => this.repository.DeleteWord(string.Empty));
             Assert.Null(exception);
         }
 
@@ -143,9 +135,9 @@
         /// Ensures that deleting a whitespace-only word does not throw an exception.
         /// </summary>
         [Fact]
-        public void DeleteWord_WhitespaceWord_DoesNotThrow()
+        public async Task DeleteWord_WhitespaceWord_DoesNotThrow()
         {
-            var exception = Record.Exception(() => this.repository.DeleteWord("   "));
+            Exception? exception = await Record.ExceptionAsync(() => this.repository.DeleteWord("   "));
             Assert.Null(exception);
         }
 
@@ -153,9 +145,9 @@
         /// Ensures that deleting a word that does not exist does not throw an exception.
         /// </summary>
         [Fact]
-        public void DeleteWord_NonExistentWord_DoesNotThrow()
+        public async Task DeleteWord_NonExistentWord_DoesNotThrow()
         {
-            var exception = Record.Exception(() => this.repository.DeleteWord("nonexistent"));
+            Exception? exception = await Record.ExceptionAsync(() => this.repository.DeleteWord("nonexistent"));
             Assert.Null(exception);
         }
 
@@ -166,7 +158,7 @@
         {
             using SqlConnection conn = new SqlConnection(this.connectionString);
             conn.Open();
-            using var cmd = new SqlCommand("DELETE FROM OffensiveWords", conn);
+            using SqlCommand cmd = new SqlCommand("DELETE FROM OffensiveWords", conn);
             cmd.ExecuteNonQuery();
         }
 
@@ -175,9 +167,9 @@
         /// </summary>
         private void EnsureTableExists()
         {
-            using var conn = new SqlConnection(this.connectionString);
+            using SqlConnection conn = new SqlConnection(this.connectionString);
             conn.Open();
-            using var cmd = new SqlCommand(
+            using SqlCommand cmd = new SqlCommand(
                 @"IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'OffensiveWords')
                 BEGIN
                     CREATE TABLE OffensiveWords (
