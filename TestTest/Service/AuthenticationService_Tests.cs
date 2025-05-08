@@ -83,7 +83,7 @@ namespace TestTest.Service
         }
 
         [TestMethod]
-        public void AuthWithUserPass_Success()
+        public async Task AuthWithUserPass_Success()
         {
             var basicAuth = new MockBasicAuth();
             basicAuth.Succeeds = true;
@@ -96,28 +96,28 @@ namespace TestTest.Service
 
             AuthenticationService service = new AuthenticationService(new MockLinkedInServer(), new MockGitHubServer(), new MockFacebookServer(), userAdapter, sessionAdapter, basicAuth);
 
-            var response = service.AuthWithUserPass(userAdapter.MockUsername, "");
+            var response = await service.AuthWithUserPass(userAdapter.MockUsername, "");
 
             var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = true, NewAccount = false, OAuthToken = string.Empty, SessionId = userAdapter.MockId };
             Assert.AreEqual(expectedResponse, response);
         }
 
         [TestMethod]
-        public void AuthWithUserPass_Fail()
+        public async Task AuthWithUserPass_Fail()
         {
             var basicAuth = new MockBasicAuth();
             basicAuth.Succeeds = false;
 
             AuthenticationService service = new AuthenticationService(new MockLinkedInServer(), new MockGitHubServer(), new MockFacebookServer(), new MockUserAdapter(), new MockSessionAdapter(), basicAuth);
 
-            var response = service.AuthWithUserPass("", "");
+            var response = await service.AuthWithUserPass("", "");
 
             var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = Guid.Empty };
             Assert.AreEqual(expectedResponse, response);
         }
 
         [TestMethod]
-        public void AuthWithUserPass_Throws_UserNotFound()
+        public async Task AuthWithUserPass_Throws_UserNotFound()
         {
             var basicAuth = new MockBasicAuth();
             basicAuth.Succeeds = true;
@@ -130,7 +130,7 @@ namespace TestTest.Service
 
             AuthenticationService service = new AuthenticationService(new MockLinkedInServer(), new MockGitHubServer(), new MockFacebookServer(), userAdapter, sessionAdapter, basicAuth);
 
-            var response = service.AuthWithUserPass("wronguser", "");
+            var response = await service.AuthWithUserPass("wronguser", "");
 
             var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = true, NewAccount = true, OAuthToken = string.Empty, SessionId = mockId };
         
