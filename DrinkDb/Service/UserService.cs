@@ -268,8 +268,6 @@ namespace DrinkDb_Auth.Service
 
         public void UpdateUserAppleaed(User user, bool newValue)
         {
-
-            //User? currentUser = userRepository.GetUserById(user.UserId).Result;
             user.HasSubmittedAppeal = newValue;
             userRepository.UpdateUser(user);
         }

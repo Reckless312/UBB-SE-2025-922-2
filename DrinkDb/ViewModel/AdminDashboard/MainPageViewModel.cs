@@ -12,6 +12,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
     using DrinkDb_Auth.AutoChecker;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using DrinkDb_Auth.ViewModel.AdminDashboard.Components;
+    using DrinkDb_Auth.Service;
 
     public class MainPageViewModel : INotifyPropertyChanged
     {
@@ -303,10 +304,34 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             this.LoadOffensiveWords();
         }
 
-        public void HandleUpgradeRequest(bool approve, int requestId)
+        public void HandleUpgradeRequest(bool isAccepted, int requestId)
         {
-            this.requestsService.ProcessUpgradeRequest(approve, requestId);
-            this.LoadRoleRequests();
+            try
+            {
+                // Call the synchronous method on the service
+                requestsService.ProcessUpgradeRequest(isAccepted, requestId);
+
+                // Refresh the UI on the UI thread
+                // This approach uses the dispatcher to update UI after processing
+                Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread()?.TryEnqueue(() =>
+                {
+                    // Refresh your data - reload upgrade requests using the synchronous method
+                    var requests = requestsService.RetrieveAllUpgradeRequests();
+
+                    // Update your property that holds the requests
+                  
+                    UpgradeRequests = new System.Collections.ObjectModel.ObservableCollection<UpgradeRequest>(requests);
+
+                    // Notify UI of changes
+                    OnPropertyChanged(nameof(UpgradeRequests));
+                });
+            }
+            catch (Exception ex)
+            {
+                
+                System.Diagnostics.Debug.WriteLine($"Error processing upgrade request: {ex.Message}");
+               
+            }
         }
 
         public void CloseAppealCase(User user)
@@ -364,9 +389,9 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             {
                 return;
             }
-
             this.UpdateUserRole(user, RoleType.User);
-            this.UpdateUserHasAppealed(user, false);
+            User updatedUser = GetUserById(user.UserId);
+            this.UpdateUserHasAppealed(updatedUser, false);
             this.IsAppealUserBanned = false;
             this.UserStatusDisplay = this.GetUserStatusDisplay(user, false);
         }
