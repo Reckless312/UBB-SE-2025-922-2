@@ -27,7 +27,7 @@ namespace TestTest.Authentication.LinkedIn
         }
 
         // Override the Authenticate method to use our mocked HttpClient instead of creating a new one
-        public new AuthenticationResponse Authenticate(string userId, string token)
+        public async Task<AuthenticationResponse> Authenticate(string userId, string token)
         {
             // Use the same implementation as the parent class but with our injected HttpClient
             _httpClient.DefaultRequestHeaders.Clear();
@@ -43,7 +43,7 @@ namespace TestTest.Authentication.LinkedIn
                 }
 
                 string json = response.Content.ReadAsStringAsync().Result;
-                return ProcessResponseJson(json, token);
+                return await ProcessResponseJson(json, token);
             }
             catch (AggregateException ex) 
             {
@@ -57,7 +57,7 @@ namespace TestTest.Authentication.LinkedIn
         }
 
         // Helper method to process the response JSON
-        private AuthenticationResponse ProcessResponseJson(string json, string token)
+        private async Task<AuthenticationResponse> ProcessResponseJson(string json, string token)
         {
             using (var document = System.Text.Json.JsonDocument.Parse(json))
             {
@@ -100,7 +100,7 @@ namespace TestTest.Authentication.LinkedIn
                     };
                 }
 
-                var user = _userRepository.GetUserByUsername(name);
+                var user = await _userRepository.GetUserByUsername(name);
                 if (user == null)
                 {
                     // Create a new user since none exists
@@ -115,14 +115,14 @@ namespace TestTest.Authentication.LinkedIn
                     bool userCreated = true;
                     if (_userRepository != null)
                     {
-                        userCreated = _userRepository.CreateUser(newUser);
+                        userCreated = await _userRepository.CreateUser(newUser);
                     }
                     
                     // Create a session for the new user
                     Guid sessionId = Guid.NewGuid();
                     if (_sessionRepository != null && userCreated)
                     {
-                        var session = _sessionRepository.CreateSession(newUser.UserId);
+                        var session = await _sessionRepository.CreateSession(newUser.UserId);
                         if (session != null)
                         {
                             sessionId = session.SessionId;
@@ -143,7 +143,7 @@ namespace TestTest.Authentication.LinkedIn
                     Guid sessionId = Guid.NewGuid();
                     if (_sessionRepository != null)
                     {
-                        var session = _sessionRepository.CreateSession(user.UserId);
+                        var session = await _sessionRepository.CreateSession(user.UserId);
                         if (session != null)
                         {
                             sessionId = session.SessionId;

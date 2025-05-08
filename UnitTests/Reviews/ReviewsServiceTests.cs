@@ -32,7 +32,7 @@
                 content: "Great drink!",
                 createdDate: DateTime.Now,
                 numberOfFlags: 3);
-            this.mockRepository.Setup(review => review.GetReviewById(reviewId)).Returns(review);
+            this.mockRepository.Setup(review => review.GetReviewById(reviewId)).Returns(Task.FromResult<Review>(review));
 
             // Act
             this.service.ResetReviewFlags(reviewId);
@@ -64,7 +64,7 @@
                 new Review(2, new Guid(), 5, "Amazing drink!", DateTime.Now, 0),
                 new Review(3, new Guid(), 3, "Good drink!", DateTime.Now, 2),
             };
-            this.mockRepository.Setup(review => review.GetAllReviews()).Returns(reviews);
+            this.mockRepository.Setup(review => review.GetAllReviews()).Returns(Task.FromResult(reviews));
 
             // Act
             var flaggedReviews = this.service.GetFlaggedReviews();
@@ -84,7 +84,7 @@
                 new Review(2, new Guid(), 5, "Amazing drink!", DateTime.Now, 0, false),
                 new Review(3, new Guid(), 3, "Good drink!", DateTime.Now, 0, true),
             };
-            this.mockRepository.Setup(review => review.GetAllReviews()).Returns(reviews);
+            this.mockRepository.Setup(review => review.GetAllReviews()).Returns(Task.FromResult(reviews));
 
             // Act
             var hiddenReviews = this.service.GetHiddenReviews();
@@ -104,7 +104,7 @@
                 new Review(2, new Guid(), 5, "Amazing drink!", DateTime.Now),
                 new Review(3, new Guid(), 3, "Good drink!", DateTime.Now),
             };
-            this.mockRepository.Setup(review => review.GetAllReviews()).Returns(reviews);
+            this.mockRepository.Setup(review => review.GetAllReviews()).Returns(Task.FromResult(reviews));
 
             // Act
             var allReviews = this.service.GetAllReviews();
@@ -125,7 +125,7 @@
                 new Review(2, new Guid(), 5, "Amazing drink!", DateTime.Now.AddDays(-3)),
                 new Review(3, new Guid(), 3, "Good drink!", DateTime.Now),
             };
-            this.mockRepository.Setup(review => review.GetReviewsSince(date)).Returns(reviews.Where(review => review.CreatedDate >= date && !review.IsHidden).ToList());
+            this.mockRepository.Setup(review => review.GetReviewsSince(date)).Returns(Task.FromResult(reviews.Where(review => review.CreatedDate >= date && !review.IsHidden).ToList()));
 
             // Act
             var recentReviews = this.service.GetReviewsSince(date);
@@ -141,7 +141,7 @@
         {
             // Arrange
             double expectedAverage = 4.0;
-            this.mockRepository.Setup(review => review.GetAverageRatingForVisibleReviews()).Returns(expectedAverage);
+            this.mockRepository.Setup(review => review.GetAverageRatingForVisibleReviews()).Returns(Task.FromResult(expectedAverage));
 
             // Act
             var average = this.service.GetAverageRatingForVisibleReviews();
@@ -162,7 +162,7 @@
                 new Review(2, new Guid(), 5, "Amazing drink!", DateTime.Now),
                 new Review(3, new Guid(), 3, "Good drink!", DateTime.Now.AddDays(-2)),
             };
-            this.mockRepository.Setup(review => review.GetMostRecentReviews(count)).Returns(reviews.OrderByDescending(review => review.CreatedDate).Take(count).ToList());
+            this.mockRepository.Setup(review => review.GetMostRecentReviews(count)).Returns(Task.FromResult(reviews.OrderByDescending(review => review.CreatedDate).Take(count).ToList()));
 
             // Act
             var recentReviews = this.service.GetMostRecentReviews(count);
@@ -180,7 +180,7 @@
             // Arrange
             var date = DateTime.Now.AddDays(-2);
             int expectedCount = 5;
-            this.mockRepository.Setup(review => review.GetReviewCountAfterDate(date)).Returns(expectedCount);
+            this.mockRepository.Setup(review => review.GetReviewCountAfterDate(date)).Returns(Task.FromResult(expectedCount));
 
             // Act
             var count = this.service.GetReviewCountAfterDate(date);
@@ -201,7 +201,7 @@
                 new Review(2, new Guid(), 5, "Amazing drink!", DateTime.Now),
                 new Review(3, new Guid(), 3, "Good drink!", DateTime.Now),
             };
-            this.mockRepository.Setup(review => review.GetReviewsByUser(userId)).Returns(reviews.Where(review => review.UserId == userId && !review.IsHidden).OrderByDescending(review => review.CreatedDate).ToList());
+            this.mockRepository.Setup(review => review.GetReviewsByUser(userId)).Returns(Task.FromResult(reviews.Where(review => review.UserId == userId && !review.IsHidden).OrderByDescending(review => review.CreatedDate).ToList()));
 
             // Act
             var userReviews = this.service.GetReviewsByUser(userId);
@@ -225,9 +225,9 @@
             };
 
             this.mockRepository.Setup(review =>
-                review.GetReviewCountAfterDate(It.Is<DateTime>(d => d.Date == date.Date))).Returns(2);
+                review.GetReviewCountAfterDate(It.Is<DateTime>(d => d.Date == date.Date))).Returns(Task.FromResult(2));
             this.mockRepository.Setup(review =>
-                review.GetMostRecentReviews(2)).Returns(reviews.OrderByDescending(review => review.CreatedDate).Take(2).ToList());
+                review.GetMostRecentReviews(2)).Returns(Task.FromResult(reviews.OrderByDescending(review => review.CreatedDate).Take(2).ToList()));
 
             // Act
             var reportReviews = this.service.GetReviewsForReport();
@@ -252,7 +252,7 @@
                 new Review(3, new Guid(), 3, "Really great service", DateTime.Now, 1, true),
             };
 
-            this.mockRepository.Setup(repo => repo.GetAllReviews()).Returns(reviews);
+            this.mockRepository.Setup(repo => repo.GetAllReviews()).Returns(Task.FromResult(reviews));
 
             // Act
             var filtered = this.service.FilterReviewsByContent(content);
@@ -274,7 +274,7 @@
                 new Review(3, new Guid(), 3, "Really great service", DateTime.Now, 1, true),
             };
 
-            this.mockRepository.Setup(repo => repo.GetAllReviews()).Returns(reviews);
+            this.mockRepository.Setup(repo => repo.GetAllReviews()).Returns(Task.FromResult(reviews));
 
             // Act
             var resultWithNull = this.service.FilterReviewsByContent(null);
@@ -292,9 +292,9 @@
             // Arrange
             var date = DateTime.Now.AddDays(-1);
             this.mockRepository.Setup(review =>
-                review.GetReviewCountAfterDate(It.Is<DateTime>(d => d.Date == date.Date))).Returns(0);
+                review.GetReviewCountAfterDate(It.Is<DateTime>(d => d.Date == date.Date))).Returns(Task.FromResult(0));
             this.mockRepository.Setup(review =>
-                review.GetMostRecentReviews(0)).Returns(new List<Review>());
+                review.GetMostRecentReviews(0)).Returns(Task.FromResult(new List<Review>()));
 
             // Act
             var reportReviews = this.service.GetReviewsForReport();
@@ -317,7 +317,7 @@
                 new Review(3, new Guid(), 3, "Really great service", DateTime.Now, 1, true),
             };
 
-            this.mockRepository.Setup(repo => repo.GetAllReviews()).Returns(reviews);
+            this.mockRepository.Setup(repo => repo.GetAllReviews()).Returns(Task.FromResult(reviews));
 
             // Act
             var filtered = this.service.FilterReviewsByContent(content);
@@ -333,7 +333,7 @@
         {
             // Arrange
             int count = -1;
-            this.mockRepository.Setup(review => review.GetMostRecentReviews(count)).Returns(new List<Review>());
+            this.mockRepository.Setup(review => review.GetMostRecentReviews(count)).Returns(Task.FromResult(new List<Review>()));
 
             // Act
             var recentReviews = this.service.GetMostRecentReviews(count);
@@ -348,7 +348,7 @@
         {
             // Arrange
             int count = 0;
-            this.mockRepository.Setup(review => review.GetMostRecentReviews(count)).Returns(new List<Review>());
+            this.mockRepository.Setup(review => review.GetMostRecentReviews(count)).Returns(Task.FromResult(new List<Review>()));
 
             // Act
             var recentReviews = this.service.GetMostRecentReviews(count);
@@ -364,9 +364,9 @@
             // Arrange
             var date = DateTime.Now.AddDays(-1);
             this.mockRepository.Setup(review =>
-                review.GetReviewCountAfterDate(It.Is<DateTime>(d => d.Date == date.Date))).Returns(2);
+                review.GetReviewCountAfterDate(It.Is<DateTime>(d => d.Date == date.Date))).Returns(Task.FromResult(2));
             this.mockRepository.Setup(review =>
-                review.GetMostRecentReviews(2)).Returns((List<Review>)null);
+                review.GetMostRecentReviews(2)).Returns(Task.FromResult((List<Review>)null));
 
             // Act
             var reportReviews = this.service.GetReviewsForReport();
@@ -388,7 +388,7 @@
                 new Review(2, new Guid(), 5, "Amazing drink!", DateTime.Now.AddDays(-3), 0, false),
                 new Review(3, new Guid(), 3, "Good drink!", DateTime.Now, 0, false),
             };
-            this.mockRepository.Setup(review => review.GetReviewsSince(date)).Returns(reviews);
+            this.mockRepository.Setup(review => review.GetReviewsSince(date)).Returns(Task.FromResult(reviews));
 
             // Act
             var recentReviews = this.service.GetReviewsSince(date);
@@ -403,7 +403,7 @@
         {
             // Arrange
             Guid userId = new Guid();
-            this.mockRepository.Setup(review => review.GetReviewsByUser(userId)).Returns(new List<Review>());
+            this.mockRepository.Setup(review => review.GetReviewsByUser(userId)).Returns(Task.FromResult(new List<Review>()));
 
             // Act
             var userReviews = this.service.GetReviewsByUser(userId);

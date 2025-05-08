@@ -47,9 +47,9 @@ namespace UnitTests.UpgradeRequests
                 new Role(RoleType.Manager, "Manager"),
                 new Role(RoleType.Admin, "Admin"),
             };
-            this.mockRolesRepository.Setup(r => r.GetAllRoles()).Returns(roles);
+            this.mockRolesRepository.Setup(r => r.GetAllRoles()).Returns(Task.FromResult(roles));
             this.mockUpgradeRequestsRepository.Setup(r => r.RetrieveAllUpgradeRequests())
-                .Returns(new List<UpgradeRequest>());
+                .Returns(Task.FromResult(new List<UpgradeRequest>()));
             this.upgradeRequestsService = new UpgradeRequestsService(
                 this.mockUpgradeRequestsRepository.Object,
                 this.mockRolesRepository.Object,
@@ -71,7 +71,7 @@ namespace UnitTests.UpgradeRequests
                 new UpgradeRequest(2, Guid.NewGuid(), "User 2"),
             };
             this.mockUpgradeRequestsRepository.Setup(r => r.RetrieveAllUpgradeRequests())
-                .Returns(expectedRequests);
+                .Returns(Task.FromResult(expectedRequests));
 
             List<UpgradeRequest> result = this.upgradeRequestsService.RetrieveAllUpgradeRequests();
             Assert.Equal(expectedRequests, result);
@@ -95,9 +95,9 @@ namespace UnitTests.UpgradeRequests
             Guid requestingUserIdentifier = Guid.NewGuid();
             UpgradeRequest upgradeRequest = new UpgradeRequest(upgradeRequestIdentifier, requestingUserIdentifier, "Test User");
             Role nextRole = new Role(RoleType.Manager, "Manager");
-            this.mockUpgradeRequestsRepository.Setup(r => r.RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier)).Returns(upgradeRequest);
-            this.mockUserRepository.Setup(r => r.GetRoleTypeForUser(requestingUserIdentifier)).Returns(RoleType.User);
-            this.mockRolesRepository.Setup(r => r.GetNextRoleInHierarchy(RoleType.User)).Returns(nextRole);
+            this.mockUpgradeRequestsRepository.Setup(r => r.RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier)).Returns(Task.FromResult(upgradeRequest));
+            this.mockUserRepository.Setup(r => r.GetRoleTypeForUser(requestingUserIdentifier)).Returns(Task.FromResult(RoleType.User));
+            this.mockRolesRepository.Setup(r => r.GetNextRoleInHierarchy(RoleType.User)).Returns(Task.FromResult(nextRole));
             this.upgradeRequestsService.ProcessUpgradeRequest(true, upgradeRequestIdentifier);
             this.mockUpgradeRequestsRepository.Verify(r => r.RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier), Times.Once);
             this.mockUserRepository.Verify(r => r.GetRoleTypeForUser(requestingUserIdentifier), Times.Once);
@@ -131,8 +131,8 @@ namespace UnitTests.UpgradeRequests
             Mock<IUpgradeRequestsRepository> mockRepository = new Mock<IUpgradeRequestsRepository>();
             Mock<IRolesRepository> mockRoles = new Mock<IRolesRepository>();
             Mock<IUserRepository> mockUsers = new Mock<IUserRepository>();
-            mockRepository.Setup(r => r.RetrieveAllUpgradeRequests()).Returns(upgradeRequests);
-            mockRoles.Setup(r => r.GetAllRoles()).Returns(new List<Role> { new Role(RoleType.Banned, "Banned"), new Role(RoleType.User, "User") });
+            mockRepository.Setup(r => r.RetrieveAllUpgradeRequests()).Returns(Task.FromResult(upgradeRequests));
+            mockRoles.Setup(r => r.GetAllRoles()).Returns(Task.FromResult(new List<Role> { new Role(RoleType.Banned, "Banned"), new Role(RoleType.User, "User") }));
             TestableUpgradeRequestsService testableService = new TestableUpgradeRequestsService(
                 mockRepository.Object,
                 mockRoles.Object,

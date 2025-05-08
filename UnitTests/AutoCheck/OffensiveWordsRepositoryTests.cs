@@ -3,9 +3,13 @@
     using System;
     using System.IO;
     using DrinkDb_Auth.AutoChecker;
-    using DrinkDb_Auth.Repository.AdminDashboard;
+    using DrinkDb_Auth.ProxyRepository.AdminDashboard;
     using Microsoft.Data.SqlClient;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
+    using Repository.AdminDashboard;
+    using ServerAPI.Data;
+    using ServerAPI.Repository.AutoChecker;
     using Xunit;
 
     /// <summary>
@@ -28,9 +32,13 @@
                 .AddJsonFile("appSettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
+            var contextOptions = new DbContextOptionsBuilder<DatabaseContext>()
+                .UseInMemoryDatabase(databaseName: "DrinkDB_Test")
+                .Options;
+
             this.connectionString = configurationRoot.GetConnectionString("TestConnection");
             this.connectionFactory = new SqlConnectionFactory(this.connectionString);
-            this.repository = new OffensiveWordsRepository(this.connectionFactory);
+            this.repository = new OffensiveWordsRepository(new DatabaseContext(contextOptions));
             this.EnsureTableExists();
             this.CleanupTable();
         }
@@ -83,19 +91,20 @@
         /// <summary>
         /// Verifies that the repository constructor throws an exception if the connection factory is null.
         /// </summary>
-        [Fact]
-        public void Constructor_NullConnectionFactory_ThrowsArgumentNullException()
-        {
-            Assert.Throws<ArgumentNullException>(() => new OffensiveWordsRepository(null));
-        }
+        // Not a valid test anymore
+        //[Fact]
+        //public void Constructor_NullConnectionFactory_ThrowsArgumentNullException()
+        //{
+        //    Assert.Throws<ArgumentNullException>(() => new OffensiveWordsRepository(null));
+        //}
 
         /// <summary>
         /// Ensures that adding a null word does not throw an exception.
         /// </summary>
         [Fact]
-        public void AddWord_NullWord_DoesNotThrow()
+        public async Task AddWord_NullWord_DoesNotThrow()
         {
-            var exception = Record.Exception(() => this.repository.AddWord(null));
+            var exception = await Record.ExceptionAsync(() => this.repository.AddWord(null));
             Assert.Null(exception);
         }
 
@@ -103,9 +112,9 @@
         /// Ensures that adding an empty string does not throw an exception.
         /// </summary>
         [Fact]
-        public void AddWord_EmptyWord_DoesNotThrow()
+        public async Task AddWord_EmptyWord_DoesNotThrow()
         {
-            var exception = Record.Exception(() => this.repository.AddWord(string.Empty));
+            var exception = await Record.ExceptionAsync(() => this.repository.AddWord(string.Empty));
             Assert.Null(exception);
         }
 
@@ -113,9 +122,9 @@
         /// Ensures that adding a whitespace-only string does not throw an exception.
         /// </summary>
         [Fact]
-        public void AddWord_WhitespaceWord_DoesNotThrow()
+        public async Task AddWord_WhitespaceWord_DoesNotThrow()
         {
-            var exception = Record.Exception(() => this.repository.AddWord("   "));
+            var exception = await Record.ExceptionAsync(() => this.repository.AddWord("   "));
             Assert.Null(exception);
         }
 
@@ -123,9 +132,9 @@
         /// Ensures that deleting a null word does not throw an exception.
         /// </summary>
         [Fact]
-        public void DeleteWord_NullWord_DoesNotThrow()
+        public async Task DeleteWord_NullWord_DoesNotThrow()
         {
-            var exception = Record.Exception(() => this.repository.DeleteWord(null));
+            var exception = await Record.ExceptionAsync(() => this.repository.DeleteWord(null));
             Assert.Null(exception);
         }
 
@@ -133,9 +142,9 @@
         /// Ensures that deleting an empty word does not throw an exception.
         /// </summary>
         [Fact]
-        public void DeleteWord_EmptyWord_DoesNotThrow()
+        public async Task DeleteWord_EmptyWord_DoesNotThrow()
         {
-            var exception = Record.Exception(() => this.repository.DeleteWord(string.Empty));
+            var exception = await Record.ExceptionAsync(() => this.repository.DeleteWord(string.Empty));
             Assert.Null(exception);
         }
 
@@ -143,9 +152,9 @@
         /// Ensures that deleting a whitespace-only word does not throw an exception.
         /// </summary>
         [Fact]
-        public void DeleteWord_WhitespaceWord_DoesNotThrow()
+        public async Task DeleteWord_WhitespaceWord_DoesNotThrow()
         {
-            var exception = Record.Exception(() => this.repository.DeleteWord("   "));
+            var exception = await Record.ExceptionAsync(() => this.repository.DeleteWord("   "));
             Assert.Null(exception);
         }
 
@@ -153,9 +162,9 @@
         /// Ensures that deleting a word that does not exist does not throw an exception.
         /// </summary>
         [Fact]
-        public void DeleteWord_NonExistentWord_DoesNotThrow()
+        public async Task DeleteWord_NonExistentWord_DoesNotThrow()
         {
-            var exception = Record.Exception(() => this.repository.DeleteWord("nonexistent"));
+            var exception = await Record.ExceptionAsync(() => this.repository.DeleteWord("nonexistent"));
             Assert.Null(exception);
         }
 

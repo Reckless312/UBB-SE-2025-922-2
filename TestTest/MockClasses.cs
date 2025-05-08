@@ -35,6 +35,27 @@ namespace Tests
         {
             return new Session { SessionId = MockId, UserId = userId }; // Mock implementation
         }
+
+        Task<Session> ISessionRepository.CreateSession(Guid userId)
+        {
+            return Task.FromResult(CreateSession(userId));
+        }
+
+        Task<bool> ISessionRepository.EndSession(Guid sessionId)
+        {
+            return Task.FromResult(EndSession(sessionId));
+        }
+
+        Task<Session> ISessionRepository.GetSession(Guid sessionId)
+        {
+            return Task.FromResult(GetSession(sessionId));
+        }
+
+        Task<Session> ISessionRepository.GetSessionByUserId(Guid userId)
+        {
+            return Task.FromResult(GetSessionByUserId(userId));
+
+        }
     }
 
     public class MockSessionAdapter : ISessionRepository
@@ -44,6 +65,7 @@ namespace Tests
         public Session CreateSession(Guid userId)
         {
             return Session.CreateSessionWithIds(MockId, MockId);
+
         }
 
         public bool EndSession(Guid sessionId)
@@ -59,6 +81,26 @@ namespace Tests
         public Session GetSessionByUserId(Guid userId)
         {
             return new Session { SessionId = MockId, UserId = userId }; // Mock implementation
+        }
+
+        Task<Session> ISessionRepository.CreateSession(Guid userId)
+        {
+            return Task.FromResult(CreateSession(userId));
+        }
+
+        Task<bool> ISessionRepository.EndSession(Guid sessionId)
+        {
+            return Task.FromResult(EndSession(sessionId));
+        }
+
+        Task<Session> ISessionRepository.GetSession(Guid sessionId)
+        {
+            return Task.FromResult(GetSession(sessionId));
+        }
+
+        Task<Session> ISessionRepository.GetSessionByUserId(Guid userId)
+        {
+            return Task.FromResult(GetSessionByUserId(userId));
         }
     }
 
@@ -168,6 +210,62 @@ namespace Tests
         public void AddRoleToUser(int v, Role role)
         {
             throw new NotImplementedException();
+        }
+
+        Task<List<User>> IUserRepository.GetUsersWhoHaveSubmittedAppeals()
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<List<User>> IUserRepository.GetBannedUsersWhoHaveSubmittedAppeals()
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<List<User>> IUserRepository.GetUsersByRoleType(RoleType roleType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<RoleType> GetRoleTypeForUser(Guid userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task ChangeRoleToUser(Guid userID, Role roleToAdd)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<List<User>> IUserRepository.GetAllUsers()
+        {
+            return Task.FromResult(this.GetAllUsers());
+        }
+
+        Task<bool> IUserRepository.ValidateAction(Guid userId, string resource, string action)
+        {
+            return Task.FromResult(ValidateAction(userId, resource, action));
+
+        }
+
+        Task<User?> IUserRepository.GetUserByUsername(string username)
+        {
+            return Task.FromResult(GetUserByUsername(username));
+        }
+
+        Task<User?> IUserRepository.GetUserById(Guid userId)
+        {
+            return Task.FromResult(GetUserById(userId));
+        }
+
+        Task<bool> IUserRepository.CreateUser(User user)
+        {
+            return Task.FromResult(CreateUser(user));
+        }
+
+        Task<bool> IUserRepository.UpdateUser(User user)
+        {
+            return Task.FromResult(UpdateUser(user));
         }
     }
 
