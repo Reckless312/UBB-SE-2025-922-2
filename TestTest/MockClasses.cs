@@ -38,22 +38,23 @@ namespace Tests
 
         Task<Session> ISessionRepository.CreateSession(Guid userId)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(CreateSession(userId));
         }
 
         Task<bool> ISessionRepository.EndSession(Guid sessionId)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(EndSession(sessionId));
         }
 
         Task<Session> ISessionRepository.GetSession(Guid sessionId)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(GetSession(sessionId));
         }
 
         Task<Session> ISessionRepository.GetSessionByUserId(Guid userId)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(GetSessionByUserId(userId));
+
         }
     }
 
@@ -64,6 +65,7 @@ namespace Tests
         public Session CreateSession(Guid userId)
         {
             return Session.CreateSessionWithIds(MockId, MockId);
+
         }
 
         public bool EndSession(Guid sessionId)
@@ -83,22 +85,22 @@ namespace Tests
 
         Task<Session> ISessionRepository.CreateSession(Guid userId)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(CreateSession(userId));
         }
 
         Task<bool> ISessionRepository.EndSession(Guid sessionId)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(EndSession(sessionId));
         }
 
         Task<Session> ISessionRepository.GetSession(Guid sessionId)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(GetSession(sessionId));
         }
 
         Task<Session> ISessionRepository.GetSessionByUserId(Guid userId)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(GetSessionByUserId(userId));
         }
     }
 
@@ -237,32 +239,33 @@ namespace Tests
 
         Task<List<User>> IUserRepository.GetAllUsers()
         {
-            throw new NotImplementedException();
+            return Task.FromResult(this.GetAllUsers());
         }
 
         Task<bool> IUserRepository.ValidateAction(Guid userId, string resource, string action)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(ValidateAction(userId, resource, action));
+
         }
 
         Task<User?> IUserRepository.GetUserByUsername(string username)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(GetUserByUsername(username));
         }
 
         Task<User?> IUserRepository.GetUserById(Guid userId)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(GetUserById(userId));
         }
 
         Task<bool> IUserRepository.CreateUser(User user)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(CreateUser(user));
         }
 
         Task<bool> IUserRepository.UpdateUser(User user)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(UpdateUser(user));
         }
     }
 
