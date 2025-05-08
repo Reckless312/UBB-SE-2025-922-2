@@ -1,10 +1,4 @@
-﻿// <copyright file="CheckersService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-using DrinkDb_Auth.Service.AdminDashboard.Components;
-
-namespace DrinkDb_Auth.Service.AdminDashboard
+﻿namespace DrinkDb_Auth.Service.AdminDashboard
 {
     using System;
     using System.Collections.Generic;
@@ -14,39 +8,46 @@ namespace DrinkDb_Auth.Service.AdminDashboard
     using System.Runtime.CompilerServices;
     using System.Text;
     using System.Threading.Tasks;
-    using DrinkDb_Auth.AutoChecker;
     using DataAccess.Model.AdminDashboard;
+    using DrinkDb_Auth.AutoChecker;
+    using DrinkDb_Auth.Service.AdminDashboard.Components;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using Microsoft.ML;
     using Newtonsoft.Json;
 
     public class CheckersService : ICheckersService
     {
-        private static readonly string ModelPath = Path.Combine(GetProjectRoot(), "Models", "curseword_model.zip");
-        private static readonly string ProjectRoot = GetProjectRoot();
-        private static readonly string LogPath = Path.Combine(ProjectRoot, "Logs", "training_log.txt");
         private readonly IReviewService reviewsService;
         private readonly IAutoCheck autoCheck;
 
         public CheckersService(IReviewService reviewsService, IAutoCheck autoCheck)
         {
-            LogToFile(ModelPath);
             this.reviewsService = reviewsService;
             this.autoCheck = autoCheck;
         }
 
         public List<string> RunAutoCheck(List<Review> receivedReviews)
         {
+            if (receivedReviews == null)
+            {
+                return new List<string>();
+            }
+
             List<string> checkingMessages = new List<string>();
 
             foreach (Review currentReview in receivedReviews)
             {
-                bool reviewIsOffensive = autoCheck.AutoCheckReview(currentReview.Content);
+                if (currentReview?.Content == null)
+                {
+                    continue;
+                }
+
+                bool reviewIsOffensive = this.autoCheck.AutoCheckReview(currentReview.Content);
                 if (reviewIsOffensive)
                 {
                     checkingMessages.Add($"Review {currentReview.ReviewId} is offensive. Hiding the review.");
-                    reviewsService.HideReview(currentReview.ReviewId);
-                    reviewsService.ResetReviewFlags(currentReview.ReviewId);
+                    this.reviewsService.HideReview(currentReview.ReviewId);
+                    this.reviewsService.ResetReviewFlags(currentReview.ReviewId);
                 }
                 else
                 {
@@ -59,87 +60,94 @@ namespace DrinkDb_Auth.Service.AdminDashboard
 
         public HashSet<string> GetOffensiveWordsList()
         {
-            return autoCheck.GetOffensiveWordsList();
+            return this.autoCheck?.GetOffensiveWordsList() ?? new HashSet<string>();
         }
 
         public void AddOffensiveWord(string newWord)
         {
-            autoCheck.AddOffensiveWord(newWord);
+            if (string.IsNullOrWhiteSpace(newWord))
+            {
+                return;
+            }
+
+            this.autoCheck?.AddOffensiveWord(newWord);
         }
 
         public void DeleteOffensiveWord(string word)
         {
-            autoCheck.DeleteOffensiveWord(word);
+            if (string.IsNullOrWhiteSpace(word))
+            {
+                return;
+            }
+
+            this.autoCheck?.DeleteOffensiveWord(word);
         }
 
         public void RunAICheckForOneReview(Review review)
         {
-            if (review == null)
+            if (review?.Content == null)
             {
-                Console.WriteLine("Review not found.");
                 return;
             }
 
-            bool reviewIsOffensive = CheckReviewWithAI(review.Content);
+            bool reviewIsOffensive = CheckReviewWithAI(review);
             if (!reviewIsOffensive)
             {
-                Console.WriteLine("Review not found.");
                 return;
             }
 
-            Console.WriteLine($"Review {review.ReviewId} is offensive. Hiding the review.");
-            reviewsService.HideReview(review.ReviewId);
-            reviewsService.ResetReviewFlags(review.ReviewId);
+            this.reviewsService.HideReview(review.ReviewId);
+            this.reviewsService.ResetReviewFlags(review.ReviewId);
         }
 
-        private static void LogToFile(string message)
+        private static bool CheckReviewWithAI(Review review)
         {
-            File.AppendAllText(LogPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}\n");
-        }
-
-        private static string GetProjectRoot([CallerFilePath] string filePath = "")
-        {
-            DirectoryInfo? directory = new FileInfo(filePath).Directory;
-            while (directory != null && !directory.GetFiles("*.csproj").Any())
+            if (review?.Content == null)
             {
-                directory = directory.Parent;
+                return false;
             }
 
-            return directory?.FullName ?? throw new Exception("Project root not found!");
-        }
-
-        private static bool CheckReviewWithAI(string reviewText)
-        {
-            string analysisReportResult = OffensiveTextDetector.DetectOffensiveContent(reviewText);
-            Console.WriteLine("Hugging Face Response: " + analysisReportResult);
-            float offesiveContentThreshold = 0.1f;
-            float hateSpeachScore = GetConfidenceScoreForHateSpeach(analysisReportResult);
-            return hateSpeachScore >= offesiveContentThreshold;
-        }
-
-        private static float GetConfidenceScoreForHateSpeach(string analisysReportAsJsonString)
-        {
             try
             {
-                List<List<Dictionary<string, string>>>? analisysReportToList = JsonConvert.DeserializeObject<List<List<Dictionary<string, string>>>>(analisysReportAsJsonString);
-                List<Dictionary<string, string>>? analisysReportToListForCurrentReview = analisysReportToList?.FirstOrDefault() ?? null;
-                if (analisysReportToListForCurrentReview != null && analisysReportToListForCurrentReview.Count != 0)
+                string response = OffensiveTextDetector.DetectOffensiveContent(review.Content);
+
+                if (string.IsNullOrEmpty(response) || response.StartsWith("Error:") || response.StartsWith("Exception:"))
                 {
-                    foreach (Dictionary<string, string> statisticForCharacteristic in analisysReportToListForCurrentReview)
+                    return false;
+                }
+
+                try
+                {
+                    List<List<Dictionary<string, object>>> arrayResults = JsonConvert.DeserializeObject<List<List<Dictionary<string, object>>>>(response);
+                    if (arrayResults?.Count > 0 && arrayResults[0]?.Count > 0)
                     {
-                        if (statisticForCharacteristic.ContainsKey("label") && statisticForCharacteristic["label"] == "hate" && statisticForCharacteristic.ContainsKey("score"))
+                        Dictionary<string, object> prediction = arrayResults[0][0];
+                        if (prediction != null && 
+                            prediction.TryGetValue("label", out object labelObj) &&
+                            prediction.TryGetValue("score", out object scoreObj) &&
+                            labelObj != null && scoreObj != null)
                         {
-                            return float.Parse(statisticForCharacteristic["score"]);
+                            string label = labelObj.ToString().ToLower();
+                            if (double.TryParse(scoreObj.ToString(), out double score))
+                            {
+                                if (label == "offensive" && score > 0.6)
+                                {
+                                    return true;
+                                }
+                            }
                         }
                     }
                 }
+                catch (Exception)
+                {
+                    return false;
+                }
 
-                return 0;
+                return false;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine("Deserialization error: " + ex.Message);
-                return 0;
+                return false;
             }
         }
     }

@@ -1,8 +1,4 @@
-﻿// <copyright file="OffensiveTextDetector.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace DrinkDb_Auth.Service.AdminDashboard.Components
+﻿namespace DrinkDb_Auth.Service.AdminDashboard.Components
 {
     using System;
     using System.Collections.Generic;
@@ -12,40 +8,95 @@ namespace DrinkDb_Auth.Service.AdminDashboard.Components
     using System.Runtime.CompilerServices;
     using System.Text;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.ML;
     using Newtonsoft.Json;
 
-    /// <summary>
-    /// class for detecting offensive content.
-    /// </summary>
     public static class OffensiveTextDetector
     {
-        private static readonly string HuggingFaceApiUrl = "https://api-inference.huggingface.co/models/facebook/roberta-hate-speech-dynabench-r1-target";
-        private static readonly string HuggingFaceApiToken = string.Empty;
+        private static readonly string HuggingFaceApiUrl = "https://api-inference.huggingface.co/models/cardiffnlp/twitter-roberta-base-offensive";
+        private static readonly string HuggingFaceApiToken; // add your token in the appsettings.json file.
+        // MAKE SURE YOU NEVER COMMIT THE TOKEN
 
-        /// <summary>
-        /// Search for offensive content.
-        /// </summary>
-        /// <param name="text">review.</p aram>
-        /// <returns>json string with the results.</returns>
+        static OffensiveTextDetector()
+        {
+            string projectRoot = GetProjectRoot();
+            IConfiguration? configuration = new ConfigurationBuilder()
+                .SetBasePath(projectRoot)
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            HuggingFaceApiToken = configuration["HuggingFaceApiToken"] ?? string.Empty;
+        }
+
         public static string DetectOffensiveContent(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return "Error: Empty text provided";
+            }
+
+            return TryApiRequest(HuggingFaceApiUrl, text);
+        }
+
+        private static string GetProjectRoot([CallerFilePath] string filePath = "")
+        {
+            DirectoryInfo? directory = new FileInfo(filePath).Directory;
+            while (directory != null && !directory.GetFiles("*.csproj").Any())
+            {
+                directory = directory.Parent;
+            }
+
+            return directory?.FullName ?? throw new Exception("Project root not found!");
+        }
+
+        private static string TryApiRequest(string apiUrl, string text)
         {
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {HuggingFaceApiToken}");
-            StringContent jsonContent = new StringContent(JsonConvert.SerializeObject(text), Encoding.UTF8, "application/json");
+            client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 DrinkDBApp");
+            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+            var payload = new { inputs = text };
+            StringContent jsonContent = new StringContent(
+                JsonConvert.SerializeObject(payload),
+                Encoding.UTF8,
+                "application/json");
+
             try
             {
-                HttpResponseMessage response = client.PostAsync(HuggingFaceApiUrl, jsonContent).GetAwaiter().GetResult();
+                // client.Timeout = TimeSpan.FromSeconds(30);
+                HttpResponseMessage response = client.PostAsync(apiUrl, jsonContent).GetAwaiter().GetResult();
+                string responseContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
                 if (response.IsSuccessStatusCode)
                 {
-                    return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                    return responseContent;
                 }
 
-                return $"Error: {response.StatusCode}";
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    return "Error: Model not found. Please check the API endpoint.";
+                }
+
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    return "Error: Unauthorized. Please check your API token.";
+                }
+
+                return $"Error: {response.StatusCode} - {responseContent}";
+            }
+            catch (HttpRequestException ex)
+            {
+                return $"Error: Network error - {ex.Message}";
+            }
+            catch (TaskCanceledException)
+            {
+                return "Error: Request timed out. Please try again.";
             }
             catch (Exception ex)
             {
-                return $"Exception: {ex.Message}";
+                return $"Error: {ex.Message}";
             }
         }
     }

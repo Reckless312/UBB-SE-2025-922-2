@@ -33,8 +33,7 @@ namespace DrinkDb_Auth.Service.AdminDashboard
 
         public List<Review> GetFlaggedReviews()
         {
-            List<Review> reviews = reviewsRepository.GetAllReviews().Result;
-            return reviews.Where(review => review.NumberOfFlags > 0).ToList();
+            return reviewsRepository.GetFlaggedReviews(1).Result;
         }
 
         public List<Review> GetHiddenReviews()

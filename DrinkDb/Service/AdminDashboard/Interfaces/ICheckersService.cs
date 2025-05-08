@@ -1,8 +1,4 @@
-﻿// <copyright file="ICheckersService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace DrinkDb_Auth.Service.AdminDashboard.Interfaces
+﻿namespace DrinkDb_Auth.Service.AdminDashboard.Interfaces
 {
     using System;
     using System.Collections.Generic;

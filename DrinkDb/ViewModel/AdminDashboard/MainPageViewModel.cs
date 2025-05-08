@@ -1,7 +1,3 @@
-// <copyright file="MainPageViewModel.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace DrinkDb_Auth.ViewModel.AdminDashboard
 {
     using System;
@@ -11,16 +7,13 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
     using System.Linq;
     using System.Runtime.CompilerServices;
     using System.Windows.Input;
-    using DrinkDb_Auth.AutoChecker;
     using DataAccess.Model.AdminDashboard;
     using DataAccess.Model.Authentication;
+    using DrinkDb_Auth.AutoChecker;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using DrinkDb_Auth.ViewModel.AdminDashboard.Components;
     using DrinkDb_Auth.Service;
 
-    /// <summary>
-    /// View model for the main page that handles review moderation and user management.
-    /// </summary>
     public class MainPageViewModel : INotifyPropertyChanged
     {
         private readonly IReviewService reviewsService;
@@ -42,14 +35,6 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         private bool isAppealUserBanned = true;
         private bool isWordListVisible = false;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MainPageViewModel"/> class.
-        /// </summary>
-        /// <param name="reviewsService">The service for handling review data.</param>
-        /// <param name="userService">The service for managing user data.</param>
-        /// <param name="upgradeRequestsService">The service for handling role upgrade requests.</param>
-        /// <param name="checkersService">The service for content checking operations.</param>
-        /// <param name="autoCheck">The automated content checking service.</param>
         public MainPageViewModel(
             IReviewService reviewsService,
             IUserService userService,
@@ -59,315 +44,217 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         {
             this.reviewsService = reviewsService ?? throw new ArgumentNullException(nameof(reviewsService));
             this.userService = userService ?? throw new ArgumentNullException(nameof(userService));
-            requestsService = upgradeRequestsService ?? throw new ArgumentNullException(nameof(upgradeRequestsService));
+            this.requestsService = upgradeRequestsService ?? throw new ArgumentNullException(nameof(upgradeRequestsService));
             this.checkersService = checkersService ?? throw new ArgumentNullException(nameof(checkersService));
             this.autoCheck = autoCheck ?? throw new ArgumentNullException(nameof(autoCheck));
 
-            InitializeCommands();
+            this.InitializeCommands();
 
-            LoadAllData();
+            this.LoadAllData();
         }
 
-        /// <summary>
-        /// Event that fires when a property value changes.
-        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
-        /// <summary>
-        /// Gets the command to maintain a user's ban status.
-        /// </summary>
         public ICommand KeepBanCommand { get; private set; }
 
-        /// <summary>
-        /// Gets the command to accept a user's appeal.
-        /// </summary>
         public ICommand AcceptAppealCommand { get; private set; }
 
-        /// <summary>
-        /// Gets the command to close an appeal case.
-        /// </summary>
         public ICommand CloseAppealCaseCommand { get; private set; }
 
-        /// <summary>
-        /// Gets the command to handle an upgrade request.
-        /// </summary>
         public ICommand HandleUpgradeRequestCommand { get; private set; }
 
-        /// <summary>
-        /// Gets the command to reset flags on a review.
-        /// </summary>
         public ICommand ResetReviewFlagsCommand { get; private set; }
 
-        /// <summary>
-        /// Gets the command to hide a review.
-        /// </summary>
         public ICommand HideReviewCommand { get; private set; }
 
-        /// <summary>
-        /// Gets the command to run an AI check on a review.
-        /// </summary>
         public ICommand RunAICheckCommand { get; private set; }
 
-        /// <summary>
-        /// Gets the command to run an automatic check on all flagged reviews.
-        /// </summary>
         public ICommand RunAutoCheckCommand { get; private set; }
 
-        /// <summary>
-        /// Gets the command to add a word to the offensive word list.
-        /// </summary>
         public ICommand AddOffensiveWordCommand { get; private set; }
 
-        /// <summary>
-        /// Gets the command to delete a word from the offensive word list.
-        /// </summary>
         public ICommand DeleteOffensiveWordCommand { get; private set; }
 
-        /// <summary>
-        /// Gets the command to show the offensive word list popup.
-        /// </summary>
         public ICommand ShowWordListPopupCommand { get; private set; }
 
-        /// <summary>
-        /// Gets the command to hide the offensive word list popup.
-        /// </summary>
         public ICommand HideWordListPopupCommand { get; private set; }
 
-        /// <summary>
-        /// Gets or sets the collection of flagged reviews.
-        /// </summary>
         public ObservableCollection<Review> FlaggedReviews
         {
-            get => flaggedReviews;
+            get => this.flaggedReviews;
             set
             {
-                flaggedReviews = value;
-                OnPropertyChanged();
+                this.flaggedReviews = value;
+                this.OnPropertyChanged();
             }
         }
 
-        /// <summary>
-        /// Gets or sets the collection of users with active appeals.
-        /// </summary>
         public ObservableCollection<User> AppealsUsers
         {
-            get => appealsUsers;
+            get => this.appealsUsers;
             set
             {
-                appealsUsers = value;
-                OnPropertyChanged();
+                this.appealsUsers = value;
+                this.OnPropertyChanged();
             }
         }
 
-        /// <summary>
-        /// Gets or sets the collection of upgrade requests.
-        /// </summary>
         public ObservableCollection<UpgradeRequest> UpgradeRequests
         {
-            get => upgradeRequests;
+            get => this.upgradeRequests;
             set
             {
-                upgradeRequests = value;
-                OnPropertyChanged();
+                this.upgradeRequests = value;
+                this.OnPropertyChanged();
             }
         }
 
-        /// <summary>
-        /// Gets or sets the collection of offensive words.
-        /// </summary>
         public ObservableCollection<string> OffensiveWords
         {
-            get => offensiveWords;
+            get => this.offensiveWords;
             set
             {
-                offensiveWords = value;
-                OnPropertyChanged();
+                this.offensiveWords = value;
+                this.OnPropertyChanged();
             }
         }
 
-        /// <summary>
-        /// Gets or sets the currently selected user for appeal review.
-        /// </summary>
         public User SelectedAppealUser
         {
-            get => selectedAppealUser;
+            get => this.selectedAppealUser;
             set
             {
-                selectedAppealUser = value;
+                this.selectedAppealUser = value;
                 if (value != null)
                 {
-                    LoadUserAppealDetails(value);
+                    this.LoadUserAppealDetails(value);
                 }
 
-                OnPropertyChanged();
+                this.OnPropertyChanged();
             }
         }
 
-        /// <summary>
-        /// Gets or sets the currently selected upgrade request.
-        /// </summary>
         public UpgradeRequest SelectedUpgradeRequest
         {
-            get => selectedUpgradeRequest;
+            get => this.selectedUpgradeRequest;
             set
             {
-                selectedUpgradeRequest = value;
+                this.selectedUpgradeRequest = value;
                 if (value != null)
                 {
-                    LoadUpgradeRequestDetails(value);
+                    this.LoadUpgradeRequestDetails(value);
                 }
 
-                OnPropertyChanged();
+                this.OnPropertyChanged();
             }
         }
 
-        /// <summary>
-        /// Gets or sets the formatted reviews for the selected user.
-        /// </summary>
         public ObservableCollection<string> UserReviewsFormatted
         {
-            get => userReviewsFormatted;
+            get => this.userReviewsFormatted;
             set
             {
-                userReviewsFormatted = value;
-                OnPropertyChanged();
+                this.userReviewsFormatted = value;
+                this.OnPropertyChanged();
             }
         }
 
-        /// <summary>
-        /// Gets or sets the reviews with flag information for the selected user.
-        /// </summary>
         public ObservableCollection<string> UserReviewsWithFlags
         {
-            get => userReviewsWithFlags;
+            get => this.userReviewsWithFlags;
             set
             {
-                userReviewsWithFlags = value;
-                OnPropertyChanged();
+                this.userReviewsWithFlags = value;
+                this.OnPropertyChanged();
             }
         }
 
-        /// <summary>
-        /// Gets or sets the display text for user status information.
-        /// </summary>
         public string UserStatusDisplay
         {
-            get => userStatusDisplay;
+            get => this.userStatusDisplay;
             set
             {
-                userStatusDisplay = value;
-                OnPropertyChanged();
+                this.userStatusDisplay = value;
+                this.OnPropertyChanged();
             }
         }
 
-        /// <summary>
-        /// Gets or sets the display text for user upgrade information.
-        /// </summary>
         public string UserUpgradeInfo
         {
-            get => userUpgradeInfo;
+            get => this.userUpgradeInfo;
             set
             {
-                userUpgradeInfo = value;
-                OnPropertyChanged();
+                this.userUpgradeInfo = value;
+                this.OnPropertyChanged();
             }
         }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether the selected appeal user is banned.
-        /// </summary>
         public bool IsAppealUserBanned
         {
-            get => isAppealUserBanned;
+            get => this.isAppealUserBanned;
             set
             {
-                isAppealUserBanned = value;
-                UserStatusDisplay = GetUserStatusDisplay(SelectedAppealUser, value);
-                OnPropertyChanged();
+                this.isAppealUserBanned = value;
+                this.UserStatusDisplay = this.GetUserStatusDisplay(this.SelectedAppealUser, value);
+                this.OnPropertyChanged();
             }
         }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether the offensive word list popup is visible.
-        /// </summary>
         public bool IsWordListVisible
         {
-            get => isWordListVisible;
+            get => this.isWordListVisible;
             set
             {
-                isWordListVisible = value;
-                OnPropertyChanged();
+                this.isWordListVisible = value;
+                this.OnPropertyChanged();
             }
         }
 
-        /// <summary>
-        /// Loads all data required by the view model.
-        /// </summary>
         public void LoadAllData()
         {
-            LoadFlaggedReviews();
-            LoadAppeals();
-            LoadRoleRequests();
-            LoadOffensiveWords();
+            this.LoadFlaggedReviews();
+            this.LoadAppeals();
+            this.LoadRoleRequests();
+            this.LoadOffensiveWords();
         }
 
-        /// <summary>
-        /// Loads the flagged reviews from the reviews service.
-        /// </summary>
         public void LoadFlaggedReviews()
         {
-            FlaggedReviews = new ObservableCollection<Review>(reviewsService.GetFlaggedReviews());
+            this.FlaggedReviews = new ObservableCollection<Review>(this.reviewsService.GetFlaggedReviews());
         }
 
-        /// <summary>
-        /// Loads the banned users who have submitted appeals.
-        /// </summary>
         public void LoadAppeals()
         {
-            AppealsUsers = new ObservableCollection<User>(userService.GetBannedUsersWhoHaveSubmittedAppeals().Result);
+            this.AppealsUsers = new ObservableCollection<User>(this.userService.GetBannedUsersWhoHaveSubmittedAppeals().Result);
         }
 
-        /// <summary>
-        /// Loads the role upgrade requests.
-        /// </summary>
         public void LoadRoleRequests()
         {
-            UpgradeRequests = new ObservableCollection<UpgradeRequest>(requestsService.RetrieveAllUpgradeRequests());
+            this.UpgradeRequests = new ObservableCollection<UpgradeRequest>(this.requestsService.RetrieveAllUpgradeRequests());
         }
 
-        /// <summary>
-        /// Loads the list of offensive words.
-        /// </summary>
         public void LoadOffensiveWords()
         {
-            OffensiveWords = new ObservableCollection<string>(checkersService.GetOffensiveWordsList());
+            this.OffensiveWords = new ObservableCollection<string>(this.checkersService.GetOffensiveWordsList());
         }
 
-        /// <summary>
-        /// Filters reviews based on content.
-        /// </summary>
-        /// <param name="filter">The filter string to apply.</param>
         public void FilterReviews(string filter)
         {
-            FlaggedReviews = new ObservableCollection<Review>(
-                reviewsService.FilterReviewsByContent(filter));
+            this.FlaggedReviews = new ObservableCollection<Review>(
+                this.reviewsService.FilterReviewsByContent(filter));
         }
 
-        /// <summary>
-        /// Filters appeals based on user information.
-        /// </summary>
-        /// <param name="filter">The filter string to apply.</param>
         public void FilterAppeals(string filter)
         {
             if (string.IsNullOrEmpty(filter))
             {
-                LoadAppeals();
+                this.LoadAppeals();
                 return;
             }
 
             filter = filter.ToLower();
-            AppealsUsers = new ObservableCollection<User>(
-                userService.GetBannedUsersWhoHaveSubmittedAppeals().Result
+            this.AppealsUsers = new ObservableCollection<User>(
+                this.userService.GetBannedUsersWhoHaveSubmittedAppeals().Result
                     .Where(user =>
                         user.EmailAddress.ToLower().Contains(filter) ||
                         user.Username.ToLower().Contains(filter) ||
@@ -375,85 +262,48 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
                     .ToList());
         }
 
-        /// <summary>
-        /// Resets the flags on a review.
-        /// </summary>
-        /// <param name="reviewId">The ID of the review to reset.</param>
         public void ResetReviewFlags(int reviewId)
         {
-            reviewsService.ResetReviewFlags(reviewId);
-            LoadFlaggedReviews();
+            this.reviewsService.ResetReviewFlags(reviewId);
+            this.LoadFlaggedReviews();
         }
 
-        /// <summary>
-        /// Hides a review and resets its flags.
-        /// </summary>
-        /// <param name="userId">The ID of the user who owns the review.</param>
-        /// <param name="reviewId">The ID of the review to hide.</param>
         public void HideReview(int reviewId)
         {
-            reviewsService.HideReview(reviewId);
-            reviewsService.ResetReviewFlags(reviewId);
-            LoadFlaggedReviews();
+            this.reviewsService.HideReview(reviewId);
+            this.reviewsService.ResetReviewFlags(reviewId);
+            this.LoadFlaggedReviews();
         }
 
-        /// <summary>
-        /// Runs an AI check on a single review.
-        /// </summary>
-        /// <param name="review">The review to check.</param>
         public void RunAICheck(Review review)
         {
-            checkersService.RunAICheckForOneReview(review);
-            LoadFlaggedReviews();
+            this.checkersService.RunAICheckForOneReview(review);
+            this.LoadFlaggedReviews();
         }
 
-        /// <summary>
-        /// Runs an automatic check on all flagged reviews.
-        /// </summary>
-        /// <returns>A list of messages from the checker.</returns>
         public List<string> RunAutoCheck()
         {
-            List<Review> reviews = reviewsService.GetFlaggedReviews();
-            List<string> messages = checkersService.RunAutoCheck(reviews);
-            LoadFlaggedReviews();
+            List<Review> reviews = this.reviewsService.GetFlaggedReviews();
+            List<string> messages = this.checkersService.RunAutoCheck(reviews);
+            this.LoadFlaggedReviews();
             return messages;
         }
 
-        /// <summary>
-        /// Adds a word to the offensive words list.
-        /// </summary>
-        /// <param name="word">The word to add.</param>
         public void AddOffensiveWord(string word)
         {
             if (!string.IsNullOrWhiteSpace(word))
             {
-                checkersService.AddOffensiveWord(word);
-                LoadOffensiveWords();
+                this.checkersService.AddOffensiveWord(word);
+                this.LoadOffensiveWords();
             }
         }
 
-        /// <summary>
-        /// Deletes a word from the offensive words list.
-        /// </summary>
-        /// <param name="word">The word to delete.</param>
         public void DeleteOffensiveWord(string word)
         {
-            checkersService.DeleteOffensiveWord(word);
-            LoadOffensiveWords();
+            this.checkersService.DeleteOffensiveWord(word);
+            this.LoadOffensiveWords();
         }
 
-        /// <summary>
-        /// Handles a role upgrade request.
-        /// </summary>
-        /// <param name="approve">Whether to approve the request.</param>
-        /// <param name="requestId">The ID of the request.</param>
-        // Add this method to your MainPageViewModel class
-
-        /// <summary>
-        /// Handles the upgrade request synchronously.
-        /// </summary>
-        /// <param name="isAccepted">Whether the request was accepted.</param>
-        /// <param name="requestId">The ID of the upgrade request.</param>
         public void HandleUpgradeRequest(bool isAccepted, int requestId)
         {
             try
@@ -484,74 +334,42 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             }
         }
 
-        /// <summary>
-        /// Closes an appeal case for a user.
-        /// </summary>
-        /// <param name="user">The user whose appeal case should be closed.</param>
         public void CloseAppealCase(User user)
         {
             user.HasSubmittedAppeal = false;
-            LoadAppeals();
+            this.LoadAppeals();
         }
 
-        /// <summary>
-        /// Gets reviews by a specific user.
-        /// </summary>
-        /// <param name="userId">The ID of the user.</param>
-        /// <returns>A list of reviews by the user.</returns>
         public List<Review> GetUserReviews(Guid userId)
         {
-            return reviewsService.GetReviewsByUser(userId);
+            return this.reviewsService.GetReviewsByUser(userId);
         }
 
-        /// <summary>
-        /// Gets a user by their ID.
-        /// </summary>
-        /// <param name="userId">The ID of the user.</param>
-        /// <returns>The user object.</returns>
         public User GetUserById(Guid userId)
         {
-            return userService.GetUserById(userId).Result;
+            return this.userService.GetUserById(userId).Result;
         }
 
-        /// <summary>
-        /// Gets the highest role type for a user.
-        /// </summary>
-        /// <param name="userId">The ID of the user.</param>
-        /// <returns>The highest role type.</returns>
         public RoleType GetHighestRoleTypeForUser(Guid userId)
         {
-            return userService.GetHighestRoleTypeForUser(userId).Result;
+            return this.userService.GetHighestRoleTypeForUser(userId).Result;
         }
 
-        /// <summary>
-        /// Gets the name of a role based on its ID.
-        /// </summary>
-        /// <param name="roleType">The role type.</param>
-        /// <returns>The role name.</returns>
         public string GetRoleNameBasedOnID(RoleType roleType)
         {
-            return requestsService.GetRoleNameBasedOnIdentifier(roleType);
+            return this.requestsService.GetRoleNameBasedOnIdentifier(roleType);
         }
 
-        /// <summary>
-        /// Loads appeal details for a user.
-        /// </summary>
-        /// <param name="user">The user to load details for.</param>
         public void LoadUserAppealDetails(User user)
         {
-            IsAppealUserBanned = true;
-            UserStatusDisplay = GetUserStatusDisplay(user, true);
+            this.IsAppealUserBanned = true;
+            this.UserStatusDisplay = this.GetUserStatusDisplay(user, true);
 
             List<Review> reviews = this.GetUserReviews(user.UserId);
-            UserReviewsFormatted = new ObservableCollection<string>(
-                reviews.Select(r => FormatReviewContent(r)).ToList());
+            this.UserReviewsFormatted = new ObservableCollection<string>(
+                reviews.Select(r => this.FormatReviewContent(r)).ToList());
         }
 
-        /// <summary>
-        /// Maintains a ban on a user.
-        /// </summary>
-        /// <param name="user">The user to keep banned.</param>
         public void KeepBanForUser(User user)
         {
             if (user == null)
@@ -559,62 +377,47 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
                 return;
             }
 
-            UpdateUserRole(user, RoleType.Banned);
-            UpdateUserHasAppealed(user, false);
-            IsAppealUserBanned = true;
-            UserStatusDisplay = GetUserStatusDisplay(user, true);
+            this.UpdateUserRole(user, RoleType.Banned);
+            this.UpdateUserHasAppealed(user, false);
+            this.IsAppealUserBanned = true;
+            this.UserStatusDisplay = this.GetUserStatusDisplay(user, true);
         }
 
-        /// <summary>
-        /// Accepts an appeal from a user, removing their ban.
-        /// </summary>
-        /// <param name="user">The user to unban.</param>
         public void AcceptAppealForUser(User user)
         {
             if (user == null)
             {
                 return;
             }
-            UpdateUserRole(user, RoleType.User);
+            this.UpdateUserRole(user, RoleType.User);
             User updatedUser = GetUserById(user.UserId);
-            UpdateUserHasAppealed(updatedUser, false);
-            
-            IsAppealUserBanned = false;
-            UserStatusDisplay = GetUserStatusDisplay(user, false);
+            this.UpdateUserHasAppealed(updatedUser, false);
+            this.IsAppealUserBanned = false;
+            this.UserStatusDisplay = this.GetUserStatusDisplay(user, false);
         }
 
         private void UpdateUserHasAppealed(User user, bool newValue)
         {
-            userService.UpdateUserAppleaed(user,newValue);
+            this.userService.UpdateUserAppleaed(user, newValue);
         }
 
-        /// <summary>
-        /// Loads upgrade request details.
-        /// </summary>
-        /// <param name="request">The upgrade request to load details for.</param>
         public void LoadUpgradeRequestDetails(UpgradeRequest request)
         {
-            SelectedUpgradeRequest = request;
+            this.SelectedUpgradeRequest = request;
 
             Guid userId = request.RequestingUserIdentifier;
-            User selectedUser = GetUserById(userId);
+            User selectedUser = this.GetUserById(userId);
             RoleType currentRoleID = this.GetHighestRoleTypeForUser(selectedUser.UserId);
-            string currentRoleName = GetRoleNameBasedOnID(currentRoleID);
-            string requiredRoleName = GetRoleNameBasedOnID(currentRoleID + 1);
+            string currentRoleName = this.GetRoleNameBasedOnID(currentRoleID);
+            string requiredRoleName = this.GetRoleNameBasedOnID(currentRoleID + 1);
 
-            UserUpgradeInfo = FormatUserUpgradeInfo(selectedUser, currentRoleName, requiredRoleName);
+            this.UserUpgradeInfo = this.FormatUserUpgradeInfo(selectedUser, currentRoleName, requiredRoleName);
 
             List<Review> reviews = this.GetUserReviews(selectedUser.UserId);
-            UserReviewsWithFlags = new ObservableCollection<string>(
-                reviews.Select(r => FormatReviewWithFlags(r)).ToList());
+            this.UserReviewsWithFlags = new ObservableCollection<string>(
+                reviews.Select(r => this.FormatReviewWithFlags(r)).ToList());
         }
 
-        /// <summary>
-        /// Formats the user status display tex
-        /// </summary>
-        /// <param name="user">The user to display status for.</param>
-        /// <param name="isBanned">Whether the user is banned.</param>
-        /// <returns>The formatted status display text.</returns>
         public string GetUserStatusDisplay(User user, bool isBanned)
         {
             if (user == null)
@@ -625,13 +428,6 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             return $"User ID: {user.UserId}\nEmail: {user.EmailAddress}\nStatus: {(isBanned ? "Banned" : "Active")}";
         }
 
-        /// <summary>
-        /// Formats the user upgrade information text.
-        /// </summary>
-        /// <param name="user">The user to display upgrade info for.</param>
-        /// <param name="currentRoleName">The user's current role name.</param>
-        /// <param name="requiredRoleName">The role name the user is requesting.</param>
-        /// <returns>The formatted upgrade info text.</returns>
         public string FormatUserUpgradeInfo(User user, string currentRoleName, string requiredRoleName)
         {
             if (user == null)
@@ -642,11 +438,6 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             return $"User ID: {user.UserId}\nEmail: {user.EmailAddress}\n{currentRoleName} -> {requiredRoleName}";
         }
 
-        /// <summary>
-        /// Formats a review's content for display.
-        /// </summary>
-        /// <param name="review">The review to format.</param>
-        /// <returns>The formatted review content.</returns>
         public string FormatReviewContent(Review review)
         {
             if (review == null)
@@ -657,11 +448,6 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             return $"{review.Content}";
         }
 
-        /// <summary>
-        /// Formats a review with flag information for display.
-        /// </summary>
-        /// <param name="review">The review to format.</param>
-        /// <returns>The formatted review with flag information.</returns>
         public string FormatReviewWithFlags(Review review)
         {
             if (review == null)
@@ -672,72 +458,54 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             return $"{review.Content}\nFlags: {review.NumberOfFlags}";
         }
 
-        /// <summary>
-        /// Shows the offensive word list popup.
-        /// </summary>
         public void ShowWordListPopup()
         {
-            IsWordListVisible = true;
+            this.IsWordListVisible = true;
         }
 
-        /// <summary>
-        /// Hides the offensive word list popup.
-        /// </summary>
         public void HideWordListPopup()
         {
-            IsWordListVisible = false;
+            this.IsWordListVisible = false;
         }
 
-        /// <summary>
-        /// Notifies listeners that a property value has changed.
-        /// </summary>
-        /// <param name="propertyName">The name of the property that changed.</param>
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        /// <summary>
-        /// Initializes the commands used by the view model.
-        /// </summary>
         private void InitializeCommands()
         {
-            KeepBanCommand = new RelayCommand(() => KeepBanForUser(SelectedAppealUser));
-            AcceptAppealCommand = new RelayCommand(() => AcceptAppealForUser(SelectedAppealUser));
-            CloseAppealCaseCommand = new RelayCommand(() => CloseAppealCase(SelectedAppealUser));
+            this.KeepBanCommand = new RelayCommand(() => this.KeepBanForUser(this.SelectedAppealUser));
+            this.AcceptAppealCommand = new RelayCommand(() => this.AcceptAppealForUser(this.SelectedAppealUser));
+            this.CloseAppealCaseCommand = new RelayCommand(() => this.CloseAppealCase(this.SelectedAppealUser));
 
-            HandleUpgradeRequestCommand = new RelayCommand<Tuple<bool, int>>(param =>
-                HandleUpgradeRequest(param.Item1, param.Item2));
+            this.HandleUpgradeRequestCommand = new RelayCommand<Tuple<bool, int>>(param =>
+                this.HandleUpgradeRequest(param.Item1, param.Item2));
 
-            ResetReviewFlagsCommand = new RelayCommand<int>(reviewId =>
-                ResetReviewFlags(reviewId));
+            this.ResetReviewFlagsCommand = new RelayCommand<int>(reviewId =>
+                this.ResetReviewFlags(reviewId));
 
-            HideReviewCommand = new RelayCommand<int>(param =>
-                HideReview(param));
+            this.HideReviewCommand = new RelayCommand<int>(param =>
+                this.HideReview(param));
 
-            RunAICheckCommand = new RelayCommand<Review>(review =>
-                RunAICheck(review));
+            this.RunAICheckCommand = new RelayCommand<Review>(review =>
+                this.RunAICheck(review));
 
-            RunAutoCheckCommand = new RelayCommand(() => RunAutoCheck());
+            this.RunAutoCheckCommand = new RelayCommand(() => this.RunAutoCheck());
 
-            AddOffensiveWordCommand = new RelayCommand<string>(word =>
-                AddOffensiveWord(word));
+            this.AddOffensiveWordCommand = new RelayCommand<string>(word =>
+                this.AddOffensiveWord(word));
 
-            DeleteOffensiveWordCommand = new RelayCommand<string>(word =>
-                DeleteOffensiveWord(word));
+            this.DeleteOffensiveWordCommand = new RelayCommand<string>(word =>
+                this.DeleteOffensiveWord(word));
 
-            ShowWordListPopupCommand = new RelayCommand(() => ShowWordListPopup());
-            HideWordListPopupCommand = new RelayCommand(() => HideWordListPopup());
+            this.ShowWordListPopupCommand = new RelayCommand(() => this.ShowWordListPopup());
+            this.HideWordListPopupCommand = new RelayCommand(() => this.HideWordListPopup());
         }
 
-        /// <summary>
-        /// Updates a user's role.
-        /// </summary>
-        /// <param name="user">The user to update.</param>
-        /// <param name="roleType">The role type to assign.</param>
         private void UpdateUserRole(User user, RoleType roleType)
         {
-            userService.UpdateUserRole(user.UserId, roleType);
+            this.userService.UpdateUserRole(user.UserId, roleType);
         }
     }
 }
