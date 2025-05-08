@@ -6,11 +6,13 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DrinkDb_Auth.AuthProviders.Facebook;
-using DrinkDb_Auth.Repository.AdminDashboard;
-using DrinkDb_Auth.Repository.Authentication;
+using DrinkDb_Auth.ProxyRepository.AdminDashboard;
+using DrinkDb_Auth.ProxyRepository.Authentification;
 using Moq;
 using Moq.Protected;
 using NUnit.Framework;
+using Repository.AdminDashboard;
+using Repository.Authentication;
 using Tests;
 
 namespace TestTest.Authentication.Facebook
@@ -46,18 +48,18 @@ namespace TestTest.Authentication.Facebook
             sessionAdapterField.SetValue(null, _mockSessionAdapter);
         }
 
-        [TearDown]
-        public void TearDown()
-        {
+        //[TearDown]
+        //public void TearDown()
+        //{
 
-            var userAdapterField = typeof(FacebookOAuth2Provider)
-                .GetField("UserAdapter", BindingFlags.NonPublic | BindingFlags.Static);
-            userAdapterField.SetValue(null, new UserRepository());
+        //    var userAdapterField = typeof(FacebookOAuth2Provider)
+        //        .GetField("UserAdapter", BindingFlags.NonPublic | BindingFlags.Static);
+        //    userAdapterField.SetValue(null, new UserRepository());
 
-            var sessionAdapterField = typeof(FacebookOAuth2Provider)
-                .GetField("SessionAdapter", BindingFlags.NonPublic | BindingFlags.Static);
-            sessionAdapterField.SetValue(null, new SessionRepository());
-        }
+        //    var sessionAdapterField = typeof(FacebookOAuth2Provider)
+        //        .GetField("SessionAdapter", BindingFlags.NonPublic | BindingFlags.Static);
+        //    sessionAdapterField.SetValue(null, new SessionRepository());
+        //}
 
         private void SetupMockHttpResponse(string jsonContent)
         {

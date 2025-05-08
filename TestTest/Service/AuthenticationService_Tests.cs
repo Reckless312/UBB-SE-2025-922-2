@@ -1,4 +1,5 @@
-﻿using DrinkDb_Auth.OAuthProviders;
+﻿using Azure;
+using DrinkDb_Auth.OAuthProviders;
 using DrinkDb_Auth.Service;
 using DrinkDb_Auth.Service.Authentication;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -11,7 +12,7 @@ namespace TestTest.Service
     [TestClass]
     public sealed class AuthenticationService_Tests
     {
-        
+
         [TestMethod]
         public async Task AuthWithOAuth_Google()
         {
@@ -21,10 +22,12 @@ namespace TestTest.Service
             google.MockId = id;
             var response = await service.AuthWithOAuth(null, OAuthService.Google, google);
 
+
             AuthenticationResponse authResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = id };
 
-            Assert.AreEqual(response, authResponse);
+            Assert.AreEqual<AuthenticationResponse>(response, authResponse);
         }
+
 
         [TestMethod]
         public async Task AuthWithOAuth_Facebook()
@@ -37,8 +40,10 @@ namespace TestTest.Service
 
             var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = id };
 
-            Assert.AreEqual(response, expectedResponse);
+            Assert.AreEqual<AuthenticationResponse>(expectedResponse, response);
         }
+
+
 
         [TestMethod]
         public async Task AuthWithOAuth_Twitter()
@@ -51,8 +56,11 @@ namespace TestTest.Service
 
             var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = id };
 
-            Assert.AreEqual(response, expectedResponse);
+            Assert.AreEqual<AuthenticationResponse>(expectedResponse, response);
         }
+
+
+
 
         [TestMethod]
         public async Task AuthWithOAuth_Github()
@@ -65,7 +73,7 @@ namespace TestTest.Service
 
             var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = id };
 
-            Assert.AreEqual(response, expectedResponse);
+            Assert.AreEqual<AuthenticationResponse>(expectedResponse, response);
         }
 
         [TestMethod]
@@ -79,11 +87,11 @@ namespace TestTest.Service
 
             var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = id };
 
-            Assert.AreEqual(response, expectedResponse);
+            Assert.AreEqual<AuthenticationResponse>(expectedResponse, response);
         }
 
         [TestMethod]
-        public void AuthWithUserPass_Success()
+        public async Task AuthWithUserPass_Success()
         {
             var basicAuth = new MockBasicAuth();
             basicAuth.Succeeds = true;
@@ -96,28 +104,29 @@ namespace TestTest.Service
 
             AuthenticationService service = new AuthenticationService(new MockLinkedInServer(), new MockGitHubServer(), new MockFacebookServer(), userAdapter, sessionAdapter, basicAuth);
 
-            var response = service.AuthWithUserPass(userAdapter.MockUsername, "");
+            var  response = await service.AuthWithUserPass(userAdapter.MockUsername, "");
 
             var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = true, NewAccount = false, OAuthToken = string.Empty, SessionId = userAdapter.MockId };
             Assert.AreEqual(expectedResponse, response);
         }
 
+
         [TestMethod]
-        public void AuthWithUserPass_Fail()
+        public async Task AuthWithUserPass_Fail()
         {
             var basicAuth = new MockBasicAuth();
             basicAuth.Succeeds = false;
 
             AuthenticationService service = new AuthenticationService(new MockLinkedInServer(), new MockGitHubServer(), new MockFacebookServer(), new MockUserAdapter(), new MockSessionAdapter(), basicAuth);
 
-            var response = service.AuthWithUserPass("", "");
+            var response = await service.AuthWithUserPass("", "");
 
             var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = Guid.Empty };
             Assert.AreEqual(expectedResponse, response);
         }
 
         [TestMethod]
-        public void AuthWithUserPass_Throws_UserNotFound()
+        public async Task AuthWithUserPass_Throws_UserNotFound()
         {
             var basicAuth = new MockBasicAuth();
             basicAuth.Succeeds = true;
@@ -130,11 +139,13 @@ namespace TestTest.Service
 
             AuthenticationService service = new AuthenticationService(new MockLinkedInServer(), new MockGitHubServer(), new MockFacebookServer(), userAdapter, sessionAdapter, basicAuth);
 
-            var response = service.AuthWithUserPass("wronguser", "");
+            var response = await service.AuthWithUserPass("wronguser", "");
 
             var expectedResponse = new AuthenticationResponse { AuthenticationSuccessful = true, NewAccount = true, OAuthToken = string.Empty, SessionId = mockId };
-        
+
             Assert.AreEqual(expectedResponse, response);
         }
     }
 }
+
+

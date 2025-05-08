@@ -1,6 +1,7 @@
 ﻿using DataAccess.Model;
 using DataAccess.Model.AdminDashboard;
 using DataAccess.Model.Authentication;
+using IRepository;
 using System;
 using System.Collections.Generic;
 
@@ -75,6 +76,61 @@ namespace Tests.CoraMockUps
         public void AddRoleToUser(int v, Role role)
         {
             throw new NotImplementedException();
+        }
+
+        Task<List<User>> IUserRepository.GetUsersWhoHaveSubmittedAppeals()
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<List<User>> IUserRepository.GetBannedUsersWhoHaveSubmittedAppeals()
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<List<User>> IUserRepository.GetUsersByRoleType(RoleType roleType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<RoleType> GetRoleTypeForUser(Guid userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task ChangeRoleToUser(Guid userID, Role roleToAdd)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<List<User>> IUserRepository.GetAllUsers()
+        {
+            return Task.FromResult(GetAllUsers());
+        }
+
+        Task<bool> IUserRepository.ValidateAction(Guid userId, string resource, string action)
+        {
+            return Task.FromResult(ValidateAction(userId, resource, action));
+        }
+
+        Task<User?> IUserRepository.GetUserByUsername(string username)
+        {
+            return Task.FromResult(GetUserByUsername(username));
+        }
+
+        Task<User?> IUserRepository.GetUserById(Guid userId)
+        {
+            return Task.FromResult(GetUserById(userId));
+        }
+
+        Task<bool> IUserRepository.CreateUser(User user)
+        {
+            return Task.FromResult(CreateUser(user));
+        }
+
+        Task<bool> IUserRepository.UpdateUser(User user)
+        {
+            return Task.FromResult(UpdateUser(user));
         }
     }
 }

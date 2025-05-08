@@ -30,17 +30,16 @@ namespace UnitTests.Users
             {
                 new Role(RoleType.User, "User"),
             };
-            var exception = Record.Exception(() => new User { UserId = userId, EmailAddress = emailAddress, Username = fullName, NumberOfDeletedReviews = numberOfDeletedReviews, AssignedRoles = assignedRoles, HasSubmittedAppeal = hasSubmittedAppeal, PasswordHash = String.Empty, TwoFASecret = String.Empty });
+            var exception = Record.Exception(() => new User { UserId = userId, EmailAddress = emailAddress, Username = fullName, NumberOfDeletedReviews = numberOfDeletedReviews, HasSubmittedAppeal = hasSubmittedAppeal, PasswordHash = String.Empty, TwoFASecret = String.Empty });
             Assert.Null(exception);
 
-            User user = new User { UserId = userId, EmailAddress = emailAddress, Username = fullName, NumberOfDeletedReviews = numberOfDeletedReviews, AssignedRoles = assignedRoles, HasSubmittedAppeal = hasSubmittedAppeal, PasswordHash = String.Empty, TwoFASecret = String.Empty };
+            User user = new User { UserId = userId, EmailAddress = emailAddress, Username = fullName, NumberOfDeletedReviews = numberOfDeletedReviews, HasSubmittedAppeal = hasSubmittedAppeal, PasswordHash = String.Empty, TwoFASecret = String.Empty };
 
             Assert.Equal(userId, user.UserId);
             Assert.Equal(emailAddress, user.EmailAddress);
             Assert.Equal(fullName, user.Username);
             Assert.Equal(numberOfDeletedReviews, user.NumberOfDeletedReviews);
             Assert.True(user.HasSubmittedAppeal);
-            Assert.Equal(assignedRoles, user.AssignedRoles);
         }
     }
 }
