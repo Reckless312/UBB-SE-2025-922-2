@@ -8,9 +8,9 @@
     using System.Runtime.CompilerServices;
     using System.Text;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.ML;
     using Newtonsoft.Json;
-    using Microsoft.Extensions.Configuration;
 
     public static class OffensiveTextDetector
     {
@@ -20,13 +20,23 @@
 
         static OffensiveTextDetector()
         {
-            var projectRoot = GetProjectRoot();
-            var configuration = new ConfigurationBuilder()
+            string projectRoot = GetProjectRoot();
+            IConfiguration? configuration = new ConfigurationBuilder()
                 .SetBasePath(projectRoot)
                 .AddJsonFile("appsettings.json")
                 .Build();
 
             HuggingFaceApiToken = configuration["HuggingFaceApiToken"] ?? string.Empty;
+        }
+
+        public static string DetectOffensiveContent(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return "Error: Empty text provided";
+            }
+
+            return TryApiRequest(HuggingFaceApiUrl, text);
         }
 
         private static string GetProjectRoot([CallerFilePath] string filePath = "")
@@ -38,16 +48,6 @@
             }
 
             return directory?.FullName ?? throw new Exception("Project root not found!");
-        }
-
-        public static string DetectOffensiveContent(string text)
-        {
-            if (string.IsNullOrEmpty(text))
-            {
-                return "Error: Empty text provided";
-            }
-
-            return TryApiRequest(HuggingFaceApiUrl, text);
         }
 
         private static string TryApiRequest(string apiUrl, string text)
@@ -65,7 +65,7 @@
 
             try
             {
-                //client.Timeout = TimeSpan.FromSeconds(30);
+                // client.Timeout = TimeSpan.FromSeconds(30);
                 HttpResponseMessage response = client.PostAsync(apiUrl, jsonContent).GetAwaiter().GetResult();
                 string responseContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 

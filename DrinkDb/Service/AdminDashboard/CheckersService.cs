@@ -1,7 +1,4 @@
-﻿using DrinkDb_Auth.Service.AdminDashboard.Components;
-using System;
-
-namespace DrinkDb_Auth.Service.AdminDashboard
+﻿namespace DrinkDb_Auth.Service.AdminDashboard
 {
     using System;
     using System.Collections.Generic;
@@ -11,8 +8,9 @@ namespace DrinkDb_Auth.Service.AdminDashboard
     using System.Runtime.CompilerServices;
     using System.Text;
     using System.Threading.Tasks;
-    using DrinkDb_Auth.AutoChecker;
     using DataAccess.Model.AdminDashboard;
+    using DrinkDb_Auth.AutoChecker;
+    using DrinkDb_Auth.Service.AdminDashboard.Components;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using Microsoft.ML;
     using Newtonsoft.Json;
@@ -30,16 +28,26 @@ namespace DrinkDb_Auth.Service.AdminDashboard
 
         public List<string> RunAutoCheck(List<Review> receivedReviews)
         {
+            if (receivedReviews == null)
+            {
+                return new List<string>();
+            }
+
             List<string> checkingMessages = new List<string>();
 
             foreach (Review currentReview in receivedReviews)
             {
-                bool reviewIsOffensive = autoCheck.AutoCheckReview(currentReview.Content);
+                if (currentReview?.Content == null)
+                {
+                    continue;
+                }
+
+                bool reviewIsOffensive = this.autoCheck.AutoCheckReview(currentReview.Content);
                 if (reviewIsOffensive)
                 {
                     checkingMessages.Add($"Review {currentReview.ReviewId} is offensive. Hiding the review.");
-                    reviewsService.HideReview(currentReview.ReviewId);
-                    reviewsService.ResetReviewFlags(currentReview.ReviewId);
+                    this.reviewsService.HideReview(currentReview.ReviewId);
+                    this.reviewsService.ResetReviewFlags(currentReview.ReviewId);
                 }
                 else
                 {
@@ -52,64 +60,80 @@ namespace DrinkDb_Auth.Service.AdminDashboard
 
         public HashSet<string> GetOffensiveWordsList()
         {
-            return autoCheck.GetOffensiveWordsList();
+            return this.autoCheck?.GetOffensiveWordsList() ?? new HashSet<string>();
         }
 
         public void AddOffensiveWord(string newWord)
         {
-            autoCheck.AddOffensiveWord(newWord);
+            if (string.IsNullOrWhiteSpace(newWord))
+            {
+                return;
+            }
+
+            this.autoCheck?.AddOffensiveWord(newWord);
         }
 
         public void DeleteOffensiveWord(string word)
         {
-            autoCheck.DeleteOffensiveWord(word);
+            if (string.IsNullOrWhiteSpace(word))
+            {
+                return;
+            }
+
+            this.autoCheck?.DeleteOffensiveWord(word);
         }
 
         public void RunAICheckForOneReview(Review review)
         {
-            if (review == null)
+            if (review?.Content == null)
             {
-                Console.WriteLine("Review not found.");
                 return;
             }
 
-            bool reviewIsOffensive = CheckReviewWithAI(review).GetAwaiter().GetResult();
+            bool reviewIsOffensive = CheckReviewWithAI(review);
             if (!reviewIsOffensive)
             {
                 return;
             }
 
-            Console.WriteLine($"Review {review.ReviewId} is offensive. Hiding the review.");
-            reviewsService.HideReview(review.ReviewId);
-            reviewsService.ResetReviewFlags(review.ReviewId);
+            this.reviewsService.HideReview(review.ReviewId);
+            this.reviewsService.ResetReviewFlags(review.ReviewId);
         }
 
-        private async Task<bool> CheckReviewWithAI(Review review)
+        private static bool CheckReviewWithAI(Review review)
         {
+            if (review?.Content == null)
+            {
+                return false;
+            }
+
             try
             {
                 string response = OffensiveTextDetector.DetectOffensiveContent(review.Content);
 
-                if (response.StartsWith("Error:") || response.StartsWith("Exception:"))
+                if (string.IsNullOrEmpty(response) || response.StartsWith("Error:") || response.StartsWith("Exception:"))
                 {
                     return false;
                 }
 
                 try
                 {
-                    var arrayResults = JsonConvert.DeserializeObject<List<List<Dictionary<string, object>>>>(response);
-                    if (arrayResults != null && arrayResults.Count > 0 && arrayResults[0].Count > 0)
+                    List<List<Dictionary<string, object>>> arrayResults = JsonConvert.DeserializeObject<List<List<Dictionary<string, object>>>>(response);
+                    if (arrayResults?.Count > 0 && arrayResults[0]?.Count > 0)
                     {
-                        var prediction = arrayResults[0][0];
-                        if (prediction.TryGetValue("label", out object labelObj) &&
-                            prediction.TryGetValue("score", out object scoreObj))
+                        Dictionary<string, object> prediction = arrayResults[0][0];
+                        if (prediction != null && 
+                            prediction.TryGetValue("label", out object labelObj) &&
+                            prediction.TryGetValue("score", out object scoreObj) &&
+                            labelObj != null && scoreObj != null)
                         {
                             string label = labelObj.ToString().ToLower();
-                            double score = Convert.ToDouble(scoreObj);
-
-                            if (label == "offensive" && score > 0.6)
+                            if (double.TryParse(scoreObj.ToString(), out double score))
                             {
-                                return true;
+                                if (label == "offensive" && score > 0.6)
+                                {
+                                    return true;
+                                }
                             }
                         }
                     }

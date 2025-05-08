@@ -28,21 +28,14 @@ namespace DrinkDb_Auth
     using Windows.ApplicationModel.Activation;
     using Windows.Media.Protection.PlayReady;
 
-    /// <summary>
-    /// Provides application-specific behavior to supplement the default Application class.
-    /// </summary>
     sealed partial class App : Application
     {
         public static Guid CurrentUserId { get; set; } = Guid.Empty;
         public static Guid CurrentSessionId { get; set; } = Guid.Empty;
 
-        /// <summary>
-        /// Initializes the singleton application object.  This is the first line of authored code
-        /// executed, and as such is the logical equivalent of main() or WinMain().
-        /// </summary>
         public App()
         {
-            InitializeComponent();
+            this.InitializeComponent();
             this.ConfigureHost();
         }
 
