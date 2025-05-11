@@ -1,5 +1,10 @@
 # DrinkDb
-Warning, this file will suffer changes when the merge is fully completed, it's role it's to combine the setup for both auth and admin functionality.
+
+## Database Connection
+- Change the database connection in ServerAPI folder
+- Use the following command to generate the database: "dotnet ef migrations add <migration_name>"
+- Now update to that migration: "dotnet ef database update"
+- Use this for any issues related to "dotnet ef" command not found: "dotnet tool install --global dotnet-ef"
 
 ## Authentication
 
@@ -39,15 +44,9 @@ A Windows desktop application providing authentication services for DrinkDb. Bui
      - LinkedIn: http://localhost:8891/
      - Google: Uses WebView2-based authentication
 
-  Dev Note: Only facebook suffered a registration change.
+  Dev Note: Facebook needs manual configuration for each user.
 
-3. Set up the database
-   - Run the SQL scripts in the `Database` folder to create the necessary tables:
-     - `CreateUserRolePermissionTables.sql`: Creates tables for users, roles, permissions, and their relationships
-     - `CreateSessionTable.sql`: Creates tables for session management
-   - Ensure your connection string is properly configured in `App.config` or `App.config.user`
-
-4. Build and run the application
+3. Build and run the application
    ```
    dotnet build
    dotnet run
@@ -77,8 +76,6 @@ A Windows desktop application providing authentication services for DrinkDb. Bui
 The application uses the following core data models:
 
 - **User**: Represents a user account with properties like UserId, Username, PasswordHash, and TwoFASecret
-- **Role**: Represents a user role (e.g., Admin, User)
-- **Permission**: Defines a specific permission with resource and action attributes
 - **Session**: Stores session information including tokens and expiration time
 
 #### Security Features
@@ -88,79 +85,10 @@ The application uses the following core data models:
 - **Two-Factor Authentication**: Additional security layer
 - **Session Management**: Secure session handling with timeout mechanisms
 
-### Database Schema
-
-The application uses the following SQL Server tables:
-
-- **Users**: Stores user account information
-  ```sql
-  CREATE TABLE Users (
-      userId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-      userName NVARCHAR(50) NOT NULL UNIQUE,
-      passwordHash NVARCHAR(255),
-      twoFASecret NVARCHAR(255)
-  );
-  ```
-
-- **Roles**: Defines user roles
-  ```sql
-  CREATE TABLE Roles (
-      roleId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-      roleName NVARCHAR(50) NOT NULL UNIQUE
-  );
-  ```
-
-- **Permissions**: Defines system permissions
-  ```sql
-  CREATE TABLE Permissions (
-      permissionId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-      permissionName NVARCHAR(50) NOT NULL,
-      resource NVARCHAR(100) NOT NULL,
-      action NVARCHAR(50) NOT NULL
-  );
-  ```
-
-- **RolePermissions**: Maps roles to permissions
-  ```sql
-  CREATE TABLE RolePermissions (
-      roleId UNIQUEIDENTIFIER NOT NULL,
-      permissionId UNIQUEIDENTIFIER NOT NULL,
-      PRIMARY KEY (roleId, permissionId),
-      FOREIGN KEY (roleId) REFERENCES Roles(roleId),
-      FOREIGN KEY (permissionId) REFERENCES Permissions(permissionId)
-  );
-  ```
-
-- **UserRoles**: Maps users to roles
-  ```sql
-  CREATE TABLE UserRoles (
-      userId UNIQUEIDENTIFIER NOT NULL,
-      roleId UNIQUEIDENTIFIER NOT NULL,
-      PRIMARY KEY (userId, roleId),
-      FOREIGN KEY (userId) REFERENCES Users(userId),
-      FOREIGN KEY (roleId) REFERENCES Roles(roleId)
-  );
-  ```
-
-- **Sessions**: Stores active user sessions
-  ```sql
-  CREATE TABLE Sessions (
-      sessionId UNIQUEIDENTIFIER PRIMARY KEY,
-      userId UNIQUEIDENTIFIER NOT NULL,
-      createdAt DATETIME NOT NULL,
-      expiresAt DATETIME NOT NULL,
-      active BIT NOT NULL DEFAULT 1,
-      FOREIGN KEY (userId) REFERENCES Users(userId)
-  );
-  ```
-
-### Advanced Configuration
-
 #### App.config Options
 
 The application uses an App.config file for configuration settings including:
 
-- Database connection strings
 - OAuth client IDs and secrets
 - Timeout settings
 - Feature toggles
@@ -168,9 +96,6 @@ The application uses an App.config file for configuration settings including:
 Example configuration:
 ```xml
 <configuration>
-  <connectionStrings>
-    <add name="DrinkDbConnection" connectionString="Server=myServer;Database=DrinkDB_Dev;Trusted_Connection=True;" />
-  </connectionStrings>
   <appSettings>
     <add key="GitHubClientId" value="your-github-client-id" />
     <add key="GitHubClientSecret" value="your-github-client-secret" />
@@ -198,12 +123,7 @@ Each OAuth provider can be customized by modifying the corresponding provider cl
    - Ensure redirect URLs match those registered with the provider
    - Check that all local OAuth servers are running
 
-2. **Database Connection Issues**
-   - Verify connection string in App.config
-   - Ensure SQL Server is running and accessible
-   - Check that database tables are properly created
-
-3. **UI Rendering Problems**
+2. **UI Rendering Problems**
    - Update to the latest version of the Windows App SDK
    - Verify WinUI 3 dependencies
    - Check Windows version compatibility
@@ -226,7 +146,6 @@ Each OAuth provider can be customized by modifying the corresponding provider cl
 
 - **OAuthProviders/**: Contains implementation for various OAuth providers
 - **Model/**: Data models for users, roles, permissions, and sessions
-- **Database/**: SQL scripts for database setup
 - **Assets/**: Application icons and images
 - **Service/**: Core business logic implementation
 - **Adapter/**: Database and external service adapters
@@ -259,48 +178,3 @@ Run these commands to set your environment variables:
 
   ### AI Check
 - requires an API key
-
-  ### Datbase setup 
-  - check connection string parameters
-
-  - CREATE DATABASE DrinksImdb;
-
-USE DrinksImdb;
-CREATE TABLE UpgradeRequests (
-    RequestId INT PRIMARY KEY IDENTITY(1,1),
-    RequestingUserId INT NOT NULL,
-    RequestingUserName NVARCHAR(100) NOT NULL
-);
-GO
-
-INSERT INTO UpgradeRequests (RequestingUserId, RequestingUserName) VALUES (3, 'Admin One');
-INSERT INTO UpgradeRequests (RequestingUserId, RequestingUserName) VALUES (5, 'Admin Two');
-
-
-CREATE TABLE OffensiveWords (
-    OffensiveWordId INT PRIMARY KEY IDENTITY(1,1),
-    Word NVARCHAR(100) NOT NULL
-);
-
-INSERT INTO OffensiveWords (Word)
-VALUES 
-    ('stupid'),
-    ('dumb'),
-    ('fool'),
-    ('loser'),
-    ('jerk'),
-    ('imbecile'),
-    ('dunce'),
-    ('bonehead'),
-    ('nitwit'),
-    ('blockhead');
-
-### Setup for admin also suffered some changes:
-- A appSettings.json is required in the main repository folder, it needs to have the following pattern: <br>
-  { <br>
-  "ConnectionStrings": { <br>
-    "DefaultConnection": "Server=;Database=DrinksImdb;Integrated Security=True;TrustServerCertificate=True;", <br>
-    "TestConnection": "Server=;Database=TestDb;Integrated Security=True;TrustServerCertificate=True;" <br>
-  } <br>
-} <br>
-The value for the server needs to be manually written.
