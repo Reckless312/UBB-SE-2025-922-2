@@ -6,7 +6,7 @@ using IRepository;
 namespace ServerAPI.Controllers
 {
     [ApiController]
-    [Route("sessions")]
+    [Route("api/sessions")]
     public class SessionController : ControllerBase
     {
         private ISessionRepository repository;

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace ServerAPI.Controllers
 {
     [ApiController]
-    [Route("users")]
+    [Route("api/users")]
     public class UsersController : ControllerBase
     {
         private IUserRepository repository;

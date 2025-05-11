@@ -9,7 +9,7 @@
 
     public class SessionProxyRepository : ISessionRepository
     {
-        private const string ApiBaseRoute = "sessions";
+        private const string ApiBaseRoute = "api/sessions";
         private readonly HttpClient httpClient;
 
         public SessionProxyRepository()

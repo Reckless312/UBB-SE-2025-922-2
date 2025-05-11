@@ -9,7 +9,7 @@ using ServerAPI.Repository.AutoChecker;
 namespace ServerAPI.Controllers
 {
     [ApiController]
-    [Route("offensiveWords")]
+    [Route("api/offensiveWords")]
     public class OffensiveWordsController: ControllerBase
     {
         private IOffensiveWordsRepository repository;
