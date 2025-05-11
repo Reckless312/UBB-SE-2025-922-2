@@ -86,27 +86,12 @@ namespace DrinkDb_Auth.Service.AdminDashboard
         {
             if (string.IsNullOrEmpty(content))
             {
-                return GetFlaggedReviews();
+                return GetAllReviews();
             }
 
             content = content.ToLower();
-            List<Review> reviews = GetFlaggedReviews();
+            List<Review> reviews = GetAllReviews();
             return reviews.Where(review => review.Content.ToLower().Contains(content)).ToList();
         }
-
-        /*
-        public List<Review> FilterReviewsByUser(string userFilter)
-        {
-            if (string.IsNullOrEmpty(userFilter))
-            {
-                return GetFlaggedReviews();
-            }
-
-            userFilter = userFilter.ToLower();
-            return GetFlaggedReviews()
-                .Where(review => review.UserName.ToLower().Contains(userFilter))
-                .ToList();
-        }
-        */
     }
 }

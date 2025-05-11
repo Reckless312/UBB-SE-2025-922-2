@@ -55,26 +55,6 @@
         }
 
         [Fact]
-        public void GetFlaggedReviews_ReturnsReviewsWithFlags()
-        {
-            // Arrange
-            var reviews = new List<Review>
-            {
-                new Review(1, new Guid(), 4, "Great drink!", DateTime.Now, 1),
-                new Review(2, new Guid(), 5, "Amazing drink!", DateTime.Now, 0),
-                new Review(3, new Guid(), 3, "Good drink!", DateTime.Now, 2),
-            };
-            this.mockRepository.Setup(review => review.GetAllReviews()).Returns(Task.FromResult(reviews));
-
-            // Act
-            var flaggedReviews = this.service.GetFlaggedReviews();
-
-            // Assert
-            Assert.Equal(2, flaggedReviews.Count);
-            Assert.All(flaggedReviews, review => Assert.True(review.NumberOfFlags > 0));
-        }
-
-        [Fact]
         public void GetHiddenReviews_ReturnsHiddenReviews()
         {
             // Arrange

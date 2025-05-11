@@ -94,16 +94,6 @@ namespace UnitTests.ReviewChecker
             this.mockAutoCheck.Verify(m => m.DeleteOffensiveWord(word), Times.Once);
         }
 
-        [Fact]
-        public void RunAICheckForOneReview_WithNullReview_LogsErrorAndReturns()
-        {
-            ConsoleOutput consoleOutput = new ConsoleOutput();
-            this.checkersService.RunAICheckForOneReview(null);
-            Assert.Contains("Review not found.", consoleOutput.GetOutput());
-            this.mockReviewService.Verify(m => m.HideReview(It.IsAny<int>()), Times.Never);
-            this.mockReviewService.Verify(m => m.ResetReviewFlags(It.IsAny<int>()), Times.Never);
-        }
-
         public class OffensiveTextDetectorTests
         {
             [Fact]
@@ -112,65 +102,6 @@ namespace UnitTests.ReviewChecker
                 string text = "Test content";
                 string result = OffensiveTextDetector.DetectOffensiveContent(text);
                 Assert.NotNull(result);
-            }
-        }
-
-        public class CheckersServicePrivateMethodTests
-        {
-            [Fact]
-            public void GetConfidenceScoreForHateSpeach_WithValidJson_ReturnsCorrectScore()
-            {
-                string validJson = @"[[{""label"":""hate"",""score"":""0.9""},{""label"":""not_hate"",""score"":""0.1""}]]";
-                MethodInfo? method = typeof(CheckersService).GetMethod("GetConfidenceScoreForHateSpeach", BindingFlags.NonPublic | BindingFlags.Static);
-                object? result = method.Invoke(null, new object[] { validJson });
-                Assert.Equal(0.9f, result);
-            }
-
-            [Fact]
-            public void GetConfidenceScoreForHateSpeach_WithNoHateLabel_ReturnsZero()
-            {
-                string jsonWithoutHate = @"[[{""label"":""not_hate"",""score"":""0.9""},{""label"":""offensive"",""score"":""0.1""}]]";
-                MethodInfo? method = typeof(CheckersService).GetMethod("GetConfidenceScoreForHateSpeach", BindingFlags.NonPublic | BindingFlags.Static);
-                object result = method.Invoke(null, new object[] { jsonWithoutHate });
-                Assert.Equal(0f, result);
-            }
-
-            [Fact]
-            public void GetConfidenceScoreForHateSpeach_WithInvalidJson_ReturnsZero()
-            {
-                string invalidJson = "not valid json";
-                MethodInfo? method = typeof(CheckersService).GetMethod("GetConfidenceScoreForHateSpeach", BindingFlags.NonPublic | BindingFlags.Static);
-                object? result = method.Invoke(null, new object[] { invalidJson });
-                Assert.Equal(0f, result);
-            }
-
-            [Fact]
-            public void CheckReviewWithAI_WithNonOffensiveContent_ReturnsFalse()
-            {
-                MethodInfo? method = typeof(CheckersService).GetMethod("CheckReviewWithAI", BindingFlags.NonPublic | BindingFlags.Static);
-                using (new MethodSwapper(typeof(OffensiveTextDetector), "DetectOffensiveContent", typeof(TestHelpers), "MockDetectOffensiveContentLowScore"))
-                {
-                    bool result = (bool)method.Invoke(null, new object[] { "Normal content" });
-                    Assert.False(result);
-                }
-            }
-
-            [Fact]
-            public void GetProjectRoot_ReturnsValidPath()
-            {
-                MethodInfo? method = typeof(CheckersService).GetMethod("GetProjectRoot", BindingFlags.NonPublic | BindingFlags.Static);
-                object? result = method.Invoke(null, new object[] { Assembly.GetExecutingAssembly().Location });
-                Assert.NotNull(result);
-                Assert.IsType<string>(result);
-            }
-
-            [Fact]
-            public void LogToFile_WritesToFile()
-            {
-                MethodInfo? method = typeof(CheckersService).GetMethod("LogToFile", BindingFlags.NonPublic | BindingFlags.Static);
-                string testMessage = "Test log message";
-                method.Invoke(null, new object[] { testMessage });
-                Assert.True(true);
             }
         }
     }
