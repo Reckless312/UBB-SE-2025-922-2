@@ -55,26 +55,6 @@
         }
 
         [Fact]
-        public void GetFlaggedReviews_ReturnsReviewsWithFlags()
-        {
-            // Arrange
-            var reviews = new List<Review>
-            {
-                new Review(1, new Guid(), 4, "Great drink!", DateTime.Now, 1),
-                new Review(2, new Guid(), 5, "Amazing drink!", DateTime.Now, 0),
-                new Review(3, new Guid(), 3, "Good drink!", DateTime.Now, 2),
-            };
-            this.mockRepository.Setup(review => review.GetAllReviews()).Returns(Task.FromResult(reviews));
-
-            // Act
-            var flaggedReviews = this.service.GetFlaggedReviews();
-
-            // Assert
-            Assert.Equal(2, flaggedReviews.Count);
-            Assert.All(flaggedReviews, review => Assert.True(review.NumberOfFlags > 0));
-        }
-
-        [Fact]
         public void GetHiddenReviews_ReturnsHiddenReviews()
         {
             // Arrange
@@ -252,7 +232,7 @@
                 new Review(3, new Guid(), 3, "Really great service", DateTime.Now, 1, true),
             };
 
-            this.mockRepository.Setup(repo => repo.GetAllReviews()).Returns(Task.FromResult(reviews));
+            this.mockRepository.Setup(repo => repo.GetFlaggedReviews(1)).Returns(Task.FromResult(reviews));
 
             // Act
             var filtered = this.service.FilterReviewsByContent(content);
@@ -260,7 +240,7 @@
             // Assert
             Assert.Equal(2, filtered.Count);
             Assert.All(filtered, r => Assert.Contains("great", r.Content, StringComparison.OrdinalIgnoreCase));
-            this.mockRepository.Verify(repo => repo.GetAllReviews(), Times.Once);
+            this.mockRepository.Verify(repo => repo.GetFlaggedReviews(1), Times.Once);
         }
 
         [Fact]
@@ -274,7 +254,7 @@
                 new Review(3, new Guid(), 3, "Really great service", DateTime.Now, 1, true),
             };
 
-            this.mockRepository.Setup(repo => repo.GetAllReviews()).Returns(Task.FromResult(reviews));
+            this.mockRepository.Setup(repo => repo.GetFlaggedReviews(1)).Returns(Task.FromResult(reviews));
 
             // Act
             var resultWithNull = this.service.FilterReviewsByContent(null);
@@ -283,7 +263,7 @@
             // Assert
             Assert.Equal(3, resultWithNull.Count);
             Assert.Equal(3, resultWithEmpty.Count);
-            this.mockRepository.Verify(repo => repo.GetAllReviews(), Times.Exactly(2));
+            this.mockRepository.Verify(repo => repo.GetFlaggedReviews(1), Times.Exactly(2));
         }
 
         [Fact]
@@ -317,7 +297,7 @@
                 new Review(3, new Guid(), 3, "Really great service", DateTime.Now, 1, true),
             };
 
-            this.mockRepository.Setup(repo => repo.GetAllReviews()).Returns(Task.FromResult(reviews));
+            this.mockRepository.Setup(repo => repo.GetFlaggedReviews(1)).Returns(Task.FromResult(reviews));
 
             // Act
             var filtered = this.service.FilterReviewsByContent(content);
@@ -325,7 +305,7 @@
             // Assert
             Assert.Equal(2, filtered.Count);
             Assert.All(filtered, r => Assert.Contains("great", r.Content, StringComparison.OrdinalIgnoreCase));
-            this.mockRepository.Verify(repo => repo.GetAllReviews(), Times.Once);
+            this.mockRepository.Verify(repo => repo.GetFlaggedReviews(1), Times.Once);
         }
 
         [Fact]
