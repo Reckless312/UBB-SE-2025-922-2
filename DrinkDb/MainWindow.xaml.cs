@@ -98,8 +98,7 @@ namespace DrinkDb_Auth
             if (res.AuthenticationSuccessful)
             {
                 User user = authenticationService.GetUser(res.SessionId).Result;
-                bool twoFAresponse = true;
-                goto fuck2fa;
+                bool twoFAresponse = false;
                 if (!user.TwoFASecret.IsNullOrEmpty())
                 {
                     this.twoFactorAuthentificationService = new TwoFactorAuthenticationService(this, user.UserId, false);
@@ -112,7 +111,6 @@ namespace DrinkDb_Auth
                     this.twoFactorAuthentificationService.InitializeOtherComponents();
                     twoFAresponse = await this.twoFactorAuthentificationService.SetupOrVerifyTwoFactor();
                 }
-            fuck2fa:
                 if (twoFAresponse)
                 {
                     App.CurrentUserId = user.UserId;
