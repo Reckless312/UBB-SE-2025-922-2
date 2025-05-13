@@ -8,6 +8,10 @@ namespace DataAccess.Model.AdminDashboard
 {
     public class UpgradeRequest
     {
+
+        public UpgradeRequest()
+        {
+        }
         public UpgradeRequest(int upgradeRequestId, Guid requestingUserIdentifier, string requestingUserDisplayName)
         {
             UpgradeRequestId = upgradeRequestId;

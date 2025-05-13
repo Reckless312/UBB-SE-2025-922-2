@@ -43,7 +43,7 @@ namespace WebServer.Controllers
 
         public IActionResult Create()
         {
-            ViewBag.UserId = new SelectList(this.context.Users.ToList(), "UserId", "Username");
+            ViewBag.UserId = new SelectList(this.context.Users.ToList(), "UserId", "UserId");
             return View();
         }
 
@@ -58,7 +58,7 @@ namespace WebServer.Controllers
                 await this.context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.UserId = new SelectList(this.context.Users.ToList(), "UserId", "Username", session.UserId);
+            ViewBag.UserId = new SelectList(this.context.Users.ToList(), "UserId", "UserId", session.UserId);
             return View(session);
         }
 

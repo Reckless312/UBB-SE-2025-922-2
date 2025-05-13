@@ -69,6 +69,7 @@ namespace WebServer.Controllers
             {
                 return NotFound();
             }
+            ViewBag.UserId = new SelectList(this.context.Users.ToList(), "UserId", "UserId", review.UserId);
             return View(review);
         }
 
@@ -101,6 +102,7 @@ namespace WebServer.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewBag.UserId = new SelectList(this.context.Users.ToList(), "UserId", "UserId", review.UserId);
             return View(review);
         }
 

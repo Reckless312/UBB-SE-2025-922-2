@@ -73,6 +73,7 @@ namespace WebServer.Controllers
             {
                 return NotFound();
             }
+            ViewBag.RequestingUserIdentifier = new SelectList(this.context.Users.ToList(), "UserId", "UserId", upgradeRequest.RequestingUserIdentifier);
             return View(upgradeRequest);
         }
 
@@ -105,6 +106,7 @@ namespace WebServer.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewBag.RequestingUserIdentifier = new SelectList(this.context.Users.ToList(), "UserId", "UserId", upgradeRequest.RequestingUserIdentifier);
             return View(upgradeRequest);
         }
 

@@ -5,7 +5,6 @@ using Repository.AdminDashboard;
 using Repository.Authentication;
 using ServerAPI.Data;
 using ServerAPI.Repository.AutoChecker;
-using WebServer.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
