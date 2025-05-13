@@ -1,4 +1,4 @@
-﻿namespace UnitTests.Autocheck
+namespace UnitTests.Autocheck
 {
     using System;
     using System.IO;

@@ -14,7 +14,7 @@
 
     public class UserProxyRepository : IUserRepository
     {
-        private const string ApiRoute = "users";
+        private const string ApiRoute = "api/users";
         private readonly HttpClient httpClient;
         private readonly JsonSerializerOptions jsonOptions;
 

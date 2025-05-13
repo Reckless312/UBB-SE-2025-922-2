@@ -82,30 +82,6 @@ namespace UnitTests.UpgradeRequests
             Assert.Null(result);
         }
 
-        // Not a valid test anymore
-        //[Fact]
-        //public async Task RemoveUpgradeRequestByIdentifier_NonExistentId_DoesNotThrow()
-        //{
-        //    Exception exception = await Record.ExceptionAsync(() => this.repository.RemoveUpgradeRequestByIdentifier(999));
-        //    Assert.Null(exception);
-        //}
-
-
-        // Not a valid test anymore since the repo does not take a connectionFactory as parameter
-        //[Fact]
-        //public void Constructor_NullConnectionFactory_ThrowsArgumentNullException()
-        //{
-        //    Assert.Throws<ArgumentNullException>(() => new UpgradeRequestsRepository(connectionFactory: null));
-        //}
-
-        // Not a valid test anymore since the repo does not take a string as parameter
-        //[Fact]
-        //public void LegacyConstructor_ValidConnectionString_CreatesRepositorySuccessfully()
-        //{
-        //    Exception exception = Record.Exception(() => new UpgradeRequestsRepository("dummy_connection_string"));
-        //    Assert.Null(exception);
-        //}
-
         [Fact]
         public async Task RetrieveAllUpgradeRequests_DbException_HandlesExceptionAndReturnsEmptyList()
         {
@@ -121,22 +97,6 @@ namespace UnitTests.UpgradeRequests
             Assert.Empty(result);
         }
 
-
-        // Not a valid test anymore
-        //[Fact]
-        //public async Task RemoveUpgradeRequestByIdentifier_DbException_HandlesException()
-        //{
-        //    Mock<IDbConnectionFactory> mockConnectionFactory = new Mock<IDbConnectionFactory>();
-        //    mockConnectionFactory
-        //        .Setup(f => f.CreateConnection());
-        //    var contextOptions = new DbContextOptionsBuilder<DatabaseContext>()
-        //        .UseInMemoryDatabase(databaseName: "DrinkDB_Test")
-        //        .Options;
-        //    UpgradeRequestsRepository repository = new UpgradeRequestsRepository(new DatabaseContext(contextOptions));
-        //    Exception exception = await Record.ExceptionAsync(() => repository.RemoveUpgradeRequestByIdentifier(1));
-        //    Assert.Null(exception);
-        //}
-
         [Fact]
         public async Task RetrieveUpgradeRequestByIdentifier_DbException_HandlesExceptionAndReturnsNull()
         {
@@ -149,34 +109,6 @@ namespace UnitTests.UpgradeRequests
             UpgradeRequest result = await repository.RetrieveUpgradeRequestByIdentifier(1);
             Assert.Null(result);
         }
-
-        // Not a valid test anymore since the repo does not take a string as parameter
-        //[Fact]
-        //public void RetrieveAllUpgradeRequests_WithBadConnectionString_HandlesExceptionAndReturnsEmptyList()
-        //{
-        //    UpgradeRequestsRepository repository = new UpgradeRequestsRepository("Data Source=nonexistent;Initial Catalog=fake;User Id=wrong;Password=wrong;");
-        //    List<UpgradeRequest> result = repository.RetrieveAllUpgradeRequests();
-        //    Assert.NotNull(result);
-        //    Assert.Empty(result);
-        //}
-
-        // Not a valid test anymore since the repo does not take a string as parameter
-        //[Fact]
-        //public void RemoveUpgradeRequestByIdentifier_WithBadConnectionString_HandlesException()
-        //{
-        //    UpgradeRequestsRepository repository = new UpgradeRequestsRepository("Data Source=nonexistent;Initial Catalog=fake;User Id=wrong;Password=wrong;");
-        //    Exception exception = Record.Exception(() => repository.RemoveUpgradeRequestByIdentifier(1));
-        //    Assert.Null(exception);
-        //}
-
-        // Not a valid test anymore since the repo does not take a string as parameter
-        //[Fact]
-        //public void RetrieveUpgradeRequestByIdentifier_WithBadConnectionString_HandlesExceptionAndReturnsNull()
-        //{
-        //    UpgradeRequestsRepository repository = new UpgradeRequestsRepository("Data Source=nonexistent;Initial Catalog=fake;User Id=wrong;Password=wrong;");
-        //    UpgradeRequest result = repository.RetrieveUpgradeRequestByIdentifier(1);
-        //    Assert.Null(result);
-        //}
 
         private void CleanupTable()
         {
@@ -201,25 +133,5 @@ namespace UnitTests.UpgradeRequests
                 END", conn);
             cmd.ExecuteNonQuery();
         }
-
-        //private int InsertTestRequest(int userId, string userName)
-        //{
-        //    int requestId = 0;
-        //    using var conn = new SqlConnection(this.connectionString);
-        //    conn.Open();
-
-        //    using (var cmdInsert = new SqlCommand(
-        //        @"INSERT INTO UpgradeRequests (RequestingUserId, RequestingUserName) 
-        //          VALUES (@userId, @userName);
-        //          SELECT SCOPE_IDENTITY();", conn))
-        //    {
-        //        cmdInsert.Parameters.AddWithValue("@userId", userId);
-        //        cmdInsert.Parameters.AddWithValue("@userName", userName);
-
-        //        requestId = Convert.ToInt32(cmdInsert.ExecuteScalar());
-        //    }
-        //    conn.Close();
-        //    return requestId;
-        //}
     }
 }

@@ -12,7 +12,7 @@
 
     public class UpgradeRequestProxyRepository : IUpgradeRequestsRepository
     {
-        private const string ApiBaseRoute = "upgradeRequests";
+        private const string ApiBaseRoute = "api/upgradeRequests";
         private HttpClient httpClient;
 
         public UpgradeRequestProxyRepository(string baseApiUrl)

@@ -1,4 +1,4 @@
-﻿namespace UnitTests.Reviews
+namespace UnitTests.Reviews
 {
     using System;
     using System.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using DrinkDb_Auth.AutoChecker;
 using IRepository;

@@ -1,4 +1,4 @@
-﻿using DataAccess.Model;
+using DataAccess.Model;
 using DataAccess.Model.AdminDashboard;
 using DataAccess.Model.Authentication;
 using IRepository;

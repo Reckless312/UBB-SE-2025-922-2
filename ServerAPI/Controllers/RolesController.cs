@@ -7,7 +7,7 @@ namespace ServerAPI.Controllers
 {
 
     [ApiController]
-    [Route("roles")]
+    [Route("api/roles")]
     public class RolesController : ControllerBase
     {
         private IRolesRepository repository;

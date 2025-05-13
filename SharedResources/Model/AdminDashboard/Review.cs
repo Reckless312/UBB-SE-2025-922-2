@@ -22,7 +22,7 @@ namespace DataAccess.Model.AdminDashboard
     {
         public int ReviewId { get; } = reviewId;
 
-        public Guid UserId { get; } = userId;
+        public Guid UserId { get; set; } = userId;
 
         public int Rating { get; set; } = rating;
 

@@ -6,7 +6,7 @@ using IRepository;
 namespace ServerAPI.Controllers
 {
     [ApiController]
-    [Route("upgradeRequests")]
+    [Route("api/upgradeRequests")]
     public class UpgradeRequestsController : ControllerBase
     {
         IUpgradeRequestsRepository repository;
