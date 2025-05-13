@@ -12,20 +12,18 @@ namespace WebServer.Controllers
 {
     public class UserController : Controller
     {
-        private readonly DatabaseContext _context;
+        private readonly DatabaseContext context;
 
         public UserController(DatabaseContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
-        // GET: User
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Users.ToListAsync());
+            return View(await this.context.Users.ToListAsync());
         }
 
-        // GET: User/Details/5
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
@@ -33,8 +31,8 @@ namespace WebServer.Controllers
                 return NotFound();
             }
 
-            var user = await _context.Users
-                .FirstOrDefaultAsync(m => m.UserId == id);
+            User? user = await context.Users
+                .FirstOrDefaultAsync(model => model.UserId == id);
             if (user == null)
             {
                 return NotFound();
@@ -43,15 +41,11 @@ namespace WebServer.Controllers
             return View(user);
         }
 
-        // GET: User/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: User/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("UserId,Username,PasswordHash,TwoFASecret,EmailAddress,NumberOfDeletedReviews,HasSubmittedAppeal,AssignedRole,FullName")] User user)
@@ -59,14 +53,13 @@ namespace WebServer.Controllers
             if (ModelState.IsValid)
             {
                 user.UserId = Guid.NewGuid();
-                _context.Add(user);
-                await _context.SaveChangesAsync();
+                this.context.Add(user);
+                await this.context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(user);
         }
 
-        // GET: User/Edit/5
         public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
@@ -74,7 +67,7 @@ namespace WebServer.Controllers
                 return NotFound();
             }
 
-            var user = await _context.Users.FindAsync(id);
+            User? user = await this.context.Users.FindAsync(id);
             if (user == null)
             {
                 return NotFound();
@@ -82,9 +75,6 @@ namespace WebServer.Controllers
             return View(user);
         }
 
-        // POST: User/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Guid id, [Bind("UserId,Username,PasswordHash,TwoFASecret,EmailAddress,NumberOfDeletedReviews,HasSubmittedAppeal,AssignedRole,FullName")] User user)
@@ -98,8 +88,8 @@ namespace WebServer.Controllers
             {
                 try
                 {
-                    _context.Update(user);
-                    await _context.SaveChangesAsync();
+                    this.context.Update(user);
+                    await this.context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -117,7 +107,6 @@ namespace WebServer.Controllers
             return View(user);
         }
 
-        // GET: User/Delete/5
         public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
@@ -125,8 +114,8 @@ namespace WebServer.Controllers
                 return NotFound();
             }
 
-            var user = await _context.Users
-                .FirstOrDefaultAsync(m => m.UserId == id);
+            User? user = await context.Users
+                .FirstOrDefaultAsync(model => model.UserId == id);
             if (user == null)
             {
                 return NotFound();
@@ -135,24 +124,23 @@ namespace WebServer.Controllers
             return View(user);
         }
 
-        // POST: User/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var user = await _context.Users.FindAsync(id);
+            User? user = await this.context.Users.FindAsync(id);
             if (user != null)
             {
-                _context.Users.Remove(user);
+                this.context.Users.Remove(user);
             }
 
-            await _context.SaveChangesAsync();
+            await this.context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool UserExists(Guid id)
         {
-            return _context.Users.Any(e => e.UserId == id);
+            return this.context.Users.Any(existingUser => existingUser.UserId == id);
         }
     }
 }

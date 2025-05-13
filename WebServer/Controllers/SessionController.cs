@@ -12,20 +12,18 @@ namespace WebServer.Controllers
 {
     public class SessionController : Controller
     {
-        private readonly DatabaseContext _context;
+        private readonly DatabaseContext context;
 
         public SessionController(DatabaseContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
-        // GET: Session
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Sessions.ToListAsync());
+            return View(await this.context.Sessions.ToListAsync());
         }
 
-        // GET: Session/Details/5
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
@@ -33,8 +31,8 @@ namespace WebServer.Controllers
                 return NotFound();
             }
 
-            var session = await _context.Sessions
-                .FirstOrDefaultAsync(m => m.SessionId == id);
+            Session? session = await this.context.Sessions
+                .FirstOrDefaultAsync(model => model.SessionId == id);
             if (session == null)
             {
                 return NotFound();
@@ -43,16 +41,12 @@ namespace WebServer.Controllers
             return View(session);
         }
 
-        // GET: Session/Create
         public IActionResult Create()
         {
-            ViewBag.UserId = new SelectList(_context.Users.ToList(), "UserId", "Username");
+            ViewBag.UserId = new SelectList(this.context.Users.ToList(), "UserId", "Username");
             return View();
         }
 
-        // POST: Session/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("SessionId,UserId")] Session session)
@@ -60,15 +54,14 @@ namespace WebServer.Controllers
             if (ModelState.IsValid)
             {
                 session.SessionId = Guid.NewGuid();
-                _context.Add(session);
-                await _context.SaveChangesAsync();
+                this.context.Add(session);
+                await this.context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.UserId = new SelectList(_context.Users.ToList(), "UserId", "Username", session.UserId);
+            ViewBag.UserId = new SelectList(this.context.Users.ToList(), "UserId", "Username", session.UserId);
             return View(session);
         }
 
-        // GET: Session/Edit/5
         public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
@@ -76,7 +69,7 @@ namespace WebServer.Controllers
                 return NotFound();
             }
 
-            var session = await _context.Sessions.FindAsync(id);
+            Session? session = await this.context.Sessions.FindAsync(id);
             if (session == null)
             {
                 return NotFound();
@@ -84,9 +77,6 @@ namespace WebServer.Controllers
             return View(session);
         }
 
-        // POST: Session/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Guid id, [Bind("SessionId,UserId")] Session session)
@@ -100,8 +90,8 @@ namespace WebServer.Controllers
             {
                 try
                 {
-                    _context.Update(session);
-                    await _context.SaveChangesAsync();
+                    this.context.Update(session);
+                    await this.context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -119,7 +109,6 @@ namespace WebServer.Controllers
             return View(session);
         }
 
-        // GET: Session/Delete/5
         public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
@@ -127,8 +116,8 @@ namespace WebServer.Controllers
                 return NotFound();
             }
 
-            var session = await _context.Sessions
-                .FirstOrDefaultAsync(m => m.SessionId == id);
+            Session? session = await this.context.Sessions
+                .FirstOrDefaultAsync(model => model.SessionId == id);
             if (session == null)
             {
                 return NotFound();
@@ -137,24 +126,23 @@ namespace WebServer.Controllers
             return View(session);
         }
 
-        // POST: Session/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var session = await _context.Sessions.FindAsync(id);
+            Session? session = await this.context.Sessions.FindAsync(id);
             if (session != null)
             {
-                _context.Sessions.Remove(session);
+                this.context.Sessions.Remove(session);
             }
 
-            await _context.SaveChangesAsync();
+            await this.context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool SessionExists(Guid id)
         {
-            return _context.Sessions.Any(e => e.SessionId == id);
+            return this.context.Sessions.Any(existingSession => existingSession.SessionId == id);
         }
     }
 }

@@ -40,7 +40,8 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@foreach (User item in Model) 
+{
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Username)

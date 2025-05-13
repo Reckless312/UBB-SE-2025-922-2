@@ -12,20 +12,18 @@ namespace WebServer.Controllers
 {
     public class RoleController : Controller
     {
-        private readonly DatabaseContext _context;
+        private readonly DatabaseContext context;
 
         public RoleController(DatabaseContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
-        // GET: Role
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Roles.ToListAsync());
+            return View(await this.context.Roles.ToListAsync());
         }
 
-        // GET: Role/Details/5
         public async Task<IActionResult> Details(RoleType id)
         {
             if (id == null)
@@ -33,8 +31,8 @@ namespace WebServer.Controllers
                 return NotFound();
             }
 
-            var role = await _context.Roles
-                .FirstOrDefaultAsync(m => m.RoleType == id);
+            Role? role = await this.context.Roles
+                .FirstOrDefaultAsync(model => model.RoleType == id);
             if (role == null)
             {
                 return NotFound();
@@ -43,31 +41,26 @@ namespace WebServer.Controllers
             return View(role);
         }
 
-        // GET: Role/Create
         public IActionResult Create()
         {
             ViewBag.RoleType = new SelectList(Enum.GetValues(typeof(RoleType)).Cast<RoleType>());
             return View();
         }
 
-        // POST: Role/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("RoleType,RoleName")] Role role)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(role);
-                await _context.SaveChangesAsync();
+                this.context.Add(role);
+                await this.context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             ViewBag.RoleType = new SelectList(Enum.GetValues(typeof(RoleType)).Cast<RoleType>(), role.RoleType);
             return View(role);
         }
 
-        // GET: Role/Edit/5
         public async Task<IActionResult> Edit(RoleType id)
         {
             if (id == null)
@@ -75,7 +68,7 @@ namespace WebServer.Controllers
                 return NotFound();
             }
 
-            var role = await _context.Roles.FindAsync(id);
+            Role? role = await this.context.Roles.FindAsync(id);
             if (role == null)
             {
                 return NotFound();
@@ -83,9 +76,6 @@ namespace WebServer.Controllers
             return View(role);
         }
 
-        // POST: Role/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(RoleType id, [Bind("RoleType,RoleName")] Role role)
@@ -99,8 +89,8 @@ namespace WebServer.Controllers
             {
                 try
                 {
-                    _context.Update(role);
-                    await _context.SaveChangesAsync();
+                    this.context.Update(role);
+                    await this.context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -118,7 +108,6 @@ namespace WebServer.Controllers
             return View(role);
         }
 
-        // GET: Role/Delete/5
         public async Task<IActionResult> Delete(RoleType id)
         {
             if (id == null)
@@ -126,8 +115,8 @@ namespace WebServer.Controllers
                 return NotFound();
             }
 
-            var role = await _context.Roles
-                .FirstOrDefaultAsync(m => m.RoleType == id);
+            Role? role = await context.Roles
+                .FirstOrDefaultAsync(model => model.RoleType == id);
             if (role == null)
             {
                 return NotFound();
@@ -136,24 +125,23 @@ namespace WebServer.Controllers
             return View(role);
         }
 
-        // POST: Role/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(RoleType id)
         {
-            var role = await _context.Roles.FindAsync(id);
+            Role? role = await this.context.Roles.FindAsync(id);
             if (role != null)
             {
-                _context.Roles.Remove(role);
+                this.context.Roles.Remove(role);
             }
 
-            await _context.SaveChangesAsync();
+            await this.context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool RoleExists(RoleType id)
         {
-            return _context.Roles.Any(e => e.RoleType == id);
+            return this.context.Roles.Any(existingRole => existingRole.RoleType == id);
         }
     }
 }
