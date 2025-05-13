@@ -17,6 +17,7 @@ using Quartz.Impl;
 using DrinkDb_Auth.Service.Authentication.Interfaces;
 using DrinkDb_Auth.Service.Authentication;
 using DataAccess.Model.Authentication;
+using DrinkDb_Auth.ViewModel.Authentication;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -99,27 +100,20 @@ namespace DrinkDb_Auth
             {
                 User user = authenticationService.GetUser(res.SessionId).Result;
                 bool twoFAresponse = false;
-                if (!user.TwoFASecret.IsNullOrEmpty())
-                {
-                    this.twoFactorAuthentificationService = new TwoFactorAuthenticationService(this, user.UserId, false);
-                    this.twoFactorAuthentificationService.InitializeOtherComponents();
-                    twoFAresponse = await this.twoFactorAuthentificationService.SetupOrVerifyTwoFactor();
-                }
-                else
-                {
-                    this.twoFactorAuthentificationService = new TwoFactorAuthenticationService(this, user.UserId, true);
-                    this.twoFactorAuthentificationService.InitializeOtherComponents();
-                    twoFAresponse = await this.twoFactorAuthentificationService.SetupOrVerifyTwoFactor();
-                }
+                bool firstTimeSetup = user.TwoFASecret.IsNullOrEmpty();
+                this.twoFactorAuthentificationService = new TwoFactorAuthenticationService(this, user.UserId, firstTimeSetup);
+                var twoFaGuiHelper = new TwoFaGuiHelper(this);
+                var values = this.twoFactorAuthentificationService.Get2FAValues();
+                twoFaGuiHelper.InitializeOtherComponents(firstTimeSetup, values.currentUser, values.uniformResourceIdentifier, values.twoFactorSecret);
+                twoFAresponse = await twoFaGuiHelper.SetupOrVerifyTwoFactor();
 
                 if (twoFAresponse)
                 {
                     App.CurrentUserId = user.UserId;
                     App.CurrentSessionId = res.SessionId;
                     MainFrame.Navigate(typeof(SuccessPage), this);
-                    return true;
                 }
-                return false;
+                return twoFAresponse;
             }
             else
             {
