@@ -76,7 +76,7 @@ namespace UnitTests.Users
         public async Task GetAllUsers_ShouldThrowUserServiceException_WhenRepositoryThrowsException()
         {
             this.mockUserRepository.Setup(repo => repo.GetAllUsers()).Throws(new Exception("Repository error"));
-            UserServiceException exception = await Assert.ThrowsAsync<UserServiceException>(async() => await this.userService.GetAllUsers());
+            UserServiceException exception = await Assert.ThrowsAsync<UserServiceException>(async () => await this.userService.GetAllUsers());
             Assert.Equal("Failed to retrieve all users.", exception.Message);
             Assert.IsType<Exception>(exception.InnerException);
         }
@@ -99,8 +99,8 @@ namespace UnitTests.Users
         [Fact]
         public async Task GetActiveUsersByRoleType_ShouldThrowArgumentException_WhenRoleTypeIsInvalid()
         {
-            var invalidRoleType = (RoleType)(-1); 
-            var exception = await Assert.ThrowsAsync<ArgumentException>(async() => await this.userService.GetActiveUsersByRoleType(invalidRoleType));
+            var invalidRoleType = (RoleType)(-1);
+            var exception = await Assert.ThrowsAsync<ArgumentException>(async () => await this.userService.GetActiveUsersByRoleType(invalidRoleType));
             Assert.Equal("Role type must be a valid value", exception.Message);
         }
 
@@ -298,7 +298,7 @@ namespace UnitTests.Users
         [Fact]
         public void GetManagers_ShouldReturnCorrectUsers()
         {
-            var users = new List<User> { new User {Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), FullName = "Manager User" } };
+            var users = new List<User> { new User { Username = String.Empty, PasswordHash = String.Empty, TwoFASecret = String.Empty, UserId = new Guid(), FullName = "Manager User" } };
             this.mockUserRepository.Setup(repository => repository.GetUsersByRoleType(RoleType.Manager)).ReturnsAsync(users);
             List<User> result = this.userService.GetManagers().Result;
             Assert.NotNull(result);
@@ -464,6 +464,6 @@ namespace UnitTests.Users
             this.mockUserRepository.Verify(repo => repo.UpdateUser(It.Is<User>(user => user.UserId == userId && user.AssignedRole == RoleType.User)), Times.Once);
         }
 
-        
+
     }
 }

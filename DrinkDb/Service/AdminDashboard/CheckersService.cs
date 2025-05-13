@@ -103,6 +103,7 @@
         private static bool CheckReviewWithAI(Review review)
         {
             if (review?.Content == null)
+
             {
                 return false;
             }

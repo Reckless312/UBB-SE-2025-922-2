@@ -13,7 +13,7 @@ namespace UnitTests.EmailJobs
     using System.Text;
     using System.Threading.Tasks;
     using Xunit;
-    
+
     /// <summary>
     /// tests AdminReprotData class.
     /// </summary>

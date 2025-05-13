@@ -369,7 +369,7 @@ namespace Tests
 
     public class MockGitHubAuthProvider : IGitHubOAuthHelper
     {
-        public Guid MockId { get; set;}
+        public Guid MockId { get; set; }
         public Task<AuthenticationResponse> AuthenticateAsync()
         {
             AuthenticationResponse mockResponse = new AuthenticationResponse
@@ -386,7 +386,7 @@ namespace Tests
 
     public class MockLinkedInAuthProvider : ILinkedInOAuthHelper
     {
-        public Guid MockId { get; set;}
+        public Guid MockId { get; set; }
         public Task<AuthenticationResponse> AuthenticateAsync()
         {
             AuthenticationResponse mockResponse = new AuthenticationResponse
@@ -404,8 +404,8 @@ namespace Tests
     public class MockGitHubHttpHelper : IGitHubHttpHelper
     {
         public bool Throws { get; set; } = false;
-        public string MockGitHubId { get; set;}
-        public string MockGitHubLogin { get; set;}
+        public string MockGitHubId { get; set; }
+        public string MockGitHubLogin { get; set; }
 
         public bool IsListening { get; set; }
 

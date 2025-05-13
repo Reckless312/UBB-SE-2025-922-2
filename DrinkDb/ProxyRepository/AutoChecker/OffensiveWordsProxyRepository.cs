@@ -14,7 +14,7 @@ namespace DrinkDb_Auth.ProxyRepository.AutoChecker
 {
     public class OffensiveWordsProxyRepository : IOffensiveWordsRepository
     {
-        private const string ApiBaseRoute = "offensiveWords";
+        private const string ApiBaseRoute = "api/offensiveWords";
         private HttpClient httpClient;
 
         public OffensiveWordsProxyRepository()

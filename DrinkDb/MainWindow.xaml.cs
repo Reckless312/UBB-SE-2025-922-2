@@ -111,7 +111,6 @@ namespace DrinkDb_Auth
                     this.twoFactorAuthentificationService.InitializeOtherComponents();
                     twoFAresponse = await this.twoFactorAuthentificationService.SetupOrVerifyTwoFactor();
                 }
-
                 if (twoFAresponse)
                 {
                     App.CurrentUserId = user.UserId;
