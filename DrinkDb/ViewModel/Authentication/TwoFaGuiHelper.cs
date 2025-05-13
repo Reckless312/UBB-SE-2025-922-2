@@ -1,23 +1,20 @@
-﻿using DataAccess.Model.Authentication;
-using DrinkDb_Auth.ProxyRepository.AdminDashboard;
-using DrinkDb_Auth.Service.Authentication.Components;
-using DrinkDb_Auth.Service.Authentication.Interfaces;
-using DrinkDb_Auth.View;
-using DrinkDb_Auth.View.Authentication;
-using DrinkDb_Auth.View.Authentication.Interfaces;
-using DrinkDb_Auth.ViewModel.AdminDashboard.Components;
-using DrinkDb_Auth.ViewModel.Authentication.Interfaces;
-using IRepository;
-using Microsoft.UI.Xaml;
-using Repository.AdminDashboard;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace DrinkDb_Auth.ViewModel.Authentication
 {
+    using System;
+    using System.Threading.Tasks;
+    using DataAccess.Model.Authentication;
+    using DrinkDb_Auth.ProxyRepository.AdminDashboard;
+    using DrinkDb_Auth.Service.Authentication.Components;
+    using DrinkDb_Auth.Service.Authentication.Interfaces;
+    using DrinkDb_Auth.View;
+    using DrinkDb_Auth.View.Authentication;
+    using DrinkDb_Auth.View.Authentication.Interfaces;
+    using DrinkDb_Auth.ViewModel.AdminDashboard.Components;
+    using DrinkDb_Auth.ViewModel.Authentication.Interfaces;
+    using IRepository;
+    using Microsoft.UI.Xaml;
+
     internal class TwoFaGuiHelper
     {
         private IAuthenticationWindowSetup? windowSetup;
@@ -36,9 +33,9 @@ namespace DrinkDb_Auth.ViewModel.Authentication
         public TwoFaGuiHelper(Window? window)
         {
             this.window = window;
-            authentificationTask = new TaskCompletionSource<bool>();
-            authentificationCompleteTask = new TaskCompletionSource<bool>();
-            cancelRelayCommand = new RelayCommand(() => { authentificationCompleteTask.SetResult(false); });
+            this.authentificationTask = new TaskCompletionSource<bool>();
+            this.authentificationCompleteTask = new TaskCompletionSource<bool>();
+            this.cancelRelayCommand = new RelayCommand(() => { this.authentificationCompleteTask.SetResult(false); });
         }
 
         public void InitializeOtherComponents(bool firstTimeSetup, User currentUser, string uniformResourceIdentifier, byte[] twoFactorSecret)
@@ -54,9 +51,9 @@ namespace DrinkDb_Auth.ViewModel.Authentication
                 this.authenticationWindow = new TwoFactorAuthCheckView(this.windowSetup);
             }
 
-            submitRelayCommand = CreateSubmitRelayCommand(this.windowSetup, currentUser, twoFactorSecret, authentificationTask, firstTimeSetup);
-            this.dialog = CreateAuthentificationSubWindow(window, this.authenticationWindow, submitRelayCommand, dialog);
-            this.invalidDialog = invalidDialog == null ? new InvalidAuthenticationWindow("Error", "Invalid 2FA code. Please try again.", "OK", cancelRelayCommand, window) : invalidDialog;
+            this.submitRelayCommand = this.CreateSubmitRelayCommand(this.windowSetup, currentUser, twoFactorSecret, authentificationTask, firstTimeSetup);
+            this.dialog = this.CreateAuthentificationSubWindow(window, this.authenticationWindow, submitRelayCommand, dialog);
+            this.invalidDialog = this.invalidDialog == null ? new InvalidAuthenticationWindow("Error", "Invalid 2FA code. Please try again.", "OK", cancelRelayCommand, window) : invalidDialog;
             this.invalidDialog.CreateContentDialog();
         }
 
@@ -78,23 +75,26 @@ namespace DrinkDb_Auth.ViewModel.Authentication
                             + authentificationHandler.FourthDigit
                             + authentificationHandler.FifthDigit
                             + authentificationHandler.SixthDigit;
-                switch (twoFactorSecretVerifier?.Verify2FAForSecret(twoFactorSecret, providedCode))
+                switch (this.twoFactorSecretVerifier?.Verify2FAForSecret(twoFactorSecret, providedCode))
                 {
                     case true:
                         // Test updating database or not
                         switch (updateDatabase)
                         {
                             case true:
-                                bool result = userRepository?.UpdateUser(user).Result ?? false;
+                                bool result = this.userRepository?.UpdateUser(user).Result ?? false;
+
                                 // Test both branches of updating 2fa
                                 if (!result)
                                 {
                                     throw new InvalidOperationException("Failed to update user with 2FA secret.");
                                 }
+
                                 break;
                             case false:
                                 break;
                         }
+
                         codeSetupTask.SetResult(true);
                         break;
                     case false:
@@ -106,30 +106,30 @@ namespace DrinkDb_Auth.ViewModel.Authentication
 
         public async Task<bool> SetupOrVerifyTwoFactor()
         {
-            dialog?.ShowAsync();
-            bool authentificationResult = await authentificationTask.Task;
+            this.dialog?.ShowAsync();
+            bool authentificationResult = await this.authentificationTask.Task;
 
-            authentificationCompleteTask = new TaskCompletionSource<bool>();
-            dialog?.Hide();
+            this.authentificationCompleteTask = new TaskCompletionSource<bool>();
+            this.dialog?.Hide();
 
-            ShowResults(window, authentificationCompleteTask, authentificationResult);
-            return await authentificationCompleteTask.Task;
+            this.ShowResults(this.window, this.authentificationCompleteTask, authentificationResult);
+            return await this.authentificationCompleteTask.Task;
         }
 
         private void ShowResults(Window? window, TaskCompletionSource<bool> authCompletionStatus, bool codeSetupResult)
         {
-            // Test both branches of results
             if (codeSetupResult)
             {
                 authCompletionStatus.SetResult(true);
             }
             else
             {
-                if (invalidDialog != null)
+                if (this.invalidDialog != null)
                 {
-                    invalidDialog.Command = cancelRelayCommand;
+                    this.invalidDialog.Command = cancelRelayCommand;
                 }
-                invalidDialog?.ShowAsync();
+
+                this.invalidDialog?.ShowAsync();
             }
         }
     }

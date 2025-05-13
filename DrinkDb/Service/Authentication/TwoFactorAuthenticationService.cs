@@ -1,24 +1,14 @@
-﻿using System;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using DataAccess.Model.Authentication;
-using IRepository;
-using DrinkDb_Auth.Service.Authentication.Components;
-using DrinkDb_Auth.Service.Authentication.Interfaces;
-using DrinkDb_Auth.View;
-using DrinkDb_Auth.View.Authentication;
-using DrinkDb_Auth.View.Authentication.Interfaces;
-using DrinkDb_Auth.ViewModel;
-using DrinkDb_Auth.ViewModel.AdminDashboard.Components;
-using DrinkDb_Auth.ViewModel.Authentication;
-using DrinkDb_Auth.ViewModel.Authentication.Interfaces;
-using Microsoft.UI.Xaml;
-using OtpNet;
-using Repository.AdminDashboard;
-using DrinkDb_Auth.ProxyRepository.AdminDashboard;
-
-namespace DrinkDb_Auth.Service.Authentication
+﻿namespace DrinkDb_Auth.Service.Authentication
 {
+    using System;
+    using DataAccess.Model.Authentication;
+    using DrinkDb_Auth.ProxyRepository.AdminDashboard;
+    using DrinkDb_Auth.Service.Authentication.Components;
+    using DrinkDb_Auth.Service.Authentication.Interfaces;
+    using IRepository;
+    using Microsoft.UI.Xaml;
+    using OtpNet;
+
     public class TwoFactorAuthenticationService : ITwoFactorAuthenticationService
     {
         private IUserRepository? userRepository = new UserProxyRepository();
@@ -33,38 +23,29 @@ namespace DrinkDb_Auth.Service.Authentication
             this.userId = userId;
             this.isFirstTimeSetup = isFirstTimeSetup;
         }
-        public (User currentUser, string uniformResourceIdentifier, byte[] twoFactorSecret) Get2FAValues(IAuthenticationWindowSetup? windowSetup = null, ITwoFactorAuthenticationView? authenticationWindow = null, IDialog? dialog = null, IDialog? invalidDialog = null)
+
+        public (User currentUser, string uniformResourceIdentifier, byte[] twoFactorSecret) Get2FAValues()
         {
-            currentUser = userRepository?.GetUserById(userId).Result ?? throw new ArgumentException("User not found.");
+            this.currentUser = this.userRepository?.GetUserById(this.userId).Result ?? throw new ArgumentException("User not found.");
 
             int keyLength = 42;
             byte[] twoFactorSecret;
             string uniformResourceIdentifier = "";
 
 
-            if (isFirstTimeSetup)
+            if (this.isFirstTimeSetup)
             {
-                twoFactorSecret = keyGeneration?.GenerateRandomKey(keyLength) ?? throw new InvalidOperationException("Failed to generate 2FA secret.");
-                currentUser.TwoFASecret = Convert.ToBase64String(twoFactorSecret);
-                userRepository.UpdateUser(currentUser);
-                uniformResourceIdentifier = new OtpUri(OtpType.Totp, twoFactorSecret, currentUser.Username, "DrinkDB").ToString();
+                twoFactorSecret = this.keyGeneration?.GenerateRandomKey(keyLength) ?? throw new InvalidOperationException("Failed to generate 2FA secret.");
+                this.currentUser.TwoFASecret = Convert.ToBase64String(twoFactorSecret);
+                this.userRepository.UpdateUser(this.currentUser);
+                uniformResourceIdentifier = new OtpUri(OtpType.Totp, twoFactorSecret, this.currentUser.Username, "DrinkDB").ToString();
             }
             else
             {
-                twoFactorSecret = Convert.FromBase64String(currentUser.TwoFASecret ?? string.Empty);
-                //Totp? timeBasedOneTimePassword = new Totp(twoFactorSecret);
+                twoFactorSecret = Convert.FromBase64String(this.currentUser.TwoFASecret ?? string.Empty);
             }
 
-            return (currentUser, uniformResourceIdentifier, twoFactorSecret);
-        }
-
-        public static TwoFactorAuthenticationService CreateInjectedInstance(Window? window, Guid userId, bool isFirstTimeSetup, IUserRepository? userRepository = null, IKeyGeneration? keyGeneration = null, IVerify? verifier = null, IAuthenticationWindowSetup? windowSetup = null, ITwoFactorAuthenticationView? authenticationWindow = null, IDialog? dialog = null, IDialog? invalidDialog = null)
-        {
-            TwoFactorAuthenticationService instance = new TwoFactorAuthenticationService(window, userId, isFirstTimeSetup);
-            instance.userRepository = userRepository;
-            instance.keyGeneration = keyGeneration;
-            instance.Get2FAValues(windowSetup, authenticationWindow, dialog, invalidDialog);
-            return instance;
+            return (this.currentUser, uniformResourceIdentifier, twoFactorSecret);
         }
     }
 }

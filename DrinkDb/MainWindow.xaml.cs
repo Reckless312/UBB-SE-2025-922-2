@@ -1,28 +1,26 @@
-using System;
-using System.Threading.Tasks;
-using DrinkDb_Auth.OAuthProviders;
-using DrinkDb_Auth.AuthProviders.Facebook;
-using DrinkDb_Auth.AuthProviders.Github;
-using DrinkDb_Auth.AuthProviders.Google;
-using DrinkDb_Auth.AuthProviders.LinkedIn;
-using DrinkDb_Auth.AuthProviders.Twitter;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Windows.Graphics;
-using Quartz;
-using Microsoft.UI;
-using Quartz.Impl;
-using DrinkDb_Auth.Service.Authentication.Interfaces;
-using DrinkDb_Auth.Service.Authentication;
-using DataAccess.Model.Authentication;
-using DrinkDb_Auth.ViewModel.Authentication;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 namespace DrinkDb_Auth
 {
+    using System;
+    using System.Threading.Tasks;
+    using DataAccess.Model.Authentication;
+    using DrinkDb_Auth.AuthProviders.Facebook;
+    using DrinkDb_Auth.AuthProviders.Github;
+    using DrinkDb_Auth.AuthProviders.Google;
+    using DrinkDb_Auth.AuthProviders.LinkedIn;
+    using DrinkDb_Auth.AuthProviders.Twitter;
+    using DrinkDb_Auth.OAuthProviders;
+    using DrinkDb_Auth.Service.Authentication;
+    using DrinkDb_Auth.Service.Authentication.Interfaces;
+    using DrinkDb_Auth.ViewModel.Authentication;
+    using Microsoft.IdentityModel.Tokens;
+    using Microsoft.UI;
+    using Microsoft.UI.Windowing;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+    using Quartz;
+    using Quartz.Impl;
+    using Windows.Graphics;
+
     public sealed partial class MainWindow : Window
     {
         private AuthenticationService authenticationService = new ();
@@ -34,12 +32,12 @@ namespace DrinkDb_Auth
         {
             this.InitializeComponent();
 
-            Title = "DrinkDb - Sign In";
+            this.Title = "DrinkDb - Sign In";
 
             this.AppWindow.Resize(new SizeInt32
             {
                 Width = DisplayArea.Primary.WorkArea.Width,
-                Height = DisplayArea.Primary.WorkArea.Height
+                Height = DisplayArea.Primary.WorkArea.Height,
             });
             this.AppWindow.Move(new PointInt32(0, 0));
 
@@ -98,12 +96,13 @@ namespace DrinkDb_Auth
         {
             if (res.AuthenticationSuccessful)
             {
-                User user = authenticationService.GetUser(res.SessionId).Result;
+                User user = this.authenticationService.GetUser(res.SessionId).Result;
                 bool twoFAresponse = false;
                 bool firstTimeSetup = user.TwoFASecret.IsNullOrEmpty();
                 this.twoFactorAuthentificationService = new TwoFactorAuthenticationService(this, user.UserId, firstTimeSetup);
-                var twoFaGuiHelper = new TwoFaGuiHelper(this);
-                var values = this.twoFactorAuthentificationService.Get2FAValues();
+                TwoFaGuiHelper twoFaGuiHelper = new TwoFaGuiHelper(this);
+                (User currentUser, string uniformResourceIdentifier, byte[] twoFactorSecret)
+                    values = this.twoFactorAuthentificationService.Get2FAValues();
                 twoFaGuiHelper.InitializeOtherComponents(firstTimeSetup, values.currentUser, values.uniformResourceIdentifier, values.twoFactorSecret);
                 twoFAresponse = await twoFaGuiHelper.SetupOrVerifyTwoFactor();
 
@@ -111,8 +110,9 @@ namespace DrinkDb_Auth
                 {
                     App.CurrentUserId = user.UserId;
                     App.CurrentSessionId = res.SessionId;
-                    MainFrame.Navigate(typeof(SuccessPage), this);
+                    this.MainFrame.Navigate(typeof(SuccessPage), this);
                 }
+
                 return twoFAresponse;
             }
             else
@@ -122,7 +122,7 @@ namespace DrinkDb_Auth
                     Title = "Authentication Failed",
                     Content = "Authentication was not successful. Please try again.",
                     CloseButtonText = "OK",
-                    XamlRoot = Content.XamlRoot
+                    XamlRoot = this.Content.XamlRoot,
                 };
                 _ = errorDialog.ShowAsync();
             }
@@ -132,23 +132,23 @@ namespace DrinkDb_Auth
 
         public void SignInButton_Click(object sender, RoutedEventArgs e)
         {
-            string username = UsernameTextBox.Text;
-            string password = PasswordBox.Password;
+            string username = this.UsernameTextBox.Text;
+            string password = this.PasswordBox.Password;
 
-            AuthenticationResponse response = authenticationService.AuthWithUserPass(username, password).Result;
-            _ = AuthenticationComplete(response);
+            AuthenticationResponse response = this.authenticationService.AuthWithUserPass(username, password).Result;
+            _ = this.AuthenticationComplete(response);
         }
 
         public async void GithubSignInButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                var authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.GitHub, new GitHubOAuthHelper());
-                _ = AuthenticationComplete(authResponse);
+                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(this, OAuthService.GitHub, new GitHubOAuthHelper());
+                _ = this.AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
             {
-                await ShowError("Authentication Error", ex.ToString());
+                await this.ShowError("Authentication Error", ex.ToString());
             }
         }
 
@@ -156,9 +156,9 @@ namespace DrinkDb_Auth
         {
             try
             {
-                GoogleSignInButton.IsEnabled = false;
-                var authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.Google, new GoogleOAuth2Provider());
-                await AuthenticationComplete(authResponse);
+                this.GoogleSignInButton.IsEnabled = false;
+                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(this, OAuthService.Google, new GoogleOAuth2Provider());
+                await this.AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
             {
@@ -166,7 +166,7 @@ namespace DrinkDb_Auth
             }
             finally
             {
-                GoogleSignInButton.IsEnabled = true;
+                this.GoogleSignInButton.IsEnabled = true;
             }
         }
 
@@ -174,12 +174,12 @@ namespace DrinkDb_Auth
         {
             try
             {
-                var authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.Facebook, new FacebookOAuthHelper());
-                await AuthenticationComplete(authResponse);
+                AuthenticationResponse authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.Facebook, new FacebookOAuthHelper());
+                await this.AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
             {
-                await ShowError("Authentication Error", ex.ToString());
+                await this.ShowError("Authentication Error", ex.ToString());
             }
         }
 
@@ -187,17 +187,17 @@ namespace DrinkDb_Auth
         {
             try
             {
-                XSignInButton.IsEnabled = false;
-                var authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.Twitter, new TwitterOAuth2Provider());
-                await AuthenticationComplete(authResponse);
+                this.XSignInButton.IsEnabled = false;
+                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(this, OAuthService.Twitter, new TwitterOAuth2Provider());
+                await this.AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
             {
-                await ShowError("Error", ex.Message);
+                await this.ShowError("Error", ex.Message);
             }
             finally
             {
-                XSignInButton.IsEnabled = true;
+                this.XSignInButton.IsEnabled = true;
             }
         }
 
@@ -205,27 +205,27 @@ namespace DrinkDb_Auth
         {
             try
             {
-                var authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.LinkedIn, new LinkedInOAuthHelper(
+                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(this, OAuthService.LinkedIn, new LinkedInOAuthHelper(
                     clientId: "86j0ikb93jm78x",
                     clientSecret: "WPL_AP1.pg2Bd1XhCi821VTG.+hatTA==",
                     redirectUri: "http://localhost:8891/auth",
                     scope: "openid profile email"));
-                AuthenticationComplete(authResponse);
+                await this.AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
             {
-                await ShowError("Authentication Error", ex.ToString());
+                await this.ShowError("Authentication Error", ex.ToString());
             }
         }
 
         private async Task ShowError(string title, string content)
         {
-            var errorDialog = new ContentDialog
+            ContentDialog errorDialog = new ContentDialog
             {
                 Title = title,
                 Content = content,
                 CloseButtonText = "OK",
-                XamlRoot = Content.XamlRoot
+                XamlRoot = this.Content.XamlRoot,
             };
             await errorDialog.ShowAsync();
         }
