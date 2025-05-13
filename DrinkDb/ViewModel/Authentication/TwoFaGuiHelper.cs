@@ -1,4 +1,5 @@
 ﻿using DataAccess.Model.Authentication;
+using DrinkDb_Auth.ProxyRepository.AdminDashboard;
 using DrinkDb_Auth.Service.Authentication.Components;
 using DrinkDb_Auth.Service.Authentication.Interfaces;
 using DrinkDb_Auth.View;
@@ -26,7 +27,7 @@ namespace DrinkDb_Auth.ViewModel.Authentication
         private Window? window;
         private RelayCommand? submitRelayCommand;
         private RelayCommand cancelRelayCommand;
-        private IUserRepository? userRepository;
+        private IUserRepository? userRepository = new UserProxyRepository();
         private IVerify? twoFactorSecretVerifier = new Verify2FactorAuthenticationSecret();
 
         private TaskCompletionSource<bool> authentificationTask;

@@ -52,7 +52,7 @@ namespace DrinkDb_Auth.Service.Authentication
             else
             {
                 twoFactorSecret = Convert.FromBase64String(currentUser.TwoFASecret ?? string.Empty);
-                Totp? timeBasedOneTimePassword = new Totp(twoFactorSecret);
+                //Totp? timeBasedOneTimePassword = new Totp(twoFactorSecret);
             }
 
             return (currentUser, uniformResourceIdentifier, twoFactorSecret);
