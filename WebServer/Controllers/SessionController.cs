@@ -1,96 +1,97 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using DataAccess.Model.AdminDashboard;
+using DataAccess.Model.Authentication;
 using ServerAPI.Data;
 
 namespace WebServer.Controllers
 {
-    public class ReviewsController : Controller
+    public class SessionController : Controller
     {
         private readonly DatabaseContext _context;
 
-        public ReviewsController(DatabaseContext context)
+        public SessionController(DatabaseContext context)
         {
             _context = context;
         }
 
-        // GET: Reviews
+        // GET: Session
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Reviews.ToListAsync());
+            return View(await _context.Sessions.ToListAsync());
         }
 
-        // GET: Reviews/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // GET: Session/Details/5
+        public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var review = await _context.Reviews
-                .FirstOrDefaultAsync(m => m.ReviewId == id);
-            if (review == null)
+            var session = await _context.Sessions
+                .FirstOrDefaultAsync(m => m.SessionId == id);
+            if (session == null)
             {
                 return NotFound();
             }
 
-            return View(review);
+            return View(session);
         }
 
-        // GET: Reviews/Create
+        // GET: Session/Create
         public IActionResult Create()
         {
-            ViewBag.UserId = new SelectList(_context.Users.ToList(), "UserId", "UserId");
+            ViewBag.UserId = new SelectList(_context.Users.ToList(), "UserId", "Username");
             return View();
         }
 
-        // POST: Reviews/Create
+        // POST: Session/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ReviewId,UserId,Rating,Content,CreatedDate,NumberOfFlags,IsHidden")] Review review)
+        public async Task<IActionResult> Create([Bind("SessionId,UserId")] Session session)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(review);
+                session.SessionId = Guid.NewGuid();
+                _context.Add(session);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.UserId = new SelectList(_context.Users.ToList(), "UserId", "UserId", review.UserId);
-            return View(review);
+            ViewBag.UserId = new SelectList(_context.Users.ToList(), "UserId", "Username", session.UserId);
+            return View(session);
         }
 
-        // GET: Reviews/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        // GET: Session/Edit/5
+        public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var review = await _context.Reviews.FindAsync(id);
-            if (review == null)
+            var session = await _context.Sessions.FindAsync(id);
+            if (session == null)
             {
                 return NotFound();
             }
-            return View(review);
+            return View(session);
         }
 
-        // POST: Reviews/Edit/5
+        // POST: Session/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ReviewId,UserId,Rating,Content,CreatedDate,NumberOfFlags,IsHidden")] Review review)
+        public async Task<IActionResult> Edit(Guid id, [Bind("SessionId,UserId")] Session session)
         {
-            if (id != review.ReviewId)
+            if (id != session.SessionId)
             {
                 return NotFound();
             }
@@ -99,12 +100,12 @@ namespace WebServer.Controllers
             {
                 try
                 {
-                    _context.Update(review);
+                    _context.Update(session);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ReviewExists(review.ReviewId))
+                    if (!SessionExists(session.SessionId))
                     {
                         return NotFound();
                     }
@@ -115,45 +116,45 @@ namespace WebServer.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(review);
+            return View(session);
         }
 
-        // GET: Reviews/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // GET: Session/Delete/5
+        public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var review = await _context.Reviews
-                .FirstOrDefaultAsync(m => m.ReviewId == id);
-            if (review == null)
+            var session = await _context.Sessions
+                .FirstOrDefaultAsync(m => m.SessionId == id);
+            if (session == null)
             {
                 return NotFound();
             }
 
-            return View(review);
+            return View(session);
         }
 
-        // POST: Reviews/Delete/5
+        // POST: Session/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var review = await _context.Reviews.FindAsync(id);
-            if (review != null)
+            var session = await _context.Sessions.FindAsync(id);
+            if (session != null)
             {
-                _context.Reviews.Remove(review);
+                _context.Sessions.Remove(session);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ReviewExists(int id)
+        private bool SessionExists(Guid id)
         {
-            return _context.Reviews.Any(e => e.ReviewId == id);
+            return _context.Sessions.Any(e => e.SessionId == id);
         }
     }
 }

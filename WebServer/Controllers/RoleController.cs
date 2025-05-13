@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,87 +10,87 @@ using ServerAPI.Data;
 
 namespace WebServer.Controllers
 {
-    public class ReviewsController : Controller
+    public class RoleController : Controller
     {
         private readonly DatabaseContext _context;
 
-        public ReviewsController(DatabaseContext context)
+        public RoleController(DatabaseContext context)
         {
             _context = context;
         }
 
-        // GET: Reviews
+        // GET: Role
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Reviews.ToListAsync());
+            return View(await _context.Roles.ToListAsync());
         }
 
-        // GET: Reviews/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // GET: Role/Details/5
+        public async Task<IActionResult> Details(RoleType id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var review = await _context.Reviews
-                .FirstOrDefaultAsync(m => m.ReviewId == id);
-            if (review == null)
+            var role = await _context.Roles
+                .FirstOrDefaultAsync(m => m.RoleType == id);
+            if (role == null)
             {
                 return NotFound();
             }
 
-            return View(review);
+            return View(role);
         }
 
-        // GET: Reviews/Create
+        // GET: Role/Create
         public IActionResult Create()
         {
-            ViewBag.UserId = new SelectList(_context.Users.ToList(), "UserId", "UserId");
+            ViewBag.RoleType = new SelectList(Enum.GetValues(typeof(RoleType)).Cast<RoleType>());
             return View();
         }
 
-        // POST: Reviews/Create
+        // POST: Role/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ReviewId,UserId,Rating,Content,CreatedDate,NumberOfFlags,IsHidden")] Review review)
+        public async Task<IActionResult> Create([Bind("RoleType,RoleName")] Role role)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(review);
+                _context.Add(role);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.UserId = new SelectList(_context.Users.ToList(), "UserId", "UserId", review.UserId);
-            return View(review);
+            ViewBag.RoleType = new SelectList(Enum.GetValues(typeof(RoleType)).Cast<RoleType>(), role.RoleType);
+            return View(role);
         }
 
-        // GET: Reviews/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        // GET: Role/Edit/5
+        public async Task<IActionResult> Edit(RoleType id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var review = await _context.Reviews.FindAsync(id);
-            if (review == null)
+            var role = await _context.Roles.FindAsync(id);
+            if (role == null)
             {
                 return NotFound();
             }
-            return View(review);
+            return View(role);
         }
 
-        // POST: Reviews/Edit/5
+        // POST: Role/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ReviewId,UserId,Rating,Content,CreatedDate,NumberOfFlags,IsHidden")] Review review)
+        public async Task<IActionResult> Edit(RoleType id, [Bind("RoleType,RoleName")] Role role)
         {
-            if (id != review.ReviewId)
+            if (id != role.RoleType)
             {
                 return NotFound();
             }
@@ -99,12 +99,12 @@ namespace WebServer.Controllers
             {
                 try
                 {
-                    _context.Update(review);
+                    _context.Update(role);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ReviewExists(review.ReviewId))
+                    if (!RoleExists(role.RoleType))
                     {
                         return NotFound();
                     }
@@ -115,45 +115,45 @@ namespace WebServer.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(review);
+            return View(role);
         }
 
-        // GET: Reviews/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // GET: Role/Delete/5
+        public async Task<IActionResult> Delete(RoleType id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var review = await _context.Reviews
-                .FirstOrDefaultAsync(m => m.ReviewId == id);
-            if (review == null)
+            var role = await _context.Roles
+                .FirstOrDefaultAsync(m => m.RoleType == id);
+            if (role == null)
             {
                 return NotFound();
             }
 
-            return View(review);
+            return View(role);
         }
 
-        // POST: Reviews/Delete/5
+        // POST: Role/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(RoleType id)
         {
-            var review = await _context.Reviews.FindAsync(id);
-            if (review != null)
+            var role = await _context.Roles.FindAsync(id);
+            if (role != null)
             {
-                _context.Reviews.Remove(review);
+                _context.Roles.Remove(role);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ReviewExists(int id)
+        private bool RoleExists(RoleType id)
         {
-            return _context.Reviews.Any(e => e.ReviewId == id);
+            return _context.Roles.Any(e => e.RoleType == id);
         }
     }
 }

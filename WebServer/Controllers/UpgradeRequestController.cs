@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,22 +10,22 @@ using ServerAPI.Data;
 
 namespace WebServer.Controllers
 {
-    public class ReviewsController : Controller
+    public class UpgradeRequestController : Controller
     {
         private readonly DatabaseContext _context;
 
-        public ReviewsController(DatabaseContext context)
+        public UpgradeRequestController(DatabaseContext context)
         {
             _context = context;
         }
 
-        // GET: Reviews
+        // GET: UpgradeRequest
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Reviews.ToListAsync());
+            return View(await _context.UpgradeRequests.ToListAsync());
         }
 
-        // GET: Reviews/Details/5
+        // GET: UpgradeRequest/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -33,41 +33,41 @@ namespace WebServer.Controllers
                 return NotFound();
             }
 
-            var review = await _context.Reviews
-                .FirstOrDefaultAsync(m => m.ReviewId == id);
-            if (review == null)
+            var upgradeRequest = await _context.UpgradeRequests
+                .FirstOrDefaultAsync(m => m.UpgradeRequestId == id);
+            if (upgradeRequest == null)
             {
                 return NotFound();
             }
 
-            return View(review);
+            return View(upgradeRequest);
         }
 
-        // GET: Reviews/Create
+        // GET: UpgradeRequest/Create
         public IActionResult Create()
         {
-            ViewBag.UserId = new SelectList(_context.Users.ToList(), "UserId", "UserId");
+            ViewBag.RequestingUserIdentifier = new SelectList(_context.Users.ToList(), "UserId", "UserId");
             return View();
         }
 
-        // POST: Reviews/Create
+        // POST: UpgradeRequest/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ReviewId,UserId,Rating,Content,CreatedDate,NumberOfFlags,IsHidden")] Review review)
+        public async Task<IActionResult> Create([Bind("UpgradeRequestId,RequestingUserIdentifier,RequestingUserDisplayName")] UpgradeRequest upgradeRequest)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(review);
+                _context.Add(upgradeRequest);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.UserId = new SelectList(_context.Users.ToList(), "UserId", "UserId", review.UserId);
-            return View(review);
+            ViewBag.RequestingUserIdentifier = new SelectList(_context.Users.ToList(), "UserId", "UserId", upgradeRequest.RequestingUserIdentifier);
+            return View(upgradeRequest);
         }
 
-        // GET: Reviews/Edit/5
+        // GET: UpgradeRequest/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -75,22 +75,22 @@ namespace WebServer.Controllers
                 return NotFound();
             }
 
-            var review = await _context.Reviews.FindAsync(id);
-            if (review == null)
+            var upgradeRequest = await _context.UpgradeRequests.FindAsync(id);
+            if (upgradeRequest == null)
             {
                 return NotFound();
             }
-            return View(review);
+            return View(upgradeRequest);
         }
 
-        // POST: Reviews/Edit/5
+        // POST: UpgradeRequest/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ReviewId,UserId,Rating,Content,CreatedDate,NumberOfFlags,IsHidden")] Review review)
+        public async Task<IActionResult> Edit(int id, [Bind("UpgradeRequestId,RequestingUserIdentifier,RequestingUserDisplayName")] UpgradeRequest upgradeRequest)
         {
-            if (id != review.ReviewId)
+            if (id != upgradeRequest.UpgradeRequestId)
             {
                 return NotFound();
             }
@@ -99,12 +99,12 @@ namespace WebServer.Controllers
             {
                 try
                 {
-                    _context.Update(review);
+                    _context.Update(upgradeRequest);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ReviewExists(review.ReviewId))
+                    if (!UpgradeRequestExists(upgradeRequest.UpgradeRequestId))
                     {
                         return NotFound();
                     }
@@ -115,10 +115,10 @@ namespace WebServer.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(review);
+            return View(upgradeRequest);
         }
 
-        // GET: Reviews/Delete/5
+        // GET: UpgradeRequest/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -126,34 +126,34 @@ namespace WebServer.Controllers
                 return NotFound();
             }
 
-            var review = await _context.Reviews
-                .FirstOrDefaultAsync(m => m.ReviewId == id);
-            if (review == null)
+            var upgradeRequest = await _context.UpgradeRequests
+                .FirstOrDefaultAsync(m => m.UpgradeRequestId == id);
+            if (upgradeRequest == null)
             {
                 return NotFound();
             }
 
-            return View(review);
+            return View(upgradeRequest);
         }
 
-        // POST: Reviews/Delete/5
+        // POST: UpgradeRequest/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var review = await _context.Reviews.FindAsync(id);
-            if (review != null)
+            var upgradeRequest = await _context.UpgradeRequests.FindAsync(id);
+            if (upgradeRequest != null)
             {
-                _context.Reviews.Remove(review);
+                _context.UpgradeRequests.Remove(upgradeRequest);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ReviewExists(int id)
+        private bool UpgradeRequestExists(int id)
         {
-            return _context.Reviews.Any(e => e.ReviewId == id);
+            return _context.UpgradeRequests.Any(e => e.UpgradeRequestId == id);
         }
     }
 }
