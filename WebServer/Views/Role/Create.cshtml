@@ -15,24 +15,11 @@
 
 <h4>Role</h4>
 <hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label class="control-label" for="RoleType">Role Type</label>
-                <input type="text" name="RoleType" class="form-control" value="@Model.RoleType.ToString()" />
-                <span asp-validation-for="RoleType" class="text-danger"></span>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+            <div class="alert alert-info text-center">
+                <strong>Notice:</strong> New Roles cannot be created. They are predefined in the system!
             </div>
-            <div class="form-group">
-                <label asp-for="RoleName" class="control-label"></label>
-                <input asp-for="RoleName" class="form-control" />
-                <span asp-validation-for="RoleName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
     </div>
 </div>
 
