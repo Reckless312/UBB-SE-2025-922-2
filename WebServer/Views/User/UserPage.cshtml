@@ -1,0 +1,48 @@
+﻿
+@{
+    ViewData["Title"] = "UserPage";
+}
+
+
+<div class="container-fluid bg-white py-5">
+    <div class="row">
+        <!-- LEFT COLUMN: User Info -->
+        <div class="col-md-4 d-flex justify-content-center align-items-center">
+            <div class="card border-dark p-4" style="width: 100%; max-width: 400px;">
+                <div class="text-center mb-4 d-flex justify-content-center align-items-center">
+                    <div class="rounded-circle bg-secondary" style="width: 100px; height: 100px;"></div>
+                </div>
+
+                <div class="text-center mb-3">
+                    <h4 id="NameTextBlock" class="fw-bold">Username</h4>
+                    <p id="UsernameTextBlock" class="text-muted">username@gmail.com</p>
+                </div>
+
+                <div class="text-center mb-3">
+                    <p id="StatusTextBlock">Status: Online</p>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button id="AdminDashboardButton" class="btn btn-outline-dark">Admin Dashboard</button>
+                    <button id="LogoutButton" class="btn btn-outline-dark">Logout</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Reviews and Drinklist -->
+        <div class="col-md-8">
+            <div class="mb-5">
+                <h4 class="fw-bold">Reviews</h4>
+                <div id="ReviewsItemsControl" class="list-group">
+                </div>
+            </div>
+
+            <div>
+                <h4 class="fw-bold">Drinklist</h4>
+                <div id="DrinklistItemsControl" class="list-group">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

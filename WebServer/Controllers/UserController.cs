@@ -149,5 +149,9 @@ namespace WebServer.Controllers
         {
             return this.context.Users.Any(existingUser => existingUser.UserId == id);
         }
+        public IActionResult UserPage()
+        {
+            return View();
+        }
     }
 }

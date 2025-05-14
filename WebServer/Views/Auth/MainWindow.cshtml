@@ -1,0 +1,73 @@
+﻿
+@{
+    ViewData["Title"] = "DrinkDb - Sign In";
+}
+
+<div class="container-fluid vh-100 d-flex align-items-center justify-content-center px-0">
+    <div class="row w-100 h-100 g-0">
+
+        <!-- Left Column -->
+        <div class="col-md-3 bg-primary text-white d-flex flex-column justify-content-center align-items-start p-5">
+            <h1 class="fw-bold">Welcome to DrinkDb</h1>
+            <p class="fs-5 mt-3">Your personal drink database</p>
+        </div>
+
+        <!-- Center Column (Login Panel) -->
+        <div class="col-md-6 bg-light d-flex flex-column justify-content-center align-items-center px-4 py-5">
+            <div class="w-75">
+                <h2 class="text-center mb-4">Sign In</h2>
+
+                <!-- Username -->
+                <label for="username" class="form-label">Username</label>
+                <input type="text" id="username" class="form-control mb-3" placeholder="Enter username">
+
+                <!-- Password -->
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" class="form-control mb-4" placeholder="Enter password">
+
+                <!-- Local Sign In -->
+                <button class="btn btn-primary w-100 mb-4">Sign In</button>
+
+                <!-- OR Separator -->
+                <div class="d-flex align-items-center my-4">
+                    <hr class="flex-grow-1">
+                    <span class="mx-2 text-muted">OR</span>
+                    <hr class="flex-grow-1">
+                </div>
+
+                <!-- OAuth Buttons -->
+                <button class="btn btn-outline-light w-100 text-dark mb-3 d-flex align-items-center justify-content-center" style="background-color: #4285F4;">
+                    <img src="/Assets/google_logo.png" class="me-2" width="20" height="20" />
+                    Sign in with Google
+                </button>
+
+                <button class="btn btn-light w-100 mb-3 d-flex align-items-center justify-content-center">
+                    <img src="/Assets/github_logo.png" class="me-2" width="20" height="20" />
+                    Sign in with GitHub
+                </button>
+
+                <button class="btn w-100 text-white mb-3 d-flex align-items-center justify-content-center" style="background-color: #3b5998;">
+                    <img src="/Assets/facebook_logo.png" class="me-2" width="20" height="20" />
+                    Sign in with Facebook
+                </button>
+
+                <button class="btn w-100 text-white mb-3 d-flex align-items-center justify-content-center" style="background-color: black;">
+                    <img src="/Assets/x-twitter-logo-on-black.png" class="me-2" width="30" height="20" />
+                    Sign in with X
+                </button>
+
+                <button class="btn w-100 text-white d-flex align-items-center justify-content-center" style="background-color: #0077B5;">
+                    <img src="/Assets/linkedin_logo.png" class="me-2" width="20" height="20" />
+                    Sign in with LinkedIn
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-md-3 bg-primary text-white d-flex flex-column justify-content-center align-items-start p-5">
+            <h3>Track your favorite drinks</h3>
+            <p class="fs-5 mt-3">Create your personal collection</p>
+        </div>
+    </div>
+</div>
+
