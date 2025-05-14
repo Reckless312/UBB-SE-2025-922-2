@@ -16,22 +16,34 @@ namespace DataAccess.Model.AdminDashboard
     /// <param name="createdDate">The date and time when the review was created.</param>
     /// <param name="numberOfFlags">The number of times this review has been flagged for inappropriate content.</param>
     /// <param name="isHidden">Indicates whether the review is hidden from public view.</param>
-    public class Review(int reviewId, Guid userId, int rating,
+    public class Review
+    {
+        public Review() { }
+
+        public Review(int reviewId, Guid userId, int rating,
                  string content, DateTime createdDate, int numberOfFlags = 0,
                  bool isHidden = false)
-    {
-        public int ReviewId { get; } = reviewId;
+        {
+            ReviewId = reviewId;
+            UserId = userId;
+            Rating = rating;
+            Content = content;
+            CreatedDate = createdDate;
+            NumberOfFlags = numberOfFlags;
+            IsHidden = isHidden;
+        }
+        public int ReviewId { get; set; }
 
-        public Guid UserId { get; set; } = userId;
+        public Guid UserId { get; set; }
 
-        public int Rating { get; set; } = rating;
+        public int Rating { get; set; } 
 
-        public string Content { get; set; } = content;
+        public string Content { get; set; } 
 
-        public DateTime CreatedDate { get; } = createdDate;
+        public DateTime CreatedDate { get; set; }
 
-        public int NumberOfFlags { get; set; } = numberOfFlags;
+        public int NumberOfFlags { get; set; }
 
-        public bool IsHidden { get; set; } = isHidden;
+        public bool IsHidden { get; set; }
     }
 }

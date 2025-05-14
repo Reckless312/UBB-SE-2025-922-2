@@ -1,23 +1,27 @@
-﻿using DataAccess.Model.AdminDashboard;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using DataAccess.Model.AutoChecker;
 using ServerAPI.Data;
 
 namespace WebServer.Controllers
 {
-    public class ReviewsController : Controller
+    public class OffensiveWordsController : Controller
     {
         private readonly DatabaseContext context;
 
-        public ReviewsController(DatabaseContext context)
+        public OffensiveWordsController(DatabaseContext context)
         {
             this.context = context;
         }
 
         public async Task<IActionResult> Index()
         {
-            return View(await this.context.Reviews.ToListAsync());
+            return View(await this.context.OffensiveWords.ToListAsync());
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -27,34 +31,32 @@ namespace WebServer.Controllers
                 return NotFound();
             }
 
-            Review? review = await this.context.Reviews
-                .FirstOrDefaultAsync(model => model.ReviewId == id);
-            if (review == null)
+            OffensiveWord? offensiveWord = await this.context.OffensiveWords
+                .FirstOrDefaultAsync(model => model.OffensiveWordId == id);
+            if (offensiveWord == null)
             {
                 return NotFound();
             }
 
-            return View(review);
+            return View(offensiveWord);
         }
 
         public IActionResult Create()
         {
-            ViewBag.UserId = new SelectList(this.context.Users.ToList(), "UserId", "UserId");
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ReviewId,UserId,Rating,Content,CreatedDate,NumberOfFlags,IsHidden")] Review review)
+        public async Task<IActionResult> Create([Bind("OffensiveWordId,Word")] OffensiveWord offensiveWord)
         {
             if (ModelState.IsValid)
             {
-                this.context.Add(review);
+                this.context.Add(offensiveWord);
                 await this.context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.UserId = new SelectList(this.context.Users.ToList(), "UserId", "UserId", review.UserId);
-            return View(review);
+            return View(offensiveWord);
         }
 
         public async Task<IActionResult> Edit(int? id)
@@ -64,30 +66,33 @@ namespace WebServer.Controllers
                 return NotFound();
             }
 
-            Review? review = await this.context.Reviews.FindAsync(id);
-            if (review == null)
+            OffensiveWord? offensiveWord = await this.context.OffensiveWords.FindAsync(id);
+            if (offensiveWord == null)
             {
                 return NotFound();
             }
-
-            ViewBag.UserId = new SelectList(this.context.Users.ToList(), "UserId", "UserId", review.UserId);
-            return View(review);
+            return View(offensiveWord);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit([Bind("ReviewId,UserId,Rating,Content,CreatedDate,NumberOfFlags,IsHidden")] Review review)
+        public async Task<IActionResult> Edit(int id, [Bind("OffensiveWordId,Word")] OffensiveWord offensiveWord)
         {
+            if (id != offensiveWord.OffensiveWordId)
+            {
+                return NotFound();
+            }
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    this.context.Update(review);
+                    this.context.Update(offensiveWord);
                     await this.context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ReviewExists(review.ReviewId))
+                    if (!OffensiveWordExists(offensiveWord.OffensiveWordId))
                     {
                         return NotFound();
                     }
@@ -98,10 +103,8 @@ namespace WebServer.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.UserId = new SelectList(this.context.Users.ToList(), "UserId", "UserId", review.UserId);
-            return View(review);
+            return View(offensiveWord);
         }
-
 
         public async Task<IActionResult> Delete(int? id)
         {
@@ -110,33 +113,33 @@ namespace WebServer.Controllers
                 return NotFound();
             }
 
-            Review? review = await this.context.Reviews
-                .FirstOrDefaultAsync(model => model.ReviewId == id);
-            if (review == null)
+            OffensiveWord? offensiveWord = await this.context.OffensiveWords
+                .FirstOrDefaultAsync(model => model.OffensiveWordId == id);
+            if (offensiveWord == null)
             {
                 return NotFound();
             }
 
-            return View(review);
+            return View(offensiveWord);
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            Review? review = await this.context.Reviews.FindAsync(id);
-            if (review != null)
+            OffensiveWord? offensiveWord = await this.context.OffensiveWords.FindAsync(id);
+            if (offensiveWord != null)
             {
-                this.context.Reviews.Remove(review);
+                this.context.OffensiveWords.Remove(offensiveWord);
             }
 
             await this.context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ReviewExists(int id)
+        private bool OffensiveWordExists(int id)
         {
-            return this.context.Reviews.Any(existingReview => existingReview.ReviewId == id);
+            return this.context.OffensiveWords.Any(existingOffensiveWord => existingOffensiveWord.OffensiveWordId == id);
         }
     }
 }

@@ -1,0 +1,31 @@
+@model DataAccess.Model.AdminDashboard.Role
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Create</title>
+</head>
+<body>
+
+<h4>Role</h4>
+<hr />
+<div class="row justify-content-center">
+    <div class="col-md-6">
+            <div class="alert alert-info text-center">
+                <strong>Notice:</strong> New Roles cannot be created. They are predefined in the system!
+            </div>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+</body>
+</html>
