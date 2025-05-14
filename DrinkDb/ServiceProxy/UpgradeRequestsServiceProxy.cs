@@ -2,8 +2,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using DrinkDb.Models; // Adjust namespace as needed
 using System;
+using DataAccess.Model.AdminDashboard;
 
 namespace DrinkDb.ProxyRepository.ServerProxy
 {
@@ -18,12 +18,12 @@ namespace DrinkDb.ProxyRepository.ServerProxy
             _baseUrl = baseUrl.TrimEnd('/');
         }
 
-        public async Task<List<UpgradeRequestModel>> GetAllUpgradeRequestsAsync()
+        public async Task<List<UpgradeRequest>> GetAllUpgradeRequestsAsync()
         {
             var response = await _httpClient.GetAsync($"{_baseUrl}/api/upgraderequests");
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<List<UpgradeRequestModel>>(json);
+            return JsonConvert.DeserializeObject<List<UpgradeRequest>>(json);
         }
 
         public async Task RemoveUpgradeRequestsFromBannedUsersAsync()
@@ -40,12 +40,12 @@ namespace DrinkDb.ProxyRepository.ServerProxy
             return await response.Content.ReadAsStringAsync();
         }
 
-        public async Task<List<UpgradeRequestModel>> RetrieveAllUpgradeRequestsAsync()
+        public async Task<List<UpgradeRequest>> RetrieveAllUpgradeRequestsAsync()
         {
             var response = await _httpClient.GetAsync($"{_baseUrl}/api/upgraderequests");
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<List<UpgradeRequestModel>>(json);
+            return JsonConvert.DeserializeObject<List<UpgradeRequest>>(json);
         }
 
         public async Task ProcessUpgradeRequestAsync(bool isRequestAccepted, int upgradeRequestIdentifier)
