@@ -15,30 +15,30 @@ namespace DrinkDb_Auth.Service.Authentication
             this.sessionRepository = sessionRepository;
         }
 
-        public Session CreateSession(Guid userId)
+        public async Task<Session> CreateSessionAsync(Guid userId)
         {
-            return sessionRepository.CreateSession(userId).Result;
+            return await this.sessionRepository.CreateSession(userId);
         }
 
-        public bool EndSession(Guid sessionId)
+        public async Task<bool> EndSessionAsync(Guid sessionId)
         {
-            return sessionRepository.EndSession(sessionId).Result;
+            return await this.sessionRepository.EndSession(sessionId);
         }
 
-        public Session GetSession(Guid sessionId)
+        public async Task<Session> GetSessionAsync(Guid sessionId)
         {
-            return sessionRepository.GetSession(sessionId).Result;
+            return await this.sessionRepository.GetSession(sessionId);
         }
 
-        public bool ValidateSession(Guid sessionId)
+        public async Task<bool> ValidateSessionAsync(Guid sessionId)
         {
-            var session = GetSession(sessionId);
+            var session = await this.GetSessionAsync(sessionId);
             return session != null && session.IsActive();
         }
 
-        public async Task<bool> AuthorizeAction(Guid sessionId, string resource, string action)
+        public async Task<bool> AuthorizeActionAsync(Guid sessionId, string resource, string action)
         {
-            var session = GetSession(sessionId);
+            var session = await this.GetSessionAsync(sessionId);
             if (session == null || !session.IsActive())
             {
                 return false;
@@ -46,6 +46,11 @@ namespace DrinkDb_Auth.Service.Authentication
 
             var userService = new UserService();
             return await userService.ValidateAction(session.UserId, resource, action);
+        }
+
+        public async Task<Session> GetSessionByUserIdAsync(Guid userId)
+        {
+            return await this.sessionRepository.GetSessionByUserId(userId);
         }
     }
 }
