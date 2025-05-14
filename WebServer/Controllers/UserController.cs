@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DataAccess.Model.Authentication;
 using ServerAPI.Data;
+using DataAccess.Model.AdminDashboard;
 
 namespace WebServer.Controllers
 {
@@ -72,6 +73,11 @@ namespace WebServer.Controllers
             {
                 return NotFound();
             }
+            ViewBag.Roles = new SelectList(Enum.GetValues(typeof(RoleType)).Cast<RoleType>().Select(role => new
+            {
+                Value = role,
+                Text = role.ToString()
+            }), "Value", "Text", user.AssignedRole);
             return View(user);
         }
 
@@ -104,6 +110,7 @@ namespace WebServer.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewBag.Roles = new SelectList(this.context.Roles.ToList(), "RoleType", "RoleName", user.AssignedRole);
             return View(user);
         }
 

@@ -32,7 +32,7 @@ namespace DataAccess.Model.AdminDashboard
             NumberOfFlags = numberOfFlags;
             IsHidden = isHidden;
         }
-        public int ReviewId { get; }
+        public int ReviewId { get; set; }
 
         public Guid UserId { get; set; }
 
@@ -40,7 +40,7 @@ namespace DataAccess.Model.AdminDashboard
 
         public string Content { get; set; } 
 
-        public DateTime CreatedDate { get; }
+        public DateTime CreatedDate { get; set; }
 
         public int NumberOfFlags { get; set; }
 

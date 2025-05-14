@@ -69,19 +69,15 @@ namespace WebServer.Controllers
             {
                 return NotFound();
             }
+
             ViewBag.UserId = new SelectList(this.context.Users.ToList(), "UserId", "UserId", review.UserId);
             return View(review);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ReviewId,UserId,Rating,Content,CreatedDate,NumberOfFlags,IsHidden")] Review review)
+        public async Task<IActionResult> Edit([Bind("ReviewId,UserId,Rating,Content,CreatedDate,NumberOfFlags,IsHidden")] Review review)
         {
-            if (id != review.ReviewId)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
@@ -105,6 +101,7 @@ namespace WebServer.Controllers
             ViewBag.UserId = new SelectList(this.context.Users.ToList(), "UserId", "UserId", review.UserId);
             return View(review);
         }
+
 
         public async Task<IActionResult> Delete(int? id)
         {

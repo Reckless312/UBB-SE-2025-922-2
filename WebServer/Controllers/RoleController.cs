@@ -43,7 +43,6 @@ namespace WebServer.Controllers
 
         public IActionResult Create()
         {
-            ViewBag.RoleType = new SelectList(Enum.GetValues(typeof(RoleType)).Cast<RoleType>());
             return View();
         }
 
@@ -57,7 +56,6 @@ namespace WebServer.Controllers
                 await this.context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.RoleType = new SelectList(Enum.GetValues(typeof(RoleType)).Cast<RoleType>(), role.RoleType);
             return View(role);
         }
 
