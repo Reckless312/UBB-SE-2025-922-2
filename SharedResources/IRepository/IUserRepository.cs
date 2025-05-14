@@ -26,7 +26,7 @@ namespace IRepository
         public Task ChangeRoleToUser(Guid userID, Role roleToAdd);
 
         public Task<List<User>> GetAllUsers();
-        public Task<bool> ValidateAction(Guid userId, string resource, string action);
+        //public Task<bool> ValidateAction(Guid userId, string resource, string action);
         public Task<User?> GetUserByUsername(string username);
         public Task<User?> GetUserById(Guid userId);
         public Task<bool> CreateUser(User user);

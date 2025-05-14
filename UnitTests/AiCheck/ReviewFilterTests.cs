@@ -1,6 +1,6 @@
 namespace UnitTests.AiCheck
 {
-    using DrinkDb_Auth.AiCheck;
+    using DataAccess.AiCheck;
     using System.Linq;
     using Xunit;
 

@@ -11,22 +11,10 @@ namespace IRepository
     using System.Threading.Tasks;
     using DataAccess.Model.AdminDashboard;
 
-    /// <summary>
-    /// interface for roles.
-    /// </summary>
     public interface IRolesRepository
     {
-        /// <summary>
-        /// returns next role.
-        /// </summary>
-        /// <param name="currentRoleType"current role>the current role.</param>
-        /// <returns>next role.</returns>
         public Task<Role> GetNextRoleInHierarchy(RoleType currentRoleType);
 
-        /// <summary>
-        /// gets all the roles.
-        /// </summary>
-        /// <returns>list of all the roles.</returns>
         public Task<List<Role>> GetAllRoles();
     }
 }

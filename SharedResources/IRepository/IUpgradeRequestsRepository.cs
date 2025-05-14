@@ -11,21 +11,10 @@ namespace IRepository
     using System.Threading.Tasks;
     using DataAccess.Model.AdminDashboard;
 
-    /// <summary>
-    /// inteface for update requests.
-    /// </summary>
     public interface IUpgradeRequestsRepository
     {
-        /// <summary>
-        /// gets update requests.
-        /// </summary>
-        /// <returns>list of requests.</returns>
         Task<List<UpgradeRequest>> RetrieveAllUpgradeRequests();
 
-        /// <summary>
-        /// removes a request from repo.
-        /// </summary>
-        /// <param name="upgradeRequestIdentifier">the request to be removed.</param>
         Task RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier);
 
         Task<UpgradeRequest> RetrieveUpgradeRequestByIdentifier(int upgradeRequestIdentifier);
