@@ -2,10 +2,10 @@ namespace DrinkDb_Auth
 {
     using System;
     using DataAccess.AutoChecker;
-    using DataAccess.Converters;
     using DataAccess.Service;
     using DataAccess.Service.AdminDashboard;
     using DataAccess.Service.AdminDashboard.Interfaces;
+    using DrinkDb_Auth.Converters;
     using DrinkDb_Auth.ProxyRepository.AdminDashboard;
     using DrinkDb_Auth.ProxyRepository.AutoChecker;
     using DrinkDb_Auth.View;

@@ -2,7 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace DataAccess.Converters
+namespace DrinkDb_Auth.Converters
 {
     using System;
     using DataAccess.Model.Authentication;
