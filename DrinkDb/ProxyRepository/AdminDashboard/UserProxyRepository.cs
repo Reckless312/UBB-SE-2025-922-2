@@ -37,7 +37,7 @@
         public async Task ChangeRoleToUser(Guid userId, Role roleToAdd)
         {
             var userUrl = $"{ApiRoute}/byId/{userId}/addRole";
-            var response = this.httpClient.PatchAsJsonAsync(userUrl, roleToAdd).Result;
+            var response = await this.httpClient.PatchAsJsonAsync(userUrl, roleToAdd);
             response.EnsureSuccessStatusCode();
         }
 

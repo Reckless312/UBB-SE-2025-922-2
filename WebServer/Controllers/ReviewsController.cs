@@ -1,8 +1,8 @@
-﻿using DataAccess.Model.AdminDashboard;
+﻿using Data;
+using DataAccess.Model.AdminDashboard;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using ServerAPI.Data;
 
 namespace WebServer.Controllers
 {

@@ -4,11 +4,8 @@
     using DataAccess.Model.Authentication;
     using DataAccess.Service.Authentication.Components;
     using DataAccess.Service.Authentication.Interfaces;
-    using global::Repository.AdminDashboard;
     using IRepository;
-    using Microsoft.UI.Xaml;
     using OtpNet;
-    using Windows.UI.Xaml;
 
     public class TwoFactorAuthenticationService : ITwoFactorAuthenticationService
     {
@@ -24,7 +21,7 @@
             this.userRepository = userRepo ?? throw new ArgumentNullException(nameof(userRepo));
         }
 
-        public TwoFactorAuthenticationService(Window? window, Guid userId, bool isFirstTimeSetup)
+        public TwoFactorAuthenticationService(Guid userId, bool isFirstTimeSetup)
         {
             this.userId = userId;
             this.isFirstTimeSetup = isFirstTimeSetup;

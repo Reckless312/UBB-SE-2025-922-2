@@ -9,7 +9,7 @@ namespace DataAccess.Service.Authentication.Interfaces
     public interface IAuthenticationService
     {
         Task<AuthenticationResponse> AuthWithUserPass(string username, string password);
-        Task<AuthenticationResponse> AuthWithOAuth(Window window, OAuthService selectedService, object authProvider);
+        Task<AuthenticationResponse> AuthWithOAuth(OAuthService selectedService, object authProvider);
         Task<User> GetUser(Guid sessionId);
 
         void Logout();

@@ -2,12 +2,9 @@ namespace DrinkDb_Auth
 {
     using System;
     using System.Threading.Tasks;
-    using DataAccess.Model.Authentication;
     using DataAccess.AuthProviders.Facebook;
-    using DataAccess.AuthProviders.Github;
-    //using DataAccess.AuthProviders.Google;
     using DataAccess.AuthProviders.LinkedIn;
-    //using DataAccess.AuthProviders.Twitter;
+    using DataAccess.Model.Authentication;
     using DataAccess.OAuthProviders;
     using DataAccess.Service.Authentication;
     using DataAccess.Service.Authentication.Interfaces;
@@ -20,7 +17,6 @@ namespace DrinkDb_Auth
     using Quartz;
     using Quartz.Impl;
     using Windows.Graphics;
-    using Uno.UI;
 
     public sealed partial class MainWindow : Window
     {
@@ -100,7 +96,7 @@ namespace DrinkDb_Auth
                 User user = this.authenticationService.GetUser(res.SessionId).Result;
                 bool twoFAresponse = false;
                 bool firstTimeSetup = user.TwoFASecret.IsNullOrEmpty();
-                this.twoFactorAuthentificationService = new TwoFactorAuthenticationService(this, user.UserId, firstTimeSetup);
+                this.twoFactorAuthentificationService = new TwoFactorAuthenticationService(user.UserId, firstTimeSetup);
                 TwoFaGuiHelper twoFaGuiHelper = new TwoFaGuiHelper(this);
                 (User currentUser, string uniformResourceIdentifier, byte[] twoFactorSecret)
                     values = this.twoFactorAuthentificationService.Get2FAValues();
@@ -175,7 +171,7 @@ namespace DrinkDb_Auth
         {
             try
             {
-                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(this, OAuthService.Facebook, new FacebookOAuthHelper());
+                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(OAuthService.Facebook, new FacebookOAuthHelper());
                 await this.AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
@@ -206,7 +202,7 @@ namespace DrinkDb_Auth
         {
             try
             {
-                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(this, OAuthService.LinkedIn, new LinkedInOAuthHelper(
+                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(OAuthService.LinkedIn, new LinkedInOAuthHelper(
                     clientId: "86j0ikb93jm78x",
                     clientSecret: "WPL_AP1.pg2Bd1XhCi821VTG.+hatTA==",
                     redirectUri: "http://localhost:8891/auth",

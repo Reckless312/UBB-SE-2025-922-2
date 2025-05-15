@@ -31,7 +31,7 @@ namespace DrinkDb_Auth.ProxyRepository.AutoChecker
         public async Task AddWord(string word)
         {
 
-            var response = this.httpClient.GetAsync(ApiBaseRoute).Result;
+            var response = await this.httpClient.GetAsync(ApiBaseRoute);
             response.EnsureSuccessStatusCode();
 
             List<OffensiveWord> offensiveWords = response.Content.ReadFromJsonAsync<List<OffensiveWord>>().Result ?? new List<OffensiveWord>();

@@ -1,32 +1,21 @@
 namespace DrinkDb_Auth
 {
     using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Runtime.InteropServices.WindowsRuntime;
-    using DrinkDb_Auth.AutoChecker;
-    using DrinkDb_Auth.Converters;
+    using DataAccess.AutoChecker;
+    using DataAccess.Converters;
+    using DataAccess.Service;
+    using DataAccess.Service.AdminDashboard;
+    using DataAccess.Service.AdminDashboard.Interfaces;
     using DrinkDb_Auth.ProxyRepository.AdminDashboard;
     using DrinkDb_Auth.ProxyRepository.AutoChecker;
-    using DrinkDb_Auth.Service;
-    using DrinkDb_Auth.Service.AdminDashboard;
-    using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using DrinkDb_Auth.View;
     using IRepository;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.UI.Xaml;
-    using Microsoft.UI.Xaml.Controls;
     using Quartz;
     using Quartz.Impl;
-    using Quartz.Spi;
-    using Repository.AdminDashboard;
-    using ServerAPI.Repository.AutoChecker;
-    using Windows.ApplicationModel;
-    using Windows.ApplicationModel.Activation;
-    using Windows.Media.Protection.PlayReady;
 
     sealed partial class App : Application
     {

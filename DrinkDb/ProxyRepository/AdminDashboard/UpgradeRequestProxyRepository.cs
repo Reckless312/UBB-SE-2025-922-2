@@ -29,7 +29,7 @@
 
         public async Task<List<UpgradeRequest>> RetrieveAllUpgradeRequests()
         {
-            var response = this.httpClient.GetAsync(ApiBaseRoute).Result;
+            var response = await this.httpClient.GetAsync(ApiBaseRoute);
             response.EnsureSuccessStatusCode();
             List<UpgradeRequest> upgradeRequests = response.Content.ReadFromJsonAsync<List<UpgradeRequest>>().Result ?? new List<UpgradeRequest>();
             return upgradeRequests;

@@ -95,10 +95,11 @@ namespace ServerAPI.Controllers
                 return result ? Ok(result) : BadRequest("Failed to create user");
         }
 
-        [HttpGet("validateAction")]
-        public async Task<bool> ValidateAction([FromQuery] Guid userID, [FromQuery] string resource, [FromQuery] string action)
-        {
-            return await repository.ValidateAction(userID, resource, action);
-        }
+        //[HttpGet("validateAction")]
+        //public async Task<bool> ValidateAction([FromQuery] Guid userID, [FromQuery] string resource, [FromQuery] string action)
+        //{
+        //    return true;
+        //    //return await repository.ValidateAction(userID, resource, action);
+        //}
     }
 }

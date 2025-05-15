@@ -30,28 +30,28 @@ namespace Repository.AdminDashboard
         {
 
 
-            _context.Reviews.AddRangeAsync(reviewsToLoad);
-            _context.SaveChangesAsync();
+            await _context.Reviews.AddRangeAsync(reviewsToLoad);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<List<Review>> GetAllReviews()
         {
-            return _context.Reviews.ToListAsync().Result;
+            return await _context.Reviews.ToListAsync();
         }
 
         public async Task<List<Review>> GetReviewsSince(DateTime date)
         {
-            return _context.Reviews
+            return await _context.Reviews
                 .Where(review => review.CreatedDate >= date && !review.IsHidden)
                 .OrderByDescending(review => review.CreatedDate)
-                .ToListAsync().Result;
+                .ToListAsync();
         }
 
         public async Task<double> GetAverageRatingForVisibleReviews()
         {
-            var visibleReviews = _context.Reviews
+            var visibleReviews = await _context.Reviews
                 .Where(review => !review.IsHidden)
-                .ToListAsync().Result;
+                .ToListAsync();
 
             if (!visibleReviews.Any())
             {
@@ -62,37 +62,37 @@ namespace Repository.AdminDashboard
 
         public async Task<List<Review>> GetMostRecentReviews(int count)
         {
-            return _context.Reviews
+            return await _context.Reviews
                 .Where(review => !review.IsHidden)
                 .OrderByDescending(review => review.CreatedDate)
                 .Take(count)
-                .ToListAsync().Result;
+                .ToListAsync();
         }
 
         public async Task<int> GetReviewCountAfterDate(DateTime date)
         {
-            return _context.Reviews
-                .CountAsync(review => review.CreatedDate >= date && !review.IsHidden).Result;
+            return await _context.Reviews
+                .CountAsync(review => review.CreatedDate >= date && !review.IsHidden);
         }
 
         public async Task<List<Review>> GetFlaggedReviews(int minFlags)
         {
-            return _context.Reviews
+            return await _context.Reviews
                 .Where(review => review.NumberOfFlags >= minFlags && !review.IsHidden)
-                .ToListAsync().Result;
+                .ToListAsync();
         }
 
         public async Task<List<Review>> GetReviewsByUser(Guid userId)
         {
-            return _context.Reviews
+            return await _context.Reviews
                 .Where(review => review.UserId == userId && !review.IsHidden)
                 .OrderByDescending(review => review.CreatedDate)
-                .ToListAsync().Result;
+                .ToListAsync();
         }
 
         public async Task<Review> GetReviewById(int reviewId)
         {
-            return _context.Reviews.FirstOrDefaultAsync(r => r.ReviewId == reviewId).Result;
+            return await _context.Reviews.FirstOrDefaultAsync(r => r.ReviewId == reviewId);
         }
 
         public async Task UpdateReviewVisibility(int reviewId, bool isHidden)
@@ -114,8 +114,8 @@ namespace Repository.AdminDashboard
 
         public async Task<int> AddReview(Review review)
         {
-            _context.Reviews.AddAsync(review);
-            _context.SaveChangesAsync();
+            await _context.Reviews.AddAsync(review);
+            await _context.SaveChangesAsync();
             return review.ReviewId;
         }
 
@@ -123,14 +123,14 @@ namespace Repository.AdminDashboard
         {
             var review = GetReviewById(reviewId).Result;
             _context.Reviews.Remove(review);
-            _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
         }
 
         public async Task<List<Review>> GetHiddenReviews()
         {
-            return _context.Reviews
+            return await _context.Reviews
                 .Where(review => review.IsHidden)
-                .ToListAsync().Result;
+                .ToListAsync();
         }
 
         private Review ReadReview(SqlDataReader reader)

@@ -4,9 +4,9 @@ namespace DrinkDb_Auth.ViewModel.Authentication
     using System;
     using System.Threading.Tasks;
     using DataAccess.Model.Authentication;
+    using DataAccess.Service.Authentication.Interfaces;
     using DrinkDb_Auth.ProxyRepository.AdminDashboard;
     using DrinkDb_Auth.Service.Authentication.Components;
-    using DrinkDb_Auth.Service.Authentication.Interfaces;
     using DrinkDb_Auth.View;
     using DrinkDb_Auth.View.Authentication;
     using DrinkDb_Auth.View.Authentication.Interfaces;

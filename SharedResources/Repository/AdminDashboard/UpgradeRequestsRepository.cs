@@ -25,12 +25,12 @@ namespace Repository.AdminDashboard
 
         public async Task<List<UpgradeRequest>> RetrieveAllUpgradeRequests()
         {
-            return _context.UpgradeRequests.ToListAsync().Result;
+            return await _context.UpgradeRequests.ToListAsync();
         }
 
         public async Task RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
         {
-                List<UpgradeRequest> upgradeRequests =  _context.UpgradeRequests.ToListAsync().Result;
+                List<UpgradeRequest> upgradeRequests =  await _context.UpgradeRequests.ToListAsync();
                 UpgradeRequest upgradeRequest = upgradeRequests.Where(upgrade => upgrade.UpgradeRequestId == upgradeRequestIdentifier).First();
                 _context.UpgradeRequests.Remove(upgradeRequest);
                 _context.SaveChanges();
@@ -39,7 +39,7 @@ namespace Repository.AdminDashboard
 
         public async Task<UpgradeRequest> RetrieveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
         {
-            var upgradeRequest = _context.UpgradeRequests.FirstOrDefaultAsync(ur => ur.UpgradeRequestId == upgradeRequestIdentifier).Result;
+            var upgradeRequest = await _context.UpgradeRequests.FirstOrDefaultAsync(ur => ur.UpgradeRequestId == upgradeRequestIdentifier);
             return upgradeRequest;
         }
     }

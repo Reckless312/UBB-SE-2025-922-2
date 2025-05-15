@@ -74,7 +74,7 @@
 
         public async Task ChangeRoleToUser(Guid userId, Role roleToAdd)
         {
-            User user = GetUserById(userId).Result;
+            User user = await GetUserById(userId);
             user.AssignedRole = roleToAdd.RoleType;
             _context.Users.Update(user);
             _context.SaveChanges();

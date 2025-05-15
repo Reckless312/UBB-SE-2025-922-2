@@ -72,7 +72,7 @@ namespace DataAccess.Service.Authentication
             _ = linkedinLocalServer.StartAsync();
         }
 
-        public async Task<AuthenticationResponse> AuthWithOAuth(Window window, OAuthService selectedService, object authProvider)
+        public async Task<AuthenticationResponse> AuthWithOAuth(OAuthService selectedService, object authProvider)
         {
             var authResponse = selectedService switch
             {
@@ -150,7 +150,7 @@ namespace DataAccess.Service.Authentication
                 user.AssignedRole = RoleType.User;
                 user.NumberOfDeletedReviews = 0;
                 user.EmailAddress = "ionutcora66@gmail.com";
-                userRepository.CreateUser(user);
+                await userRepository.CreateUser(user);
                 Session session = sessionRepository.CreateSession(user.UserId).Result;
                 return new AuthenticationResponse
                 {

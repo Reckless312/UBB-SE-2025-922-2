@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DataAccess.Model.Authentication;
-using ServerAPI.Data;
+using Data;
 
 namespace WebServer.Controllers
 {

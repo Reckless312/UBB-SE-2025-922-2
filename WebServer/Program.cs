@@ -1,10 +1,10 @@
+using Data;
+using DataAccess.Repository.AutoChecker;
 using IRepository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Repository.AdminDashboard;
 using Repository.Authentication;
-using ServerAPI.Data;
-using ServerAPI.Repository.AutoChecker;
 
 var builder = WebApplication.CreateBuilder(args);
 

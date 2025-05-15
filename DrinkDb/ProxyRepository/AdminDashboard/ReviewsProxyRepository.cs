@@ -23,7 +23,7 @@
 
         public async Task<int> AddReview(Review review)
         {
-            var response = httpClient.PostAsJsonAsync(ApiRoute, review).Result;
+            var response = await httpClient.PostAsJsonAsync(ApiRoute, review);
             response.EnsureSuccessStatusCode();
             return review.ReviewId + 1;
         }

@@ -30,7 +30,7 @@ namespace DrinkDb_Auth.ProxyRepository.AdminDashboard
 
         public async Task<Role> GetNextRoleInHierarchy(RoleType currentRoleType)
         {
-            var response = this.httpClient.GetAsync(ApiRoute).Result;
+            var response = await this.httpClient.GetAsync(ApiRoute);
             response.EnsureSuccessStatusCode();
             List<Role> roles = response.Content.ReadFromJsonAsync<List<Role>>().Result ?? new List<Role>();
 
