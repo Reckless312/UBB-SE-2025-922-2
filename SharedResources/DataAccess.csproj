@@ -36,7 +36,6 @@
     <PackageReference Include="MimeKit" Version="4.12.0" />
     <PackageReference Include="Otp.NET" Version="1.4.0" />
     <PackageReference Include="Quartz" Version="3.14.0" />
-    <PackageReference Include="Uno.UI" Version="5.6.99" />
   </ItemGroup>
 
   <ItemGroup>

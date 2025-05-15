@@ -1,18 +1,15 @@
-﻿using DrinkDb_Auth.AuthProviders;
-using DrinkDb_Auth.AuthProviders.Facebook;
-using DrinkDb_Auth.AuthProviders.Github;
-using DrinkDb_Auth.AuthProviders.Google;
-using DrinkDb_Auth.AuthProviders.LinkedIn;
-using DrinkDb_Auth.AuthProviders.Twitter;
-using DrinkDb_Auth.OAuthProviders;
-using Microsoft.UI.Xaml;
-using System;
-using System.Net;
-using System.Threading.Tasks;
-using IRepository;
-using DataAccess.Model.Authentication;
-using System.Collections.Generic;
+﻿using DataAccess.AuthProviders;
+using DataAccess.AuthProviders.Facebook;
+using DataAccess.AuthProviders.Github;
+using DataAccess.AuthProviders.LinkedIn;
+using DataAccess.AuthProviders.Twitter;
 using DataAccess.Model.AdminDashboard;
+using DataAccess.Model.Authentication;
+using DataAccess.OAuthProviders;
+using DrinkDb_Auth.AuthProviders.Google;
+using IRepository;
+using Microsoft.UI.Xaml;
+using System.Net;
 
 namespace Tests
 {
@@ -123,17 +120,9 @@ namespace Tests
             throw new NotImplementedException();
         }
 
-        public Task<AuthenticationResponse> SignInWithGoogleAsync(Window parentWindow)
+        public Task<AuthenticationResponse> SignInWithGoogleAsync()
         {
-            AuthenticationResponse mockResponse = new AuthenticationResponse
-            {
-                AuthenticationSuccessful = false,
-                NewAccount = false,
-                OAuthToken = string.Empty,
-                SessionId = MockId,
-            };
-
-            return Task.FromResult(mockResponse);
+            return null;
         }
     }
 
@@ -242,12 +231,6 @@ namespace Tests
             return Task.FromResult(this.GetAllUsers());
         }
 
-        Task<bool> IUserRepository.ValidateAction(Guid userId, string resource, string action)
-        {
-            return Task.FromResult(ValidateAction(userId, resource, action));
-
-        }
-
         Task<User?> IUserRepository.GetUserByUsername(string username)
         {
             return Task.FromResult(GetUserByUsername(username));
@@ -353,7 +336,7 @@ namespace Tests
             throw new NotImplementedException();
         }
 
-        public Task<AuthenticationResponse> SignInWithTwitterAsync(Window parentWindow)
+        public Task<AuthenticationResponse> SignInWithTwitterAsync()
         {
             AuthenticationResponse mockResponse = new AuthenticationResponse
             {

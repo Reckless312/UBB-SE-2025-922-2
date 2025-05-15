@@ -79,7 +79,6 @@
     </PackageReference>
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.3" />
 	  <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
-	  <PackageReference Include="Uno.UI" Version="5.6.99" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="View\AdminDashboard\" />

@@ -7,7 +7,7 @@ namespace DataAccess.Converters
     using System;
     using DataAccess.Model.Authentication;
     using DataAccess.Service.AdminDashboard.Interfaces;
-    using Windows.UI.Xaml.Data;
+    using Microsoft.UI.Xaml.Data;
 
     public class UserIdToNameConverter : IValueConverter
     {

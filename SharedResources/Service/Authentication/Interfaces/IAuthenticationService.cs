@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using DataAccess.Model.Authentication;
 using DataAccess.OAuthProviders;
-using Windows.UI.Xaml;
 
 namespace DataAccess.Service.Authentication.Interfaces
 {

@@ -11,13 +11,11 @@ using DataAccess.Model.Authentication;
 using DataAccess.OAuthProviders;
 using IRepository;
 using DataAccess.Service.Authentication.Interfaces;
-using Microsoft.UI.Xaml;
 using Repository.Authentication;
 using Repository.AdminDashboard;
 using Org.BouncyCastle.Tls;
 using System.Collections.Generic;
 using DataAccess.Model.AdminDashboard;
-using Windows.UI.Xaml;
 
 namespace DataAccess.Service.Authentication
 {
