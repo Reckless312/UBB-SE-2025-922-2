@@ -9,6 +9,7 @@
     using System.Text;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Configuration.Json;
     using Microsoft.ML;
     using Newtonsoft.Json;
 
