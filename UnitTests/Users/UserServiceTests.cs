@@ -15,7 +15,6 @@ namespace UnitTests.Users
     using IRepository;
     using Moq;
     using Xunit;
-    using static DrinkDb_Auth.ProxyRepository.AdminDashboard.UserProxyRepository;
 
     /// <summary>
     /// Unit tests for the <see cref="UserService"/> class.
@@ -32,7 +31,7 @@ namespace UnitTests.Users
         public UserServiceTests()
         {
             this.mockUserRepository = new Mock<IUserRepository>();
-            this.userService = new UserService(this.mockUserRepository.Object);
+            this.userService = new UserService(this.mockUserRepository.Object, null);
         }
 
         /// <summary>
@@ -60,7 +59,7 @@ namespace UnitTests.Users
             };
             mockUserRepository.Setup(repo => repo.GetAllUsers()).ReturnsAsync(users);
 
-            var userService1 = new UserService(mockUserRepository.Object);
+            var userService1 = new UserService(mockUserRepository.Object, null);
 
             var result = userService1.GetAllUsers().Result;
 

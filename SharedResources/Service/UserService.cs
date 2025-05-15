@@ -17,6 +17,7 @@ namespace DataAccess.Service
     {
         private readonly IUserRepository userRepository;
         private readonly IAuthenticationService authenticationService;
+        public static Guid currentSessionId { set; private get; }
 
         private const string UserNotFoundMessage = "User not found";
         private const string NoUserLoggedInMessage = "No user is currently logged in.";
@@ -78,7 +79,6 @@ namespace DataAccess.Service
 
         public async Task<User> GetCurrentUser()
         {
-            Guid currentSessionId = App.CurrentSessionId;
             if (currentSessionId == Guid.Empty)
             {
                 throw new InvalidOperationException(NoUserLoggedInMessage);

@@ -6,6 +6,7 @@ namespace DrinkDb_Auth
     using DataAccess.AuthProviders.LinkedIn;
     using DataAccess.Model.Authentication;
     using DataAccess.OAuthProviders;
+    using DataAccess.Service;
     using DataAccess.Service.Authentication;
     using DataAccess.Service.Authentication.Interfaces;
     using DrinkDb_Auth.ViewModel.Authentication;
@@ -107,6 +108,7 @@ namespace DrinkDb_Auth
                 {
                     App.CurrentUserId = user.UserId;
                     App.CurrentSessionId = res.SessionId;
+                    UserService.currentSessionId = res.SessionId;
                     this.MainFrame.Navigate(typeof(SuccessPage), this);
                 }
 

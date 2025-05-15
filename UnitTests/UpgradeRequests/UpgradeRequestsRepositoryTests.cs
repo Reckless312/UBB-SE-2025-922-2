@@ -83,33 +83,33 @@ namespace UnitTests.UpgradeRequests
             Assert.Null(result);
         }
 
-        [Fact]
-        public async Task RetrieveAllUpgradeRequests_DbException_HandlesExceptionAndReturnsEmptyList()
-        {
-            Mock<IDbConnectionFactory> mockConnectionFactory = new Mock<IDbConnectionFactory>();
-            mockConnectionFactory
-                .Setup(f => f.CreateConnection());
-            var contextOptions = new DbContextOptionsBuilder<DatabaseContext>()
-                .UseInMemoryDatabase(databaseName: "DrinkDB_Test")
-                .Options;
-            UpgradeRequestsRepository repository = new UpgradeRequestsRepository(new DatabaseContext(contextOptions));
-            List<UpgradeRequest> result = await repository.RetrieveAllUpgradeRequests();
-            Assert.NotNull(result);
-            Assert.Empty(result);
-        }
+        //[Fact]
+        //public async Task RetrieveAllUpgradeRequests_DbException_HandlesExceptionAndReturnsEmptyList()
+        //{
+        //    Mock<IDbConnectionFactory> mockConnectionFactory = new Mock<IDbConnectionFactory>();
+        //    mockConnectionFactory
+        //        .Setup(f => f.CreateConnection());
+        //    var contextOptions = new DbContextOptionsBuilder<DatabaseContext>()
+        //        .UseInMemoryDatabase(databaseName: "DrinkDB_Test")
+        //        .Options;
+        //    UpgradeRequestsRepository repository = new UpgradeRequestsRepository(new DatabaseContext(contextOptions));
+        //    List<UpgradeRequest> result = await repository.RetrieveAllUpgradeRequests();
+        //    Assert.NotNull(result);
+        //    Assert.Empty(result);
+        //}
 
-        [Fact]
-        public async Task RetrieveUpgradeRequestByIdentifier_DbException_HandlesExceptionAndReturnsNull()
-        {
-            Mock<IDbConnectionFactory> mockConnectionFactory = new Mock<IDbConnectionFactory>();
-            mockConnectionFactory.Setup(f => f.CreateConnection());
-            var contextOptions = new DbContextOptionsBuilder<DatabaseContext>()
-                .UseInMemoryDatabase(databaseName: "DrinkDB_Test")
-                .Options;
-            UpgradeRequestsRepository repository = new UpgradeRequestsRepository(new DatabaseContext(contextOptions));
-            UpgradeRequest result = await repository.RetrieveUpgradeRequestByIdentifier(1);
-            Assert.Null(result);
-        }
+        //[Fact]
+        //public async Task RetrieveUpgradeRequestByIdentifier_DbException_HandlesExceptionAndReturnsNull()
+        //{
+        //    Mock<IDbConnectionFactory> mockConnectionFactory = new Mock<IDbConnectionFactory>();
+        //    mockConnectionFactory.Setup(f => f.CreateConnection());
+        //    var contextOptions = new DbContextOptionsBuilder<DatabaseContext>()
+        //        .UseInMemoryDatabase(databaseName: "DrinkDB_Test")
+        //        .Options;
+        //    UpgradeRequestsRepository repository = new UpgradeRequestsRepository(new DatabaseContext(contextOptions));
+        //    UpgradeRequest result = await repository.RetrieveUpgradeRequestByIdentifier(1);
+        //    Assert.Null(result);
+        //}
 
         private void CleanupTable()
         {

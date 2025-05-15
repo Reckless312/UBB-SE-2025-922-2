@@ -1,7 +1,9 @@
 using System;
 using System.Threading.Tasks;
+using Data;
 using DataAccess.Model.Authentication;
 using IRepository;
+using Repository.AdminDashboard;
 
 namespace DataAccess.Service.Authentication
 {
@@ -9,9 +11,12 @@ namespace DataAccess.Service.Authentication
     {
         private readonly ISessionRepository sessionRepository;
 
-        public SessionService(ISessionRepository sessionRepository)
+        private DatabaseContext context;
+
+        public SessionService(ISessionRepository sessionRepository, DatabaseContext context)
         {
             this.sessionRepository = sessionRepository;
+            this.context = context;
         }
 
         public Session CreateSession(Guid userId)
@@ -43,7 +48,7 @@ namespace DataAccess.Service.Authentication
                 return false;
             }
 
-            var userService = new UserService();
+            var userService = new UserService(new UserRepository(context), new AuthenticationService(context));
             return await userService.ValidateAction(session.UserId, resource, action);
         }
     }

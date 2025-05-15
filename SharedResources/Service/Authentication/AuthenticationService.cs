@@ -16,6 +16,7 @@ using Repository.AdminDashboard;
 using Org.BouncyCastle.Tls;
 using System.Collections.Generic;
 using DataAccess.Model.AdminDashboard;
+using Data;
 
 namespace DataAccess.Service.Authentication
 {
@@ -39,7 +40,7 @@ namespace DataAccess.Service.Authentication
         private static Guid currentSessionId = Guid.Empty;
         private static Guid currentUserId = Guid.Empty;
 
-        public AuthenticationService(IUserRepository userRepo, ISessionRepository sessionRepo, IBasicAuthenticationProvider basicAuthenticationProv)
+        public AuthenticationService(DatabaseContext context)
         {
             githubLocalServer = new GitHubLocalOAuthServer("http://localhost:8890/");
             _ = githubLocalServer.StartAsync();
@@ -50,11 +51,11 @@ namespace DataAccess.Service.Authentication
             linkedinLocalServer = new LinkedInLocalOAuthServer("http://localhost:8891/");
             _ = linkedinLocalServer.StartAsync();
 
-            sessionRepository = sessionRepo;
+            sessionRepository = new SessionRepository(context);
 
-            basicAuthenticationProvider = basicAuthenticationProv;
+            basicAuthenticationProvider = new BasicAuthenticationProvider(new UserRepository(context));
 
-            userRepository = userRepo;
+            userRepository = new UserRepository(context);
         }
 
         public AuthenticationService(ILinkedInLocalOAuthServer linkedinLocalServer, IGitHubLocalOAuthServer githubLocalServer, IFacebookLocalOAuthServer facebookLocalServer, IUserRepository userRepository, ISessionRepository sessionAdapter, IBasicAuthenticationProvider basicAuthenticationProvider)

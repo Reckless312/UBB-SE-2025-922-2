@@ -22,6 +22,7 @@ using System.Linq;
 using System.Collections.Generic;
 using DataAccess.Model.AdminDashboard;
 using DataAccess.Service.Authentication.Interfaces;
+using DrinkDb_Auth.ProxyRepository.AdminDashboard;
 
 namespace DrinkDb_Auth
 {
@@ -48,7 +49,7 @@ namespace DrinkDb_Auth
             if (currentUserId != Guid.Empty)
             {
                 // Retrieve the user from the database using your UserService.
-                var userService = new UserService();
+                var userService = new UserService(new UserProxyRepository(), AuthenticationService);
                 currentUser = userService.GetUserById(currentUserId).Result;
 
                 // Update UI with the retrieved data.
