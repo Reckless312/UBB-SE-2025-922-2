@@ -21,6 +21,31 @@ namespace DrinkDb_Auth.Service.AdminDashboard
             this.reviewsRepository = reviewsRepository;
         }
 
+        public Task<int> AddReview(Review review)
+        {
+            return reviewsRepository.AddReview(review);
+        }
+
+        public Task RemoveReviewById(int reviewId)
+        {
+            return reviewsRepository.RemoveReviewById(reviewId);
+        }
+
+        public Task<Review> GetReviewById(int reviewId)
+        {
+            return reviewsRepository.GetReviewById(reviewId);
+        }
+
+        public Task UpdateNumberOfFlagsForReview(int reviewId, int numberOfFlags)
+        {
+            return reviewsRepository.UpdateNumberOfFlagsForReview(reviewId, numberOfFlags);
+        }
+
+        public Task UpdateReviewVisibility(int reviewId, bool isHidden)
+        {
+            return reviewsRepository.UpdateReviewVisibility(reviewId, isHidden);
+        }
+
         public void ResetReviewFlags(int reviewId)
         {
             reviewsRepository.UpdateNumberOfFlagsForReview(reviewId, 0);
@@ -31,9 +56,9 @@ namespace DrinkDb_Auth.Service.AdminDashboard
              reviewsRepository.UpdateReviewVisibility(reviewId, true);
         }
 
-        public List<Review> GetFlaggedReviews()
+        public List<Review> GetFlaggedReviews(int minFlags = 1)
         {
-            return reviewsRepository.GetFlaggedReviews(1).Result;
+            return reviewsRepository.GetFlaggedReviews(minFlags).Result;
         }
 
         public List<Review> GetHiddenReviews()
