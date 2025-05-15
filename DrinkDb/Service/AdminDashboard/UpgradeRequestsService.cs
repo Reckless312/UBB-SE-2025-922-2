@@ -137,5 +137,15 @@
                 ProcessUpgradeRequestAsync(isRequestAccepted, upgradeRequestIdentifier).Wait();
             }).Wait();
         }
+
+        public async Task RemoveUpgradeRequestByIdentifierAsync(int upgradeRequestIdentifier)
+        {
+            await this.upgradeRequestsRepository.RemoveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
+        }
+
+        public async Task<UpgradeRequest> RetrieveUpgradeRequestByIdentifierAsync(int upgradeRequestIdentifier)
+        {
+            return await this.upgradeRequestsRepository.RetrieveUpgradeRequestByIdentifier(upgradeRequestIdentifier);
+        }
     }
 }

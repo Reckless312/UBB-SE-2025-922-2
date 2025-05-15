@@ -6,6 +6,7 @@ namespace DrinkDb_Auth.Service.AdminDashboard.Interfaces
 {
     using System.Collections.Generic;
     using DataAccess.Model.AdminDashboard;
+    using System.Threading.Tasks;
 
     public interface IUpgradeRequestsService
     {
@@ -14,5 +15,8 @@ namespace DrinkDb_Auth.Service.AdminDashboard.Interfaces
         void ProcessUpgradeRequest(bool isRequestAccepted, int upgradeRequestIdentifier);
 
         string GetRoleNameBasedOnIdentifier(RoleType roleType);
+
+        Task RemoveUpgradeRequestByIdentifierAsync(int upgradeRequestIdentifier);
+        Task<UpgradeRequest> RetrieveUpgradeRequestByIdentifierAsync(int upgradeRequestIdentifier);
     }
 }
