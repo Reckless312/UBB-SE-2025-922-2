@@ -1,0 +1,119 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<!-- Header -->
+<div class="container-fluid bg-primary text-white py-3 mb-4 rounded">
+    <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+            <img src="/images/beers-logo.png" alt="Logo" style="width:32px;height:32px;" class="me-3" />
+            <h3 class="mb-0">Admin Dashboard</h3>
+        </div>
+        <a href="/" class="btn btn-light">Go Back</a>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Left Column: Reviews -->
+        <div class="col-md-4 mb-4">
+            <h5 class="fw-bold mb-3">List of all reviews</h5>
+            <input type="text" class="form-control mb-2" placeholder="Search reviews..." />
+            <ul class="list-group mb-3" style="max-height: 300px; overflow-y: auto;">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                        <strong>User A</strong>: Review 1 content here
+                    </span>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Actions
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Allow</a></li>
+                            <li><a class="dropdown-item" href="#">Hide</a></li>
+                            <li><a class="dropdown-item" href="#">AI Check</a></li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                        <strong>User B</strong>: Review 2 content here
+                    </span>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Actions
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Allow</a></li>
+                            <li><a class="dropdown-item" href="#">Hide</a></li>
+                            <li><a class="dropdown-item" href="#">AI Check</a></li>
+                        </ul>
+                    </div>
+                </li>
+                <!-- More reviews -->
+            </ul>
+            <div class="d-grid gap-2 mb-2">
+                <button class="btn btn-primary">Automatically check reviews</button>
+                <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#forbiddenWordsModal">Modify offensive words list</button>
+            </div>
+        </div>
+
+        <!-- Middle Column: Role Upgrade Requests -->
+        <div class="col-md-4 mb-4">
+            <h5 class="fw-bold mb-3">Role Upgrade Requests</h5>
+            <ul class="list-group" style="max-height: 300px; overflow-y: auto;">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>User C requests upgrade</span>
+                    <div>
+                        <button class="btn btn-success btn-sm me-2">Accept</button>
+                        <button class="btn btn-danger btn-sm">Decline</button>
+                    </div>
+                </li>
+                <!-- More requests -->
+            </ul>
+        </div>
+
+        <!-- Right Column: Appeals -->
+        <div class="col-md-4 mb-4">
+            <h5 class="fw-bold mb-3">List of all appeals</h5>
+            <input type="text" class="form-control mb-2" placeholder="Search appeals..." />
+            <ul class="list-group" style="max-height: 300px; overflow-y: auto;">
+                <li class="list-group-item">Appeal 1 - <span class="text-muted">User D</span></li>
+                <li class="list-group-item">Appeal 2 - <span class="text-muted">User E</span></li>
+                <!-- More appeals -->
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Forbidden Words Modal -->
+<div class="modal fade" id="forbiddenWordsModal" tabindex="-1" aria-labelledby="forbiddenWordsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="forbiddenWordsModalLabel">Forbidden Words</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group mb-3">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        word1
+                        <button class="btn btn-danger btn-sm">Delete</button>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        word2
+                        <button class="btn btn-danger btn-sm">Delete</button>
+                    </li>
+                    <!-- More words -->
+                </ul>
+                <div class="d-flex mb-2">
+                    <input type="text" class="form-control me-2" placeholder="Add new word...">
+                    <button class="btn btn-primary">Add</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div> 
