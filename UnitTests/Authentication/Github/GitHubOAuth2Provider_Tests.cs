@@ -1,6 +1,6 @@
 ﻿using System;
-using DrinkDb_Auth.OAuthProviders;
-using DrinkDb_Auth.AuthProviders.Github;
+using DataAccess.OAuthProviders;
+using DataAccess.AuthProviders.Github;
 using Tests;
 using Xunit;
 
@@ -18,7 +18,7 @@ namespace TestTest.Authentication.Github
             };
             var userAdapter = new MockUserAdapter();
             var sessionAdapter = new MockSessionAdapter();
-            var gitHubOAuth2Provider = new GitHubOAuth2Provider(userAdapter, sessionAdapter, httpHelper);
+            var gitHubOAuth2Provider = new GitHubOAuth2Provider(userAdapter, sessionAdapter, (IGitHubHttpHelper)httpHelper);
 
             var response = gitHubOAuth2Provider.Authenticate("", "");
 
@@ -49,7 +49,7 @@ namespace TestTest.Authentication.Github
                 Throws = true
             };
             var sessionAdapter = new MockSessionAdapter { MockId = mockId };
-            var gitHubOAuth2Provider = new GitHubOAuth2Provider(userAdapter, sessionAdapter, httpHelper);
+            var gitHubOAuth2Provider = new GitHubOAuth2Provider(userAdapter, sessionAdapter, (IGitHubHttpHelper)httpHelper);
 
             var response = gitHubOAuth2Provider.Authenticate("", "testtoken");
 
@@ -81,7 +81,7 @@ namespace TestTest.Authentication.Github
                 Throws = true
             };
             var sessionAdapter = new MockSessionAdapter { MockId = mockId };
-            var gitHubOAuth2Provider = new GitHubOAuth2Provider(userAdapter, sessionAdapter, httpHelper);
+            var gitHubOAuth2Provider = new GitHubOAuth2Provider(userAdapter, sessionAdapter, (IGitHubHttpHelper)httpHelper);
 
             var response = gitHubOAuth2Provider.Authenticate("", "testtoken");
 

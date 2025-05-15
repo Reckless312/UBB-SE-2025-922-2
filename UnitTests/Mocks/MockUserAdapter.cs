@@ -108,10 +108,10 @@ namespace Tests.CoraMockUps
             return Task.FromResult(GetAllUsers());
         }
 
-        Task<bool> IUserRepository.ValidateAction(Guid userId, string resource, string action)
-        {
-            return Task.FromResult(ValidateAction(userId, resource, action));
-        }
+        //Task<bool> IUserRepository.ValidateAction(Guid userId, string resource, string action)
+        //{
+        //    return Task.FromResult(ValidateAction(userId, resource, action));
+        //}
 
         Task<User?> IUserRepository.GetUserByUsername(string username)
         {

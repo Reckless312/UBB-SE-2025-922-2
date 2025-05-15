@@ -114,7 +114,7 @@
                     message.Body = bodyBuilder.ToMessageBody();
 
                     // Use your existing email sender service
-                    DrinkDb_Auth.Service.AdminDashboard.Components.SmtpEmailSender emailSender = new DrinkDb_Auth.Service.AdminDashboard.Components.SmtpEmailSender();
+                    DataAccess.Service.AdminDashboard.Components.SmtpEmailSender emailSender = new DataAccess.Service.AdminDashboard.Components.SmtpEmailSender();
                     // Replace with your SMTP credentials
                     System.String smtpEmail = Environment.GetEnvironmentVariable("SMTP_MODERATOR_EMAIL");
                     System.String smtpPassword = Environment.GetEnvironmentVariable("SMTP_MODERATOR_PASSWORD");

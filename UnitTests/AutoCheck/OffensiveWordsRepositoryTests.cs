@@ -2,15 +2,15 @@ namespace UnitTests.Autocheck
 {
     using System;
     using System.IO;
-    using DrinkDb_Auth.AutoChecker;
-    using DrinkDb_Auth.ProxyRepository.AdminDashboard;
+    using DataAccess.AutoChecker;
     using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Repository.AdminDashboard;
-    using ServerAPI.Data;
-    using ServerAPI.Repository.AutoChecker;
+    using DataAccess.Repository.AutoChecker;
     using Xunit;
+    using System.Data.Entity.Infrastructure;
+    using Data;
 
     /// <summary>
     /// Contains integration tests for the <see cref="OffensiveWordsRepository"/> class.

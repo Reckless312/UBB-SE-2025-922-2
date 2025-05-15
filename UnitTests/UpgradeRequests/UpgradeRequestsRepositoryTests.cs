@@ -16,8 +16,9 @@ namespace UnitTests.UpgradeRequests
     using Microsoft.Extensions.Configuration;
     using Moq;
     using Repository.AdminDashboard;
-    using ServerAPI.Data;
+    using Data;
     using Xunit;
+    using System.Data.Entity.Infrastructure;
 
     public class UpgradeRequestsRepositoryTests : IDisposable
     {

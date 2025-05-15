@@ -4,6 +4,7 @@
     using DataAccess.Model.Authentication;
     using DataAccess.Service.Authentication.Components;
     using DataAccess.Service.Authentication.Interfaces;
+    using global::Repository.AdminDashboard;
     using IRepository;
     using Microsoft.UI.Xaml;
     using OtpNet;
@@ -11,12 +12,17 @@
 
     public class TwoFactorAuthenticationService : ITwoFactorAuthenticationService
     {
-        private IUserRepository? userRepository = new UserRepository();
+        private IUserRepository? userRepository;
         private IKeyGeneration? keyGeneration = new OtpKeyGeneration();
         private User? currentUser;
 
         private Guid userId;
         private bool isFirstTimeSetup;
+
+        public TwoFactorAuthenticationService(IUserRepository userRepo)
+        {
+            this.userRepository = userRepo ?? throw new ArgumentNullException(nameof(userRepo));
+        }
 
         public TwoFactorAuthenticationService(Window? window, Guid userId, bool isFirstTimeSetup)
         {

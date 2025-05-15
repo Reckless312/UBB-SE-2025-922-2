@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using DrinkDb_Auth.AutoChecker;
+using DataAccess.AutoChecker;
 using IRepository;
 using Moq;
 using Xunit;

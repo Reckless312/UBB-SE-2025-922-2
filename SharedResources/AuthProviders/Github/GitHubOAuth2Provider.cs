@@ -18,13 +18,6 @@ namespace DataAccess.AuthProviders.Github
         private ISessionRepository sessionRepository;
         private IGitHubHttpHelper gitHubHttpHelper;
 
-        public GitHubOAuth2Provider()
-        {
-            userRepository = new UserRepository();
-            sessionRepository = new SessionRepository();
-            gitHubHttpHelper = new GitHubHttpHelper();
-        }
-
         public GitHubOAuth2Provider(IUserRepository userRepository, ISessionRepository sessionAdapter, IGitHubHttpHelper gitHubHttpHelper)
         {
             this.userRepository = userRepository;

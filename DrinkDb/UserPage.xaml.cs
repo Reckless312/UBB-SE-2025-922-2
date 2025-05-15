@@ -1,6 +1,6 @@
 using DataAccess.Model.AdminDashboard;
-using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
-using DrinkDb_Auth.Service;
+using DataAccess.Service.AdminDashboard.Interfaces;
+using DataAccess.Service;
 using DrinkDb_Auth.View;
 using DrinkDb_Auth;
 using Microsoft.UI.Xaml.Controls;
@@ -11,23 +11,24 @@ using System;
 
 using System;
 using DataAccess.Model.Authentication;
-using DrinkDb_Auth.Service;
-using DrinkDb_Auth.Service.Authentication;
+using DataAccess.Service;
+using DataAccess.Service.Authentication;
 using DrinkDb_Auth.View;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
-using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
+using DataAccess.Service.AdminDashboard.Interfaces;
 using System.Linq;
 using System.Collections.Generic;
 using DataAccess.Model.AdminDashboard;
+using DataAccess.Service.Authentication.Interfaces;
 
 namespace DrinkDb_Auth
 {
     public sealed partial class UserPage : Page
     {
-        private static readonly AuthenticationService AuthenticationService = new();
-        private static readonly UserService UserService = new();
+        private static readonly IAuthenticationService AuthenticationService;
+        private static readonly UserService UserService;
 
         private User currentUser;
 

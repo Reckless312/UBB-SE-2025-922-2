@@ -3,14 +3,14 @@ namespace DrinkDb_Auth
     using System;
     using System.Threading.Tasks;
     using DataAccess.Model.Authentication;
-    using DrinkDb_Auth.AuthProviders.Facebook;
-    using DrinkDb_Auth.AuthProviders.Github;
-    using DrinkDb_Auth.AuthProviders.Google;
-    using DrinkDb_Auth.AuthProviders.LinkedIn;
-    using DrinkDb_Auth.AuthProviders.Twitter;
-    using DrinkDb_Auth.OAuthProviders;
-    using DrinkDb_Auth.Service.Authentication;
-    using DrinkDb_Auth.Service.Authentication.Interfaces;
+    using DataAccess.AuthProviders.Facebook;
+    using DataAccess.AuthProviders.Github;
+    //using DataAccess.AuthProviders.Google;
+    using DataAccess.AuthProviders.LinkedIn;
+    //using DataAccess.AuthProviders.Twitter;
+    using DataAccess.OAuthProviders;
+    using DataAccess.Service.Authentication;
+    using DataAccess.Service.Authentication.Interfaces;
     using DrinkDb_Auth.ViewModel.Authentication;
     using Microsoft.IdentityModel.Tokens;
     using Microsoft.UI;
@@ -20,11 +20,12 @@ namespace DrinkDb_Auth
     using Quartz;
     using Quartz.Impl;
     using Windows.Graphics;
+    using Uno.UI;
 
     public sealed partial class MainWindow : Window
     {
-        private AuthenticationService authenticationService = new ();
-        private ITwoFactorAuthenticationService? twoFactorAuthentificationService;
+        private IAuthenticationService authenticationService;
+        private TwoFactorAuthenticationService? twoFactorAuthentificationService;
 
         private IScheduler scheduler;
 
@@ -143,8 +144,8 @@ namespace DrinkDb_Auth
         {
             try
             {
-                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(this, OAuthService.GitHub, new GitHubOAuthHelper());
-                _ = this.AuthenticationComplete(authResponse);
+                //AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(this, OAuthService.GitHub, new GitHubOAuthHelper());
+                //_ = this.AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
             {
@@ -156,9 +157,9 @@ namespace DrinkDb_Auth
         {
             try
             {
-                this.GoogleSignInButton.IsEnabled = false;
-                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(this, OAuthService.Google, new GoogleOAuth2Provider());
-                await this.AuthenticationComplete(authResponse);
+                //this.GoogleSignInButton.IsEnabled = false;
+                //AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(this, OAuthService.Google, new GoogleOAuth2Provider());
+                //await this.AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
             {
@@ -174,7 +175,7 @@ namespace DrinkDb_Auth
         {
             try
             {
-                AuthenticationResponse authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.Facebook, new FacebookOAuthHelper());
+                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(this, OAuthService.Facebook, new FacebookOAuthHelper());
                 await this.AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
@@ -187,9 +188,9 @@ namespace DrinkDb_Auth
         {
             try
             {
-                this.XSignInButton.IsEnabled = false;
-                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(this, OAuthService.Twitter, new TwitterOAuth2Provider());
-                await this.AuthenticationComplete(authResponse);
+                //this.XSignInButton.IsEnabled = false;
+                //AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(this, OAuthService.Twitter, new TwitterOAuth2Provider());
+                //await this.AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
             {

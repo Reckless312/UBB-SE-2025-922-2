@@ -38,7 +38,8 @@ namespace Data
                 user.Property(currentUser => currentUser.NumberOfDeletedReviews).IsRequired();
                 user.Property(currentUser => currentUser.HasSubmittedAppeal).IsRequired();
                 user.Property(currentUser => currentUser.FullName).IsRequired(false);
-                user.Property(currentUser => currentUser.AssignedRole).HasDefaultValue(RoleType.User);
+                user.Property(currentUser => currentUser.AssignedRole);
+                //.HasDefaultValue(RoleType.User);
             });
 
             // configure role

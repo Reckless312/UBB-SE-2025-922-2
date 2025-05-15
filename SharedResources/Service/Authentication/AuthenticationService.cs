@@ -38,8 +38,10 @@ namespace DataAccess.Service.Authentication
         private IGitHubLocalOAuthServer githubLocalServer;
         private IFacebookLocalOAuthServer facebookLocalServer;
         private IBasicAuthenticationProvider basicAuthenticationProvider;
+        private static Guid currentSessionId = Guid.Empty;
+        private static Guid currentUserId = Guid.Empty;
 
-        public AuthenticationService()
+        public AuthenticationService(IUserRepository userRepo, ISessionRepository sessionRepo, IBasicAuthenticationProvider basicAuthenticationProv)
         {
             githubLocalServer = new GitHubLocalOAuthServer("http://localhost:8890/");
             _ = githubLocalServer.StartAsync();
@@ -50,11 +52,11 @@ namespace DataAccess.Service.Authentication
             linkedinLocalServer = new LinkedInLocalOAuthServer("http://localhost:8891/");
             _ = linkedinLocalServer.StartAsync();
 
-            sessionRepository = new SessionRepository();
+            sessionRepository = sessionRepo;
 
-            basicAuthenticationProvider = new BasicAuthenticationProvider();
+            basicAuthenticationProvider = basicAuthenticationProv;
 
-            userRepository = new UserRepository();
+            userRepository = userRepo;
         }
 
         public AuthenticationService(ILinkedInLocalOAuthServer linkedinLocalServer, IGitHubLocalOAuthServer githubLocalServer, IFacebookLocalOAuthServer facebookLocalServer, IUserRepository userRepository, ISessionRepository sessionAdapter, IBasicAuthenticationProvider basicAuthenticationProvider)
@@ -74,9 +76,9 @@ namespace DataAccess.Service.Authentication
         {
             var authResponse = selectedService switch
             {
-                OAuthService.Google => await AuthenticateWithGoogleAsync(window, authProvider as IGoogleOAuth2Provider),
+                //OAuthService.Google => await AuthenticateWithGoogleAsync(window, authProvider as IGoogleOAuth2Provider),
                 OAuthService.Facebook => await AuthenticateWithFacebookAsync(authProvider as IFacebookOAuthHelper),
-                OAuthService.Twitter => await AuthenticateWithTwitterAsync(window, authProvider as ITwitterOAuth2Provider),
+                //OAuthService.Twitter => await AuthenticateWithTwitterAsync(window, authProvider as ITwitterOAuth2Provider),
                 OAuthService.GitHub => await AuthenticateWithGitHubAsync(authProvider as IGitHubOAuthHelper),
                 OAuthService.LinkedIn => await AuthenticateWithLinkedInAsync(authProvider as ILinkedInOAuthHelper),
                 _ => throw new ArgumentException("Invalid OAuth service selected"),
@@ -84,9 +86,9 @@ namespace DataAccess.Service.Authentication
 
             if (authResponse.AuthenticationSuccessful)
             {
-                App.CurrentSessionId = authResponse.SessionId;
-                Session session = sessionRepository.GetSession(App.CurrentSessionId).Result;
-                App.CurrentUserId = session.UserId;
+                currentSessionId = authResponse.SessionId;
+                Session session = sessionRepository.GetSession(currentSessionId).Result;
+                currentUserId = session.UserId;
             }
 
             return authResponse;
@@ -94,9 +96,9 @@ namespace DataAccess.Service.Authentication
 
         public virtual void Logout()
         {
-            sessionRepository.EndSession(App.CurrentSessionId);
-            App.CurrentSessionId = Guid.Empty;
-            App.CurrentUserId = Guid.Empty;
+            sessionRepository.EndSession(currentSessionId);
+            currentSessionId = Guid.Empty;
+            currentUserId = Guid.Empty;
         }
 
         public virtual async Task<User> GetUser(Guid sessionId)
@@ -166,20 +168,20 @@ namespace DataAccess.Service.Authentication
             return await gitHubHelper.AuthenticateAsync();
         }
 
-        private static async Task<AuthenticationResponse> AuthenticateWithGoogleAsync(Window window, IGoogleOAuth2Provider googleProvider)
-        {
-            return await googleProvider.SignInWithGoogleAsync(window);
-        }
+        //private static async Task<AuthenticationResponse> AuthenticateWithGoogleAsync(Window window, IGoogleOAuth2Provider googleProvider)
+        //{
+        //    return await googleProvider.SignInWithGoogleAsync(window);
+        //}
 
         private static async Task<AuthenticationResponse> AuthenticateWithFacebookAsync(IFacebookOAuthHelper faceBookHelper)
         {
             return await faceBookHelper.AuthenticateAsync();
         }
 
-        private static async Task<AuthenticationResponse> AuthenticateWithTwitterAsync(Window window, ITwitterOAuth2Provider twitterProvider)
-        {
-            return await twitterProvider.SignInWithTwitterAsync(window);
-        }
+        //private static async Task<AuthenticationResponse> AuthenticateWithTwitterAsync(Window window, ITwitterOAuth2Provider twitterProvider)
+        //{
+        //    return await twitterProvider.SignInWithTwitterAsync(window);
+        //}
 
         private static async Task<AuthenticationResponse> AuthenticateWithLinkedInAsync(ILinkedInOAuthHelper linkedInHelper)
         {

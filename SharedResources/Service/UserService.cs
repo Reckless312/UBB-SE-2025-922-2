@@ -9,30 +9,31 @@ using DataAccess.Service.AdminDashboard.Components;
 using DataAccess.Service.AdminDashboard.Interfaces;
 using DataAccess.Service.Authentication;
 using Repository.AdminDashboard;
+using DataAccess.Service.Authentication.Interfaces;
 
 namespace DataAccess.Service
 {
     public class UserService : IUserService
     {
         private readonly IUserRepository userRepository;
-        private readonly AuthenticationService authenticationService;
+        private readonly IAuthenticationService authenticationService;
 
         private const string UserNotFoundMessage = "User not found";
         private const string NoUserLoggedInMessage = "No user is currently logged in.";
         private const string NullResourceError = "Resource cannot be null or empty.";
         private const string NullActionError = "Action cannot be null or empty.";
 
-        public UserService(IUserRepository userRepository)
+        public UserService(IUserRepository userRepository, IAuthenticationService authService)
         {
             this.userRepository = userRepository;
-            this.authenticationService = new AuthenticationService();
+            this.authenticationService = authService;
         }
 
-        public UserService()
-        {
-            this.userRepository = new UserRepository();
-            this.authenticationService = new AuthenticationService();
-        }
+        //public UserService()
+        //{
+        //    this.userRepository = userRepository;
+        //    this.authenticationService = authService;
+        //}
 
         // Constructor for dependency injection and testing
         public UserService(IUserRepository repository, AuthenticationService authService)
@@ -85,27 +86,27 @@ namespace DataAccess.Service
             return await authenticationService.GetUser(currentSessionId);
         }
 
-        public async Task<bool> ValidateAction(Guid userId, string resource, string action)
-        {
-            if (string.IsNullOrEmpty(resource))
-            {
-                throw new ArgumentException(NullResourceError, nameof(resource));
-            }
+        //public async Task<bool> ValidateAction(Guid userId, string resource, string action)
+        //{
+        //    if (string.IsNullOrEmpty(resource))
+        //    {
+        //        throw new ArgumentException(NullResourceError, nameof(resource));
+        //    }
 
-            if (string.IsNullOrEmpty(action))
-            {
-                throw new ArgumentException(NullActionError, nameof(action));
-            }
+        //    if (string.IsNullOrEmpty(action))
+        //    {
+        //        throw new ArgumentException(NullActionError, nameof(action));
+        //    }
 
-            try
-            {
-                return await userRepository.ValidateAction(userId, resource, action);
-            }
-            catch (Exception ex)
-            {
-                throw new UserServiceException($"Failed to validate action '{action}' on resource '{resource}' for user with ID {userId}.", ex);
-            }
-        }
+        //    try
+        //    {
+        //        return await userRepository.ValidateAction(userId, resource, action);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new UserServiceException($"Failed to validate action '{action}' on resource '{resource}' for user with ID {userId}.", ex);
+        //    }
+        //}
 
         public void LogoutUser()
         {
@@ -269,6 +270,11 @@ namespace DataAccess.Service
         {
             user.HasSubmittedAppeal = newValue;
             userRepository.UpdateUser(user);
+        }
+
+        public Task<bool> ValidateAction(Guid userId, string resource, string action)
+        {
+            throw new NotImplementedException();
         }
     }
 }

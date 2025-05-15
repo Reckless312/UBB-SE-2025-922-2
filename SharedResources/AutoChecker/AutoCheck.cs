@@ -18,10 +18,7 @@ namespace DataAccess.AutoChecker
         private readonly HashSet<string> offensiveWords;
 
         private static readonly char[] WordDelimiters = new[] { ' ', ',', '.', '!', '?', ';', ':', '\n', '\r', '\t' };
-        public AutoCheck() {
-            this.repository = new OffensiveWordsRepository();
-            this.offensiveWords = this.repository.LoadOffensiveWords();
-        }
+
         public AutoCheck(IOffensiveWordsRepository repository)
         {
             this.repository = repository ?? throw new ArgumentNullException(nameof(repository));

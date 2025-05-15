@@ -1,7 +1,7 @@
 namespace UnitTests.UpgradeRequests
 {
     using DataAccess.Model.AdminDashboard;
-    using DrinkDb_Auth.Service;
+    using DataAccess.Service;
     using IRepository;
     using Moq;
     using System;

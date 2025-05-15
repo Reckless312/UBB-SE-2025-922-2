@@ -17,12 +17,12 @@ namespace DataAccess.AuthProviders.Github
         private GenericOAuth2Provider gitHubOAuth2Provider;
         private TaskCompletionSource<AuthenticationResponse> taskCompletionSource;
 
-        public GitHubOAuthHelper()
-        {
-            gitHubOAuth2Provider = new GitHubOAuth2Provider();
-            taskCompletionSource = new TaskCompletionSource<AuthenticationResponse>();
-            GitHubLocalOAuthServer.OnCodeReceived += OnCodeReceived;
-        }
+        //public GitHubOAuthHelper()
+        //{
+        //    gitHubOAuth2Provider = new GitHubOAuth2Provider();
+        //    taskCompletionSource = new TaskCompletionSource<AuthenticationResponse>();
+        //    GitHubLocalOAuthServer.OnCodeReceived += OnCodeReceived;
+        //}
 
         public GitHubOAuthHelper(GenericOAuth2Provider gitHubOAuth2Provider)
         {

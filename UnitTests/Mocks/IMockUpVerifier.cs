@@ -1,5 +1,5 @@
-﻿using DrinkDb_Auth.Service;
-using DrinkDb_Auth.Service.Authentication.Interfaces;
+﻿using DataAccess.Service;
+using DataAccess.Service.Authentication.Interfaces;
 namespace Tests.CoraMockUps
 {
     public interface IMockUpVerifier : IVerify

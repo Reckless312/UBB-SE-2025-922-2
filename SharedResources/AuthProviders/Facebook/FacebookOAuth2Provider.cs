@@ -14,13 +14,14 @@ namespace DataAccess.AuthProviders.Facebook
 {
     public class FacebookOAuth2Provider : GenericOAuth2Provider
     {
-        private ISessionRepository
-        public FacebookOAuth2Provider()
+        private ISessionRepository sessionRepository;
+        private IUserRepository userRepository;
+        public FacebookOAuth2Provider(ISessionRepository sessionRepo, IUserRepository userRepository)
         {
-
+            this.sessionRepository = sessionRepo;
+            this.userRepository = userRepository;
         }
 
-        private static readonly SessionRepository SessionProxy = new ();
         public AuthenticationResponse Authenticate(string userId, string token)
         {
             try
@@ -43,9 +44,9 @@ namespace DataAccess.AuthProviders.Facebook
                             // store or update user in DB - UserService
                             bool isNewAccount = StoreOrUpdateUserInDb(fbId, fbName, email);
 
-                            User user = UserRepository.GetUserByUsername(fbName).Result ?? throw new Exception("User not found");
+                            User user = userRepository.GetUserByUsername(fbName).Result ?? throw new Exception("User not found");
 
-                            Session session = SessionProxy.CreateSession(user.UserId).Result;
+                            Session session = sessionRepository.CreateSession(user.UserId).Result;
 
                             if (isNewAccount)
                             {
@@ -89,14 +90,14 @@ namespace DataAccess.AuthProviders.Facebook
                 };
             }
         }
-        private static readonly IUserRepository UserRepository = new UserRepository();
+
         private bool StoreOrUpdateUserInDb(string fbId, string fbName, string email)
         {
-            User user = UserRepository.GetUserByUsername(fbName).Result;
+            User user = userRepository.GetUserByUsername(fbName).Result;
 
             if (user == null)
             {
-                UserRepository.CreateUser(new User
+                userRepository.CreateUser(new User
                 {
                     Username = fbName,
                     PasswordHash = string.Empty,
@@ -114,7 +115,7 @@ namespace DataAccess.AuthProviders.Facebook
             {
                 user.Username = fbName;
                 user.EmailAddress = email;
-                UserRepository.UpdateUser(user);
+                userRepository.UpdateUser(user);
                 return false;
             }
         }

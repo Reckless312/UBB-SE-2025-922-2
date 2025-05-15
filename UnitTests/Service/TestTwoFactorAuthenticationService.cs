@@ -1,8 +1,8 @@
 ﻿//using System;
 //using System.Threading.Tasks;
-//using DrinkDb_Auth.Service.Authentication;
-//using DrinkDb_Auth.Service.Authentication.Components;
-//using DrinkDb_Auth.Service.Authentication.Interfaces;
+//using DataAccess.Service.Authentication;
+//using DataAccess.Service.Authentication.Components;
+//using DataAccess.Service.Authentication.Interfaces;
 //using DrinkDb_Auth.ViewModel.Authentication.Interfaces;
 //using DrinkDb_Auth.View.Authentication.Interfaces;
 //using DataAccess.Model.Authentication;

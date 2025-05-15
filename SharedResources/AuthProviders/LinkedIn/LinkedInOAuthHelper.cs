@@ -17,7 +17,6 @@ namespace DataAccess.AuthProviders.LinkedIn
         private readonly string redirectUrl = "http://localhost:8891/auth";
         private readonly string scope = "openid profile email";
         private TaskCompletionSource<AuthenticationResponse>? taskCompletionSource;
-        private readonly IUserRepository userRepository = new UserRepository();
         private readonly static LinkedInOAuth2Provider LinkedInOAuth2Provider = new ();
 
         public LinkedInOAuthHelper(string clientId, string clientSecret, string redirectUri, string scope)

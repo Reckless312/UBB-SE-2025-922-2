@@ -6,7 +6,6 @@ namespace UnitTests.EmailJobs
 {
     using DataAccess.Model.AdminDashboard;
     using DataAccess.Model.Authentication;
-    using DrinkDb_Auth.ProxyRepository.AdminDashboard;
     using System;
     using System.Collections.Generic;
     using System.Linq;

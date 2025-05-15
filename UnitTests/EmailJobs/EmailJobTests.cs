@@ -10,9 +10,8 @@
 //    using System.Threading.Tasks;
 //    using DataAccess.Model.AdminDashboard;
 //    using DataAccess.Model.Authentication;
-//    using DrinkDb_Auth.Repository.AdminDashboard;
-//    using DrinkDb_Auth.Service.AdminDashboard.Components;
-//    using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
+//    using DataAccess.Service.AdminDashboard.Components;
+//    using DataAccess.Service.AdminDashboard.Interfaces;
 //    using MailKit.Net.Smtp;
 //    using Microsoft.Extensions.Configuration;
 //    using MimeKit;
@@ -29,7 +28,7 @@
 //        private readonly Mock<IEmailSender> mockEmailSender;
 //        private readonly EmailJob emailJob;
 
-//        private readonly List<User> adminUsers = new List<User> { new User { UserId = new Guid(), EmailAddress = "admin@example.com", Username = "Admin User", NumberOfDeletedReviews = 0, AssignedRoles = UserRepository.AdminRoles, PasswordHash=String.Empty,TwoFASecret=String.Empty }, new User { UserId = new Guid(), EmailAddress = "admin2@example.com", Username = "Admin User2", NumberOfDeletedReviews = 0, AssignedRoles = UserRepository.AdminRoles, PasswordHash = String.Empty, TwoFASecret = String.Empty } };
+//        private readonly List<User> adminUsers = new List<User> { new User { UserId = new Guid(), EmailAddress = "admin@example.com", Username = "Admin User", NumberOfDeletedReviews = 0, AssignedRoles = UserRepository.AdminRoles, PasswordHash = String.Empty, TwoFASecret = String.Empty }, new User { UserId = new Guid(), EmailAddress = "admin2@example.com", Username = "Admin User2", NumberOfDeletedReviews = 0, AssignedRoles = UserRepository.AdminRoles, PasswordHash = String.Empty, TwoFASecret = String.Empty } };
 
 
 
@@ -109,7 +108,7 @@
 //        [Fact]
 //        public void GatherReportData_ShouldIncludeCorrectReportData()
 //        {
-//            AdminReportData? result = typeof(EmailJob).GetMethod("GatherReportData", BindingFlags.NonPublic | BindingFlags.Instance) !.Invoke(this.emailJob, null) as AdminReportData;
+//            AdminReportData? result = typeof(EmailJob).GetMethod("GatherReportData", BindingFlags.NonPublic | BindingFlags.Instance)!.Invoke(this.emailJob, null) as AdminReportData;
 //            Assert.NotNull(result);
 //            Assert.Equal(this.adminUsers.Count + this.regularUsers.Count, result.ActiveUsersCount);
 //            Assert.Equal(this.bannedUsers.Count, result.BannedUsersCount);

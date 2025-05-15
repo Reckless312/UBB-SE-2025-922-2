@@ -10,8 +10,8 @@ namespace UnitTests.Users
     using DataAccess.Model.AdminDashboard;
     using DataAccess.Model.Authentication;
     using DataAccess.Model.Authentication;
-    using DrinkDb_Auth.Service;
-    using DrinkDb_Auth.Service.AdminDashboard.Components;
+    using DataAccess.Service;
+    using DataAccess.Service.AdminDashboard.Components;
     using IRepository;
     using Moq;
     using Xunit;

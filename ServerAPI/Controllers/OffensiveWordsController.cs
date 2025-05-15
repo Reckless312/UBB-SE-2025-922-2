@@ -3,8 +3,7 @@ using DataAccess.Model.AutoChecker;
 using IRepository;
 using Microsoft.AspNetCore.Mvc;
 using Repository.AdminDashboard;
-using ServerAPI.Data;
-using ServerAPI.Repository.AutoChecker;
+using DataAccess.Repository.AutoChecker;
 
 namespace ServerAPI.Controllers
 {
