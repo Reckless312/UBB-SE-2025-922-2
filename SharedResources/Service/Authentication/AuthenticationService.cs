@@ -58,18 +58,18 @@ namespace DataAccess.Service.Authentication
             userRepository = new UserRepository(context);
         }
 
-        public AuthenticationService(ILinkedInLocalOAuthServer linkedinLocalServer, IGitHubLocalOAuthServer githubLocalServer, IFacebookLocalOAuthServer facebookLocalServer, IUserRepository userRepository, ISessionRepository sessionAdapter, IBasicAuthenticationProvider basicAuthenticationProvider)
-        {
-            this.linkedinLocalServer = linkedinLocalServer;
-            this.githubLocalServer = githubLocalServer;
-            this.facebookLocalServer = facebookLocalServer;
-            this.userRepository = userRepository;
-            this.sessionRepository = sessionAdapter;
-            this.basicAuthenticationProvider = basicAuthenticationProvider;
-            _ = githubLocalServer.StartAsync();
-            _ = facebookLocalServer.StartAsync();
-            _ = linkedinLocalServer.StartAsync();
-        }
+        //public AuthenticationService(ILinkedInLocalOAuthServer linkedinLocalServer, IGitHubLocalOAuthServer githubLocalServer, IFacebookLocalOAuthServer facebookLocalServer, IUserRepository userRepository, ISessionRepository sessionAdapter, IBasicAuthenticationProvider basicAuthenticationProvider)
+        //{
+        //    this.linkedinLocalServer = linkedinLocalServer;
+        //    this.githubLocalServer = githubLocalServer;
+        //    this.facebookLocalServer = facebookLocalServer;
+        //    this.userRepository = userRepository;
+        //    this.sessionRepository = sessionAdapter;
+        //    this.basicAuthenticationProvider = basicAuthenticationProvider;
+        //    _ = githubLocalServer.StartAsync();
+        //    _ = facebookLocalServer.StartAsync();
+        //    _ = linkedinLocalServer.StartAsync();
+        //}
 
         public async Task<AuthenticationResponse> AuthWithOAuth(OAuthService selectedService, object authProvider)
         {

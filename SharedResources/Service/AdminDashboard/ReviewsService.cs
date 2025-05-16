@@ -118,5 +118,10 @@ namespace DataAccess.Service.AdminDashboard
             List<Review> reviews = GetFlaggedReviews();
             return reviews.Where(review => review.Content.ToLower().Contains(content)).ToList();
         }
+
+        public List<Review> GetFlaggedReviews()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

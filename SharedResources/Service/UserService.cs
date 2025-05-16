@@ -36,12 +36,12 @@ namespace DataAccess.Service
         //    this.authenticationService = authService;
         //}
 
-        // Constructor for dependency injection and testing
-        public UserService(IUserRepository repository, AuthenticationService authService)
-        {
-            userRepository = repository;
-            authenticationService = authService;
-        }
+        //// Constructor for dependency injection and testing
+        //public UserService(IUserRepository repository, AuthenticationService authService)
+        //{
+        //    userRepository = repository;
+        //    authenticationService = authService;
+        //}
 
         public async Task<User> GetUserById(Guid userId)
         {

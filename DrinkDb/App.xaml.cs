@@ -5,11 +5,14 @@ namespace DrinkDb_Auth
     using DataAccess.Service;
     using DataAccess.Service.AdminDashboard;
     using DataAccess.Service.AdminDashboard.Interfaces;
+    using DataAccess.Service.Authentication;
+    using DataAccess.Service.Authentication.Interfaces;
     using DrinkDb_Auth.Converters;
     using DrinkDb_Auth.ProxyRepository.AdminDashboard;
     using DrinkDb_Auth.ProxyRepository.AutoChecker;
     using DrinkDb_Auth.View;
     using IRepository;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -55,6 +58,10 @@ namespace DrinkDb_Auth
                     IConfiguration config = new ConfigurationBuilder().AddUserSecrets<App>().AddEnvironmentVariables().AddJsonFile("appSettings.json", optional: false, reloadOnChange: true).Build();
                     services.AddSingleton<IConfiguration>(config);
                     string connectionString = config.GetConnectionString("DrinkDbConnection");
+                    services.AddDbContext<Data.DatabaseContext>(options =>
+                    {
+                        options.UseSqlServer(connectionString);
+                    });
                     string apiRoute = "http://localhost:5280/";
                     services.AddHttpClient<IUserRepository, UserProxyRepository>(provider =>
                     {
@@ -82,6 +89,7 @@ namespace DrinkDb_Auth
                         return new RolesProxyRepository(apiRoute);
                     });
                     services.AddSingleton<IUserService, UserService>();
+                    services.AddSingleton<IAuthenticationService, AuthenticationService>();
                     services.AddSingleton<IReviewService, ReviewsService>();
                     services.AddSingleton<IUpgradeRequestsService, UpgradeRequestsService>();
                     services.AddTransient<EmailJob>();
