@@ -8,5 +8,15 @@ namespace WebServer.Controllers
         {
             return View();
         }
+
+        public IActionResult TwoFactorAuthSetup()
+        {
+            return View();
+        }
+
+        public IActionResult TwoFactorAuthCheck()
+        {
+            return View();
+        }
     }
 }

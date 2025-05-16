@@ -1,0 +1,25 @@
+﻿@{
+    ViewData["Title"] = "Two-Factor Authentication Setup";
+}
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="card p-4" style="max-width: 400px; width: 100%;">
+        <h5 class="mb-3 text-center">Scan the QR code with your authenticator app and enter the 6-digit code below:</h5>
+        <div class="d-flex justify-content-center mb-3">
+            <img src="/images/placeholder-qr.png" alt="QR Code" width="200" height="200" />
+        </div>
+        <form>
+            <div class="d-flex justify-content-center mb-3">
+                <input type="text" maxlength="1" class="form-control mx-1 text-center" style="width: 40px;" />
+                <input type="text" maxlength="1" class="form-control mx-1 text-center" style="width: 40px;" />
+                <input type="text" maxlength="1" class="form-control mx-1 text-center" style="width: 40px;" />
+                <input type="text" maxlength="1" class="form-control mx-1 text-center" style="width: 40px;" />
+                <input type="text" maxlength="1" class="form-control mx-1 text-center" style="width: 40px;" />
+                <input type="text" maxlength="1" class="form-control mx-1 text-center" style="width: 40px;" />
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Verify</button>
+            </div>
+        </form>
+    </div>
+</div> 
