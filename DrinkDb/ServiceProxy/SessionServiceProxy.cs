@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using DataAccess.Model.Authentication;
 using System;
 
-namespace DrinkDb.ProxyRepository.ServerProxy
+namespace DrinkDb.ServiceProxy
 {
     public class SessionServiceProxy
     {

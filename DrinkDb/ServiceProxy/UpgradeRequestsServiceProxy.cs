@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using DataAccess.Model.AdminDashboard;
 
-namespace DrinkDb.ProxyRepository.ServerProxy
+namespace DrinkDb.ServiceProxy
 {
     public class UpgradeRequestsServiceProxy
     {

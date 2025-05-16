@@ -12,7 +12,7 @@ namespace IRepository
 
     public interface IOffensiveWordsRepository
     {
-        HashSet<string> LoadOffensiveWords();
+        Task<HashSet<string>> LoadOffensiveWords();
 
         Task AddWord(string word);
 
