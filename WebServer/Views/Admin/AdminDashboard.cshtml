@@ -2,97 +2,130 @@
     ViewData["Title"] = "Admin Dashboard";
 }
 
-<!-- Header -->
-<div class="container-fluid bg-primary text-white py-3 mb-4 rounded">
-    <div class="d-flex align-items-center justify-content-between">
-        <div class="d-flex align-items-center">
-            <img src="/images/beers-logo.png" alt="Logo" style="width:32px;height:32px;" class="me-3" />
-            <h3 class="mb-0">Admin Dashboard</h3>
+<div class="container-fluid bg-primary text-white py-3 mb-4 rounded shadow-sm">
+    <div class="d-flex align-items-center justify-content-between flex-wrap">
+        <div class="d-flex align-items-center mb-2 mb-lg-0">
+
+            @* <img src="~/images/beers-logo.png" alt="Logo" width="32" height="32" class="me-3" /> *@
+            <h3 class="mb-0 fw-semibold">Admin Dashboard</h3>
         </div>
-        <a href="/" class="btn btn-light">Go Back</a>
+
+        <a asp-controller="Home" asp-action="Index" class="btn btn-light fw-semibold shadow-sm">
+            Go Back
+        </a>
     </div>
 </div>
+
+<style>
+    /* keep the two review‑buttons on one row without bleeding to next col */
+    .review-action-btn {
+        min-width: 240px
+    }
+
+    @@media (max-width:991px) { /* stack on tablets / phones   */
+        .review-action-btn {
+            min-width: 100% !important;
+            margin-bottom: 12px
+        }
+    }
+</style>
 
 <div class="container-fluid">
-    <div class="row">
-        <!-- Left Column: Reviews -->
-        <div class="col-md-4 mb-4">
+    <div class="row g-4">
+        <!-- g‑4 = bootstrap gap -->
+        <!-- ───────── LEFT COL : REVIEWS ───────── -->
+        <div class="col-lg-4">
             <h5 class="fw-bold mb-3">List of all reviews</h5>
-            <input type="text" class="form-control mb-2" placeholder="Search reviews..." />
-            <ul class="list-group mb-3" style="max-height: 300px; overflow-y: auto;">
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>
-                        <strong>User A</strong>: Review 1 content here
-                    </span>
+
+            <input type="text" class="form-control mb-2" placeholder="Search reviews…" />
+
+            <ul class="list-group mb-3 shadow-sm" style="max-height:300px;overflow-y:auto">
+                <!-- sample items – replace with real Loop -->
+                <li class="list-group-item">
+                    <strong>User A</strong>: Review 1 content here
                 </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>
-                        <strong>User B</strong>: Review 2 content here
-                    </span>
+                <li class="list-group-item">
+                    <strong>User B</strong>: Review 2 content here
                 </li>
-                <!-- More reviews -->
             </ul>
-            <div class="mb-2" style="display: flex; gap: 12px;">
-                <button class="btn btn-primary flex-fill" style="min-width: 240px;">Automatically check reviews</button>
-                <button class="btn btn-secondary flex-fill" style="min-width: 240px;" data-bs-toggle="modal" data-bs-target="#forbiddenWordsModal">Modify offensive words list</button>
+
+            <div class="btn-group w-100 review-btn-group" role="group">
+                <button type="button"
+                        class="btn btn-primary w-50 fw-semibold"
+                        style="border-top-right-radius:0;border-bottom-right-radius:0;">
+                    Automatically check reviews
+                </button>
+
+                <button type="button"
+                        class="btn btn-secondary w-50 fw-semibold"
+                        data-bs-toggle="modal"
+                        data-bs-target="#forbiddenWordsModal"
+                        style="border-top-left-radius:0;border-bottom-left-radius:0;">
+                    Modify offensive words list
+                </button>
             </div>
         </div>
 
-        <!-- Middle Column: Role Upgrade Requests -->
-        <div class="col-md-4 mb-4">
+        <!-- ───────── MID COL : ROLE UPGRADE ───────── -->
+        <div class="col-lg-4">
             <h5 class="fw-bold mb-3">Role Upgrade Requests</h5>
-            <ul class="list-group" style="max-height: 300px; overflow-y: auto;">
-                <li class="list-group-item d-flex justify-content-between align-items-center">
+
+            <ul class="list-group shadow-sm" style="max-height:300px;overflow-y:auto">
+                <li class="list-group-item d-flex justify-content-between">
                     <span>User C requests upgrade</span>
-                    <div>
-                        <button class="btn btn-success btn-sm me-2">Accept</button>
-                        <button class="btn btn-danger btn-sm">Decline</button>
+                    <div class="btn-group" role="group" style="height:38px;">
+                        <button class="btn btn-success btn-sm fw-semibold"
+                                style="border-top-right-radius:0; border-bottom-right-radius:0; height:100%;">
+                            Accept
+                        </button>
+                        <button class="btn btn-danger btn-sm fw-semibold"
+                                style="border-top-left-radius:0; border-bottom-left-radius:0; height:100%;">
+                            Decline
+                        </button>
                     </div>
                 </li>
-                <!-- More requests -->
             </ul>
         </div>
 
-        <!-- Right Column: Appeals -->
-        <div class="col-md-4 mb-4">
+        <!-- ───────── RIGHT COL : APPEALS ───────── -->
+        <div class="col-lg-4">
             <h5 class="fw-bold mb-3">List of all appeals</h5>
-            <input type="text" class="form-control mb-2" placeholder="Search appeals..." />
-            <ul class="list-group" style="max-height: 300px; overflow-y: auto;">
-                <li class="list-group-item">Appeal 1 - <span class="text-muted">User D</span></li>
-                <li class="list-group-item">Appeal 2 - <span class="text-muted">User E</span></li>
-                <!-- More appeals -->
+
+            <input type="text" class="form-control mb-2" placeholder="Search appeals…" />
+
+            <ul class="list-group shadow-sm" style="max-height:300px;overflow-y:auto">
+                <li class="list-group-item">
+                    Appeal 1 – <span class="text-muted">User D</span>
+                </li>
             </ul>
         </div>
     </div>
 </div>
 
-<!-- Forbidden Words Modal -->
-<div class="modal fade" id="forbiddenWordsModal" tabindex="-1" aria-labelledby="forbiddenWordsModalLabel" aria-hidden="true">
+<!-- ───────── MODAL : FORBIDDEN WORDS ───────── -->
+<div class="modal fade" id="forbiddenWordsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div class="modal-content shadow-lg">
             <div class="modal-header">
-                <h5 class="modal-title" id="forbiddenWordsModalLabel">Forbidden Words</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Forbidden Words</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
+
             <div class="modal-body">
                 <ul class="list-group mb-3">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        word1
-                        <button class="btn btn-danger btn-sm">Delete</button>
+                    <li class="list-group-item d-flex justify-content-between">
+                        word1 <button class="btn btn-danger btn-sm">Delete</button>
                     </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        word2
-                        <button class="btn btn-danger btn-sm">Delete</button>
-                    </li>
-                    <!-- More words -->
                 </ul>
-                <div class="d-flex mb-2">
-                    <input type="text" class="form-control me-2" placeholder="Add new word...">
+
+                <div class="d-flex">
+                    <input type="text" class="form-control me-2" placeholder="Add new word…">
                     <button class="btn btn-primary">Add</button>
                 </div>
             </div>
+
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
