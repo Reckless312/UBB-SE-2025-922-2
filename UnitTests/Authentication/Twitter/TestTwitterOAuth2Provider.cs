@@ -9,10 +9,9 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Collections.Generic;
-using DrinkDb_Auth.OAuthProviders;
-using DrinkDb_Auth.AuthProviders.Twitter;
 using DataAccess.Model;
 using Xunit;
+using DataAccess.AuthProviders.Twitter;
 
 namespace TestTest.Authentication.Twitter
 {

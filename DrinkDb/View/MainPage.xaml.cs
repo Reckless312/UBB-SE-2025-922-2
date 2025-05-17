@@ -6,7 +6,6 @@ namespace DrinkDb_Auth.View
 {
     using System;
     using System.ComponentModel;
-    using DrinkDb_Auth.AutoChecker;
     using DataAccess.Model.AdminDashboard;
     using DataAccess.Model.Authentication;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
@@ -16,6 +15,8 @@ namespace DrinkDb_Auth.View
     using Microsoft.UI.Xaml.Controls;
     using Microsoft.UI.Xaml.Controls.Primitives;
     using Microsoft.Extensions.DependencyInjection;
+    using DataAccess.Service.AdminDashboard.Interfaces;
+    using DataAccess.AutoChecker;
 
     /// <summary>
     /// a page.

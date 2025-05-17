@@ -2,15 +2,16 @@ namespace DrinkDb_Auth
 {
     using System;
     using System.Threading.Tasks;
+    using DataAccess.AuthProviders.Facebook;
+    using DataAccess.AuthProviders.Github;
+    using DataAccess.AuthProviders.LinkedIn;
+    using DataAccess.AuthProviders.Twitter;
     using DataAccess.Model.Authentication;
-    using DrinkDb_Auth.AuthProviders.Facebook;
-    using DrinkDb_Auth.AuthProviders.Github;
+    using DataAccess.OAuthProviders;
+    using DataAccess.Service.Authentication;
+    using DataAccess.Service.Authentication.Interfaces;
     using DrinkDb_Auth.AuthProviders.Google;
-    using DrinkDb_Auth.AuthProviders.LinkedIn;
-    using DrinkDb_Auth.AuthProviders.Twitter;
-    using DrinkDb_Auth.OAuthProviders;
     using DrinkDb_Auth.Service.Authentication;
-    using DrinkDb_Auth.Service.Authentication.Interfaces;
     using DrinkDb_Auth.ViewModel.Authentication;
     using Microsoft.IdentityModel.Tokens;
     using Microsoft.UI;
@@ -23,7 +24,7 @@ namespace DrinkDb_Auth
 
     public sealed partial class MainWindow : Window
     {
-        private AuthenticationService authenticationService = new ();
+        private AuthenticationService authenticationService;
         private ITwoFactorAuthenticationService? twoFactorAuthentificationService;
 
         private IScheduler scheduler;
@@ -99,7 +100,7 @@ namespace DrinkDb_Auth
                 User user = this.authenticationService.GetUser(res.SessionId).Result;
                 bool twoFAresponse = false;
                 bool firstTimeSetup = user.TwoFASecret.IsNullOrEmpty();
-                this.twoFactorAuthentificationService = new TwoFactorAuthenticationService(this, user.UserId, firstTimeSetup);
+                this.twoFactorAuthentificationService = new TwoFactorAuthenticationService(user.UserId, firstTimeSetup);
                 TwoFaGuiHelper twoFaGuiHelper = new TwoFaGuiHelper(this);
                 (User currentUser, string uniformResourceIdentifier, byte[] twoFactorSecret)
                     values = this.twoFactorAuthentificationService.Get2FAValues();
@@ -143,7 +144,7 @@ namespace DrinkDb_Auth
         {
             try
             {
-                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(this, OAuthService.GitHub, new GitHubOAuthHelper());
+                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(OAuthService.GitHub, new GitHubOAuthHelper(null)); // REPLACE NULL HERE
                 _ = this.AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
@@ -157,7 +158,7 @@ namespace DrinkDb_Auth
             try
             {
                 this.GoogleSignInButton.IsEnabled = false;
-                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(this, OAuthService.Google, new GoogleOAuth2Provider());
+                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(OAuthService.Google, new GoogleOAuth2Provider());
                 await this.AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
@@ -174,7 +175,7 @@ namespace DrinkDb_Auth
         {
             try
             {
-                AuthenticationResponse authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.Facebook, new FacebookOAuthHelper());
+                AuthenticationResponse authResponse = await authenticationService.AuthWithOAuth(OAuthService.Facebook, new FacebookOAuthHelper());
                 await this.AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
@@ -188,7 +189,7 @@ namespace DrinkDb_Auth
             try
             {
                 this.XSignInButton.IsEnabled = false;
-                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(this, OAuthService.Twitter, new TwitterOAuth2Provider());
+                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(OAuthService.Twitter, new TwitterOAuth2Provider());
                 await this.AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
@@ -205,7 +206,7 @@ namespace DrinkDb_Auth
         {
             try
             {
-                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(this, OAuthService.LinkedIn, new LinkedInOAuthHelper(
+                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(OAuthService.LinkedIn, new LinkedInOAuthHelper(
                     clientId: "86j0ikb93jm78x",
                     clientSecret: "WPL_AP1.pg2Bd1XhCi821VTG.+hatTA==",
                     redirectUri: "http://localhost:8891/auth",

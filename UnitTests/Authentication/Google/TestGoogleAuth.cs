@@ -1,6 +1,5 @@
 ﻿using System;
 using DrinkDb_Auth.AuthProviders.Google;
-using DrinkDb_Auth.OAuthProviders;
 using Xunit;
 
 namespace TestTest.Authentication.Google

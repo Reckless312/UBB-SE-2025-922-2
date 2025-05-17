@@ -10,8 +10,9 @@ namespace UnitTests.Users
     using DataAccess.Model.AdminDashboard;
     using DataAccess.Model.Authentication;
     using DataAccess.Model.Authentication;
+    using DataAccess.Service;
+    using DataAccess.Service.AdminDashboard.Components;
     using DrinkDb_Auth.Service;
-    using DrinkDb_Auth.Service.AdminDashboard.Components;
     using IRepository;
     using Moq;
     using Xunit;
@@ -32,7 +33,7 @@ namespace UnitTests.Users
         public UserServiceTests()
         {
             this.mockUserRepository = new Mock<IUserRepository>();
-            this.userService = new UserService(this.mockUserRepository.Object);
+            this.userService = new UserService(this.mockUserRepository.Object, null);
         }
 
         /// <summary>
@@ -60,7 +61,7 @@ namespace UnitTests.Users
             };
             mockUserRepository.Setup(repo => repo.GetAllUsers()).ReturnsAsync(users);
 
-            var userService1 = new UserService(mockUserRepository.Object);
+            var userService1 = new UserService(mockUserRepository.Object, null);
 
             var result = userService1.GetAllUsers().Result;
 

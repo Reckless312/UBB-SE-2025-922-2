@@ -1,10 +1,5 @@
 ﻿using DrinkDb_Auth.AuthProviders;
-using DrinkDb_Auth.AuthProviders.Facebook;
-using DrinkDb_Auth.AuthProviders.Github;
 using DrinkDb_Auth.AuthProviders.Google;
-using DrinkDb_Auth.AuthProviders.LinkedIn;
-using DrinkDb_Auth.AuthProviders.Twitter;
-using DrinkDb_Auth.OAuthProviders;
 using Microsoft.UI.Xaml;
 using System;
 using System.Net;
@@ -13,6 +8,12 @@ using IRepository;
 using DataAccess.Model.Authentication;
 using System.Collections.Generic;
 using DataAccess.Model.AdminDashboard;
+using DataAccess.OAuthProviders;
+using DataAccess.AuthProviders.LinkedIn;
+using DataAccess.AuthProviders.Github;
+using DataAccess.AuthProviders.Twitter;
+using DataAccess.AuthProviders;
+using DataAccess.AuthProviders.Facebook;
 
 namespace Tests
 {
@@ -134,6 +135,11 @@ namespace Tests
             };
 
             return Task.FromResult(mockResponse);
+        }
+
+        public Task<AuthenticationResponse> SignInWithGoogleAsync()
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -364,6 +370,11 @@ namespace Tests
             };
 
             return Task.FromResult(mockResponse);
+        }
+
+        public Task<AuthenticationResponse> SignInWithTwitterAsync()
+        {
+            throw new NotImplementedException();
         }
     }
 

@@ -6,6 +6,7 @@ namespace DrinkDb_Auth.Converters
 {
     using System;
     using DataAccess.Model.Authentication;
+    using DataAccess.Service.AdminDashboard.Interfaces;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using Microsoft.UI.Xaml.Data;
 

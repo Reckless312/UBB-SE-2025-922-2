@@ -5,7 +5,12 @@ namespace DrinkDb_Auth
     using System.IO;
     using System.Linq;
     using System.Runtime.InteropServices.WindowsRuntime;
-    using DrinkDb_Auth.AutoChecker;
+    using DataAccess.AutoChecker;
+    using DataAccess.Service;
+    using DataAccess.Service.AdminDashboard;
+    using DataAccess.Service.AdminDashboard.Interfaces;
+    using DataAccess.Service.Authentication;
+    using DataAccess.Service.Authentication.Interfaces;
     using DrinkDb_Auth.Converters;
     using DrinkDb_Auth.ProxyRepository.AdminDashboard;
     using DrinkDb_Auth.ProxyRepository.AutoChecker;
@@ -95,10 +100,13 @@ namespace DrinkDb_Auth
                     services.AddSingleton<IUserService, UserService>();
                     services.AddSingleton<IReviewService, ReviewsService>();
                     services.AddSingleton<IUpgradeRequestsService, UpgradeRequestsService>();
+
+                    // services.AddSingleton<IAuthenticationService, AuthenticationService>(); PROXY NEEDED HERE
                     services.AddTransient<EmailJob>();
 
-                    IUserService userService = services.BuildServiceProvider().GetRequiredService<IUserService>();
-                    UserIdToNameConverter.Initialize(userService);
+                    // BLOWS UP HERE
+                    // IUserService userService = services.BuildServiceProvider().GetRequiredService<IUserService>();
+                    // UserIdToNameConverter.Initialize(userService);
 
                     // Quartz Configuration
                     services.AddSingleton<JobFactory>();

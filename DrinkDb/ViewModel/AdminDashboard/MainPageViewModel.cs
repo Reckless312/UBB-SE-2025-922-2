@@ -9,10 +9,11 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
     using System.Windows.Input;
     using DataAccess.Model.AdminDashboard;
     using DataAccess.Model.Authentication;
-    using DrinkDb_Auth.AutoChecker;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using DrinkDb_Auth.ViewModel.AdminDashboard.Components;
     using DrinkDb_Auth.Service;
+    using DataAccess.Service.AdminDashboard.Interfaces;
+    using DataAccess.AutoChecker;
 
     public class MainPageViewModel : INotifyPropertyChanged
     {

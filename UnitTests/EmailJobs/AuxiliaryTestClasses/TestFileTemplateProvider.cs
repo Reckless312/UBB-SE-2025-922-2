@@ -1,5 +1,6 @@
 ﻿namespace UnitTests.EmailJobs.AuxiliaryTestClasses
 {
+    using DataAccess.Service.AdminDashboard.Interfaces;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using System.IO;
 
