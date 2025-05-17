@@ -25,11 +25,11 @@ namespace ServerAPI.Repository.AutoChecker
             this.databaseContext = databaseContext;
         }
 
-        public HashSet<string> LoadOffensiveWords()
+        public async Task<HashSet<string>> LoadOffensiveWords()
         {
-            return databaseContext.OffensiveWords
+            return await Task.FromResult(databaseContext.OffensiveWords
                 .Select(w => w.Word)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                .ToHashSet(StringComparer.OrdinalIgnoreCase));
         }
 
         public async Task AddWord(string word)
@@ -40,7 +40,7 @@ namespace ServerAPI.Repository.AutoChecker
             if (!exists)
             {
                 databaseContext.OffensiveWords.Add(new OffensiveWord { Word = word });
-                databaseContext.SaveChanges();
+                await databaseContext.SaveChangesAsync();
             }
         }
 
@@ -52,7 +52,7 @@ namespace ServerAPI.Repository.AutoChecker
             if (entity != null)
             {
                 databaseContext.OffensiveWords.Remove(entity);
-                databaseContext.SaveChanges();
+                await databaseContext.SaveChangesAsync();
             }
         }
     }

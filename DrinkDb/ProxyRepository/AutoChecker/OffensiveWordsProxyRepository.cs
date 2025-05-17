@@ -30,11 +30,10 @@ namespace DrinkDb_Auth.ProxyRepository.AutoChecker
 
         public async Task AddWord(string word)
         {
-
-            var response = this.httpClient.GetAsync(ApiBaseRoute).Result;
+            HttpResponseMessage response = await this.httpClient.GetAsync(ApiBaseRoute);
             response.EnsureSuccessStatusCode();
 
-            List<OffensiveWord> offensiveWords = response.Content.ReadFromJsonAsync<List<OffensiveWord>>().Result ?? new List<OffensiveWord>();
+            List<OffensiveWord> offensiveWords = await response.Content.ReadFromJsonAsync<List<OffensiveWord>>() ?? new List<OffensiveWord>();
             OffensiveWord? searchedWord  = null;
             foreach (OffensiveWord offensive in offensiveWords)
                 if (offensive.Word == word)
@@ -42,36 +41,39 @@ namespace DrinkDb_Auth.ProxyRepository.AutoChecker
 
             if (searchedWord == null)
             {
-                response = this.httpClient.PostAsJsonAsync($"{ApiBaseRoute}/add", new OffensiveWord { Word = word }).Result;
-                response.EnsureSuccessStatusCode();
+                HttpResponseMessage postResponse = await this.httpClient.PostAsJsonAsync($"{ApiBaseRoute}/add", new OffensiveWord { Word = word });
+                postResponse.EnsureSuccessStatusCode();
              }
         }
 
         public async Task DeleteWord(string word)
         {
-            var response = await this.httpClient.GetAsync(ApiBaseRoute);
+            HttpResponseMessage response = await this.httpClient.GetAsync(ApiBaseRoute);
             response.EnsureSuccessStatusCode();
 
-            List<OffensiveWord> offensiveWords = response.Content.ReadFromJsonAsync<List<OffensiveWord>>().Result ?? new List<OffensiveWord>();
+            List<OffensiveWord> offensiveWords = await response.Content.ReadFromJsonAsync<List<OffensiveWord>>() ?? new List<OffensiveWord>();
             OffensiveWord? searchedWord = null;
             foreach (OffensiveWord offensive in offensiveWords)
                 if (offensive.Word == word)
                     searchedWord = offensive;
             if (searchedWord != null)
             {
-                response = this.httpClient.DeleteAsync($"{ApiBaseRoute}/delete/{word}").Result;
-                response.EnsureSuccessStatusCode();
+                HttpResponseMessage deleteResponse = await this.httpClient.DeleteAsync($"{ApiBaseRoute}/delete/{word}");
+                deleteResponse.EnsureSuccessStatusCode();
             }
         }
 
-        public HashSet<string> LoadOffensiveWords()
+        public async Task<HashSet<string>> LoadOffensiveWords()
         {
-            var response = this.httpClient.GetAsync(ApiBaseRoute).Result;
+            HttpResponseMessage response = await this.httpClient.GetAsync(ApiBaseRoute);
             response.EnsureSuccessStatusCode();
-             List < OffensiveWord > offensiveWords = response.Content.ReadFromJsonAsync<List<OffensiveWord>>().Result ?? new List<OffensiveWord>();
+            
+            List<OffensiveWord> offensiveWords = await response.Content.ReadFromJsonAsync<List<OffensiveWord>>() ?? new List<OffensiveWord>();
             HashSet<string> wordsAsStrings = new HashSet<string>();
+            
             foreach (OffensiveWord word in offensiveWords)
                 wordsAsStrings.Add(word.Word);
+                
             return wordsAsStrings;
         }
     }
