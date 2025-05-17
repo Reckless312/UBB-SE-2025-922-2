@@ -221,7 +221,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
 
         public void LoadFlaggedReviews()
         {
-            this.FlaggedReviews = new ObservableCollection<Review>(this.reviewsService.GetFlaggedReviews());
+            this.FlaggedReviews = new ObservableCollection<Review>(this.reviewsService.GetFlaggedReviews().Result);
         }
 
         public void LoadAppeals()
@@ -242,7 +242,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         public void FilterReviews(string filter)
         {
             this.FlaggedReviews = new ObservableCollection<Review>(
-                this.reviewsService.FilterReviewsByContent(filter));
+                this.reviewsService.FilterReviewsByContent(filter).Result);
         }
 
         public void FilterAppeals(string filter)
@@ -284,7 +284,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
 
         public List<string> RunAutoCheck()
         {
-            List<Review> reviews = this.reviewsService.GetFlaggedReviews();
+            List<Review> reviews = this.reviewsService.GetFlaggedReviews().Result;
             List<string> messages = this.checkersService.RunAutoCheck(reviews);
             this.LoadFlaggedReviews();
             return messages;
@@ -343,7 +343,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
 
         public List<Review> GetUserReviews(Guid userId)
         {
-            return this.reviewsService.GetReviewsByUser(userId);
+            return this.reviewsService.GetReviewsByUser(userId).Result;
         }
 
         public User GetUserById(Guid userId)

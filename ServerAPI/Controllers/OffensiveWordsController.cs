@@ -22,7 +22,7 @@ namespace ServerAPI.Controllers
         [HttpGet]
         public List<OffensiveWord> GetAllWords()
         {
-            HashSet<string> words = repository.LoadOffensiveWords();
+            HashSet<string> words = repository.LoadOffensiveWords().Result;
             List<OffensiveWord> wordsList = new List<OffensiveWord>();
             foreach (string word in words)
             {

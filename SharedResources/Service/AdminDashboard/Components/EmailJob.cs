@@ -11,6 +11,7 @@ using DataAccess.Model.AdminDashboard;
 using DataAccess.Model.Authentication;
 using DataAccess.Service.AdminDashboard.Components;
 using DataAccess.Service.AdminDashboard.Interfaces;
+using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
 using Quartz;
@@ -96,9 +97,9 @@ public class EmailJob : IJob
         List<User> adminUsers = this.userService.GetAdminUsers().Result;
         int activeUsersCount = this.userService.GetAdminUsers().Result.Count() + this.userService.GetRegularUsers().Result.Count;
         int bannedUsersCount = this.userService.GetBannedUsers().Result.Count();
-        int numberOfNewReviews = this.reviewService.GetReviewsSince(yesterday).Count;
-        double averageRating = this.reviewService.GetAverageRatingForVisibleReviews();
-        List<Review> recentReviews = this.reviewService.GetReviewsForReport();
+        int numberOfNewReviews = this.reviewService.GetReviewsSince(yesterday).Result.Count;
+        double averageRating = this.reviewService.GetAverageRatingForVisibleReviews().Result;
+        List<Review> recentReviews = this.reviewService.GetReviewsForReport().Result;
 
         return new AdminReportData(reportDate, adminUsers, activeUsersCount, bannedUsersCount, numberOfNewReviews, averageRating, recentReviews);
     }

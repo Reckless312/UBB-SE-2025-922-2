@@ -21,7 +21,8 @@ namespace DataAccess.AutoChecker
         public AutoCheck(IOffensiveWordsRepository repository)
         {
             this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
-            this.offensiveWords = this.repository.LoadOffensiveWords();
+            // Had to add result
+            this.offensiveWords = this.repository.LoadOffensiveWords().Result;
         }
 
         public bool AutoCheckReview(string reviewText)

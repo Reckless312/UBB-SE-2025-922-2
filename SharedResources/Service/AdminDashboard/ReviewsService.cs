@@ -2,7 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace DataAccess.Service.AdminDashboard
+namespace DrinkDb_Auth.Service.AdminDashboard
 {
     using System;
     using System.Collections.Generic;
@@ -10,6 +10,7 @@ namespace DataAccess.Service.AdminDashboard
     using System.Threading.Tasks;
     using DataAccess.Model.AdminDashboard;
     using DataAccess.Service.AdminDashboard.Interfaces;
+    using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using IRepository;
 
     public class ReviewsService : IReviewService
@@ -53,7 +54,7 @@ namespace DataAccess.Service.AdminDashboard
 
         public async Task HideReview(int reviewId)
         {
-             await reviewsRepository.UpdateReviewVisibility(reviewId, true);
+            await reviewsRepository.UpdateReviewVisibility(reviewId, true);
         }
 
         public async Task<List<Review>> GetFlaggedReviews(int minFlags = 1)

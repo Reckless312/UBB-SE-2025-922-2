@@ -14,6 +14,7 @@
     using DataAccess.Service.AdminDashboard.Interfaces;
     using Microsoft.ML;
     using Newtonsoft.Json;
+    using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
 
     public class CheckersService : ICheckersService
     {

@@ -118,7 +118,7 @@ namespace DrinkDb_Auth
             {
                 return;
             }
-            var userReviews = reviewService.GetReviewsByUser(currentUserId)
+            var userReviews = reviewService.GetReviewsByUser(currentUserId).Result
                 .Where(r => !r.IsHidden)
                 .OrderByDescending(r => r.CreatedDate)
                 .ToList();
