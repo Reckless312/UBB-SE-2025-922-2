@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Verify two‑factor authentication";
+}
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height:80vh;">
+    <div class="card p-4 shadow-sm" style="max-width:420px;width:100%;">
+
+        <h4 class="text-center fw-semibold mb-3">Verify two‑factor auth</h4>
+
+        <p class="text-center small mb-3">
+            Enter the 6‑digit code from your authenticator app:
+        </p>
+
+        <form asp-action="VerifyLoginCode" method="post">
+            <div class="d-flex justify-content-center mb-3">
+                @for (int i = 0; i<6; i++)
+                {
+                    <input type="text" name="d@i" maxlength="1"
+                           class="form-control mx-1 text-center code-box" style="width:40px;" />
+                }
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Submit</button>
+                <a asp-action="Cancel2FA" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
