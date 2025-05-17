@@ -11,12 +11,15 @@ namespace DrinkDb_Auth
     using DataAccess.Service.AdminDashboard.Interfaces;
     using DataAccess.Service.Authentication;
     using DataAccess.Service.Authentication.Interfaces;
+    using DrinkDb.ProxyRepository.ServerProxy;
+    using DrinkDb.ServiceProxy;
     using DrinkDb_Auth.Converters;
     using DrinkDb_Auth.ProxyRepository.AdminDashboard;
     using DrinkDb_Auth.ProxyRepository.AutoChecker;
     using DrinkDb_Auth.Service;
     using DrinkDb_Auth.Service.AdminDashboard;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
+    using DrinkDb_Auth.ServiceProxy;
     using DrinkDb_Auth.View;
     using IRepository;
     using Microsoft.Extensions.Configuration;
@@ -72,36 +75,36 @@ namespace DrinkDb_Auth
                     services.AddSingleton<IConfiguration>(config);
                     string connectionString = config.GetConnectionString("DrinkDbConnection");
                     string apiRoute = "http://localhost:5280/";
-                    services.AddHttpClient<IUserRepository, UserProxyRepository>(provider =>
+                    services.AddHttpClient<IUserService, UserServiceProxy>(provider =>
                     {
-                        UserProxyRepository repository = new UserProxyRepository(apiRoute);
+                        UserServiceProxy repository = new UserServiceProxy(apiRoute);
                         return repository;
                     });
-                    services.AddSingleton<IReviewsRepository, ReviewsProxyRepository>(provider =>
+                    services.AddSingleton<IReviewService, ReviewsServiceProxy>(provider =>
                     {
-                        ReviewsProxyRepository repository = new ReviewsProxyRepository(apiRoute);
+                        ReviewsServiceProxy repository = new ReviewsServiceProxy(apiRoute);
                         return repository;
                     });
-                    services.AddSingleton<IOffensiveWordsRepository, OffensiveWordsProxyRepository>(provider =>
+                    services.AddSingleton<IOffensiveWordsService, OffensiveWordsServiceProxy>(provider =>
                     {
-                        OffensiveWordsProxyRepository repository = new OffensiveWordsProxyRepository(apiRoute);
+                        OffensiveWordsServiceProxy repository = new OffensiveWordsServiceProxy(apiRoute);
                         return repository;
                     });
                     services.AddSingleton<IAutoCheck, AutoCheck>();
                     services.AddSingleton<ICheckersService, CheckersService>();
-                    services.AddSingleton<IUpgradeRequestsRepository, UpgradeRequestProxyRepository>(provider =>
+                    services.AddSingleton<IUpgradeRequestsService, UpgradeRequestsServiceProxy>(provider =>
                     {
-                        return new UpgradeRequestProxyRepository(apiRoute);
+                        return new UpgradeRequestsServiceProxy(apiRoute);
                     });
-                    services.AddSingleton<IRolesRepository, RolesProxyRepository>(provider =>
+                    services.AddSingleton<IRolesService, RolesProxyService>(provider =>
                     {
-                        return new RolesProxyRepository(apiRoute);
+                        return new RolesProxyService(apiRoute);
                     });
                     services.AddSingleton<IUserService, UserService>();
                     services.AddSingleton<IReviewService, ReviewsService>();
                     services.AddSingleton<IUpgradeRequestsService, UpgradeRequestsService>();
 
-                    // services.AddSingleton<IAuthenticationService, AuthenticationService>(); PROXY NEEDED HERE
+                    // services.AddSingleton<IAuthenticationService, AuthenticationService>(); // PROXY NEEDED HERE
                     services.AddTransient<EmailJob>();
 
                     // BLOWS UP HERE
