@@ -101,7 +101,7 @@ namespace DrinkDb_Auth
                     services.AddSingleton<IReviewService, ReviewsService>();
                     services.AddSingleton<IUpgradeRequestsService, UpgradeRequestsService>();
 
-                    // services.AddSingleton<IAuthenticationService, AuthenticationService>(); PROXY NEEDED HERE
+                    services.AddSingleton<IAuthenticationService, AuthenticationService>(); //PROXY NEEDED HERE
                     services.AddTransient<EmailJob>();
 
                     // BLOWS UP HERE

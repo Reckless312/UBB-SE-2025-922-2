@@ -3,13 +3,14 @@ using System.Threading.Tasks;
 using DataAccess.Model.Authentication;
 using DataAccess.Service;
 using DataAccess.Service.Authentication;
+using DataAccess.Service.Authentication.Interfaces;
 using IRepository;
 using Repository.AdminDashboard;
 using ServerAPI.Data;
 
 namespace DrinkDb_Auth.Service.Authentication
 {
-    public class SessionService
+    public class SessionService : ISessionService
     {
         private readonly ISessionRepository sessionRepository;
 

@@ -2,11 +2,12 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using DataAccess.Model.Authentication;
+using DataAccess.Service.Authentication.Interfaces;
 using System;
 
 namespace DrinkDb.ServiceProxy
 {
-    public class SessionServiceProxy
+    public class SessionServiceProxy : ISessionService
     {
         private readonly HttpClient httpClient;
         private readonly string baseUrl;
@@ -46,6 +47,22 @@ namespace DrinkDb.ServiceProxy
             response.EnsureSuccessStatusCode();
             string json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<Session>(json);
+        }
+
+        public async Task<bool> AuthorizeActionAsync(Guid sessionId, string resource, string action)
+        {
+            HttpResponseMessage response = await this.httpClient.GetAsync($"{this.baseUrl}/{ApiBaseRoute}/{sessionId}/authorize?resource={resource}&action={action}");
+            response.EnsureSuccessStatusCode();
+            string json = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<bool>(json);
+        }
+
+        public async Task<bool> ValidateSessionAsync(Guid sessionId)
+        {
+            HttpResponseMessage response = await this.httpClient.GetAsync($"{this.baseUrl}/{ApiBaseRoute}/{sessionId}/validate");
+            response.EnsureSuccessStatusCode();
+            string json = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<bool>(json);
         }
     }
 } 

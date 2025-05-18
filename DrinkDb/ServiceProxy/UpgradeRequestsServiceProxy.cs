@@ -3,10 +3,13 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using DataAccess.Model.AdminDashboard;
+using DataAccess.Service.AdminDashboard.Interfaces;
+using System;
+using System.Text;
 
 namespace DrinkDb.ServiceProxy
 {
-    public class UpgradeRequestsServiceProxy
+    public class UpgradeRequestsServiceProxy : IUpgradeRequestsService
     {
         private readonly HttpClient httpClient;
         private readonly string baseUrl;
@@ -18,13 +21,12 @@ namespace DrinkDb.ServiceProxy
             this.baseUrl = baseUrl.TrimEnd('/');
         }
 
-        public async Task RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
+        public List<UpgradeRequest> RetrieveAllUpgradeRequests()
         {
-            HttpResponseMessage response = await this.httpClient.DeleteAsync($"{this.baseUrl}/{ApiBaseRoute}/{upgradeRequestIdentifier}/delete");
-            response.EnsureSuccessStatusCode();
+            return RetrieveAllUpgradeRequestsAsync().GetAwaiter().GetResult();
         }
 
-        public async Task<List<UpgradeRequest>> RetrieveAllUpgradeRequests()
+        public async Task<List<UpgradeRequest>> RetrieveAllUpgradeRequestsAsync()
         {
             HttpResponseMessage response = await this.httpClient.GetAsync($"{this.baseUrl}/{ApiBaseRoute}");
             response.EnsureSuccessStatusCode();
@@ -32,7 +34,36 @@ namespace DrinkDb.ServiceProxy
             return JsonConvert.DeserializeObject<List<UpgradeRequest>>(json) ?? new List<UpgradeRequest>();
         }
 
-        public async Task<UpgradeRequest> RetrieveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
+        public void ProcessUpgradeRequest(bool isRequestAccepted, int upgradeRequestIdentifier)
+        {
+            ProcessUpgradeRequestAsync(isRequestAccepted, upgradeRequestIdentifier).GetAwaiter().GetResult();
+        }
+
+        private async Task ProcessUpgradeRequestAsync(bool isRequestAccepted, int upgradeRequestIdentifier)
+        {
+            StringContent content = new StringContent(
+                JsonConvert.SerializeObject(new { IsAccepted = isRequestAccepted }),
+                Encoding.UTF8,
+                "application/json");
+
+            HttpResponseMessage response = await this.httpClient.PostAsync(
+                $"{this.baseUrl}/{ApiBaseRoute}/{upgradeRequestIdentifier}/process", 
+                content);
+            response.EnsureSuccessStatusCode();
+        }
+
+        public string GetRoleNameBasedOnIdentifier(RoleType roleType)
+        {
+            return roleType.ToString();
+        }
+
+        public async Task RemoveUpgradeRequestByIdentifierAsync(int upgradeRequestIdentifier)
+        {
+            HttpResponseMessage response = await this.httpClient.DeleteAsync($"{this.baseUrl}/{ApiBaseRoute}/{upgradeRequestIdentifier}/delete");
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task<UpgradeRequest> RetrieveUpgradeRequestByIdentifierAsync(int upgradeRequestIdentifier)
         {
             HttpResponseMessage response = await this.httpClient.GetAsync($"{this.baseUrl}/{ApiBaseRoute}/{upgradeRequestIdentifier}");
             response.EnsureSuccessStatusCode();
