@@ -7,10 +7,11 @@ using System.Text;
 using System.Linq;
 using System.Net.Http.Json;
 using DataAccess.Model.AdminDashboard;
+using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
 
 namespace DrinkDb.ProxyRepository.ServerProxy
 {
-    public class ReviewsServiceProxy
+    public class ReviewsServiceProxy : IReviewService
     {
         private readonly HttpClient httpClient;
         private readonly string baseUrl;
@@ -158,6 +159,27 @@ namespace DrinkDb.ProxyRepository.ServerProxy
             
             HttpResponseMessage response = await httpClient.PatchAsync($"{this.baseUrl}/{ApiBaseRoute}/{reviewID}/updateVisibility", content);
             response.EnsureSuccessStatusCode();
+        }
+
+        public async Task HideReview(int reviewID)
+        {
+            await UpdateReviewVisibility(reviewID, true);
+        }
+
+        public async Task ResetReviewFlags(int reviewId)
+        {
+            await UpdateNumberOfFlagsForReview(reviewId, 0);
+        }
+
+        public async Task<List<Review>> GetReviewsForReport()
+        {
+            return await GetAllReviews();
+        }
+
+        public async Task<List<Review>> FilterReviewsByContent(string content)
+        {
+            List<Review> reviews = await GetAllReviews();
+            return reviews.Where(review => review.Content.Contains(content, StringComparison.OrdinalIgnoreCase)).ToList();
         }
     }
 } 
