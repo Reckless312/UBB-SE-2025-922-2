@@ -8,18 +8,16 @@ using DataAccess.OAuthProviders;
 using DataAccess.Service.Authentication;
 using System.Text;
 
-namespace DrinkDb.ServiceProxy
+namespace DrinkDb_Auth.ServiceProxy
 {
     public class AuthenticationServiceProxy : IAuthenticationService
     {
         private readonly HttpClient httpClient;
-        private readonly string baseUrl;
         private const string ApiBaseRoute = "api/auth";
 
-        public AuthenticationServiceProxy(HttpClient httpClient, string baseUrl)
+        public AuthenticationServiceProxy(HttpClient httpClient)
         {
             this.httpClient = httpClient;
-            this.baseUrl = baseUrl.TrimEnd('/');
         }
 
         public async Task<AuthenticationResponse> AuthWithUserPass(string username, string password)
@@ -29,7 +27,7 @@ namespace DrinkDb.ServiceProxy
                 Encoding.UTF8,
                 "application/json");
 
-            HttpResponseMessage response = await httpClient.PostAsync($"{this.baseUrl}/{ApiBaseRoute}/login", content);
+            HttpResponseMessage response = await httpClient.PostAsync($"{ApiBaseRoute}/login", content);
             response.EnsureSuccessStatusCode();
             string json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<AuthenticationResponse>(json);
@@ -42,7 +40,7 @@ namespace DrinkDb.ServiceProxy
                 Encoding.UTF8,
                 "application/json");
 
-            HttpResponseMessage response = await httpClient.PostAsync($"{this.baseUrl}/{ApiBaseRoute}/oauth", content);
+            HttpResponseMessage response = await httpClient.PostAsync($"{ApiBaseRoute}/oauth", content);
             response.EnsureSuccessStatusCode();
             string json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<AuthenticationResponse>(json);
@@ -50,7 +48,7 @@ namespace DrinkDb.ServiceProxy
 
         public async Task<User> GetUser(Guid sessionId)
         {
-            HttpResponseMessage response = await httpClient.GetAsync($"{this.baseUrl}/{ApiBaseRoute}/user/{sessionId}");
+            HttpResponseMessage response = await httpClient.GetAsync($"{ApiBaseRoute}/user/{sessionId}");
             response.EnsureSuccessStatusCode();
             string json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<User>(json);
@@ -58,7 +56,7 @@ namespace DrinkDb.ServiceProxy
 
         public async void Logout()
         {
-            HttpResponseMessage response = await httpClient.PostAsync($"{this.baseUrl}/{ApiBaseRoute}/logout", null);
+            HttpResponseMessage response = await httpClient.PostAsync($"{ApiBaseRoute}/logout", null);
             response.EnsureSuccessStatusCode();
         }
     }

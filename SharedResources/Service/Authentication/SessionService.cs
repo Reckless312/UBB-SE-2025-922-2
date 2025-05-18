@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using DataAccess.Model.Authentication;
 using DataAccess.Service;
+using DataAccess.Service.AdminDashboard.Interfaces;
 using DataAccess.Service.Authentication;
 using DataAccess.Service.Authentication.Interfaces;
 using IRepository;
@@ -13,13 +14,12 @@ namespace DrinkDb_Auth.Service.Authentication
     public class SessionService : ISessionService
     {
         private readonly ISessionRepository sessionRepository;
+        private readonly IUserService userService;
 
-        private DatabaseContext context;
-
-        public SessionService(ISessionRepository sessionRepository, DatabaseContext context)
+        public SessionService(ISessionRepository sessionRepository, IUserService userService)
         {
             this.sessionRepository = sessionRepository;
-            this.context = context;
+            this.userService = userService;
         }
 
         public async Task<Session> CreateSessionAsync(Guid userId)
@@ -51,7 +51,6 @@ namespace DrinkDb_Auth.Service.Authentication
                 return false;
             }
 
-            var userService = new UserService(new UserRepository(context), new AuthenticationService(context));
             return await userService.ValidateAction(session.UserId, resource, action);
         }
 

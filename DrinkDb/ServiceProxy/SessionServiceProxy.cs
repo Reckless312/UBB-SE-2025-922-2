@@ -5,7 +5,7 @@ using DataAccess.Model.Authentication;
 using DataAccess.Service.Authentication.Interfaces;
 using System;
 
-namespace DrinkDb.ServiceProxy
+namespace DrinkDb_Auth.ServiceProxy
 {
     public class SessionServiceProxy : ISessionService
     {

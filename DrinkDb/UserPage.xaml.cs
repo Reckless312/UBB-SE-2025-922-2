@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml;
 using System.Collections.Generic;
 using System;
+using Microsoft.Extensions.DependencyInjection;
 
 using System;
 using DataAccess.Model.Authentication;
@@ -24,24 +25,56 @@ using DataAccess.Model.AdminDashboard;
 using DataAccess.Service.Authentication;
 using DataAccess.Service;
 using DataAccess.Service.AdminDashboard.Interfaces;
+using DataAccess.Service.Authentication.Interfaces;
 
 namespace DrinkDb_Auth
 {
     public sealed partial class UserPage : Page
     {
-        private static readonly AuthenticationService AuthenticationService;
-        private static readonly UserService UserService;
-
+        private readonly IUserService userService;
+        private readonly IAuthenticationService authenticationService;
+        private readonly IReviewService reviewService;
         private User currentUser;
+        private Exception initializationError;
 
         public UserPage()
         {
             this.InitializeComponent();
-            LoadUserData();
-            LoadUserReviews();
+            this.Loaded += UserPage_Loaded;
+            
+            try
+            {
+                this.userService = App.Host.Services.GetRequiredService<IUserService>();
+                this.authenticationService = App.Host.Services.GetRequiredService<IAuthenticationService>();
+                this.reviewService = App.Host.Services.GetRequiredService<IReviewService>();
+            }
+            catch (Exception ex)
+            {
+                initializationError = ex;
+            }
         }
 
-        private void LoadUserData()
+        private async void UserPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (initializationError != null)
+            {
+                var dialog = new ContentDialog
+                {
+                    Title = "Error",
+                    Content = $"Failed to initialize UserPage: {initializationError.Message}",
+                    CloseButtonText = "OK",
+                    XamlRoot = this.Content.XamlRoot
+                };
+                await dialog.ShowAsync();
+            }
+            else
+            {
+                LoadUserData();
+                LoadUserReviews();
+            }
+        }
+
+        private async void LoadUserData()
         {
             // Retrieve the current user's ID from the static property.
             Guid currentUserId = App.CurrentUserId;
@@ -50,8 +83,7 @@ namespace DrinkDb_Auth
             if (currentUserId != Guid.Empty)
             {
                 // Retrieve the user from the database using your UserService.
-                var userService = new UserService(null, null); // REPLACE NULL HERE
-                currentUser = userService.GetUserById(currentUserId).Result;
+                currentUser = await userService.GetUserById(currentUserId);
 
                 // Update UI with the retrieved data.
                 if (currentUser != null)
@@ -75,21 +107,12 @@ namespace DrinkDb_Auth
                 StatusTextBlock.Text = string.Empty;
             }
 
-            RoleType userRole = this.currentUser.AssignedRole;
+            RoleType userRole = this.currentUser?.AssignedRole ?? RoleType.User;
 
-            bool isAdmin = false;
+            bool isAdmin = userRole == RoleType.Admin;
+            bool isManager = userRole == RoleType.Manager;
 
-            if (userRole == RoleType.Admin)
-            {
-                isAdmin = true;
-            }
-            bool isManager = false;
-
-            if (userRole == RoleType.Manager)
-            {
-                isManager = true;
-            }
-            if (!isAdmin&&!isManager)
+            if (!isAdmin && !isManager)
             {
                 this.AdminDashboardButton.Visibility = Visibility.Collapsed;
             }
@@ -97,7 +120,7 @@ namespace DrinkDb_Auth
 
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
-            AuthenticationService.Logout();
+            authenticationService.Logout();
             App.MainWindow.Close();
         }
 
@@ -109,19 +132,19 @@ namespace DrinkDb_Auth
             }
         }
 
-        private void LoadUserReviews()
+        private async void LoadUserReviews()
         {
-            // Get the review service from DI
-            var reviewService = (IReviewService)App.Host.Services.GetService(typeof(IReviewService));
             Guid currentUserId = App.CurrentUserId;
-            if (currentUserId == Guid.Empty || reviewService == null)
+            if (currentUserId == Guid.Empty)
             {
                 return;
             }
-            var userReviews = reviewService.GetReviewsByUser(currentUserId).Result
+
+            var userReviews = (await reviewService.GetReviewsByUser(currentUserId))
                 .Where(r => !r.IsHidden)
                 .OrderByDescending(r => r.CreatedDate)
                 .ToList();
+
             ReviewsItemsControl.Items.Clear();
             foreach (var review in userReviews)
             {

@@ -7,7 +7,7 @@ using DataAccess.Service.AdminDashboard.Interfaces;
 using System;
 using System.Text;
 
-namespace DrinkDb.ServiceProxy
+namespace DrinkDb_Auth.ServiceProxy
 {
     public class UpgradeRequestsServiceProxy : IUpgradeRequestsService
     {

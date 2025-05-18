@@ -27,6 +27,11 @@ namespace DataAccess.AuthProviders.Github
 
         public AuthenticationResponse Authenticate(string? userId, string token)
         {
+            return AuthenticateAsync(userId, token).Result;
+        }
+
+        private async Task<AuthenticationResponse> AuthenticateAsync(string? userId, string token)
+        {
             try
             {
                 var (gitHubId, gitHubLogin, email) = FetchGitHubUserInfo(token);
@@ -43,7 +48,7 @@ namespace DataAccess.AuthProviders.Github
                 }
 
                 // Check if a user exists by using the GitHub username.
-                if (UserExists(gitHubLogin))
+                if (await UserExists(gitHubLogin))
                 {
                     // User exists, so proceed.
                     User user = userRepository.GetUserByUsername(gitHubLogin).Result ?? throw new Exception("User not found");
@@ -146,11 +151,11 @@ namespace DataAccess.AuthProviders.Github
             }
         }
 
-        private bool UserExists(string gitHubLogin)
+        private async Task<bool> UserExists(string gitHubLogin)
         {
             try
             {
-                User? user = userRepository.GetUserByUsername(gitHubLogin).Result;
+                User? user = await userRepository.GetUserByUsername(gitHubLogin);
                 if (user != null)
                 {
                     return true;
