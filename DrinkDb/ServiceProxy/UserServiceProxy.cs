@@ -1,5 +1,6 @@
 using DataAccess.Model.AdminDashboard;
 using DataAccess.Model.Authentication;
+using DataAccess.Service.AdminDashboard.Interfaces;
 using IRepository;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace DrinkDb_Auth.ServiceProxy
 {
-    public class UserServiceProxy : IUserRepository
+    public class UserServiceProxy : IUserService
     {
         private const string ApiRoute = "api/users";
         private readonly HttpClient httpClient;
@@ -105,6 +106,85 @@ namespace DrinkDb_Auth.ServiceProxy
             HttpResponseMessage response = await this.httpClient.GetAsync($"{ApiRoute}/validateAction?userID={userId}&resource={resource}&action={action}");
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<bool>();
+        }
+
+        public async Task<User> GetCurrentUser()
+        {
+            HttpResponseMessage response = await this.httpClient.GetAsync($"{ApiRoute}/current");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<User>(jsonOptions);
+        }
+
+        public async Task<List<User>> GetActiveUsersByRoleType(RoleType roleType)
+        {
+            HttpResponseMessage response = await this.httpClient.GetAsync($"{ApiRoute}/active/byRole/{roleType}");
+            response.EnsureSuccessStatusCode();
+            List<User> users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
+            return users ?? new List<User>();
+        }
+
+        public async Task<List<User>> GetBannedUsers()
+        {
+            HttpResponseMessage response = await this.httpClient.GetAsync($"{ApiRoute}/banned");
+            response.EnsureSuccessStatusCode();
+            List<User> users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
+            return users ?? new List<User>();
+        }
+
+        public async Task<List<User>> GetAdminUsers()
+        {
+            HttpResponseMessage response = await this.httpClient.GetAsync($"{ApiRoute}/admins");
+            response.EnsureSuccessStatusCode();
+            List<User> users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
+            return users ?? new List<User>();
+        }
+
+        public async Task<List<User>> GetManagers()
+        {
+            HttpResponseMessage response = await this.httpClient.GetAsync($"{ApiRoute}/managers");
+            response.EnsureSuccessStatusCode();
+            List<User> users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
+            return users ?? new List<User>();
+        }
+
+        public async Task<List<User>> GetRegularUsers()
+        {
+            HttpResponseMessage response = await this.httpClient.GetAsync($"{ApiRoute}/regular");
+            response.EnsureSuccessStatusCode();
+            List<User> users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
+            return users ?? new List<User>();
+        }
+
+        public async Task<RoleType> GetHighestRoleTypeForUser(Guid id)
+        {
+            HttpResponseMessage response = await this.httpClient.GetAsync($"{ApiRoute}/byId/{id}/highestRole");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<RoleType>(jsonOptions);
+        }
+
+        public async Task UpdateUserRole(Guid userId, RoleType roleType)
+        {
+            HttpResponseMessage response = await this.httpClient.PatchAsJsonAsync($"{ApiRoute}/byId/{userId}/role", roleType);
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task<string> GetUserFullNameById(Guid userId)
+        {
+            HttpResponseMessage response = await this.httpClient.GetAsync($"{ApiRoute}/byId/{userId}/fullName");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<string>(jsonOptions);
+        }
+
+        public void LogoutUser()
+        {
+            // This is typically handled by the client-side session management
+            // No need to make an API call for logout
+        }
+
+        public void UpdateUserAppleaed(User user, bool newValue)
+        {
+            var response = this.httpClient.PatchAsJsonAsync($"{ApiRoute}/byId/{user.UserId}/appealed", newValue).GetAwaiter().GetResult();
+            response.EnsureSuccessStatusCode();
         }
     }
 } 

@@ -10,12 +10,13 @@ using DataAccess.Service.AdminDashboard.Interfaces;
 using DataAccess.Service.Authentication;
 using Repository.AdminDashboard;
 using DataAccess.Service.Authentication.Interfaces;
+using ServerAPI.Data;
 
 namespace DataAccess.Service
 {
-    public class UserService : IUserService
+    public class UserService : AdminDashboard.Interfaces.IUserService
     {
-        private readonly IUserRepository userRepository;
+        private readonly IRepository.IUserService userRepository;
         private readonly IAuthenticationService authenticationService;
         public static Guid currentSessionId { set; private get; }
 
@@ -23,8 +24,8 @@ namespace DataAccess.Service
         private const string NoUserLoggedInMessage = "No user is currently logged in.";
         private const string NullResourceError = "Resource cannot be null or empty.";
         private const string NullActionError = "Action cannot be null or empty.";
-
-        public UserService(IUserRepository userRepository, IAuthenticationService authService)
+        private readonly DatabaseContext _context;
+        public UserService(IRepository.IUserService userRepository, IAuthenticationService authService)
         {
             this.userRepository = userRepository;
             this.authenticationService = authService;
@@ -37,7 +38,7 @@ namespace DataAccess.Service
         //}
 
         //// Constructor for dependency injection and testing
-        //public UserService(IUserRepository repository, AuthenticationService authService)
+        //public UserService(IUserService repository, AuthenticationService authService)
         //{
         //    userRepository = repository;
         //    authenticationService = authService;
@@ -172,7 +173,7 @@ namespace DataAccess.Service
                 User user = await userRepository.GetUserById(userId);
                 if (user == null)
                 {
-                    throw new UserServiceException($"Failed to retrieve the full name of the user with ID {userId}.", 
+                    throw new UserServiceException($"Failed to retrieve the full name of the user with ID {userId}.",
                         new ArgumentNullException(nameof(user)));
                 }
 
@@ -272,9 +273,62 @@ namespace DataAccess.Service
             userRepository.UpdateUser(user);
         }
 
+
+
+
+
         public Task<bool> ValidateAction(Guid userId, string resource, string action)
         {
             throw new NotImplementedException();
         }
+
+        public async Task ChangeRoleToUser(Guid userId, Role role)
+        {
+            try
+            {
+                await userRepository.ChangeRoleToUser(userId, role);
+            }
+            catch (Exception ex)
+            {
+                throw new UserServiceException($"Failed to change role for user with ID {userId}.", ex);
+            }
+        }
+        public async Task<bool> CreateUser(User user)
+        {
+            try
+            {
+                return await userRepository.CreateUser(user);
+            }
+            catch (Exception ex)
+            {
+                throw new UserServiceException("Failed to create user.", ex);
+            }
+        }
+        public async Task<bool> UpdateUser(User user)
+        {
+            if (user == null)
+                throw new ArgumentNullException(nameof(user));
+
+            try
+            {
+                return await userRepository.UpdateUser(user);
+            }
+            catch (Exception ex)
+            {
+                throw new UserServiceException($"Failed to update user with ID {user.UserId}.", ex);
+            }
+        }
+        public async Task<List<User>> GetUsersWhoHaveSubmittedAppeals()
+        {
+            try
+            {
+                return await userRepository.GetUsersWhoHaveSubmittedAppeals();
+            }
+            catch (Exception ex)
+            {
+                throw new UserServiceException("Failed to retrieve users who have submitted appeals.", ex);
+            }
+        }
+
     }
 }

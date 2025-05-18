@@ -43,5 +43,9 @@ namespace DataAccess.Service.AdminDashboard.Interfaces
 
         void LogoutUser();
         void UpdateUserAppleaed(User user, bool newValue);
+        Task ChangeRoleToUser(Guid userId, Role roleToAdd);
+        Task<bool> UpdateUser(User user);
+        Task<bool> CreateUser(User user);
+        Task<List<User>> GetUsersWhoHaveSubmittedAppeals();
     }
 }

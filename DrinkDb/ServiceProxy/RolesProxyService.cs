@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using DataAccess.Service.AdminDashboard.Interfaces;
 
 namespace DrinkDb_Auth.ServiceProxy
 {
-    public class RolesProxyService : IRolesRepository
+    public class RolesProxyService : IRolesService
     {
         private const string ApiRoute = "api/roles";
         private readonly HttpClient httpClient;
@@ -19,7 +20,7 @@ namespace DrinkDb_Auth.ServiceProxy
             this.httpClient.BaseAddress = new Uri(baseApiUrl);
         }
 
-        public async Task<List<Role>> GetAllRoles()
+        public async Task<List<Role>> GetAllRolesAsync()
         {
             HttpResponseMessage response = await this.httpClient.GetAsync(ApiRoute);
             response.EnsureSuccessStatusCode();
@@ -27,7 +28,7 @@ namespace DrinkDb_Auth.ServiceProxy
             return roles;
         }
 
-        public async Task<Role> GetNextRoleInHierarchy(RoleType currentRoleType)
+        public async Task<Role> GetNextRoleInHierarchyAsync(RoleType currentRoleType)
         {
             HttpResponseMessage response = await this.httpClient.GetAsync(ApiRoute);
             response.EnsureSuccessStatusCode();
