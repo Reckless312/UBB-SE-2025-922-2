@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using DataAccess.Model.AdminDashboard;
-using IRepository;
+using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
 
 namespace ServerAPI.Controllers
 {
@@ -8,89 +8,101 @@ namespace ServerAPI.Controllers
     [Route("api/reviews")]
     public class ReviewsController : ControllerBase
     {
-        private IReviewsRepository repository;
+        private readonly IReviewService reviewService;
 
-        public ReviewsController(IReviewsRepository repository)
+        public ReviewsController(IReviewService reviewService)
         {
-            this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            this.reviewService = reviewService ?? throw new ArgumentNullException(nameof(reviewService));
         }
 
         [HttpGet("")]
         public async Task<IEnumerable<Review>> GetAll()
         {
-            return repository.GetAllReviews().Result;
+            return await reviewService.GetAllReviews();
         }
 
         [HttpGet("since")]
         public async Task<IEnumerable<Review>> GetReviewsSince([FromQuery] DateTime date)
         {
-            return await repository.GetReviewsSince(date);
+            return await reviewService.GetReviewsSince(date);
         }
         
         [HttpGet("averageRatingVisibleReviews")]
         public async Task<double> GetAverageRatingForVisibleReviews()
         {
-            return await repository.GetAverageRatingForVisibleReviews();
+            return await reviewService.GetAverageRatingForVisibleReviews();
         }
         
         [HttpGet("mostRecent")]
         public async Task<IEnumerable<Review>> GetMostRecentReviews([FromQuery] int count)
         {
-            return await repository.GetMostRecentReviews(count);
+            return await reviewService.GetMostRecentReviews(count);
         }
         
         [HttpGet("countAfterDate")]
-        public async Task<double> GetReviewCountAfterDate([FromQuery] DateTime date)
+        public async Task<int> GetReviewCountAfterDate([FromQuery] DateTime date)
         {
-            return await repository.GetReviewCountAfterDate(date);
+            return await reviewService.GetReviewCountAfterDate(date);
         }
 
         [HttpGet("flagged")]
-        public IEnumerable<Review> GetFlaggedReviews([FromQuery] int minFlags)
+        public async Task<IEnumerable<Review>> GetFlaggedReviews([FromQuery] int minFlags)
         {
-            return  repository.GetFlaggedReviews(minFlags).Result;
+            return await reviewService.GetFlaggedReviews(minFlags);
         }
 
         [HttpGet("byUser")]
         public async Task<IEnumerable<Review>> GetReviewsByUser([FromQuery] Guid userId)
         {
-            return await repository.GetReviewsByUser(userId);
+            return await reviewService.GetReviewsByUser(userId);
         }
         
         [HttpGet("{id}")]
         public async Task<Review> GetReviewById(int id)
         {
-            return  repository.GetReviewById(id).Result;
+            return await reviewService.GetReviewById(id);
         }
 
         [HttpPatch("{id}/updateFlags")]
         public async Task UpdateNumberOfFlagsForReview(int id, [FromBody] int numberOfFlags)
         {
-             repository.UpdateNumberOfFlagsForReview(id, numberOfFlags);
+            await reviewService.UpdateNumberOfFlagsForReview(id, numberOfFlags);
         }
 
         [HttpPatch("{id}/updateVisibility")]
         public async Task UpdateReviewVisibility(int id, [FromBody] bool isHidden)
         {
-            repository.UpdateReviewVisibility(id, isHidden);
+            await reviewService.UpdateReviewVisibility(id, isHidden);
         }
 
         [HttpPost("add")]
         public async Task<int> AddReview([FromBody] Review review)
         {
-            return await repository.AddReview(review);
+            return await reviewService.AddReview(review);
         }
 
         [HttpDelete("{id}/delete")]
         public async Task RemoveReviewById(int id)
         {
-            repository.RemoveReviewById(id);
+            await reviewService.RemoveReviewById(id);
         }
 
         [HttpGet("hidden")]
         public async Task<IEnumerable<Review>> GetHiddenReviews()
         {
-            return await repository.GetHiddenReviews();
+            return await reviewService.GetHiddenReviews();
+        }
+
+        [HttpGet("report")]
+        public async Task<IEnumerable<Review>> GetReviewsForReport()
+        {
+            return await reviewService.GetReviewsForReport();
+        }
+
+        [HttpGet("filter")]
+        public async Task<IEnumerable<Review>> FilterReviewsByContent([FromQuery] string content)
+        {
+            return await reviewService.FilterReviewsByContent(content);
         }
     }
 }

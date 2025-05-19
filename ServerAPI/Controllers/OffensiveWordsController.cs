@@ -1,10 +1,7 @@
 ﻿using DataAccess.Model.AdminDashboard;
 using DataAccess.Model.AutoChecker;
-using IRepository;
+using DataAccess.Service.AdminDashboard.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Repository.AdminDashboard;
-using ServerAPI.Data;
-using ServerAPI.Repository.AutoChecker;
 
 namespace ServerAPI.Controllers
 {
@@ -12,17 +9,17 @@ namespace ServerAPI.Controllers
     [Route("api/offensiveWords")]
     public class OffensiveWordsController: ControllerBase
     {
-        private IOffensiveWordsRepository repository;
+        private readonly ICheckersService checkersService;
 
-        public OffensiveWordsController(IOffensiveWordsRepository repository)
+        public OffensiveWordsController(ICheckersService checkersService)
         {
-            this.repository = repository;
+            this.checkersService = checkersService ?? throw new ArgumentNullException(nameof(checkersService));
         }
 
         [HttpGet]
         public List<OffensiveWord> GetAllWords()
         {
-            HashSet<string> words = repository.LoadOffensiveWords().Result;
+            HashSet<string> words = checkersService.GetOffensiveWordsList();
             List<OffensiveWord> wordsList = new List<OffensiveWord>();
             foreach (string word in words)
             {
@@ -30,15 +27,29 @@ namespace ServerAPI.Controllers
             }
             return wordsList;
         }
+
         [HttpPost("add")]
         public void AddOffensiveWord(OffensiveWord word)
         {
-            repository.AddWord(word.Word);
+            checkersService.AddOffensiveWord(word.Word);
         }
+
         [HttpDelete("delete/{word}")]
         public void DeleteWord(string word)
         {
-            repository.DeleteWord(word);
+            checkersService.DeleteOffensiveWord(word);
+        }
+
+        [HttpPost("check")]
+        public List<string> CheckReviews([FromBody] List<Review> reviews)
+        {
+            return checkersService.RunAutoCheck(reviews);
+        }
+
+        [HttpPost("checkOne")]
+        public void CheckOneReview([FromBody] Review review)
+        {
+            checkersService.RunAICheckForOneReview(review);
         }
     }
 }
