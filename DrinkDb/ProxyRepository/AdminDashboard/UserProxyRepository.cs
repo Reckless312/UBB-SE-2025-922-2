@@ -84,23 +84,20 @@
 
         public async Task<User?> GetUserByUsername(string username)
         {
-            List<User> users = GetAllUsers().Result;
-            foreach (User user in users)
+            try
             {
-                if (user.Username == username)
-                    return user;
-            }
-            return null;
+                var response = await this.httpClient.GetAsync($"{ApiRoute}/byUserName/{username}"); // this is where the app freezes
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    return null;
 
-            //var response = this.httpClient.GetAsync($"{ApiRoute}/byUserName/{username}").Result;
-            //response.EnsureSuccessStatusCode();
-            //try
-            //{
-            //    return await response.Content.ReadFromJsonAsync<User>(jsonOptions);
-            //}
-            //catch (Exception) {
-            //    return null;
-            //}
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadFromJsonAsync<User>(jsonOptions);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"UserProxyRepository: Error getting user by username: {ex}");
+                return null;
+            }
         }
 
         public async Task<List<User>> GetUsersByRoleType(RoleType roleType)

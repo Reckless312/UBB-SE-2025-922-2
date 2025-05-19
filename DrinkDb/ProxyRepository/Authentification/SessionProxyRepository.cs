@@ -16,7 +16,6 @@
         {
             this.httpClient = new HttpClient();
             httpClient.BaseAddress = new Uri("http://localhost:5280/");
-
         }
 
         public SessionProxyRepository(string baseApiUrl)
@@ -26,9 +25,10 @@
                 BaseAddress = new Uri(baseApiUrl)
             };
         }
+
         public async Task<Session> CreateSession(Guid userId)
         {
-            var response = this.httpClient.PostAsync($"{ApiBaseRoute}/add?userId={userId}", null).Result;
+            var response = await this.httpClient.PostAsync($"{ApiBaseRoute}/add?userId={userId}", null);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<Session>();
         }
@@ -41,9 +41,9 @@
 
         public async Task<Session> GetSession(Guid sessionId)
         {
-            var response = this.httpClient.GetAsync($"{ApiBaseRoute}/{sessionId}").Result;
+            var response = await this.httpClient.GetAsync($"{ApiBaseRoute}/{sessionId}");
             response.EnsureSuccessStatusCode();
-            return response.Content.ReadFromJsonAsync<Session>().Result;
+            return await response.Content.ReadFromJsonAsync<Session>();
         }
 
         public async Task<Session> GetSessionByUserId(Guid userId)

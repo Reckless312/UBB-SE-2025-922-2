@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using DataAccess.Model.AutoChecker;
 using IRepository;
 
-namespace DrinkDb.ProxyRepository.ServerProxy
+namespace DrinkDb_Auth.ServerProxy
 {
     public class OffensiveWordsServiceProxy : IOffensiveWordsRepository
     {

@@ -186,5 +186,6 @@ namespace DrinkDb_Auth.ServiceProxy
             var response = this.httpClient.PatchAsJsonAsync($"{ApiRoute}/byId/{user.UserId}/appealed", newValue).GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();
         }
+       
     }
 } 

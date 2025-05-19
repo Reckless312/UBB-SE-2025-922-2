@@ -8,7 +8,7 @@ using System.Linq;
 using System.Net.Http.Json;
 using DataAccess.Model.AdminDashboard;
 
-namespace DrinkDb.ProxyRepository.ServerProxy
+namespace DrinkDb_Auth.ServiceProxy
 {
     public class ReviewsServiceProxy
     {

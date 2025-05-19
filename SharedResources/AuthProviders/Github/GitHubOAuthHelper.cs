@@ -16,18 +16,14 @@ namespace DataAccess.AuthProviders.Github
         private const string Scope = "read:user user:email";
         private GenericOAuth2Provider gitHubOAuth2Provider;
         private TaskCompletionSource<AuthenticationResponse> taskCompletionSource;
+        private GitHubLocalOAuthServer localServer;
 
-        //public GitHubOAuthHelper()
-        //{
-        //    gitHubOAuth2Provider = new GitHubOAuth2Provider();
-        //    taskCompletionSource = new TaskCompletionSource<AuthenticationResponse>();
-        //    GitHubLocalOAuthServer.OnCodeReceived += OnCodeReceived;
-        //}
-
-        public GitHubOAuthHelper(GenericOAuth2Provider gitHubOAuth2Provider)
+        public GitHubOAuthHelper(GenericOAuth2Provider gitHubOAuth2Provider, GitHubLocalOAuthServer localServer)
         {
             this.gitHubOAuth2Provider = gitHubOAuth2Provider;
+            this.localServer = localServer;
             taskCompletionSource = new TaskCompletionSource<AuthenticationResponse>();
+            GitHubLocalOAuthServer.OnCodeReceived += OnCodeReceived;
         }
 
         private string BuildAuthorizeUrl()

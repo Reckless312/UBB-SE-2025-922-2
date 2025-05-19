@@ -47,5 +47,6 @@ namespace DataAccess.Service.AdminDashboard.Interfaces
         Task<bool> UpdateUser(User user);
         Task<bool> CreateUser(User user);
         Task<List<User>> GetUsersWhoHaveSubmittedAppeals();
+       
     }
 }

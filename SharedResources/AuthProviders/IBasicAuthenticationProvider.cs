@@ -1,7 +1,10 @@
-﻿namespace DataAccess.AuthProviders
+﻿using System.Threading.Tasks;
+
+namespace DataAccess.AuthProviders
 {
     public interface IBasicAuthenticationProvider
     {
-        abstract bool Authenticate(string username, string password);
+        bool Authenticate(string username, string password);
+        Task<bool> AuthenticateAsync(string username, string password);
     }
 }

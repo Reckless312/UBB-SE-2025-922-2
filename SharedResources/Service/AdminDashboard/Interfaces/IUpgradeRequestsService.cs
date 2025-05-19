@@ -1,8 +1,4 @@
-﻿// <copyright file="IUpgradeRequestsService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace DataAccess.Service.AdminDashboard.Interfaces
+﻿namespace DataAccess.Service.AdminDashboard.Interfaces
 {
     using System.Collections.Generic;
     using DataAccess.Model.AdminDashboard;

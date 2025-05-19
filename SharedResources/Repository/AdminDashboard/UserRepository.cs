@@ -146,12 +146,27 @@
 
         public virtual async Task<User?> GetUserById(Guid userId)
         {
-            return _context.Users.Where(user => user.UserId == userId).First();
+            var user = await _context.Users.Where(user => user.UserId == userId).FirstOrDefaultAsync();
+            if (user == null)
+            {
+                throw new ArgumentException($"No user found with ID {userId}");
+            }
+            return user;
         }
 
         public virtual async Task<User?> GetUserByUsername(string username)
         {
-                return _context.Users.Where(user => user.Username == username).First();
+            try
+            {
+                return await _context.Users
+                    .Where(user => user.Username == username)
+                    .FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"UserRepository: Error getting user by username: {ex}");
+                throw new RepositoryException($"Failed to get user with username {username}", ex);
+            }
         }
 
         public async Task<bool> UpdateUser(User user)

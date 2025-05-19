@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using DataAccess.Service.AdminDashboard.Interfaces;
+
+
+using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
 
 namespace DrinkDb_Auth.ServiceProxy
 {

@@ -31,45 +31,35 @@ namespace DataAccess.Service.Authentication
 
     public class AuthenticationService : IAuthenticationService
     {
-        private ISessionRepository sessionRepository;
-        private IUserRepository userRepository;
-        private ILinkedInLocalOAuthServer linkedinLocalServer;
-        private IGitHubLocalOAuthServer githubLocalServer;
-        private IFacebookLocalOAuthServer facebookLocalServer;
-        private IBasicAuthenticationProvider basicAuthenticationProvider;
+        private readonly ISessionRepository sessionRepository;
+        private readonly IUserRepository userRepository;
+        private readonly ILinkedInLocalOAuthServer linkedinLocalServer;
+        private readonly IGitHubLocalOAuthServer githubLocalServer;
+        private readonly IFacebookLocalOAuthServer facebookLocalServer;
+        private readonly IBasicAuthenticationProvider basicAuthenticationProvider;
         private static Guid currentSessionId = Guid.Empty;
         private static Guid currentUserId = Guid.Empty;
 
-        public AuthenticationService(DatabaseContext context)
+        public AuthenticationService(
+            ISessionRepository sessionRepository,
+            IUserRepository userRepository,
+            ILinkedInLocalOAuthServer linkedinLocalServer,
+            IGitHubLocalOAuthServer githubLocalServer,
+            IFacebookLocalOAuthServer facebookLocalServer,
+            IBasicAuthenticationProvider basicAuthenticationProvider)
         {
-            githubLocalServer = new GitHubLocalOAuthServer("http://localhost:8890/");
+            System.Diagnostics.Debug.WriteLine("AuthenticationService: Constructor called with original implementation");
+            this.sessionRepository = sessionRepository;
+            this.userRepository = userRepository;
+            this.linkedinLocalServer = linkedinLocalServer;
+            this.githubLocalServer = githubLocalServer;
+            this.facebookLocalServer = facebookLocalServer;
+            this.basicAuthenticationProvider = basicAuthenticationProvider;
+
             _ = githubLocalServer.StartAsync();
-
-            facebookLocalServer = new FacebookLocalOAuthServer("http://localhost:8888/");
             _ = facebookLocalServer.StartAsync();
-
-            linkedinLocalServer = new LinkedInLocalOAuthServer("http://localhost:8891/");
             _ = linkedinLocalServer.StartAsync();
-
-            sessionRepository = new SessionRepository(context);
-
-            basicAuthenticationProvider = new BasicAuthenticationProvider(new UserRepository(context));
-
-            userRepository = new UserRepository(context);
         }
-
-        //public AuthenticationService(ILinkedInLocalOAuthServer linkedinLocalServer, IGitHubLocalOAuthServer githubLocalServer, IFacebookLocalOAuthServer facebookLocalServer, IUserRepository userRepository, ISessionRepository sessionAdapter, IBasicAuthenticationProvider basicAuthenticationProvider)
-        //{
-        //    this.linkedinLocalServer = linkedinLocalServer;
-        //    this.githubLocalServer = githubLocalServer;
-        //    this.facebookLocalServer = facebookLocalServer;
-        //    this.userRepository = userRepository;
-        //    this.sessionRepository = sessionAdapter;
-        //    this.basicAuthenticationProvider = basicAuthenticationProvider;
-        //    _ = githubLocalServer.StartAsync();
-        //    _ = facebookLocalServer.StartAsync();
-        //    _ = linkedinLocalServer.StartAsync();
-        //}
 
         public async Task<AuthenticationResponse> AuthWithOAuth(OAuthService selectedService, object authProvider)
         {
@@ -86,7 +76,7 @@ namespace DataAccess.Service.Authentication
             if (authResponse.AuthenticationSuccessful)
             {
                 currentSessionId = authResponse.SessionId;
-                Session session = sessionRepository.GetSession(currentSessionId).Result;
+                Session session = await sessionRepository.GetSession(currentSessionId);
                 currentUserId = session.UserId;
             }
 
@@ -102,8 +92,8 @@ namespace DataAccess.Service.Authentication
 
         public virtual async Task<User> GetUser(Guid sessionId)
         {
-            Session session = sessionRepository.GetSession(sessionId).Result;
-            User user = userRepository.GetUserById(session.UserId).Result;
+            Session session = await sessionRepository.GetSession(sessionId);
+            User user = await userRepository.GetUserById(session.UserId);
             return user ?? throw new UserNotFoundException("User not found");
         }
 
@@ -111,10 +101,14 @@ namespace DataAccess.Service.Authentication
         {
             try
             {
-                if (basicAuthenticationProvider.Authenticate(username, password))
+                System.Diagnostics.Debug.WriteLine($"AuthenticationService: Attempting to authenticate user {username}");
+                if (await basicAuthenticationProvider.AuthenticateAsync(username, password))
                 {
+                    System.Diagnostics.Debug.WriteLine("AuthenticationService: Basic authentication successful");
                     User user = await userRepository.GetUserByUsername(username) ?? throw new UserNotFoundException("User not found");
-                    Session session = sessionRepository.CreateSession(user.UserId).Result;
+                    System.Diagnostics.Debug.WriteLine($"AuthenticationService: Found user {user.UserId}");
+                    Session session = await sessionRepository.CreateSession(user.UserId);
+                    System.Diagnostics.Debug.WriteLine($"AuthenticationService: Created session {session.SessionId}");
                     return new AuthenticationResponse
                     {
                         AuthenticationSuccessful = true,
@@ -125,6 +119,7 @@ namespace DataAccess.Service.Authentication
                 }
                 else
                 {
+                    System.Diagnostics.Debug.WriteLine("AuthenticationService: Basic authentication failed");
                     return new AuthenticationResponse
                     {
                         AuthenticationSuccessful = false,
@@ -136,6 +131,7 @@ namespace DataAccess.Service.Authentication
             }
             catch (UserNotFoundException)
             {
+                System.Diagnostics.Debug.WriteLine("AuthenticationService: User not found, creating new account");
                 // create user
                 User user = new()
                 {
@@ -144,13 +140,15 @@ namespace DataAccess.Service.Authentication
                     UserId = Guid.NewGuid(),
                     TwoFASecret = string.Empty,
                     FullName = username,
-
+                    AssignedRole = RoleType.User,
+                    NumberOfDeletedReviews = 0,
+                    EmailAddress = "ionutcora66@gmail.com"
                 };
-                user.AssignedRole = RoleType.User;
-                user.NumberOfDeletedReviews = 0;
-                user.EmailAddress = "ionutcora66@gmail.com";
+
                 await userRepository.CreateUser(user);
-                Session session = sessionRepository.CreateSession(user.UserId).Result;
+                System.Diagnostics.Debug.WriteLine($"AuthenticationService: Created new user {user.UserId}");
+                Session session = await sessionRepository.CreateSession(user.UserId);
+                System.Diagnostics.Debug.WriteLine($"AuthenticationService: Created session {session.SessionId} for new user");
                 return new AuthenticationResponse
                 {
                     AuthenticationSuccessful = true,
@@ -159,7 +157,17 @@ namespace DataAccess.Service.Authentication
                     SessionId = session.SessionId,
                 };
             }
-            throw new Exception("Unexpected error during authentication");
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"AuthenticationService: Unexpected error: {ex}");
+                return new AuthenticationResponse
+                {
+                    AuthenticationSuccessful = false,
+                    NewAccount = false,
+                    OAuthToken = string.Empty,
+                    SessionId = Guid.Empty,
+                };
+            }
         }
 
         private static async Task<AuthenticationResponse> AuthenticateWithGitHubAsync(IGitHubOAuthHelper gitHubHelper)

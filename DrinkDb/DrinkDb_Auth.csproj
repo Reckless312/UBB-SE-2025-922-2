@@ -94,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Database\" />
+    <Folder Include="Service Proxy\" />
     <Folder Include="View\AdminDashboard\" />
   </ItemGroup>
 	<ItemGroup>

@@ -14,9 +14,9 @@ using ServerAPI.Data;
 
 namespace DataAccess.Service
 {
-    public class UserService : AdminDashboard.Interfaces.IUserService
+    public class UserService : IUserService
     {
-        private readonly IRepository.IUserService userRepository;
+        private readonly IUserRepository userRepository;
         private readonly IAuthenticationService authenticationService;
         public static Guid currentSessionId { set; private get; }
 
@@ -24,8 +24,8 @@ namespace DataAccess.Service
         private const string NoUserLoggedInMessage = "No user is currently logged in.";
         private const string NullResourceError = "Resource cannot be null or empty.";
         private const string NullActionError = "Action cannot be null or empty.";
-        private readonly DatabaseContext _context;
-        public UserService(IRepository.IUserService userRepository, IAuthenticationService authService)
+        
+        public UserService(IUserRepository userRepository, IAuthenticationService authService)
         {
             this.userRepository = userRepository;
             this.authenticationService = authService;
@@ -329,6 +329,8 @@ namespace DataAccess.Service
                 throw new UserServiceException("Failed to retrieve users who have submitted appeals.", ex);
             }
         }
+
+        
 
     }
 }

@@ -55,7 +55,7 @@ namespace ServerAPI.Controllers
         [HttpPatch("byId/{userId}/addRole")]
         public void AddRoleToUser(Guid userId, Role role)
         {
-            service.ChangeRole(userId, role);
+            service.ChangeRoleToUser(userId, role);
 
         }
 
