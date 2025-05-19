@@ -128,7 +128,8 @@ namespace DrinkDb_Auth
         {
             if (this.Frame != null)
             {
-                this.Frame.Navigate(typeof(MainPage));
+                var mainPage = App.Host.Services.GetRequiredService<MainPage>();
+                this.Frame.Navigate(typeof(MainPage), mainPage);
             }
         }
 

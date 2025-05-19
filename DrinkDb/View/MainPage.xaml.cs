@@ -17,6 +17,7 @@ namespace DrinkDb_Auth.View
     using Microsoft.Extensions.DependencyInjection;
     using DataAccess.Service.AdminDashboard.Interfaces;
     using DataAccess.AutoChecker;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// a page.
@@ -36,15 +37,14 @@ namespace DrinkDb_Auth.View
         /// <param name="upgradeRequestsService">given update request service.</param>
         /// <param name="checkersService">given checker service.</param>
         /// <param name="autoCheck">given auto check.</param>
-        public MainPage()
+        public MainPage(
+            IReviewService reviewsService,
+            IUserService userService,
+            IUpgradeRequestsService upgradeRequestsService,
+            ICheckersService checkersService,
+            IAutoCheck autoCheck)
         {
             this.InitializeComponent();
-
-            IReviewService reviewsService = App.Host.Services.GetRequiredService<IReviewService>();
-            IUserService userService = App.Host.Services.GetRequiredService<IUserService>();
-            IUpgradeRequestsService upgradeRequestsService = App.Host.Services.GetRequiredService<IUpgradeRequestsService>();
-            ICheckersService checkersService = App.Host.Services.GetRequiredService<ICheckersService>();
-            IAutoCheck autoCheck = App.Host.Services.GetRequiredService<IAutoCheck>();
 
             ViewModel = new MainPageViewModel(
                 reviewsService,
@@ -58,6 +58,29 @@ namespace DrinkDb_Auth.View
             DataContext = ViewModel;
 
             Unloaded += MainPage_Unloaded;
+            
+            // Load data asynchronously
+            _ = LoadDataAsync();
+        }
+
+        private async Task LoadDataAsync()
+        {
+            try
+            {
+                await ViewModel.LoadAllData();
+            }
+            catch (Exception ex)
+            {
+                // Show error to user
+                var dialog = new ContentDialog
+                {
+                    Title = "Error Loading Data",
+                    Content = "There was an error loading the admin dashboard data. Please try again.",
+                    CloseButtonText = "OK",
+                    XamlRoot = this.XamlRoot
+                };
+                await dialog.ShowAsync();
+            }
         }
 
         private void MainPage_Unloaded(object sender, RoutedEventArgs e)
@@ -213,14 +236,14 @@ namespace DrinkDb_Auth.View
             }
         }
 
-        private void ReviewSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private async void ReviewSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            ViewModel.FilterReviews(this.ReviewSearchTextBox.Text);
+            await ViewModel.FilterReviews(this.ReviewSearchTextBox.Text);
         }
 
-        private void BannedUserSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private async void BannedUserSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            ViewModel.FilterAppeals(this.BannedUserSearchTextBox.Text);
+            await ViewModel.FilterAppeals(this.BannedUserSearchTextBox.Text);
         }
 
         private void MenuFlyoutAllowReview_Click(object sender, RoutedEventArgs e)

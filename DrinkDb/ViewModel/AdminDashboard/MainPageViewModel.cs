@@ -14,6 +14,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
     using DrinkDb_Auth.Service;
     using DataAccess.Service.AdminDashboard.Interfaces;
     using DataAccess.AutoChecker;
+    using System.Threading.Tasks;
 
     public class MainPageViewModel : INotifyPropertyChanged
     {
@@ -211,56 +212,62 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             }
         }
 
-        public void LoadAllData()
+        public async Task LoadAllData()
         {
-            this.LoadFlaggedReviews();
-            this.LoadAppeals();
-            this.LoadRoleRequests();
-            this.LoadOffensiveWords();
+            await Task.WhenAll(
+                LoadFlaggedReviews(),
+                LoadAppeals(),
+                LoadRoleRequests(),
+                LoadOffensiveWords()
+            );
         }
 
-        public void LoadFlaggedReviews()
+        public async Task LoadFlaggedReviews()
         {
-            this.FlaggedReviews = new ObservableCollection<Review>(this.reviewsService.GetFlaggedReviews().Result);
+            var reviews = await this.reviewsService.GetFlaggedReviews();
+            this.FlaggedReviews = new ObservableCollection<Review>(reviews);
         }
 
-        public void LoadAppeals()
+        public async Task LoadAppeals()
         {
-            this.AppealsUsers = new ObservableCollection<User>(this.userService.GetBannedUsersWhoHaveSubmittedAppeals().Result);
+            var appeals = await this.userService.GetBannedUsersWhoHaveSubmittedAppeals();
+            this.AppealsUsers = new ObservableCollection<User>(appeals);
         }
 
-        public void LoadRoleRequests()
+        public async Task LoadRoleRequests()
         {
-            this.UpgradeRequests = new ObservableCollection<UpgradeRequest>(this.requestsService.RetrieveAllUpgradeRequests());
+            var requests = await Task.Run(() => this.requestsService.RetrieveAllUpgradeRequests());
+            this.UpgradeRequests = new ObservableCollection<UpgradeRequest>(requests);
         }
 
-        public void LoadOffensiveWords()
+        public async Task LoadOffensiveWords()
         {
-            this.OffensiveWords = new ObservableCollection<string>(this.checkersService.GetOffensiveWordsList());
+            var words = await Task.Run(() => this.checkersService.GetOffensiveWordsList());
+            this.OffensiveWords = new ObservableCollection<string>(words);
         }
 
-        public void FilterReviews(string filter)
+        public async Task FilterReviews(string filter)
         {
-            this.FlaggedReviews = new ObservableCollection<Review>(
-                this.reviewsService.FilterReviewsByContent(filter).Result);
+            var reviews = await this.reviewsService.FilterReviewsByContent(filter);
+            this.FlaggedReviews = new ObservableCollection<Review>(reviews);
         }
 
-        public void FilterAppeals(string filter)
+        public async Task FilterAppeals(string filter)
         {
             if (string.IsNullOrEmpty(filter))
             {
-                this.LoadAppeals();
+                await LoadAppeals();
                 return;
             }
 
             filter = filter.ToLower();
+            var appeals = await this.userService.GetBannedUsersWhoHaveSubmittedAppeals();
             this.AppealsUsers = new ObservableCollection<User>(
-                this.userService.GetBannedUsersWhoHaveSubmittedAppeals().Result
-                    .Where(user =>
-                        user.EmailAddress.ToLower().Contains(filter) ||
-                        user.Username.ToLower().Contains(filter) ||
-                        user.UserId.ToString().Contains(filter))
-                    .ToList());
+                appeals.Where(user =>
+                    user.EmailAddress.ToLower().Contains(filter) ||
+                    user.Username.ToLower().Contains(filter) ||
+                    user.UserId.ToString().Contains(filter))
+                .ToList());
         }
 
         public void ResetReviewFlags(int reviewId)
