@@ -13,7 +13,7 @@
             <SymbolIcon Symbol="Accept" 
                        Foreground="{ThemeResource SystemAccentColor}"
                        Height="100" Width="100"/>
-            
+
             <TextBlock Text="Successfully Logged In!"
                      FontSize="32"
                      FontWeight="Bold"

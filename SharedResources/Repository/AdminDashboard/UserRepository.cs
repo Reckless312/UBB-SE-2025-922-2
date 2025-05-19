@@ -202,9 +202,15 @@
 
         public async Task<bool> CreateUser(User user)
         {
-            _context.Users.Add(user);
-            return _context.SaveChangesAsync().Result > 0;
-            
+            try
+            {
+                _context.Users.Add(user);
+                return await _context.SaveChangesAsync() > 0;
+            }
+            catch (Exception ex)
+            {
+                throw new RepositoryException($"Failed to create user with username {user.Username}.", ex);
+            }
         }
 
         public virtual async Task<bool> ValidateAction(Guid userId, string resource, string action)

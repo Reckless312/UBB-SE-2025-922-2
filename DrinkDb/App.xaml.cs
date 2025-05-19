@@ -11,7 +11,7 @@ namespace DrinkDb_Auth
     using DataAccess.Service.AdminDashboard.Interfaces;
     using DataAccess.Service.Authentication;
     using DataAccess.Service.Authentication.Interfaces;
-  
+
     using DrinkDb_Auth.ServiceProxy;
     using DrinkDb_Auth.Converters;
     using DrinkDb_Auth.ProxyRepository.AdminDashboard;
@@ -88,7 +88,7 @@ namespace DrinkDb_Auth
                         .AddEnvironmentVariables()
                         .AddJsonFile("appSettings.json", optional: false, reloadOnChange: true)
                         .Build();
-                    
+
                     services.AddSingleton<IConfiguration>(config);
                     string apiRoute = "http://localhost:5280/";
 
@@ -99,45 +99,46 @@ namespace DrinkDb_Auth
                     });
 
                     // Register Proxy Services
-                    //services.AddSingleton<ISessionService, SessionServiceProxy>();
-                    //services.AddSingleton<IAuthenticationService>(sp => 
-                    //    new AuthenticationServiceProxy(
-                    //        sp.GetRequiredService<IHttpClientFactory>().CreateClient("DrinkDbClient")));
-                    //services.AddSingleton<IUserService, UserServiceProxy>();
+                    services.AddSingleton<ISessionService, SessionServiceProxy>();
+                    services.AddSingleton<IAuthenticationService>(sp => 
+                        new AuthenticationServiceProxy(
+                            sp.GetRequiredService<IHttpClientFactory>().CreateClient("DrinkDbClient")));
+                    services.AddSingleton<IUserService>(sp =>
+                        new UserServiceProxy("http://localhost:5280/"));
                     //services.AddSingleton<IReviewService, ReviewsServiceProxy>();
                     //services.AddSingleton<IUpgradeRequestsService, UpgradeRequestsServiceProxy>();
                     //services.AddSingleton<IRolesService, RolesProxyService>();
 
                     // Register Original Services
-                    services.AddSingleton<ISessionService, SessionService>();
-                    services.AddSingleton<IAuthenticationService>(sp => new AuthenticationService(
-                        sp.GetRequiredService<ISessionRepository>(),
-                        sp.GetRequiredService<IUserRepository>(),
-                        sp.GetRequiredService<LinkedInLocalOAuthServer>(),
-                        sp.GetRequiredService<GitHubLocalOAuthServer>(),
-                        sp.GetRequiredService<FacebookLocalOAuthServer>(),
-                        sp.GetRequiredService<IBasicAuthenticationProvider>()));
-                   services.AddSingleton<IUserService, UserService>();
+                   // services.AddSingleton<ISessionService, SessionService>();
+                    //services.AddSingleton<IAuthenticationService>(sp => new AuthenticationService(
+                    //    sp.GetRequiredService<ISessionRepository>(),
+                    //    sp.GetRequiredService<IUserRepository>(),
+                    //    sp.GetRequiredService<LinkedInLocalOAuthServer>(),
+                    //    sp.GetRequiredService<GitHubLocalOAuthServer>(),
+                    //    sp.GetRequiredService<FacebookLocalOAuthServer>(),
+                    //    sp.GetRequiredService<IBasicAuthenticationProvider>()));
+                    //services.AddSingleton<IUserService, UserService>();
                     services.AddSingleton<IReviewService, ReviewsService>();
                     services.AddSingleton<IUpgradeRequestsService, UpgradeRequestsService>();
 
                     // Register Repositories
                     services.AddSingleton<ISessionRepository, SessionProxyRepository>();
                     services.AddSingleton<IUserRepository, UserProxyRepository>();
-                    services.AddSingleton<IReviewsRepository>(sp => 
-                        new ReviewsProxyRepository("http://localhost:5280/"));                    
+                    services.AddSingleton<IReviewsRepository>(sp =>
+                        new ReviewsProxyRepository("http://localhost:5280/"));
                     services.AddSingleton<IOffensiveWordsRepository, OffensiveWordsProxyRepository>();
                     services.AddSingleton<IUpgradeRequestsRepository>(sp =>
                        new UpgradeRequestProxyRepository("http://localhost:5280/"));
-                    services.AddSingleton<IRolesRepository>(sp => 
+                    services.AddSingleton<IRolesRepository>(sp =>
                         new RolesProxyRepository("http://localhost:5280/"));
 
                     // Register OAuth Servers
-                    services.AddSingleton<LinkedInLocalOAuthServer>(sp => 
+                    services.AddSingleton<LinkedInLocalOAuthServer>(sp =>
                         new LinkedInLocalOAuthServer("http://localhost:8891/"));
-                    services.AddSingleton<GitHubLocalOAuthServer>(sp => 
+                    services.AddSingleton<GitHubLocalOAuthServer>(sp =>
                         new GitHubLocalOAuthServer("http://localhost:8890/"));
-                    services.AddSingleton<FacebookLocalOAuthServer>(sp => 
+                    services.AddSingleton<FacebookLocalOAuthServer>(sp =>
                         new FacebookLocalOAuthServer("http://localhost:8888/"));
 
                     // Register OAuth Helpers
@@ -165,7 +166,7 @@ namespace DrinkDb_Auth
                     // Register Services
                     services.AddSingleton<IAutoCheck, AutoCheck>();
                     services.AddSingleton<ICheckersService, CheckersService>();
-                    services.AddSingleton<IBasicAuthenticationProvider>(sp => 
+                    services.AddSingleton<IBasicAuthenticationProvider>(sp =>
                         new BasicAuthenticationProvider(sp.GetRequiredService<IUserRepository>()));
                     services.AddTransient<ITwoFactorAuthenticationService, TwoFactorAuthenticationService>();
 

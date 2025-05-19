@@ -48,7 +48,7 @@ namespace DrinkDb_Auth.ServiceProxy
 
         public async Task<User> GetUser(Guid sessionId)
         {
-            HttpResponseMessage response = await httpClient.GetAsync($"{ApiBaseRoute}/user/{sessionId}");
+            HttpResponseMessage response = await httpClient.GetAsync($"api/auth/user?sessionId={sessionId}");
             response.EnsureSuccessStatusCode();
             string json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<User>(json);
