@@ -39,6 +39,13 @@ DependencyInjection(builder);
 
 var app = builder.Build();
 
+// Start the GitHub OAuth server using a proper scope
+using (var scope = app.Services.CreateScope())
+{
+    var gitHubServer = scope.ServiceProvider.GetRequiredService<GitHubLocalOAuthServer>();
+    _ = gitHubServer.StartAsync(); // Start the server asynchronously
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -59,13 +66,14 @@ app.Run();
 static void DependencyInjection(WebApplicationBuilder builder)
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    // Add database context to server
-    builder.Services.AddDbContext<DatabaseContext>(options =>
+    
+    // Replace the existing DbContext registration with a factory
+    builder.Services.AddDbContextFactory<DatabaseContext>(options =>
         options.UseSqlServer(connectionString));
-
-    // Register DbContextFactory for use in singleton services
-    //builder.Services.AddPooledDbContextFactory<DatabaseContext>(options =>
-    //    options.UseSqlServer(connectionString));
+    
+    // Add a scoped DbContext that uses the factory
+    builder.Services.AddScoped<DatabaseContext>(sp => 
+        sp.GetRequiredService<IDbContextFactory<DatabaseContext>>().CreateDbContext());
 
     // Register Repositories (these are the "real" repositories that will be used by services)
     // Use scoped instead of singleton for repositories that use DbContext

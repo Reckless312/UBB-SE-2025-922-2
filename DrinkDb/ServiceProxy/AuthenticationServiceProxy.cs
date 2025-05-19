@@ -35,12 +35,12 @@ namespace DrinkDb_Auth.ServiceProxy
 
         public async Task<AuthenticationResponse> AuthWithOAuth(OAuthService selectedService, object authProvider)
         {
-            StringContent content = new StringContent(
-                JsonConvert.SerializeObject(new { Service = selectedService, Provider = authProvider }),
-                Encoding.UTF8,
-                "application/json");
+            //StringContent content = new StringContent(
+            //    JsonConvert.SerializeObject(new { Service = selectedService, Provider = authProvider }),
+            //    Encoding.UTF8,
+            //    "application/json");
 
-            HttpResponseMessage response = await httpClient.PostAsync($"{ApiBaseRoute}/oauth", content);
+            HttpResponseMessage response = await httpClient.PostAsync($"{ApiBaseRoute}/oauth?service={selectedService}", null);
             response.EnsureSuccessStatusCode();
             string json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<AuthenticationResponse>(json);
