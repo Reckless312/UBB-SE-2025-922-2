@@ -1,7 +1,4 @@
-﻿// <copyright file="IUserService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-namespace DataAccess.Service.AdminDashboard.Interfaces
+﻿namespace DataAccess.Service.AdminDashboard.Interfaces
 {
     using DataAccess.Model.AdminDashboard;
     using DataAccess.Model.Authentication;

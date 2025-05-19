@@ -103,7 +103,8 @@ namespace DrinkDb_Auth
                     //services.AddSingleton<IAuthenticationService>(sp => 
                     //    new AuthenticationServiceProxy(
                     //        sp.GetRequiredService<IHttpClientFactory>().CreateClient("DrinkDbClient")));
-                    //services.AddSingleton<IUserService, UserServiceProxy>();
+                    services.AddSingleton<IUserService>(sp => 
+                        new UserServiceProxy("http://localhost:5280/"));
                     //services.AddSingleton<IReviewService, ReviewsServiceProxy>();
                     //services.AddSingleton<IUpgradeRequestsService, UpgradeRequestsServiceProxy>();
                     //services.AddSingleton<IRolesService, RolesProxyService>();
@@ -117,7 +118,7 @@ namespace DrinkDb_Auth
                         sp.GetRequiredService<GitHubLocalOAuthServer>(),
                         sp.GetRequiredService<FacebookLocalOAuthServer>(),
                         sp.GetRequiredService<IBasicAuthenticationProvider>()));
-                   services.AddSingleton<IUserService, UserService>();
+                    //services.AddSingleton<IUserService, UserService>();
                     services.AddSingleton<IReviewService, ReviewsService>();
                     services.AddSingleton<IUpgradeRequestsService, UpgradeRequestsService>();
 
