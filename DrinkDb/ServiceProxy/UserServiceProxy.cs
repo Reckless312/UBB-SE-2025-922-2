@@ -167,12 +167,12 @@ namespace DrinkDb_Auth.ServiceProxy
         {
             try
             {
-                var url = $"{ApiRoute}/byId/{userId}/addRole";
-                
+                string url = $"{ApiRoute}/byId/{userId}/addRole";
+
                 // Create a new Role object with the desired RoleType
-                var role = new Role { RoleType = roleType };
-                
-                var response = await this.httpClient.PatchAsJsonAsync(url, role);
+                Role role = new Role { RoleType = roleType };
+
+                HttpResponseMessage response = await this.httpClient.PatchAsJsonAsync(url, role);
                 
                 if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
@@ -181,7 +181,7 @@ namespace DrinkDb_Auth.ServiceProxy
                 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var content = await response.Content.ReadAsStringAsync();
+                    string content = await response.Content.ReadAsStringAsync();
                     throw new Exception($"Failed to update role. Status: {response.StatusCode}, Content: {content}");
                 }
             }
@@ -208,7 +208,7 @@ namespace DrinkDb_Auth.ServiceProxy
         {
             try
             {
-                var response = await this.httpClient.PatchAsJsonAsync($"{ApiRoute}/byId/{user.UserId}/appealed", newValue);
+                HttpResponseMessage response = await this.httpClient.PatchAsJsonAsync($"{ApiRoute}/byId/{user.UserId}/appealed", newValue);
                 
                 if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {

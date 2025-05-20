@@ -41,7 +41,7 @@ namespace ServerAPI.Controllers
             if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
                 return BadRequest("Username and password must be provided.");
 
-            var response = await authenticationService.AuthWithUserPass(request.Username, request.Password);
+            AuthenticationResponse response = await authenticationService.AuthWithUserPass(request.Username, request.Password);
             if (!response.AuthenticationSuccessful)
                 return Unauthorized();
 
@@ -60,9 +60,9 @@ namespace ServerAPI.Controllers
             };
 
             if (helper == null)
-                return BadRequest("OAuth service not supported or helper not found.");
+                return BadRequest("OAuth rolesService not supported or helper not found.");
 
-            var response = await authenticationService.AuthWithOAuth(service, helper);
+            AuthenticationResponse response = await authenticationService.AuthWithOAuth(service, helper);
             if (!response.AuthenticationSuccessful)
                 return Unauthorized();
 
@@ -81,7 +81,7 @@ namespace ServerAPI.Controllers
         {
             try
             {
-                var user = await authenticationService.GetUser(sessionId);
+                User user = await authenticationService.GetUser(sessionId);
                 return Ok(user);
             }
             catch (UserNotFoundException)

@@ -9,35 +9,35 @@ namespace ServerAPI.Controllers
     [Route("api/sessions")]
     public class SessionController : ControllerBase
     {
-        private ISessionService service;
+        private ISessionService sessionService;
 
         public SessionController(ISessionService service)
         {
-            this.service = service ?? throw new ArgumentNullException(nameof(service));
+            this.sessionService = service ?? throw new ArgumentNullException(nameof(service));
         }
 
         [HttpPost("add")]
         public async Task<Session> CreateSession([FromQuery] Guid userId)
         {
-            return await service.CreateSessionAsync(userId);
+            return await this.sessionService.CreateSessionAsync(userId);
         }
 
         [HttpPatch("end")]
         public async Task<bool> EndSession([FromQuery] Guid sessionId)
         {
-            return await service.EndSessionAsync(sessionId);
+            return await this.sessionService.EndSessionAsync(sessionId);
         }
 
         [HttpGet("{id}")]
         public async Task<Session> GetSession(Guid id)
         { 
-            return await service.GetSessionAsync(id);
+            return await this.sessionService.GetSessionAsync(id);
         }
         
         [HttpGet("byUserId/{id}")]
         public async Task<Session> GetSessionByUserID(Guid id)
         { 
-            return await service.GetSessionByUserIdAsync(id);
+            return await this.sessionService.GetSessionByUserIdAsync(id);
         }
     }
 }

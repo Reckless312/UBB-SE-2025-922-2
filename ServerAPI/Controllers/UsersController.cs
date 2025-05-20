@@ -14,54 +14,54 @@ namespace ServerAPI.Controllers
     [Route("api/users")]
     public class UsersController : ControllerBase
     {
-        private IUserService service;
+        private IUserService userService;
 
         public UsersController(IUserService service)
         {
-            this.service = service ?? throw new ArgumentNullException(nameof(service));
+            this.userService = service ?? throw new ArgumentNullException(nameof(service));
         }
 
         [HttpGet]
         public async Task<IEnumerable<User>> GetUsers()
         {
-            return await service.GetAllUsers();
+            return await this.userService.GetAllUsers();
         }
 
         [HttpGet("appealed")]
         public async Task<IEnumerable<User>> GetUsersWhoHaveSubmittedAppeals()
         {
-            return await service.GetUsersWhoHaveSubmittedAppeals();
+            return await this.userService.GetUsersWhoHaveSubmittedAppeals();
         }
 
         [HttpGet("banned/appealed")]
         public async Task<IEnumerable<User>> GetBannedUsersWhoHaveSubmittedAppeals()
         {
-            return await service.GetBannedUsersWhoHaveSubmittedAppeals();
+            return await this.userService.GetBannedUsersWhoHaveSubmittedAppeals();
         }
 
         [HttpGet("byRole/{role}")]
         public async Task<IEnumerable<User>> GetUsersByRoleType(RoleType roleType)
         {
-            return await service.GetUsersByRoleType(roleType);
+            return await this.userService.GetUsersByRoleType(roleType);
         }
 
         [HttpGet("byId/{userId}/role")]
         public async Task<ActionResult<RoleType>> GetHighestRoleTypeForUser(Guid userId)
         {
-            var role = await service.GetHighestRoleTypeForUser(userId);
+            RoleType role = await userService.GetHighestRoleTypeForUser(userId);
             return role == null ? NotFound() : role;
         }
 
         [HttpPatch("byId/{userId}/addRole")]
         public void AddRoleToUser(Guid userId, Role role)
         {
-            service.ChangeRoleToUser(userId, role);
+            this.userService.ChangeRoleToUser(userId, role);
         }
 
         [HttpGet("byId/{userID}")]
         public async Task<ActionResult<User>> GetUserById(Guid userId)
         {
-            var user = await service.GetUserById(userId);
+            User user = await userService.GetUserById(userId);
             return user == null ? NotFound() : user;
         }
 
@@ -70,7 +70,7 @@ namespace ServerAPI.Controllers
         {
             try
             {
-                var user = await service.GetUserByUsername(username);
+                User user = await userService.GetUserByUsername(username);
                 return user == null ? NotFound() : user;
             }
             catch (Exception)
@@ -82,21 +82,21 @@ namespace ServerAPI.Controllers
         [HttpPatch("{userId}/updateUser")]
         public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] User user)
         {
-            var result = await service.UpdateUser(user);
+            bool result = await userService.UpdateUser(user);
             return result ? Ok(result) : BadRequest("Failed to update user");
         }
 
         [HttpPost("add")]
         public async Task<IActionResult> CreateUser([FromBody] User user)
         {
-            var result = await service.CreateUser(user);
+            bool result = await userService.CreateUser(user);
             return result ? Ok(result) : BadRequest("Failed to create user");
         }
 
         [HttpGet("validateAction")]
         public async Task<bool> ValidateAction([FromQuery] Guid userID, [FromQuery] string resource, [FromQuery] string action)
         {
-            return await service.ValidateAction(userID, resource, action);
+            return await userService.ValidateAction(userID, resource, action);
         }
 
         [HttpPatch("byId/{userId}/appealed")]
@@ -104,13 +104,13 @@ namespace ServerAPI.Controllers
         {
             try
             {
-                var user = await service.GetUserById(userId);
+                User user = await userService.GetUserById(userId);
                 if (user == null)
                 {
                     return NotFound();
                 }
 
-                service.UpdateUserAppleaed(user, newValue);
+                userService.UpdateUserAppleaed(user, newValue);
                 return Ok();
             }
             catch (Exception ex)
@@ -124,13 +124,13 @@ namespace ServerAPI.Controllers
         {
             try
             {
-                var user = await service.GetUserById(userId);
+                User user = await userService.GetUserById(userId);
                 if (user == null)
                 {
                     return NotFound();
                 }
 
-                await service.UpdateUserRole(userId, roleType);
+                await userService.UpdateUserRole(userId, roleType);
                 return Ok();
             }
             catch (Exception ex)

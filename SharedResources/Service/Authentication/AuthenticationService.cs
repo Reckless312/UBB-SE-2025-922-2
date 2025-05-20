@@ -63,7 +63,7 @@ namespace DataAccess.Service.Authentication
 
         public async Task<AuthenticationResponse> AuthWithOAuth(OAuthService selectedService, object authProvider)
         {
-            var authResponse = selectedService switch
+            AuthenticationResponse authResponse = selectedService switch
             {
                 //OAuthService.Google => await AuthenticateWithGoogleAsync(window, authProvider as IGoogleOAuth2Provider),
                 OAuthService.Facebook => await AuthenticateWithFacebookAsync(authProvider as IFacebookOAuthHelper),

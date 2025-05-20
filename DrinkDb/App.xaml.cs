@@ -106,8 +106,6 @@ namespace DrinkDb_Auth
                             sp.GetRequiredService<IHttpClientFactory>().CreateClient("DrinkDbClient")));
                     services.AddSingleton<IUserService>(sp =>
                         new UserServiceProxy("http://localhost:5280/"));
-                    //services.AddSingleton<IReviewService, ReviewsServiceProxy>();
-                    //services.AddSingleton<IUpgradeRequestsService, UpgradeRequestsServiceProxy>();
                     services.AddSingleton<ICheckersService>(sp =>
                     new OffensiveWordsServiceProxy(
                         sp.GetRequiredService<IHttpClientFactory>().CreateClient("DrinkDbClient"),

@@ -6,13 +6,10 @@
 
     public interface IUpgradeRequestsService
     {
-        List<UpgradeRequest> RetrieveAllUpgradeRequests();
-
-        void ProcessUpgradeRequest(bool isRequestAccepted, int upgradeRequestIdentifier);
-
-        string GetRoleNameBasedOnIdentifier(RoleType roleType);
-
-        Task RemoveUpgradeRequestByIdentifierAsync(int upgradeRequestIdentifier);
-        Task<UpgradeRequest> RetrieveUpgradeRequestByIdentifierAsync(int upgradeRequestIdentifier);
+        Task<List<UpgradeRequest>> RetrieveAllUpgradeRequests();
+        Task ProcessUpgradeRequest(bool isRequestAccepted, int upgradeRequestIdentifier);
+        Task<string> GetRoleNameBasedOnIdentifier(RoleType roleType);
+        Task RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier);
+        Task<UpgradeRequest> RetrieveUpgradeRequestByIdentifier(int upgradeRequestIdentifier);
     }
 }

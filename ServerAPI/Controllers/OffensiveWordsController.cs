@@ -22,7 +22,7 @@ namespace ServerAPI.Controllers
         [HttpGet]
         public List<OffensiveWord> GetAllWords()
         {
-            HashSet<string> words = checkersService.GetOffensiveWordsList();
+            HashSet<string> words = this.checkersService.GetOffensiveWordsList();
             List<OffensiveWord> wordsList = new List<OffensiveWord>();
             foreach (string word in words)
             {
@@ -37,12 +37,12 @@ namespace ServerAPI.Controllers
             try
             {
                 await checkersService.AddOffensiveWordAsync(word.Word);
-                return Ok();
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
+            return null;
         }
 
         [HttpDelete("delete/{word}")]
@@ -51,12 +51,12 @@ namespace ServerAPI.Controllers
             try
             {
                 await checkersService.DeleteOffensiveWordAsync(word);
-                return Ok();
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
+            return null;
         }
 
         [HttpPost("check")]
@@ -71,12 +71,12 @@ namespace ServerAPI.Controllers
             try
             {
                 await checkersService.RunAICheckForOneReviewAsync(review);
-                return Ok();
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
+            return null;
         }
     }
 }
