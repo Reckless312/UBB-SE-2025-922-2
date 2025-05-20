@@ -19,7 +19,7 @@ namespace ServerAPI.Controllers
         [HttpGet]
         public List<OffensiveWord> GetAllWords()
         {
-            HashSet<string> words = checkersService.GetOffensiveWordsList();
+            HashSet<string> words = this.checkersService.GetOffensiveWordsList();
             List<OffensiveWord> wordsList = new List<OffensiveWord>();
             foreach (string word in words)
             {
@@ -31,25 +31,25 @@ namespace ServerAPI.Controllers
         [HttpPost("add")]
         public void AddOffensiveWord(OffensiveWord word)
         {
-            checkersService.AddOffensiveWord(word.Word);
+            this.checkersService.AddOffensiveWord(word.Word);
         }
 
         [HttpDelete("delete/{word}")]
         public void DeleteWord(string word)
         {
-            checkersService.DeleteOffensiveWord(word);
+            this.checkersService.DeleteOffensiveWord(word);
         }
 
         [HttpPost("check")]
         public List<string> CheckReviews([FromBody] List<Review> reviews)
         {
-            return checkersService.RunAutoCheck(reviews);
+            return this.checkersService.RunAutoCheck(reviews);
         }
 
         [HttpPost("checkOne")]
         public void CheckOneReview([FromBody] Review review)
         {
-            checkersService.RunAICheckForOneReview(review);
+            this.checkersService.RunAICheckForOneReview(review);
         }
     }
 }

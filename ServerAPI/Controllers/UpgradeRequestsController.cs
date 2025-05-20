@@ -9,35 +9,35 @@ namespace ServerAPI.Controllers
     [Route("api/upgradeRequests")]
     public class UpgradeRequestsController : ControllerBase
     {
-        private readonly IUpgradeRequestsService _upgradeRequestsService;
+        private readonly IUpgradeRequestsService upgradeRequestsService;
 
         public UpgradeRequestsController(IUpgradeRequestsService upgradeRequestsService)
         {
-            _upgradeRequestsService = upgradeRequestsService ?? throw new ArgumentNullException(nameof(upgradeRequestsService));
+            this.upgradeRequestsService = upgradeRequestsService ?? throw new ArgumentNullException(nameof(upgradeRequestsService));
         }
 
         [HttpGet]
         public async Task<IEnumerable<UpgradeRequest>> GetAll()
         {
-            return await _upgradeRequestsService.RetrieveAllUpgradeRequests();
+            return await this.upgradeRequestsService.RetrieveAllUpgradeRequests();
         }
 
         [HttpDelete("{id}/delete")]
         public async Task Delete(int id)
         {
-            await _upgradeRequestsService.RemoveUpgradeRequestByIdentifier(id);
+            await this.upgradeRequestsService.RemoveUpgradeRequestByIdentifier(id);
         }
 
         [HttpGet("{id}")]
         public async Task<UpgradeRequest> Get(int id)
         {
-            return await _upgradeRequestsService.RetrieveUpgradeRequestByIdentifier(id);
+            return await this.upgradeRequestsService.RetrieveUpgradeRequestByIdentifier(id);
         }
 
         [HttpPost("{id}/process")]
         public async Task Process(int id, [FromBody] bool isAccepted)
         {
-            await _upgradeRequestsService.ProcessUpgradeRequest(isAccepted, id);
+            await this.upgradeRequestsService.ProcessUpgradeRequest(isAccepted, id);
         }
     }
 }

@@ -39,13 +39,13 @@ namespace DrinkDb_Auth.Service.Authentication
 
         public async Task<bool> ValidateSessionAsync(Guid sessionId)
         {
-            var session = await this.GetSessionAsync(sessionId);
+            Session session = await this.GetSessionAsync(sessionId);
             return session != null && session.IsActive();
         }
 
         public async Task<bool> AuthorizeActionAsync(Guid sessionId, string resource, string action)
         {
-            var session = await this.GetSessionAsync(sessionId);
+            Session session = await this.GetSessionAsync(sessionId);
             if (session == null || !session.IsActive())
             {
                 return false;

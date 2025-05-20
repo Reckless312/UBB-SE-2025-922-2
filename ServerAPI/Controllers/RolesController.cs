@@ -10,22 +10,22 @@ namespace ServerAPI.Controllers
     [Route("api/roles")]
     public class RolesController : ControllerBase
     {
-        private IRolesService service;
+        private IRolesService rolesService;
         public RolesController(IRolesService service)
         {
-            this.service = service ?? throw new ArgumentNullException(nameof(service));
+            this.rolesService = service ?? throw new ArgumentNullException(nameof(service));
         }
 
         [HttpGet]
         public async Task<IEnumerable<Role>> GetAll()
         {
-            return await service.GetAllRolesAsync();
+            return await this.rolesService.GetAllRolesAsync();
         }
 
         [HttpGet("next")]
         public async Task<Role> GetNextRoleInHierarchy([FromQuery] RoleType currentRoleType)
         {
-            return await service.GetNextRoleInHierarchyAsync(currentRoleType);
+            return await this.rolesService.GetNextRoleInHierarchyAsync(currentRoleType);
         }
     }
 }

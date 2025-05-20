@@ -48,7 +48,7 @@ namespace DataAccess.Service
         {
             try
             {
-                var user = await userRepository.GetUserById(userId);
+                User? user = await userRepository.GetUserById(userId);
                 if (user == null)
                 {
                     throw new ArgumentException(UserNotFoundMessage, nameof(userId));
@@ -65,7 +65,7 @@ namespace DataAccess.Service
         {
             try
             {
-                var user = await userRepository.GetUserByUsername(username);
+                User? user = await userRepository.GetUserByUsername(username);
                 if (user == null)
                 {
                     throw new ArgumentException(UserNotFoundMessage, nameof(username));

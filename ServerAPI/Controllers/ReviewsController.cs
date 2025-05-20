@@ -18,73 +18,73 @@ namespace ServerAPI.Controllers
         [HttpGet("")]
         public async Task<IEnumerable<Review>> GetAll()
         {
-            return await reviewService.GetAllReviews();
+            return await this.reviewService.GetAllReviews();
         }
 
         [HttpGet("since")]
         public async Task<IEnumerable<Review>> GetReviewsSince([FromQuery] DateTime date)
         {
-            return await reviewService.GetReviewsSince(date);
+            return await this.reviewService.GetReviewsSince(date);
         }
         
         [HttpGet("averageRatingVisibleReviews")]
         public async Task<double> GetAverageRatingForVisibleReviews()
         {
-            return await reviewService.GetAverageRatingForVisibleReviews();
+            return await this.reviewService.GetAverageRatingForVisibleReviews();
         }
         
         [HttpGet("mostRecent")]
         public async Task<IEnumerable<Review>> GetMostRecentReviews([FromQuery] int count)
         {
-            return await reviewService.GetMostRecentReviews(count);
+            return await this.reviewService.GetMostRecentReviews(count);
         }
         
         [HttpGet("countAfterDate")]
         public async Task<int> GetReviewCountAfterDate([FromQuery] DateTime date)
         {
-            return await reviewService.GetReviewCountAfterDate(date);
+            return await this.reviewService.GetReviewCountAfterDate(date);
         }
 
         [HttpGet("flagged")]
         public async Task<IEnumerable<Review>> GetFlaggedReviews([FromQuery] int minFlags)
         {
-            return await reviewService.GetFlaggedReviews(minFlags);
+            return await this.reviewService.GetFlaggedReviews(minFlags);
         }
 
         [HttpGet("byUser")]
         public async Task<IEnumerable<Review>> GetReviewsByUser([FromQuery] Guid userId)
         {
-            return await reviewService.GetReviewsByUser(userId);
+            return await this.reviewService.GetReviewsByUser(userId);
         }
         
         [HttpGet("{id}")]
         public async Task<Review> GetReviewById(int id)
         {
-            return await reviewService.GetReviewById(id);
+            return await this.reviewService.GetReviewById(id);
         }
 
         [HttpPatch("{id}/updateFlags")]
         public async Task UpdateNumberOfFlagsForReview(int id, [FromBody] int numberOfFlags)
         {
-            await reviewService.UpdateNumberOfFlagsForReview(id, numberOfFlags);
+            await this.reviewService.UpdateNumberOfFlagsForReview(id, numberOfFlags);
         }
 
         [HttpPatch("{id}/updateVisibility")]
         public async Task UpdateReviewVisibility(int id, [FromBody] bool isHidden)
         {
-            await reviewService.UpdateReviewVisibility(id, isHidden);
+            await this.reviewService.UpdateReviewVisibility(id, isHidden);
         }
 
         [HttpPost("add")]
         public async Task<int> AddReview([FromBody] Review review)
         {
-            return await reviewService.AddReview(review);
+            return await this.reviewService.AddReview(review);
         }
 
         [HttpDelete("{id}/delete")]
         public async Task RemoveReviewById(int id)
         {
-            await reviewService.RemoveReviewById(id);
+            await this.reviewService.RemoveReviewById(id);
         }
 
         [HttpGet("hidden")]
@@ -96,13 +96,13 @@ namespace ServerAPI.Controllers
         [HttpGet("report")]
         public async Task<IEnumerable<Review>> GetReviewsForReport()
         {
-            return await reviewService.GetReviewsForReport();
+            return await this.reviewService.GetReviewsForReport();
         }
 
         [HttpGet("filter")]
         public async Task<IEnumerable<Review>> FilterReviewsByContent([FromQuery] string content)
         {
-            return await reviewService.FilterReviewsByContent(content);
+            return await this.reviewService.FilterReviewsByContent(content);
         }
     }
 }
