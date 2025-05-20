@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace DrinkDb_Auth.ServiceProxy
 {
@@ -164,8 +165,30 @@ namespace DrinkDb_Auth.ServiceProxy
 
         public async Task UpdateUserRole(Guid userId, RoleType roleType)
         {
-            HttpResponseMessage response = await this.httpClient.PatchAsJsonAsync($"{ApiRoute}/byId/{userId}/role", roleType);
-            response.EnsureSuccessStatusCode();
+            try
+            {
+                var url = $"{ApiRoute}/byId/{userId}/addRole";
+                
+                // Create a new Role object with the desired RoleType
+                var role = new Role { RoleType = roleType };
+                
+                var response = await this.httpClient.PatchAsJsonAsync(url, role);
+                
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    throw new Exception($"User {userId} not found");
+                }
+                
+                if (!response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    throw new Exception($"Failed to update role. Status: {response.StatusCode}, Content: {content}");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
 
         public async Task<string> GetUserFullNameById(Guid userId)
@@ -181,10 +204,23 @@ namespace DrinkDb_Auth.ServiceProxy
             // No need to make an API call for logout
         }
 
-        public void UpdateUserAppleaed(User user, bool newValue)
+        public async Task UpdateUserAppleaed(User user, bool newValue)
         {
-            var response = this.httpClient.PatchAsJsonAsync($"{ApiRoute}/byId/{user.UserId}/appealed", newValue).GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            try
+            {
+                var response = await this.httpClient.PatchAsJsonAsync($"{ApiRoute}/byId/{user.UserId}/appealed", newValue);
+                
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    throw new Exception($"User {user.UserId} not found");
+                }
+                
+                response.EnsureSuccessStatusCode();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
        
     }

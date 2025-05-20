@@ -247,35 +247,50 @@ namespace DataAccess.Service
 
         public async Task UpdateUserRole(Guid userId, RoleType roleType)
         {
-            User? user = await userRepository.GetUserById(userId);
-            if (roleType == RoleType.Banned)
+            try
             {
-                bool hasBannedRole = false;
-                if (user.AssignedRole == RoleType.Banned)
+                User? user = await userRepository.GetUserById(userId);
+                if (user == null)
                 {
-                    hasBannedRole = true;
+                    throw new UserServiceException($"User with ID {userId} not found", new ArgumentException($"User with ID {userId} not found"));
                 }
-                if (!hasBannedRole)
+
+                if (roleType == RoleType.Banned)
                 {
-                    user.AssignedRole = RoleType.Banned;
+                    bool hasBannedRole = false;
+                    if (user.AssignedRole == RoleType.Banned)
+                    {
+                        hasBannedRole = true;
+                    }
+                    if (!hasBannedRole)
+                    {
+                        user.AssignedRole = RoleType.Banned;
+                    }
                 }
+                else
+                {
+                    user.AssignedRole = roleType;
+                }
+                await userRepository.UpdateUser(user);
             }
-            else
+            catch (Exception ex)
             {
-                user.AssignedRole = roleType;
+                throw new UserServiceException($"Failed to update role for user with ID {userId}", ex);
             }
-            userRepository.UpdateUser(user);
         }
 
-        public void UpdateUserAppleaed(User user, bool newValue)
+        public async Task UpdateUserAppleaed(User user, bool newValue)
         {
-            user.HasSubmittedAppeal = newValue;
-            userRepository.UpdateUser(user);
+            try
+            {
+                user.HasSubmittedAppeal = newValue;
+                await userRepository.UpdateUser(user);
+            }
+            catch (Exception ex)
+            {
+                throw new UserServiceException($"Failed to update appeal status for user {user.UserId}", ex);
+            }
         }
-
-
-
-
 
         public Task<bool> ValidateAction(Guid userId, string resource, string action)
         {

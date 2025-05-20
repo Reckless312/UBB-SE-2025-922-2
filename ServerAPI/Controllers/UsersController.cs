@@ -56,7 +56,6 @@ namespace ServerAPI.Controllers
         public void AddRoleToUser(Guid userId, Role role)
         {
             service.ChangeRoleToUser(userId, role);
-
         }
 
         [HttpGet("byId/{userID}")]
@@ -74,9 +73,8 @@ namespace ServerAPI.Controllers
                 var user = await service.GetUserByUsername(username);
                 return user == null ? NotFound() : user;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine(ex);
                 return NotFound();
             }
         }
@@ -84,7 +82,6 @@ namespace ServerAPI.Controllers
         [HttpPatch("{userId}/updateUser")]
         public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] User user)
         {
-
             var result = await service.UpdateUser(user);
             return result ? Ok(result) : BadRequest("Failed to update user");
         }
@@ -100,6 +97,46 @@ namespace ServerAPI.Controllers
         public async Task<bool> ValidateAction([FromQuery] Guid userID, [FromQuery] string resource, [FromQuery] string action)
         {
             return await service.ValidateAction(userID, resource, action);
+        }
+
+        [HttpPatch("byId/{userId}/appealed")]
+        public async Task<IActionResult> UpdateUserAppealed(Guid userId, [FromBody] bool newValue)
+        {
+            try
+            {
+                var user = await service.GetUserById(userId);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                service.UpdateUserAppleaed(user, newValue);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPatch("byId/{userId}/role")]
+        public async Task<IActionResult> UpdateUserRole(Guid userId, [FromBody] RoleType roleType)
+        {
+            try
+            {
+                var user = await service.GetUserById(userId);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                await service.UpdateUserRole(userId, roleType);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }

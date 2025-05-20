@@ -129,9 +129,8 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
                 this.selectedAppealUser = value;
                 if (value != null)
                 {
-                    this.LoadUserAppealDetails(value);
+                    _ = LoadUserAppealDetails(value);
                 }
-
                 this.OnPropertyChanged();
             }
         }
@@ -289,12 +288,19 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             this.LoadFlaggedReviews();
         }
 
-        public List<string> RunAutoCheck()
+        public async Task<List<string>> RunAutoCheck()
         {
-            List<Review> reviews = this.reviewsService.GetFlaggedReviews().Result;
-            List<string> messages = this.checkersService.RunAutoCheck(reviews);
-            this.LoadFlaggedReviews();
-            return messages;
+            try
+            {
+                var reviews = await this.reviewsService.GetFlaggedReviews();
+                var messages = this.checkersService.RunAutoCheck(reviews);
+                await this.LoadFlaggedReviews();
+                return messages;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
 
         public void AddOffensiveWord(string word)
@@ -336,8 +342,8 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             }
             catch (Exception ex)
             {
-                
-                System.Diagnostics.Debug.WriteLine($"Error processing upgrade request: {ex.Message}");
+
+                throw;
                
             }
         }
@@ -368,45 +374,80 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             return this.requestsService.GetRoleNameBasedOnIdentifier(roleType);
         }
 
-        public void LoadUserAppealDetails(User user)
+        public async Task LoadUserAppealDetails(User user)
         {
-            this.IsAppealUserBanned = true;
-            this.UserStatusDisplay = this.GetUserStatusDisplay(user, true);
-
-            List<Review> reviews = this.GetUserReviews(user.UserId);
-            this.UserReviewsFormatted = new ObservableCollection<string>(
-                reviews.Select(r => this.FormatReviewContent(r)).ToList());
-        }
-
-        public void KeepBanForUser(User user)
-        {
-            if (user == null)
+            try
             {
-                return;
+                this.IsAppealUserBanned = true;
+                this.UserStatusDisplay = this.GetUserStatusDisplay(user, true);
+
+                var reviews = await this.reviewsService.GetReviewsByUser(user.UserId);
+                this.UserReviewsFormatted = new ObservableCollection<string>(
+                    reviews.Select(r => this.FormatReviewContent(r)).ToList());
             }
-
-            this.UpdateUserRole(user, RoleType.Banned);
-            this.UpdateUserHasAppealed(user, false);
-            this.IsAppealUserBanned = true;
-            this.UserStatusDisplay = this.GetUserStatusDisplay(user, true);
-        }
-
-        public void AcceptAppealForUser(User user)
-        {
-            if (user == null)
+            catch (Exception ex)
             {
-                return;
+                throw;
             }
-            this.UpdateUserRole(user, RoleType.User);
-            User updatedUser = GetUserById(user.UserId);
-            this.UpdateUserHasAppealed(updatedUser, false);
-            this.IsAppealUserBanned = false;
-            this.UserStatusDisplay = this.GetUserStatusDisplay(user, false);
         }
 
-        private void UpdateUserHasAppealed(User user, bool newValue)
+        private async Task UpdateUserHasAppealed(User user, bool newValue)
         {
-            this.userService.UpdateUserAppleaed(user, newValue);
+            try
+            {
+                await this.userService.UpdateUserAppleaed(user, newValue);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task KeepBanForUser(User user)
+        {
+            try
+            {
+                if (user == null)
+                {
+                    return;
+                }
+
+                await this.userService.UpdateUserRole(user.UserId, RoleType.Banned);
+                await this.UpdateUserHasAppealed(user, false);
+                
+                this.IsAppealUserBanned = true;
+                this.UserStatusDisplay = this.GetUserStatusDisplay(user, true);
+                
+                await this.LoadAppeals();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task AcceptAppealForUser(User user)
+        {
+            try
+            {
+                if (user == null)
+                {
+                    return;
+                }
+
+                await this.userService.UpdateUserRole(user.UserId, RoleType.User);
+                User updatedUser = await this.userService.GetUserById(user.UserId);
+                await this.UpdateUserHasAppealed(updatedUser, false);
+                
+                this.IsAppealUserBanned = false;
+                this.UserStatusDisplay = this.GetUserStatusDisplay(user, false);
+                
+                await this.LoadAppeals();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
 
         public void LoadUpgradeRequestDetails(UpgradeRequest request)
@@ -483,8 +524,28 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
 
         private void InitializeCommands()
         {
-            this.KeepBanCommand = new RelayCommand(() => this.KeepBanForUser(this.SelectedAppealUser));
-            this.AcceptAppealCommand = new RelayCommand(() => this.AcceptAppealForUser(this.SelectedAppealUser));
+            this.KeepBanCommand = new RelayCommand(async () => 
+            {
+                try
+                {
+                    await this.KeepBanForUser(this.SelectedAppealUser);
+                }
+                catch (Exception ex)
+                {
+                    // err
+                }
+            });
+            this.AcceptAppealCommand = new RelayCommand(async () => 
+            {
+                try
+                {
+                    await this.AcceptAppealForUser(this.SelectedAppealUser);
+                }
+                catch (Exception ex)
+                {
+                    // err
+                }
+            });
             this.CloseAppealCaseCommand = new RelayCommand(() => this.CloseAppealCase(this.SelectedAppealUser));
 
             this.HandleUpgradeRequestCommand = new RelayCommand<Tuple<bool, int>>(param =>
@@ -499,7 +560,17 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             this.RunAICheckCommand = new RelayCommand<Review>(review =>
                 this.RunAICheck(review));
 
-            this.RunAutoCheckCommand = new RelayCommand(() => this.RunAutoCheck());
+            this.RunAutoCheckCommand = new RelayCommand(async () => 
+            {
+                try 
+                {
+                    var messages = await this.RunAutoCheck();
+                }
+                catch (Exception ex)
+                {
+                    // err
+                }
+            });
 
             this.AddOffensiveWordCommand = new RelayCommand<string>(word =>
                 this.AddOffensiveWord(word));

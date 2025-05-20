@@ -119,7 +119,7 @@ namespace DrinkDb_Auth.ServiceProxy
 
         public async Task<List<Review>> GetReviewsByUser(Guid userId)
         {
-            HttpResponseMessage response = await httpClient.GetAsync($"{this.baseUrl}/{ApiBaseRoute}/by-user/{userId}");
+            HttpResponseMessage response = await httpClient.GetAsync($"{this.baseUrl}/{ApiBaseRoute}/byUser?userId={userId}");
             response.EnsureSuccessStatusCode();
             
             string json = await response.Content.ReadAsStringAsync();

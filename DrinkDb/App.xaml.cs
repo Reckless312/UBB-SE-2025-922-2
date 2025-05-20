@@ -47,6 +47,7 @@ namespace DrinkDb_Auth
     using Microsoft.EntityFrameworkCore;
     using DrinkDb_Auth.ProxyRepository.Authentification;
     using DrinkDb_Auth.AuthProviders.Google;
+    using DrinkDb_Auth.ServerProxy;
 
     sealed partial class App : Application
     {
@@ -107,10 +108,26 @@ namespace DrinkDb_Auth
                         new UserServiceProxy("http://localhost:5280/"));
                     //services.AddSingleton<IReviewService, ReviewsServiceProxy>();
                     //services.AddSingleton<IUpgradeRequestsService, UpgradeRequestsServiceProxy>();
-                    //services.AddSingleton<IRolesService, RolesProxyService>();
+                    services.AddSingleton<ICheckersService>(sp =>
+                    new OffensiveWordsServiceProxy(
+                        sp.GetRequiredService<IHttpClientFactory>().CreateClient("DrinkDbClient"),
+                        "http://localhost:5280/"));
+
+                    services.AddSingleton<IReviewService>(sp =>
+                    new ReviewsServiceProxy(
+                        sp.GetRequiredService<IHttpClientFactory>().CreateClient("DrinkDbClient"),
+                        "http://localhost:5280/"));
+
+                    services.AddSingleton<IUpgradeRequestsService>(sp =>
+                    new UpgradeRequestsServiceProxy(
+                        sp.GetRequiredService<IHttpClientFactory>().CreateClient("DrinkDbClient"),
+                        "http://localhost:5280/"
+                    ));
+
+                    services.AddSingleton<IRolesService, RolesProxyService>();
 
                     // Register Original Services
-                   // services.AddSingleton<ISessionService, SessionService>();
+                    // services.AddSingleton<ISessionService, SessionService>();
                     //services.AddSingleton<IAuthenticationService>(sp => new AuthenticationService(
                     //    sp.GetRequiredService<ISessionRepository>(),
                     //    sp.GetRequiredService<IUserRepository>(),
@@ -119,8 +136,9 @@ namespace DrinkDb_Auth
                     //    sp.GetRequiredService<FacebookLocalOAuthServer>(),
                     //    sp.GetRequiredService<IBasicAuthenticationProvider>()));
                     //services.AddSingleton<IUserService, UserService>();
-                    services.AddSingleton<IReviewService, ReviewsService>();
-                    services.AddSingleton<IUpgradeRequestsService, UpgradeRequestsService>();
+                    //services.AddSingleton<IReviewService, ReviewsService>();
+
+                    //services.AddSingleton<IUpgradeRequestsService, UpgradeRequestsService>();
 
                     // Register Repositories
                     services.AddSingleton<ISessionRepository, SessionProxyRepository>();
