@@ -21,12 +21,7 @@ namespace DrinkDb_Auth.ServiceProxy
             this.baseUrl = baseUrl.TrimEnd('/');
         }
 
-        public List<UpgradeRequest> RetrieveAllUpgradeRequests()
-        {
-            return RetrieveAllUpgradeRequestsAsync().GetAwaiter().GetResult();
-        }
-
-        public async Task<List<UpgradeRequest>> RetrieveAllUpgradeRequestsAsync()
+        public async Task<List<UpgradeRequest>> RetrieveAllUpgradeRequests()
         {
             HttpResponseMessage response = await this.httpClient.GetAsync($"{this.baseUrl}/{ApiBaseRoute}");
             response.EnsureSuccessStatusCode();
@@ -34,15 +29,10 @@ namespace DrinkDb_Auth.ServiceProxy
             return JsonConvert.DeserializeObject<List<UpgradeRequest>>(json) ?? new List<UpgradeRequest>();
         }
 
-        public void ProcessUpgradeRequest(bool isRequestAccepted, int upgradeRequestIdentifier)
-        {
-            ProcessUpgradeRequestAsync(isRequestAccepted, upgradeRequestIdentifier).GetAwaiter().GetResult();
-        }
-
-        private async Task ProcessUpgradeRequestAsync(bool isRequestAccepted, int upgradeRequestIdentifier)
+        public async Task ProcessUpgradeRequest(bool isRequestAccepted, int upgradeRequestIdentifier)
         {
             StringContent content = new StringContent(
-                JsonConvert.SerializeObject(new { IsAccepted = isRequestAccepted }),
+                JsonConvert.SerializeObject(isRequestAccepted),
                 Encoding.UTF8,
                 "application/json");
 
@@ -52,18 +42,18 @@ namespace DrinkDb_Auth.ServiceProxy
             response.EnsureSuccessStatusCode();
         }
 
-        public string GetRoleNameBasedOnIdentifier(RoleType roleType)
+        public async Task<string> GetRoleNameBasedOnIdentifier(RoleType roleType)
         {
             return roleType.ToString();
         }
 
-        public async Task RemoveUpgradeRequestByIdentifierAsync(int upgradeRequestIdentifier)
+        public async Task RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
         {
             HttpResponseMessage response = await this.httpClient.DeleteAsync($"{this.baseUrl}/{ApiBaseRoute}/{upgradeRequestIdentifier}/delete");
             response.EnsureSuccessStatusCode();
         }
 
-        public async Task<UpgradeRequest> RetrieveUpgradeRequestByIdentifierAsync(int upgradeRequestIdentifier)
+        public async Task<UpgradeRequest> RetrieveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
         {
             HttpResponseMessage response = await this.httpClient.GetAsync($"{this.baseUrl}/{ApiBaseRoute}/{upgradeRequestIdentifier}");
             response.EnsureSuccessStatusCode();

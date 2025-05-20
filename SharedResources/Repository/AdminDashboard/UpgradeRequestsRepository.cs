@@ -25,22 +25,25 @@ namespace Repository.AdminDashboard
 
         public async Task<List<UpgradeRequest>> RetrieveAllUpgradeRequests()
         {
-            return _context.UpgradeRequests.ToListAsync().Result;
+            return await _context.UpgradeRequests.ToListAsync();
         }
 
         public async Task RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
         {
-                List<UpgradeRequest> upgradeRequests =  _context.UpgradeRequests.ToListAsync().Result;
-                UpgradeRequest upgradeRequest = upgradeRequests.Where(upgrade => upgrade.UpgradeRequestId == upgradeRequestIdentifier).First();
+            var upgradeRequest = await _context.UpgradeRequests
+                .FirstOrDefaultAsync(ur => ur.UpgradeRequestId == upgradeRequestIdentifier);
+                
+            if (upgradeRequest != null)
+            {
                 _context.UpgradeRequests.Remove(upgradeRequest);
-                _context.SaveChanges();
-          
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task<UpgradeRequest> RetrieveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
         {
-            var upgradeRequest = _context.UpgradeRequests.FirstOrDefaultAsync(ur => ur.UpgradeRequestId == upgradeRequestIdentifier).Result;
-            return upgradeRequest;
+            return await _context.UpgradeRequests
+                .FirstOrDefaultAsync(ur => ur.UpgradeRequestId == upgradeRequestIdentifier);
         }
     }
 }

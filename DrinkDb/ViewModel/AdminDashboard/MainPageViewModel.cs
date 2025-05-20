@@ -143,9 +143,8 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
                 this.selectedUpgradeRequest = value;
                 if (value != null)
                 {
-                    this.LoadUpgradeRequestDetails(value);
+                    _ = LoadUpgradeRequestDetails(value);
                 }
-
                 this.OnPropertyChanged();
             }
         }
@@ -318,22 +317,20 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             this.LoadOffensiveWords();
         }
 
-        public void HandleUpgradeRequest(bool isAccepted, int requestId)
+        public async Task HandleUpgradeRequest(bool isAccepted, int requestId)
         {
             try
             {
-                // Call the synchronous method on the service
-                requestsService.ProcessUpgradeRequest(isAccepted, requestId);
+                // Call the async method on the service
+                await requestsService.ProcessUpgradeRequest(isAccepted, requestId);
 
                 // Refresh the UI on the UI thread
-                // This approach uses the dispatcher to update UI after processing
-                Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread()?.TryEnqueue(() =>
+                Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread()?.TryEnqueue(async () =>
                 {
-                    // Refresh your data - reload upgrade requests using the synchronous method
-                    var requests = requestsService.RetrieveAllUpgradeRequests();
+                    // Refresh your data - reload upgrade requests using the async method
+                    var requests = await requestsService.RetrieveAllUpgradeRequests();
 
                     // Update your property that holds the requests
-                  
                     UpgradeRequests = new System.Collections.ObjectModel.ObservableCollection<UpgradeRequest>(requests);
 
                     // Notify UI of changes
@@ -342,9 +339,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             }
             catch (Exception ex)
             {
-
                 throw;
-               
             }
         }
 
@@ -369,9 +364,9 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             return this.userService.GetHighestRoleTypeForUser(userId).Result;
         }
 
-        public string GetRoleNameBasedOnID(RoleType roleType)
+        public async Task<string> GetRoleNameBasedOnID(RoleType roleType)
         {
-            return this.requestsService.GetRoleNameBasedOnIdentifier(roleType);
+            return await this.requestsService.GetRoleNameBasedOnIdentifier(roleType);
         }
 
         public async Task LoadUserAppealDetails(User user)
@@ -450,21 +445,20 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             }
         }
 
-        public void LoadUpgradeRequestDetails(UpgradeRequest request)
+        public async Task LoadUpgradeRequestDetails(UpgradeRequest request)
         {
-            this.SelectedUpgradeRequest = request;
+            if (request == null)
+            {
+                return;
+            }
 
-            Guid userId = request.RequestingUserIdentifier;
-            User selectedUser = this.GetUserById(userId);
-            RoleType currentRoleID = this.GetHighestRoleTypeForUser(selectedUser.UserId);
-            string currentRoleName = this.GetRoleNameBasedOnID(currentRoleID);
-            string requiredRoleName = this.GetRoleNameBasedOnID(currentRoleID + 1);
+            User requestingUser = this.GetUserById(request.RequestingUserIdentifier);
+            RoleType currentRoleID = this.GetHighestRoleTypeForUser(request.RequestingUserIdentifier);
 
-            this.UserUpgradeInfo = this.FormatUserUpgradeInfo(selectedUser, currentRoleName, requiredRoleName);
+            string currentRoleName = await this.GetRoleNameBasedOnID(currentRoleID);
+            string requiredRoleName = await this.GetRoleNameBasedOnID(currentRoleID + 1);
 
-            List<Review> reviews = this.GetUserReviews(selectedUser.UserId);
-            this.UserReviewsWithFlags = new ObservableCollection<string>(
-                reviews.Select(r => this.FormatReviewWithFlags(r)).ToList());
+            this.UserUpgradeInfo = this.FormatUserUpgradeInfo(requestingUser, currentRoleName, requiredRoleName);
         }
 
         public string GetUserStatusDisplay(User user, bool isBanned)
@@ -548,8 +542,8 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             });
             this.CloseAppealCaseCommand = new RelayCommand(() => this.CloseAppealCase(this.SelectedAppealUser));
 
-            this.HandleUpgradeRequestCommand = new RelayCommand<Tuple<bool, int>>(param =>
-                this.HandleUpgradeRequest(param.Item1, param.Item2));
+            this.HandleUpgradeRequestCommand = new RelayCommand<Tuple<bool, int>>(async param =>
+                await this.HandleUpgradeRequest(param.Item1, param.Item2));
 
             this.ResetReviewFlagsCommand = new RelayCommand<int>(reviewId =>
                 this.ResetReviewFlags(reviewId));

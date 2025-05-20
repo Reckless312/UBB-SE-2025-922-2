@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using DataAccess.Model.AdminDashboard;
-using Repository.AdminDashboard;
+using DataAccess.Service.AdminDashboard.Interfaces;
 using IRepository;
 
 namespace ServerAPI.Controllers
@@ -9,29 +9,35 @@ namespace ServerAPI.Controllers
     [Route("api/upgradeRequests")]
     public class UpgradeRequestsController : ControllerBase
     {
-        IUpgradeRequestsRepository repository;
+        private readonly IUpgradeRequestsService _upgradeRequestsService;
 
-        public UpgradeRequestsController(IUpgradeRequestsRepository repository)
+        public UpgradeRequestsController(IUpgradeRequestsService upgradeRequestsService)
         {
-            this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _upgradeRequestsService = upgradeRequestsService ?? throw new ArgumentNullException(nameof(upgradeRequestsService));
         }
 
         [HttpGet]
         public async Task<IEnumerable<UpgradeRequest>> GetAll()
         {
-            return repository.RetrieveAllUpgradeRequests().Result;
+            return await _upgradeRequestsService.RetrieveAllUpgradeRequests();
         }
 
         [HttpDelete("{id}/delete")]
         public async Task Delete(int id)
         {
-            repository.RemoveUpgradeRequestByIdentifier(id);
+            await _upgradeRequestsService.RemoveUpgradeRequestByIdentifier(id);
         }
 
         [HttpGet("{id}")]
         public async Task<UpgradeRequest> Get(int id)
         {
-            return repository.RetrieveUpgradeRequestByIdentifier(id).Result;
+            return await _upgradeRequestsService.RetrieveUpgradeRequestByIdentifier(id);
+        }
+
+        [HttpPost("{id}/process")]
+        public async Task Process(int id, [FromBody] bool isAccepted)
+        {
+            await _upgradeRequestsService.ProcessUpgradeRequest(isAccepted, id);
         }
     }
 }
