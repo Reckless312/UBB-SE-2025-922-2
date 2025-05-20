@@ -2,16 +2,18 @@ namespace DrinkDb_Auth
 {
     using System;
     using System.Threading.Tasks;
+    using DataAccess.AuthProviders.Facebook;
+    using DataAccess.AuthProviders.Github;
+    using DataAccess.AuthProviders.LinkedIn;
+    using DataAccess.AuthProviders.Twitter;
     using DataAccess.Model.Authentication;
-    using DrinkDb_Auth.AuthProviders.Facebook;
-    using DrinkDb_Auth.AuthProviders.Github;
+    using DataAccess.OAuthProviders;
+    using DataAccess.Service.Authentication;
+    using DataAccess.Service.Authentication.Interfaces;
     using DrinkDb_Auth.AuthProviders.Google;
-    using DrinkDb_Auth.AuthProviders.LinkedIn;
-    using DrinkDb_Auth.AuthProviders.Twitter;
-    using DrinkDb_Auth.OAuthProviders;
     using DrinkDb_Auth.Service.Authentication;
-    using DrinkDb_Auth.Service.Authentication.Interfaces;
     using DrinkDb_Auth.ViewModel.Authentication;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.IdentityModel.Tokens;
     using Microsoft.UI;
     using Microsoft.UI.Windowing;
@@ -23,14 +25,19 @@ namespace DrinkDb_Auth
 
     public sealed partial class MainWindow : Window
     {
-        private AuthenticationService authenticationService = new ();
-        private ITwoFactorAuthenticationService? twoFactorAuthentificationService;
+        private readonly IAuthenticationService authenticationService;
+        private readonly ITwoFactorAuthenticationService twoFactorAuthentificationService;
+        private readonly IScheduler scheduler;
 
-        private IScheduler scheduler;
+        public Frame NavigationFrame { get; private set; }
 
-        public MainWindow()
+        public MainWindow(IAuthenticationService authenticationService, IScheduler scheduler, ITwoFactorAuthenticationService twoFactorAuthenticationService)
         {
+            this.authenticationService = authenticationService;
+            this.scheduler = scheduler;
+            this.twoFactorAuthentificationService = twoFactorAuthenticationService;
             this.InitializeComponent();
+            this.NavigationFrame = this.MainFrame;
 
             this.Title = "DrinkDb - Sign In";
 
@@ -41,7 +48,6 @@ namespace DrinkDb_Auth
             });
             this.AppWindow.Move(new PointInt32(0, 0));
 
-            this.InitializeScheduler().ConfigureAwait(false);
             this.ScheduleDelayedEmailAutomatically().ConfigureAwait(false);
 
             IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
@@ -59,7 +65,6 @@ namespace DrinkDb_Auth
             try
             {
                 StdSchedulerFactory factory = new StdSchedulerFactory();
-                this.scheduler = await factory.GetScheduler();
                 await this.scheduler.Start();
                 System.Diagnostics.Debug.WriteLine("Scheduler initialized successfully");
             }
@@ -96,10 +101,11 @@ namespace DrinkDb_Auth
         {
             if (res.AuthenticationSuccessful)
             {
-                User user = this.authenticationService.GetUser(res.SessionId).Result;
+                User user = await this.authenticationService.GetUser(res.SessionId);
                 bool twoFAresponse = false;
                 bool firstTimeSetup = user.TwoFASecret.IsNullOrEmpty();
-                this.twoFactorAuthentificationService = new TwoFactorAuthenticationService(this, user.UserId, firstTimeSetup);
+                this.twoFactorAuthentificationService.UserId = user.UserId;
+                this.twoFactorAuthentificationService.IsFirstTimeSetup = firstTimeSetup;
                 TwoFaGuiHelper twoFaGuiHelper = new TwoFaGuiHelper(this);
                 (User currentUser, string uniformResourceIdentifier, byte[] twoFactorSecret)
                     values = this.twoFactorAuthentificationService.Get2FAValues();
@@ -110,7 +116,7 @@ namespace DrinkDb_Auth
                 {
                     App.CurrentUserId = user.UserId;
                     App.CurrentSessionId = res.SessionId;
-                    this.MainFrame.Navigate(typeof(SuccessPage), this);
+                    this.NavigationFrame.Navigate(typeof(SuccessPage), this);
                 }
 
                 return twoFAresponse;
@@ -124,26 +130,43 @@ namespace DrinkDb_Auth
                     CloseButtonText = "OK",
                     XamlRoot = this.Content.XamlRoot,
                 };
-                _ = errorDialog.ShowAsync();
+                await errorDialog.ShowAsync();
             }
 
             return false;
         }
 
-        public void SignInButton_Click(object sender, RoutedEventArgs e)
+        public async void SignInButton_Click(object sender, RoutedEventArgs e)
         {
-            string username = this.UsernameTextBox.Text;
-            string password = this.PasswordBox.Password;
+            try
+            {
+                string username = this.UsernameTextBox.Text;
+                string password = this.PasswordBox.Password;
 
-            AuthenticationResponse response = this.authenticationService.AuthWithUserPass(username, password).Result;
-            _ = this.AuthenticationComplete(response);
+                AuthenticationResponse response = await this.authenticationService.AuthWithUserPass(username, password);
+                await this.AuthenticationComplete(response);
+            }
+            catch (Exception ex)
+            {
+                await this.ShowError("Authentication Error", ex.ToString());
+            }
         }
 
         public async void GithubSignInButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(this, OAuthService.GitHub, new GitHubOAuthHelper());
+                var githubHelper = App.Host.Services.GetRequiredService<IGitHubOAuthHelper>();
+                AuthenticationResponse authResponse = null;
+                try
+                {
+                    authResponse = await this.authenticationService.AuthWithOAuth(OAuthService.GitHub, githubHelper);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Exception in AuthWithOAuth: {ex}");
+                    throw;
+                }
                 _ = this.AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
@@ -157,7 +180,8 @@ namespace DrinkDb_Auth
             try
             {
                 this.GoogleSignInButton.IsEnabled = false;
-                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(this, OAuthService.Google, new GoogleOAuth2Provider());
+                var googleHelper = App.Host.Services.GetRequiredService<IGoogleOAuth2Provider>();
+                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(OAuthService.Google, googleHelper);
                 await this.AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
@@ -174,7 +198,8 @@ namespace DrinkDb_Auth
         {
             try
             {
-                AuthenticationResponse authResponse = await authenticationService.AuthWithOAuth(this, OAuthService.Facebook, new FacebookOAuthHelper());
+                var facebookHelper = App.Host.Services.GetRequiredService<IFacebookOAuthHelper>();
+                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(OAuthService.Facebook, facebookHelper);
                 await this.AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
@@ -188,7 +213,7 @@ namespace DrinkDb_Auth
             try
             {
                 this.XSignInButton.IsEnabled = false;
-                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(this, OAuthService.Twitter, new TwitterOAuth2Provider());
+                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(OAuthService.Twitter, new TwitterOAuth2Provider());
                 await this.AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
@@ -205,11 +230,8 @@ namespace DrinkDb_Auth
         {
             try
             {
-                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(this, OAuthService.LinkedIn, new LinkedInOAuthHelper(
-                    clientId: "86j0ikb93jm78x",
-                    clientSecret: "WPL_AP1.pg2Bd1XhCi821VTG.+hatTA==",
-                    redirectUri: "http://localhost:8891/auth",
-                    scope: "openid profile email"));
+                var linkedInHelper = App.Host.Services.GetRequiredService<ILinkedInOAuthHelper>();
+                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(OAuthService.LinkedIn, linkedInHelper);
                 await this.AuthenticationComplete(authResponse);
             }
             catch (Exception ex)

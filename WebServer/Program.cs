@@ -1,3 +1,5 @@
+using DataAccess.Service;
+using DataAccess.Service.AdminDashboard.Interfaces;
 using IRepository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -51,6 +53,7 @@ app.Run();
 
 static void DependencyInjection(WebApplicationBuilder builder)
 {
+    builder.Services.AddScoped<IUserService, UserService>();
     builder.Services.AddScoped<IUserRepository, UserRepository>();
     builder.Services.AddScoped<IRolesRepository, RolesRepository>();
     builder.Services.AddScoped<IReviewsRepository, ReviewsRepository>();

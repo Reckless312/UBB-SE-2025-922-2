@@ -4,6 +4,7 @@ namespace UnitTests.Reviews
     using System.Collections.Generic;
     using System.Linq;
     using DataAccess.Model.AdminDashboard;
+    using DataAccess.Service.AdminDashboard;
     using DrinkDb_Auth.Service.AdminDashboard;
     using IRepository;
     using Moq;

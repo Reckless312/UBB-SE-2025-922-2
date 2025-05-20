@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using DrinkDb_Auth.AiCheck;
+using DataAccess.AiCheck;
 using Microsoft.ML;
 using Moq;
 using Xunit;

@@ -10,10 +10,12 @@ namespace UnitTests.ReviewChecker
     using System.Reflection;
     using System.Text;
     using System.Threading.Tasks;
+    using DataAccess.AutoChecker;
     using DataAccess.Model.AdminDashboard;
-    using DrinkDb_Auth.AutoChecker;
+    using DataAccess.Service.AdminDashboard;
+    using DataAccess.Service.AdminDashboard.Components;
+    using DataAccess.Service.AdminDashboard.Interfaces;
     using DrinkDb_Auth.Service.AdminDashboard;
-    using DrinkDb_Auth.Service.AdminDashboard.Components;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using Moq;
     using UnitTests.ReviewChecker.AuxiliaryTestsClasses;

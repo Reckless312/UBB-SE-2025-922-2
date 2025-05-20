@@ -23,21 +23,21 @@
 
         public async Task RemoveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
         {
-            var response = this.httpClient.DeleteAsync(ApiBaseRoute + "/" + upgradeRequestIdentifier + "/delete").Result;
+            var response = await this.httpClient.DeleteAsync(ApiBaseRoute + "/" + upgradeRequestIdentifier + "/delete");
             response.EnsureSuccessStatusCode();
         }
 
         public async Task<List<UpgradeRequest>> RetrieveAllUpgradeRequests()
         {
-            var response = this.httpClient.GetAsync(ApiBaseRoute).Result;
+            var response = await this.httpClient.GetAsync(ApiBaseRoute);
             response.EnsureSuccessStatusCode();
-            List<UpgradeRequest> upgradeRequests = response.Content.ReadFromJsonAsync<List<UpgradeRequest>>().Result ?? new List<UpgradeRequest>();
+            List<UpgradeRequest> upgradeRequests = await response.Content.ReadFromJsonAsync<List<UpgradeRequest>>() ?? new List<UpgradeRequest>();
             return upgradeRequests;
         }
 
         public async Task<UpgradeRequest> RetrieveUpgradeRequestByIdentifier(int upgradeRequestIdentifier)
         {
-            var response = this.httpClient.GetAsync(ApiBaseRoute + "/" + upgradeRequestIdentifier).Result;
+            var response = await this.httpClient.GetAsync(ApiBaseRoute + "/" + upgradeRequestIdentifier);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<UpgradeRequest>();
         }

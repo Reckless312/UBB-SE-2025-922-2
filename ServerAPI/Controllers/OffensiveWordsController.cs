@@ -1,10 +1,10 @@
 ﻿using DataAccess.Model.AdminDashboard;
 using DataAccess.Model.AutoChecker;
-using IRepository;
+using DataAccess.Service.AdminDashboard.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Repository.AdminDashboard;
-using ServerAPI.Data;
-using ServerAPI.Repository.AutoChecker;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ServerAPI.Controllers
 {
@@ -12,17 +12,17 @@ namespace ServerAPI.Controllers
     [Route("api/offensiveWords")]
     public class OffensiveWordsController: ControllerBase
     {
-        private IOffensiveWordsRepository repository;
+        private readonly ICheckersService checkersService;
 
-        public OffensiveWordsController(IOffensiveWordsRepository repository)
+        public OffensiveWordsController(ICheckersService checkersService)
         {
-            this.repository = repository;
+            this.checkersService = checkersService ?? throw new ArgumentNullException(nameof(checkersService));
         }
 
         [HttpGet]
         public List<OffensiveWord> GetAllWords()
         {
-            HashSet<string> words = repository.LoadOffensiveWords();
+            HashSet<string> words = this.checkersService.GetOffensiveWordsList();
             List<OffensiveWord> wordsList = new List<OffensiveWord>();
             foreach (string word in words)
             {
@@ -30,15 +30,53 @@ namespace ServerAPI.Controllers
             }
             return wordsList;
         }
+
         [HttpPost("add")]
-        public void AddOffensiveWord(OffensiveWord word)
+        public async Task<IActionResult> AddOffensiveWord(OffensiveWord word)
         {
-            repository.AddWord(word.Word);
+            try
+            {
+                await checkersService.AddOffensiveWordAsync(word.Word);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            return null;
         }
+
         [HttpDelete("delete/{word}")]
-        public void DeleteWord(string word)
+        public async Task<IActionResult> DeleteWord(string word)
         {
-            repository.DeleteWord(word);
+            try
+            {
+                await checkersService.DeleteOffensiveWordAsync(word);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            return null;
+        }
+
+        [HttpPost("check")]
+        public async Task<List<string>> CheckReviews([FromBody] List<Review> reviews)
+        {
+            return await checkersService.RunAutoCheck(reviews);
+        }
+
+        [HttpPost("checkOne")]
+        public async Task<IActionResult> CheckOneReview([FromBody] Review review)
+        {
+            try
+            {
+                await checkersService.RunAICheckForOneReviewAsync(review);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            return null;
         }
     }
 }

@@ -9,10 +9,12 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
     using System.Windows.Input;
     using DataAccess.Model.AdminDashboard;
     using DataAccess.Model.Authentication;
-    using DrinkDb_Auth.AutoChecker;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using DrinkDb_Auth.ViewModel.AdminDashboard.Components;
     using DrinkDb_Auth.Service;
+    using DataAccess.Service.AdminDashboard.Interfaces;
+    using DataAccess.AutoChecker;
+    using System.Threading.Tasks;
 
     public class MainPageViewModel : INotifyPropertyChanged
     {
@@ -127,9 +129,8 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
                 this.selectedAppealUser = value;
                 if (value != null)
                 {
-                    this.LoadUserAppealDetails(value);
+                    _ = LoadUserAppealDetails(value);
                 }
-
                 this.OnPropertyChanged();
             }
         }
@@ -142,9 +143,8 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
                 this.selectedUpgradeRequest = value;
                 if (value != null)
                 {
-                    this.LoadUpgradeRequestDetails(value);
+                    _ = LoadUpgradeRequestDetails(value);
                 }
-
                 this.OnPropertyChanged();
             }
         }
@@ -210,56 +210,62 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             }
         }
 
-        public void LoadAllData()
+        public async Task LoadAllData()
         {
-            this.LoadFlaggedReviews();
-            this.LoadAppeals();
-            this.LoadRoleRequests();
-            this.LoadOffensiveWords();
+            await Task.WhenAll(
+                LoadFlaggedReviews(),
+                LoadAppeals(),
+                LoadRoleRequests(),
+                LoadOffensiveWords()
+            );
         }
 
-        public void LoadFlaggedReviews()
+        public async Task LoadFlaggedReviews()
         {
-            this.FlaggedReviews = new ObservableCollection<Review>(this.reviewsService.GetFlaggedReviews());
+            var reviews = await this.reviewsService.GetFlaggedReviews();
+            this.FlaggedReviews = new ObservableCollection<Review>(reviews);
         }
 
-        public void LoadAppeals()
+        public async Task LoadAppeals()
         {
-            this.AppealsUsers = new ObservableCollection<User>(this.userService.GetBannedUsersWhoHaveSubmittedAppeals().Result);
+            var appeals = await this.userService.GetBannedUsersWhoHaveSubmittedAppeals();
+            this.AppealsUsers = new ObservableCollection<User>(appeals);
         }
 
-        public void LoadRoleRequests()
+        public async Task LoadRoleRequests()
         {
-            this.UpgradeRequests = new ObservableCollection<UpgradeRequest>(this.requestsService.RetrieveAllUpgradeRequests());
+            var requests = await Task.Run(() => this.requestsService.RetrieveAllUpgradeRequests());
+            this.UpgradeRequests = new ObservableCollection<UpgradeRequest>(requests);
         }
 
-        public void LoadOffensiveWords()
+        public async Task LoadOffensiveWords()
         {
-            this.OffensiveWords = new ObservableCollection<string>(this.checkersService.GetOffensiveWordsList());
+            var words = await Task.Run(() => this.checkersService.GetOffensiveWordsList());
+            this.OffensiveWords = new ObservableCollection<string>(words);
         }
 
-        public void FilterReviews(string filter)
+        public async Task FilterReviews(string filter)
         {
-            this.FlaggedReviews = new ObservableCollection<Review>(
-                this.reviewsService.FilterReviewsByContent(filter));
+            var reviews = await this.reviewsService.FilterReviewsByContent(filter);
+            this.FlaggedReviews = new ObservableCollection<Review>(reviews);
         }
 
-        public void FilterAppeals(string filter)
+        public async Task FilterAppeals(string filter)
         {
             if (string.IsNullOrEmpty(filter))
             {
-                this.LoadAppeals();
+                await LoadAppeals();
                 return;
             }
 
             filter = filter.ToLower();
+            var appeals = await this.userService.GetBannedUsersWhoHaveSubmittedAppeals();
             this.AppealsUsers = new ObservableCollection<User>(
-                this.userService.GetBannedUsersWhoHaveSubmittedAppeals().Result
-                    .Where(user =>
-                        user.EmailAddress.ToLower().Contains(filter) ||
-                        user.Username.ToLower().Contains(filter) ||
-                        user.UserId.ToString().Contains(filter))
-                    .ToList());
+                appeals.Where(user =>
+                    user.EmailAddress.ToLower().Contains(filter) ||
+                    user.Username.ToLower().Contains(filter) ||
+                    user.UserId.ToString().Contains(filter))
+                .ToList());
         }
 
         public void ResetReviewFlags(int reviewId)
@@ -275,51 +281,89 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             this.LoadFlaggedReviews();
         }
 
-        public void RunAICheck(Review review)
-        {
-            this.checkersService.RunAICheckForOneReview(review);
-            this.LoadFlaggedReviews();
-        }
-
-        public List<string> RunAutoCheck()
-        {
-            List<Review> reviews = this.reviewsService.GetFlaggedReviews();
-            List<string> messages = this.checkersService.RunAutoCheck(reviews);
-            this.LoadFlaggedReviews();
-            return messages;
-        }
-
-        public void AddOffensiveWord(string word)
-        {
-            if (!string.IsNullOrWhiteSpace(word))
-            {
-                this.checkersService.AddOffensiveWord(word);
-                this.LoadOffensiveWords();
-            }
-        }
-
-        public void DeleteOffensiveWord(string word)
-        {
-            this.checkersService.DeleteOffensiveWord(word);
-            this.LoadOffensiveWords();
-        }
-
-        public void HandleUpgradeRequest(bool isAccepted, int requestId)
+        public async Task RunAICheck(Review review)
         {
             try
             {
-                // Call the synchronous method on the service
-                requestsService.ProcessUpgradeRequest(isAccepted, requestId);
+                await this.checkersService.RunAICheckForOneReviewAsync(review);
+                await this.LoadFlaggedReviews();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in RunAICheck: {ex.Message}");
+            }
+        }
+
+        public async Task<List<string>> RunAutoCheck()
+        {
+            try
+            {
+                var reviews = await this.reviewsService.GetFlaggedReviews();
+                var messages = await Task.Run(() => this.checkersService.RunAutoCheck(reviews));
+                await this.LoadFlaggedReviews();
+                return messages;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in RunAutoCheck: {ex.Message}");
+                throw;
+            }
+        }
+
+        public async void AddOffensiveWord(string word)
+        {
+            if (string.IsNullOrWhiteSpace(word))
+            {
+                return;
+            }
+
+            try
+            {
+                await this.checkersService.AddOffensiveWordAsync(word);
+                this.offensiveWords.Add(word);
+                OnPropertyChanged(nameof(this.OffensiveWords));
+            }
+            catch (Exception ex)
+            {
+                // Handle error appropriately
+                System.Diagnostics.Debug.WriteLine($"Error adding offensive word: {ex.Message}");
+            }
+        }
+
+        public async void DeleteOffensiveWord(string word)
+        {
+            if (string.IsNullOrWhiteSpace(word))
+            {
+                return;
+            }
+
+            try
+            {
+                await this.checkersService.DeleteOffensiveWordAsync(word);
+                this.offensiveWords.Remove(word);
+                OnPropertyChanged(nameof(this.OffensiveWords));
+            }
+            catch (Exception ex)
+            {
+                // Handle error appropriately
+                System.Diagnostics.Debug.WriteLine($"Error deleting offensive word: {ex.Message}");
+            }
+        }
+
+        public async Task HandleUpgradeRequest(bool isAccepted, int requestId)
+        {
+            try
+            {
+                // Call the async method on the service
+                await requestsService.ProcessUpgradeRequest(isAccepted, requestId);
 
                 // Refresh the UI on the UI thread
-                // This approach uses the dispatcher to update UI after processing
-                Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread()?.TryEnqueue(() =>
+                Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread()?.TryEnqueue(async () =>
                 {
-                    // Refresh your data - reload upgrade requests using the synchronous method
-                    var requests = requestsService.RetrieveAllUpgradeRequests();
+                    // Refresh your data - reload upgrade requests using the async method
+                    var requests = await requestsService.RetrieveAllUpgradeRequests();
 
                     // Update your property that holds the requests
-                  
                     UpgradeRequests = new System.Collections.ObjectModel.ObservableCollection<UpgradeRequest>(requests);
 
                     // Notify UI of changes
@@ -328,9 +372,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             }
             catch (Exception ex)
             {
-                
-                System.Diagnostics.Debug.WriteLine($"Error processing upgrade request: {ex.Message}");
-               
+                throw;
             }
         }
 
@@ -342,7 +384,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
 
         public List<Review> GetUserReviews(Guid userId)
         {
-            return this.reviewsService.GetReviewsByUser(userId);
+            return this.reviewsService.GetReviewsByUser(userId).Result;
         }
 
         public User GetUserById(Guid userId)
@@ -355,67 +397,101 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             return this.userService.GetHighestRoleTypeForUser(userId).Result;
         }
 
-        public string GetRoleNameBasedOnID(RoleType roleType)
+        public async Task<string> GetRoleNameBasedOnID(RoleType roleType)
         {
-            return this.requestsService.GetRoleNameBasedOnIdentifier(roleType);
+            return await this.requestsService.GetRoleNameBasedOnIdentifier(roleType);
         }
 
-        public void LoadUserAppealDetails(User user)
+        public async Task LoadUserAppealDetails(User user)
         {
-            this.IsAppealUserBanned = true;
-            this.UserStatusDisplay = this.GetUserStatusDisplay(user, true);
+            try
+            {
+                this.IsAppealUserBanned = true;
+                this.UserStatusDisplay = this.GetUserStatusDisplay(user, true);
 
-            List<Review> reviews = this.GetUserReviews(user.UserId);
-            this.UserReviewsFormatted = new ObservableCollection<string>(
-                reviews.Select(r => this.FormatReviewContent(r)).ToList());
+                var reviews = await this.reviewsService.GetReviewsByUser(user.UserId);
+                this.UserReviewsFormatted = new ObservableCollection<string>(
+                    reviews.Select(r => this.FormatReviewContent(r)).ToList());
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
 
-        public void KeepBanForUser(User user)
+        private async Task UpdateUserHasAppealed(User user, bool newValue)
         {
-            if (user == null)
+            try
+            {
+                await this.userService.UpdateUserAppleaed(user, newValue);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task KeepBanForUser(User user)
+        {
+            try
+            {
+                if (user == null)
+                {
+                    return;
+                }
+
+                await this.userService.UpdateUserRole(user.UserId, RoleType.Banned);
+                await this.UpdateUserHasAppealed(user, false);
+                
+                this.IsAppealUserBanned = true;
+                this.UserStatusDisplay = this.GetUserStatusDisplay(user, true);
+                
+                await this.LoadAppeals();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task AcceptAppealForUser(User user)
+        {
+            try
+            {
+                if (user == null)
+                {
+                    return;
+                }
+
+                await this.userService.UpdateUserRole(user.UserId, RoleType.User);
+                User updatedUser = await this.userService.GetUserById(user.UserId);
+                await this.UpdateUserHasAppealed(updatedUser, false);
+                
+                this.IsAppealUserBanned = false;
+                this.UserStatusDisplay = this.GetUserStatusDisplay(user, false);
+                
+                await this.LoadAppeals();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task LoadUpgradeRequestDetails(UpgradeRequest request)
+        {
+            if (request == null)
             {
                 return;
             }
 
-            this.UpdateUserRole(user, RoleType.Banned);
-            this.UpdateUserHasAppealed(user, false);
-            this.IsAppealUserBanned = true;
-            this.UserStatusDisplay = this.GetUserStatusDisplay(user, true);
-        }
+            User requestingUser = this.GetUserById(request.RequestingUserIdentifier);
+            RoleType currentRoleID = this.GetHighestRoleTypeForUser(request.RequestingUserIdentifier);
 
-        public void AcceptAppealForUser(User user)
-        {
-            if (user == null)
-            {
-                return;
-            }
-            this.UpdateUserRole(user, RoleType.User);
-            User updatedUser = GetUserById(user.UserId);
-            this.UpdateUserHasAppealed(updatedUser, false);
-            this.IsAppealUserBanned = false;
-            this.UserStatusDisplay = this.GetUserStatusDisplay(user, false);
-        }
+            string currentRoleName = await this.GetRoleNameBasedOnID(currentRoleID);
+            string requiredRoleName = await this.GetRoleNameBasedOnID(currentRoleID + 1);
 
-        private void UpdateUserHasAppealed(User user, bool newValue)
-        {
-            this.userService.UpdateUserAppleaed(user, newValue);
-        }
-
-        public void LoadUpgradeRequestDetails(UpgradeRequest request)
-        {
-            this.SelectedUpgradeRequest = request;
-
-            Guid userId = request.RequestingUserIdentifier;
-            User selectedUser = this.GetUserById(userId);
-            RoleType currentRoleID = this.GetHighestRoleTypeForUser(selectedUser.UserId);
-            string currentRoleName = this.GetRoleNameBasedOnID(currentRoleID);
-            string requiredRoleName = this.GetRoleNameBasedOnID(currentRoleID + 1);
-
-            this.UserUpgradeInfo = this.FormatUserUpgradeInfo(selectedUser, currentRoleName, requiredRoleName);
-
-            List<Review> reviews = this.GetUserReviews(selectedUser.UserId);
-            this.UserReviewsWithFlags = new ObservableCollection<string>(
-                reviews.Select(r => this.FormatReviewWithFlags(r)).ToList());
+            this.UserUpgradeInfo = this.FormatUserUpgradeInfo(requestingUser, currentRoleName, requiredRoleName);
         }
 
         public string GetUserStatusDisplay(User user, bool isBanned)
@@ -475,12 +551,32 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
 
         private void InitializeCommands()
         {
-            this.KeepBanCommand = new RelayCommand(() => this.KeepBanForUser(this.SelectedAppealUser));
-            this.AcceptAppealCommand = new RelayCommand(() => this.AcceptAppealForUser(this.SelectedAppealUser));
+            this.KeepBanCommand = new RelayCommand(async () => 
+            {
+                try
+                {
+                    await this.KeepBanForUser(this.SelectedAppealUser);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error in KeepBanCommand: {ex.Message}");
+                }
+            });
+            this.AcceptAppealCommand = new RelayCommand(async () => 
+            {
+                try
+                {
+                    await this.AcceptAppealForUser(this.SelectedAppealUser);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error in AcceptAppealCommand: {ex.Message}");
+                }
+            });
             this.CloseAppealCaseCommand = new RelayCommand(() => this.CloseAppealCase(this.SelectedAppealUser));
 
-            this.HandleUpgradeRequestCommand = new RelayCommand<Tuple<bool, int>>(param =>
-                this.HandleUpgradeRequest(param.Item1, param.Item2));
+            this.HandleUpgradeRequestCommand = new RelayCommand<Tuple<bool, int>>(async param =>
+                await this.HandleUpgradeRequest(param.Item1, param.Item2));
 
             this.ResetReviewFlagsCommand = new RelayCommand<int>(reviewId =>
                 this.ResetReviewFlags(reviewId));
@@ -488,10 +584,26 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             this.HideReviewCommand = new RelayCommand<int>(param =>
                 this.HideReview(param));
 
-            this.RunAICheckCommand = new RelayCommand<Review>(review =>
-                this.RunAICheck(review));
+            this.RunAICheckCommand = new RelayCommand<Review>(async review =>
+                await this.RunAICheck(review));
 
-            this.RunAutoCheckCommand = new RelayCommand(() => this.RunAutoCheck());
+            this.RunAutoCheckCommand = new RelayCommand(async () => 
+            {
+                try 
+                {
+                    var messages = await this.RunAutoCheck();
+                    // You might want to show these messages to the user
+                    System.Diagnostics.Debug.WriteLine("Auto check completed with messages:");
+                    foreach (var message in messages)
+                    {
+                        System.Diagnostics.Debug.WriteLine(message);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error in RunAutoCheckCommand: {ex.Message}");
+                }
+            });
 
             this.AddOffensiveWordCommand = new RelayCommand<string>(word =>
                 this.AddOffensiveWord(word));

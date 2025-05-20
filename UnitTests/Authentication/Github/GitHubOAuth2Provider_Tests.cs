@@ -1,8 +1,8 @@
 ﻿using System;
-using DrinkDb_Auth.OAuthProviders;
-using DrinkDb_Auth.AuthProviders.Github;
 using Tests;
 using Xunit;
+using DataAccess.AuthProviders.Github;
+using DataAccess.OAuthProviders;
 
 namespace TestTest.Authentication.Github
 {

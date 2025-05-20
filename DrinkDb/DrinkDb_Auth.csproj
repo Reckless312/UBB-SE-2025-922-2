@@ -89,15 +89,13 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.3" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.5" />
 	  <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Database\" />
+    <Folder Include="Service Proxy\" />
     <Folder Include="View\AdminDashboard\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="AuthProviders\AuthenticationResponse.cs" />
   </ItemGroup>
 	<ItemGroup>
 		<Page Update="Views\MainPage.xaml">
@@ -119,11 +117,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-	<ItemGroup>
-		<None Update="AutoChecker\offensive_words.txt">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<CodeAnalysisRuleSet>SE.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>

@@ -2,7 +2,6 @@ namespace UnitTests.Autocheck
 {
     using System;
     using System.IO;
-    using DrinkDb_Auth.AutoChecker;
     using DrinkDb_Auth.ProxyRepository.AdminDashboard;
     using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;

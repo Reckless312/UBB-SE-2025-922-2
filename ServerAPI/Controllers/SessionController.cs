@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using DataAccess.Model.Authentication;
-using Repository.Authentication;
-using IRepository;
+using DataAccess.Service.Authentication.Interfaces;
+
 
 namespace ServerAPI.Controllers
 {
@@ -9,35 +9,35 @@ namespace ServerAPI.Controllers
     [Route("api/sessions")]
     public class SessionController : ControllerBase
     {
-        private ISessionRepository repository;
+        private ISessionService sessionService;
 
-        public SessionController(ISessionRepository repository)
+        public SessionController(ISessionService service)
         {
-            this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            this.sessionService = service ?? throw new ArgumentNullException(nameof(service));
         }
 
         [HttpPost("add")]
         public async Task<Session> CreateSession([FromQuery] Guid userId)
         {
-            return await repository.CreateSession(userId);
+            return await this.sessionService.CreateSessionAsync(userId);
         }
 
         [HttpPatch("end")]
         public async Task<bool> EndSession([FromQuery] Guid sessionId)
         {
-            return await repository.EndSession(sessionId);
+            return await this.sessionService.EndSessionAsync(sessionId);
         }
 
         [HttpGet("{id}")]
         public async Task<Session> GetSession(Guid id)
         { 
-            return await repository.GetSession(id);
+            return await this.sessionService.GetSessionAsync(id);
         }
         
         [HttpGet("byUserId/{id}")]
         public async Task<Session> GetSessionByUserID(Guid id)
         { 
-            return await repository.GetSessionByUserId(id);
+            return await this.sessionService.GetSessionByUserIdAsync(id);
         }
     }
 }

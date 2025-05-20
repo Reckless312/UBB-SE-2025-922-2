@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using DrinkDb_Auth.OAuthProviders;
+using DataAccess.OAuthProviders;
+using DataAccess.Service.Authentication;
 using DrinkDb_Auth.Service;
 using DrinkDb_Auth.Service.Authentication;
 using Tests;
@@ -12,13 +13,7 @@ namespace TestTest.Service
     {
         private AuthenticationService CreateService(MockBasicAuth basicAuth = null)
         {
-            return new AuthenticationService(
-                new MockLinkedInServer(),
-                new MockGitHubServer(),
-                new MockFacebookServer(),
-                new MockUserAdapter(),
-                new MockSessionAdapter(),
-                basicAuth ?? new MockBasicAuth()
+            return new AuthenticationService(null
             );
         }
 
@@ -30,7 +25,7 @@ namespace TestTest.Service
             var id = Guid.NewGuid();
             google.MockId = id;
 
-            var response = await service.AuthWithOAuth(null, OAuthService.Google, google);
+            var response = await service.AuthWithOAuth(OAuthService.Google, google);
 
             var expected = new AuthenticationResponse
             {
@@ -51,7 +46,7 @@ namespace TestTest.Service
             var id = Guid.NewGuid();
             facebook.MockId = id;
 
-            var response = await service.AuthWithOAuth(null, OAuthService.Facebook, facebook);
+            var response = await service.AuthWithOAuth(OAuthService.Facebook, facebook);
 
             var expected = new AuthenticationResponse
             {
@@ -72,7 +67,7 @@ namespace TestTest.Service
             var id = Guid.NewGuid();
             twitter.MockId = id;
 
-            var response = await service.AuthWithOAuth(null, OAuthService.Twitter, twitter);
+            var response = await service.AuthWithOAuth(OAuthService.Twitter, twitter);
 
             var expected = new AuthenticationResponse
             {
@@ -93,7 +88,7 @@ namespace TestTest.Service
             var id = Guid.NewGuid();
             github.MockId = id;
 
-            var response = await service.AuthWithOAuth(null, OAuthService.GitHub, github);
+            var response = await service.AuthWithOAuth(OAuthService.GitHub, github);
 
             var expected = new AuthenticationResponse
             {
@@ -114,7 +109,7 @@ namespace TestTest.Service
             var id = Guid.NewGuid();
             linkedin.MockId = id;
 
-            var response = await service.AuthWithOAuth(null, OAuthService.LinkedIn, linkedin);
+            var response = await service.AuthWithOAuth(OAuthService.LinkedIn, linkedin);
 
             var expected = new AuthenticationResponse
             {
@@ -133,13 +128,7 @@ namespace TestTest.Service
             var basicAuth = new MockBasicAuth { Succeeds = true };
             var userAdapter = new MockUserAdapter { MockId = Guid.NewGuid(), MockUsername = "testuser" };
             var sessionAdapter = new MockSessionAdapter { MockId = userAdapter.MockId };
-            var service = new AuthenticationService(
-                new MockLinkedInServer(),
-                new MockGitHubServer(),
-                new MockFacebookServer(),
-                userAdapter,
-                sessionAdapter,
-                basicAuth
+            var service = new AuthenticationService(null
             );
 
             var response = await service.AuthWithUserPass(userAdapter.MockUsername, string.Empty);
@@ -180,13 +169,7 @@ namespace TestTest.Service
             var basicAuth = new MockBasicAuth { Succeeds = true };
             var userAdapter = new MockUserAdapter { MockId = Guid.Parse("12345678-1234-1234-1234-1234567890ab"), MockUsername = "testuser" };
             var sessionAdapter = new MockSessionAdapter { MockId = userAdapter.MockId };
-            var service = new AuthenticationService(
-                new MockLinkedInServer(),
-                new MockGitHubServer(),
-                new MockFacebookServer(),
-                userAdapter,
-                sessionAdapter,
-                basicAuth
+            var service = new AuthenticationService(null
             );
 
             var response = await service.AuthWithUserPass("wronguser", string.Empty);
