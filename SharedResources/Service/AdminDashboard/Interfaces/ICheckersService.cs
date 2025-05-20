@@ -9,14 +9,14 @@
 
     public interface ICheckersService
     {
-        public List<string> RunAutoCheck(List<Review> reviews);
+        public Task<List<string>> RunAutoCheck(List<Review> reviews);
 
         public HashSet<string> GetOffensiveWordsList();
 
-        public void AddOffensiveWord(string newWord);
+        public Task AddOffensiveWordAsync(string newWord);
 
-        public void DeleteOffensiveWord(string word);
+        public Task DeleteOffensiveWordAsync(string word);
 
-        public void RunAICheckForOneReview(Review review);
+        public Task RunAICheckForOneReviewAsync(Review review);
     }
 }

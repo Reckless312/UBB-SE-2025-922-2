@@ -282,10 +282,17 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             this.LoadFlaggedReviews();
         }
 
-        public void RunAICheck(Review review)
+        public async Task RunAICheck(Review review)
         {
-            this.checkersService.RunAICheckForOneReview(review);
-            this.LoadFlaggedReviews();
+            try
+            {
+                await this.checkersService.RunAICheckForOneReviewAsync(review);
+                await this.LoadFlaggedReviews();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in RunAICheck: {ex.Message}");
+            }
         }
 
         public async Task<List<string>> RunAutoCheck()
@@ -293,29 +300,55 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             try
             {
                 var reviews = await this.reviewsService.GetFlaggedReviews();
-                var messages = this.checkersService.RunAutoCheck(reviews);
+                var messages = await Task.Run(() => this.checkersService.RunAutoCheck(reviews));
                 await this.LoadFlaggedReviews();
                 return messages;
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"Error in RunAutoCheck: {ex.Message}");
                 throw;
             }
         }
 
-        public void AddOffensiveWord(string word)
+        public async void AddOffensiveWord(string word)
         {
-            if (!string.IsNullOrWhiteSpace(word))
+            if (string.IsNullOrWhiteSpace(word))
             {
-                this.checkersService.AddOffensiveWord(word);
-                this.LoadOffensiveWords();
+                return;
+            }
+
+            try
+            {
+                await this.checkersService.AddOffensiveWordAsync(word);
+                this.offensiveWords.Add(word);
+                OnPropertyChanged(nameof(this.OffensiveWords));
+            }
+            catch (Exception ex)
+            {
+                // Handle error appropriately
+                System.Diagnostics.Debug.WriteLine($"Error adding offensive word: {ex.Message}");
             }
         }
 
-        public void DeleteOffensiveWord(string word)
+        public async void DeleteOffensiveWord(string word)
         {
-            this.checkersService.DeleteOffensiveWord(word);
-            this.LoadOffensiveWords();
+            if (string.IsNullOrWhiteSpace(word))
+            {
+                return;
+            }
+
+            try
+            {
+                await this.checkersService.DeleteOffensiveWordAsync(word);
+                this.offensiveWords.Remove(word);
+                OnPropertyChanged(nameof(this.OffensiveWords));
+            }
+            catch (Exception ex)
+            {
+                // Handle error appropriately
+                System.Diagnostics.Debug.WriteLine($"Error deleting offensive word: {ex.Message}");
+            }
         }
 
         public void HandleUpgradeRequest(bool isAccepted, int requestId)
@@ -532,7 +565,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
                 }
                 catch (Exception ex)
                 {
-                    // err
+                    System.Diagnostics.Debug.WriteLine($"Error in KeepBanCommand: {ex.Message}");
                 }
             });
             this.AcceptAppealCommand = new RelayCommand(async () => 
@@ -543,7 +576,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
                 }
                 catch (Exception ex)
                 {
-                    // err
+                    System.Diagnostics.Debug.WriteLine($"Error in AcceptAppealCommand: {ex.Message}");
                 }
             });
             this.CloseAppealCaseCommand = new RelayCommand(() => this.CloseAppealCase(this.SelectedAppealUser));
@@ -557,18 +590,24 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             this.HideReviewCommand = new RelayCommand<int>(param =>
                 this.HideReview(param));
 
-            this.RunAICheckCommand = new RelayCommand<Review>(review =>
-                this.RunAICheck(review));
+            this.RunAICheckCommand = new RelayCommand<Review>(async review =>
+                await this.RunAICheck(review));
 
             this.RunAutoCheckCommand = new RelayCommand(async () => 
             {
                 try 
                 {
                     var messages = await this.RunAutoCheck();
+                    // You might want to show these messages to the user
+                    System.Diagnostics.Debug.WriteLine("Auto check completed with messages:");
+                    foreach (var message in messages)
+                    {
+                        System.Diagnostics.Debug.WriteLine(message);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    // err
+                    System.Diagnostics.Debug.WriteLine($"Error in RunAutoCheckCommand: {ex.Message}");
                 }
             });
 

@@ -2,6 +2,9 @@
 using DataAccess.Model.AutoChecker;
 using DataAccess.Service.AdminDashboard.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ServerAPI.Controllers
 {
@@ -29,27 +32,51 @@ namespace ServerAPI.Controllers
         }
 
         [HttpPost("add")]
-        public void AddOffensiveWord(OffensiveWord word)
+        public async Task<IActionResult> AddOffensiveWord(OffensiveWord word)
         {
-            checkersService.AddOffensiveWord(word.Word);
+            try
+            {
+                await checkersService.AddOffensiveWordAsync(word.Word);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete("delete/{word}")]
-        public void DeleteWord(string word)
+        public async Task<IActionResult> DeleteWord(string word)
         {
-            checkersService.DeleteOffensiveWord(word);
+            try
+            {
+                await checkersService.DeleteOffensiveWordAsync(word);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost("check")]
-        public List<string> CheckReviews([FromBody] List<Review> reviews)
+        public async Task<List<string>> CheckReviews([FromBody] List<Review> reviews)
         {
-            return checkersService.RunAutoCheck(reviews);
+            return await checkersService.RunAutoCheck(reviews);
         }
 
         [HttpPost("checkOne")]
-        public void CheckOneReview([FromBody] Review review)
+        public async Task<IActionResult> CheckOneReview([FromBody] Review review)
         {
-            checkersService.RunAICheckForOneReview(review);
+            try
+            {
+                await checkersService.RunAICheckForOneReviewAsync(review);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

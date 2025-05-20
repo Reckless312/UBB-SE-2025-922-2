@@ -22,59 +22,59 @@ namespace DrinkDb_Auth.ServerProxy
             this.baseUrl = baseUrl.TrimEnd('/');
         }
 
-        public List<string> RunAutoCheck(List<Review> reviews)
+        public async Task<List<string>> RunAutoCheck(List<Review> reviews)
         {
-            List<string> checkingMessages = new List<string>();
-            foreach (Review currentReview in reviews)
+            try
             {
-                bool reviewIsOffensive = AutoCheckReview(currentReview.Content);
-                if (reviewIsOffensive)
-                {
-                    checkingMessages.Add($"Review {currentReview.ReviewId} is offensive. Hiding the review.");
-                }
-                else
-                {
-                    checkingMessages.Add($"Review {currentReview.ReviewId} is not offensive.");
-                }
+                HttpResponseMessage response = await this.httpClient.PostAsJsonAsync($"{this.baseUrl}/{ApiBaseRoute}/check", reviews);
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadFromJsonAsync<List<string>>() ?? new List<string>();
             }
-            return checkingMessages;
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in RunAutoCheck: {ex.Message}");
+                return new List<string>();
+            }
         }
 
         public HashSet<string> GetOffensiveWordsList()
         {
-            return LoadOffensiveWords().Result;
+            return LoadOffensiveWords().GetAwaiter().GetResult();
         }
 
-        public void AddOffensiveWord(string newWord)
+        public async Task AddOffensiveWordAsync(string newWord)
         {
             if (string.IsNullOrWhiteSpace(newWord))
             {
                 return;
             }
-            AddWord(newWord).Wait();
+            await AddWord(newWord);
         }
 
-        public void DeleteOffensiveWord(string word)
+        public async Task DeleteOffensiveWordAsync(string word)
         {
             if (string.IsNullOrWhiteSpace(word))
             {
                 return;
             }
-            DeleteWord(word).Wait();
+            await DeleteWord(word);
         }
 
-        public void RunAICheckForOneReview(Review review)
+        public async Task RunAICheckForOneReviewAsync(Review review)
         {
             if (review?.Content == null)
             {
                 return;
             }
 
-            bool reviewIsOffensive = AutoCheckReview(review.Content);
-            if (reviewIsOffensive)
+            try
             {
-                // Note: This would need to be handled by the calling service
-                // as we don't have direct access to the review service here
+                HttpResponseMessage response = await this.httpClient.PostAsJsonAsync($"{this.baseUrl}/{ApiBaseRoute}/checkOne", review);
+                response.EnsureSuccessStatusCode();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in RunAICheckForOneReviewAsync: {ex.Message}");
             }
         }
 
@@ -109,49 +109,24 @@ namespace DrinkDb_Auth.ServerProxy
 
             if (!wordExists)
             {
-                HttpResponseMessage addResponse = await this.httpClient.PostAsJsonAsync($"{this.baseUrl}/{ApiBaseRoute}/add", new OffensiveWord { Word = word });
-                addResponse.EnsureSuccessStatusCode();
+                HttpResponseMessage postResponse = await this.httpClient.PostAsJsonAsync($"{this.baseUrl}/{ApiBaseRoute}/add", new OffensiveWord { Word = word });
+                postResponse.EnsureSuccessStatusCode();
             }
         }
 
         private async Task DeleteWord(string word)
         {
-            HttpResponseMessage response = await this.httpClient.GetAsync($"{this.baseUrl}/{ApiBaseRoute}");
+            HttpResponseMessage response = await this.httpClient.DeleteAsync($"{this.baseUrl}/{ApiBaseRoute}/delete/{Uri.EscapeDataString(word)}");
             response.EnsureSuccessStatusCode();
-
-            List<OffensiveWord> offensiveWords = await response.Content.ReadFromJsonAsync<List<OffensiveWord>>() ?? new List<OffensiveWord>();
-            
-            bool wordExists = false;
-            foreach (OffensiveWord offensive in offensiveWords)
-            {
-                if (offensive.Word == word)
-                {
-                    wordExists = true;
-                    break;
-                }
-            }
-
-            if (wordExists)
-            {
-                HttpResponseMessage deleteResponse = await this.httpClient.DeleteAsync($"{this.baseUrl}/{ApiBaseRoute}/delete/{word}");
-                deleteResponse.EnsureSuccessStatusCode();
-            }
         }
 
         private async Task<HashSet<string>> LoadOffensiveWords()
         {
             HttpResponseMessage response = await this.httpClient.GetAsync($"{this.baseUrl}/{ApiBaseRoute}");
             response.EnsureSuccessStatusCode();
-            
+
             List<OffensiveWord> offensiveWords = await response.Content.ReadFromJsonAsync<List<OffensiveWord>>() ?? new List<OffensiveWord>();
-            HashSet<string> wordsAsStrings = new HashSet<string>();
-            
-            foreach (OffensiveWord word in offensiveWords)
-            {
-                wordsAsStrings.Add(word.Word);
-            }
-            
-            return wordsAsStrings;
+            return new HashSet<string>(offensiveWords.Select(w => w.Word), StringComparer.OrdinalIgnoreCase);
         }
     }
 } 

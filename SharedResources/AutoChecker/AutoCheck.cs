@@ -10,19 +10,24 @@ namespace DataAccess.AutoChecker
     using System.Linq;
     using IRepository;
     using Microsoft.Data.SqlClient;
+    using System.Threading.Tasks;
 
     public class AutoCheck : IAutoCheck
     {
         private readonly IOffensiveWordsRepository repository;
-        private readonly HashSet<string> offensiveWords;
+        private HashSet<string> offensiveWords;
 
         private static readonly char[] WordDelimiters = new[] { ' ', ',', '.', '!', '?', ';', ':', '\n', '\r', '\t' };
 
         public AutoCheck(IOffensiveWordsRepository repository)
         {
             this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
-            // Had to add result
-            this.offensiveWords = this.repository.LoadOffensiveWords().Result;
+            InitializeOffensiveWords().GetAwaiter().GetResult();
+        }
+
+        private async Task InitializeOffensiveWords()
+        {
+            this.offensiveWords = await this.repository.LoadOffensiveWords();
         }
 
         public bool AutoCheckReview(string reviewText)
@@ -36,7 +41,7 @@ namespace DataAccess.AutoChecker
             return words.Any(word => offensiveWords.Contains(word, StringComparer.OrdinalIgnoreCase));
         }
 
-        public void AddOffensiveWord(string newWord)
+        public async Task AddOffensiveWordAsync(string newWord)
         {
             if (string.IsNullOrWhiteSpace(newWord))
             {
@@ -48,11 +53,11 @@ namespace DataAccess.AutoChecker
                 return;
             }
 
-            repository.AddWord(newWord);
+            await repository.AddWord(newWord);
             offensiveWords.Add(newWord);
         }
 
-        public void DeleteOffensiveWord(string word)
+        public async Task DeleteOffensiveWordAsync(string word)
         {
             if (string.IsNullOrWhiteSpace(word))
             {
@@ -64,7 +69,7 @@ namespace DataAccess.AutoChecker
                 return;
             }
 
-            repository.DeleteWord(word);
+            await repository.DeleteWord(word);
             offensiveWords.Remove(word);
         }
 

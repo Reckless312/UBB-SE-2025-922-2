@@ -27,7 +27,7 @@
             this.autoCheck = autoCheck;
         }
 
-        public List<string> RunAutoCheck(List<Review> receivedReviews)
+        public async Task<List<string>> RunAutoCheck(List<Review> receivedReviews)
         {
             if (receivedReviews == null)
             {
@@ -47,8 +47,10 @@
                 if (reviewIsOffensive)
                 {
                     checkingMessages.Add($"Review {currentReview.ReviewId} is offensive. Hiding the review.");
-                    this.reviewsService.HideReview(currentReview.ReviewId);
-                    this.reviewsService.ResetReviewFlags(currentReview.ReviewId);
+                    await Task.Run(() => {
+                        this.reviewsService.HideReview(currentReview.ReviewId);
+                        this.reviewsService.ResetReviewFlags(currentReview.ReviewId);
+                    });
                 }
                 else
                 {
@@ -64,47 +66,54 @@
             return this.autoCheck?.GetOffensiveWordsList() ?? new HashSet<string>();
         }
 
-        public void AddOffensiveWord(string newWord)
+        public async Task AddOffensiveWordAsync(string newWord)
         {
             if (string.IsNullOrWhiteSpace(newWord))
             {
                 return;
             }
 
-            this.autoCheck?.AddOffensiveWord(newWord);
+            if (this.autoCheck != null)
+            {
+                await this.autoCheck.AddOffensiveWordAsync(newWord);
+            }
         }
 
-        public void DeleteOffensiveWord(string word)
+        public async Task DeleteOffensiveWordAsync(string word)
         {
             if (string.IsNullOrWhiteSpace(word))
             {
                 return;
             }
 
-            this.autoCheck?.DeleteOffensiveWord(word);
+            if (this.autoCheck != null)
+            {
+                await this.autoCheck.DeleteOffensiveWordAsync(word);
+            }
         }
 
-        public void RunAICheckForOneReview(Review review)
+        public async Task RunAICheckForOneReviewAsync(Review review)
         {
             if (review?.Content == null)
             {
                 return;
             }
 
-            bool reviewIsOffensive = CheckReviewWithAI(review);
+            bool reviewIsOffensive = await Task.Run(() => CheckReviewWithAI(review));
             if (!reviewIsOffensive)
             {
                 return;
             }
 
-            this.reviewsService.HideReview(review.ReviewId);
-            this.reviewsService.ResetReviewFlags(review.ReviewId);
+            await Task.Run(() => {
+                this.reviewsService.HideReview(review.ReviewId);
+                this.reviewsService.ResetReviewFlags(review.ReviewId);
+            });
         }
 
         private static bool CheckReviewWithAI(Review review)
         {
             if (review?.Content == null)
-
             {
                 return false;
             }
@@ -140,15 +149,17 @@
                         }
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    System.Diagnostics.Debug.WriteLine($"Error parsing AI response: {ex.Message}");
                     return false;
                 }
 
                 return false;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"Error in AI check: {ex.Message}");
                 return false;
             }
         }

@@ -15,9 +15,9 @@ namespace DataAccess.AutoChecker
     {
         public bool AutoCheckReview(string reviewText);
 
-        public void AddOffensiveWord(string newWord);
+        public Task AddOffensiveWordAsync(string newWord);
 
-        public void DeleteOffensiveWord(string word);
+        public Task DeleteOffensiveWordAsync(string word);
 
         public HashSet<string> GetOffensiveWordsList();
     }
