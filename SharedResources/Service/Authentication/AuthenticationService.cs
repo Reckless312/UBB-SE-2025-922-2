@@ -61,7 +61,7 @@ namespace DataAccess.Service.Authentication
             {
                 //OAuthService.Google => await AuthenticateWithGoogleAsync(window, authProvider as IGoogleOAuth2Provider),
                 OAuthService.Facebook => await AuthenticateWithFacebookAsync(authProvider as IFacebookOAuthHelper),
-                OAuthService.Twitter => await AuthenticateWithTwitterAsync(authProvider as ITwitterOAuth2Provider),
+                //OAuthService.Twitter => await AuthenticateWithTwitterAsync(authProvider as ITwitterOAuth2Provider),
                 OAuthService.GitHub => await AuthenticateWithGitHubAsync(authProvider as IGitHubOAuthHelper),
                 OAuthService.LinkedIn => await AuthenticateWithLinkedInAsync(authProvider as ILinkedInOAuthHelper),
                 _ => throw new ArgumentException("Invalid OAuth service selected"),
@@ -179,10 +179,10 @@ namespace DataAccess.Service.Authentication
             return await faceBookHelper.AuthenticateAsync();
         }
 
-        private static async Task<AuthenticationResponse> AuthenticateWithTwitterAsync(ITwitterOAuth2Provider twitterProvider)
-        {
-            return await twitterProvider.SignInWithTwitterAsync();
-        }
+        //private static async Task<AuthenticationResponse> AuthenticateWithTwitterAsync(ITwitterOAuth2Provider twitterProvider)
+        //{
+        //    return await twitterProvider.SignInWithTwitterAsync();
+        //}
 
         private static async Task<AuthenticationResponse> AuthenticateWithLinkedInAsync(ILinkedInOAuthHelper linkedInHelper)
         {
