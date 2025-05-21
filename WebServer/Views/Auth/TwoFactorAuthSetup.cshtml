@@ -12,9 +12,15 @@
             then enter the 6‑digit code:
         </p>
 
-        <!-- dynamic src via model later -->
         <div class="d-flex justify-content-center mb-3">
-            <img src="~/images/placeholder-qr.png" alt="QR Code" width="200" height="200" />
+            @if (ViewBag.QRCode != null)
+            {
+                <img src="@ViewBag.QRCode" alt="QR Code" width="200" height="200" />
+            }
+            else
+            {
+                <p class="text-danger">Failed to generate QR code. Please try again.</p>
+            }
         </div>
 
         <form asp-action="VerifySetupCode" method="post">

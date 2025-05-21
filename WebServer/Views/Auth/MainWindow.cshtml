@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "DrinkDb - Sign In";
 }
 
@@ -17,16 +16,25 @@
             <div class="w-75">
                 <h2 class="text-center mb-4">Sign In</h2>
 
-                <!-- Username -->
-                <label for="username" class="form-label">Username</label>
-                <input type="text" id="username" class="form-control mb-3" placeholder="Enter username">
+                <!-- Error Message -->
+                @if (ViewBag.ErrorMessage != null)
+                {
+                    <div class="alert alert-danger text-center">@ViewBag.ErrorMessage</div>
+                }
 
-                <!-- Password -->
-                <label for="password" class="form-label">Password</label>
-                <input type="password" id="password" class="form-control mb-4" placeholder="Enter password">
+                <!-- Sign In Form -->
+                <form asp-action="ManualLogin" method="post">
+                    <!-- Username -->
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" id="username" name="username" class="form-control mb-3" placeholder="Enter username" required />
 
-                <!-- Local Sign In -->
-                <button class="btn btn-primary w-100 mb-4">Sign In</button>
+                    <!-- Password -->
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-control mb-4" placeholder="Enter password" required />
+
+                    <!-- Local Sign In -->
+                    <button type="submit" class="btn btn-primary w-100 mb-4">Sign In</button>
+                </form>
 
                 <!-- OR Separator -->
                 <div class="d-flex align-items-center my-4">
@@ -41,10 +49,27 @@
                     Sign in with Google
                 </button>
 
-                <button class="btn btn-light w-100 mb-3 d-flex align-items-center justify-content-center">
+                <button class="btn btn-light w-100 mb-3 d-flex align-items-center justify-content-center" onclick="openGitHubLogin()">
                     <img src="/Assets/github_logo.png" class="me-2" width="20" height="20" />
                     Sign in with GitHub
                 </button>
+                <script>
+                    function openGitHubLogin() {
+                        const width = 600;
+                        const height = 700;
+                        const left = (screen.width / 2) - (width / 2);
+                        const top = (screen.height / 2) - (height / 2);
+                        const popup = window.open('/Auth/GitHubLogin', 'GitHub Login', `width=${width},height=${height},top=${top},left=${left}`);
+
+                        const interval = setInterval(() => {
+                            if (popup.closed) {
+                                clearInterval(interval);
+                                window.location.reload();
+                            }
+                        }, 500);
+                    }
+                </script>
+
 
                 <button class="btn w-100 text-white mb-3 d-flex align-items-center justify-content-center" style="background-color: #3b5998;">
                     <img src="/Assets/facebook_logo.png" class="me-2" width="20" height="20" />
@@ -70,4 +95,3 @@
         </div>
     </div>
 </div>
-

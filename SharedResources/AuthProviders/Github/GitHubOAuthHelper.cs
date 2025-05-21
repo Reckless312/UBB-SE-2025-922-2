@@ -37,20 +37,25 @@ namespace DataAccess.AuthProviders.Github
 
         private async void OnCodeReceived(string code)
         {
+            Debug.WriteLine($"OnCodeReceived called with code: {code}");
             if (taskCompletionSource == null || taskCompletionSource.Task.IsCompleted)
             {
+                Debug.WriteLine("OnCodeReceived: taskCompletionSource is null or already completed.");
                 return;
             }
 
             try
             {
-                // Exchange code for an access token
+                Debug.WriteLine("Exchanging code for token...");
                 var token = await ExchangeCodeForToken(code);
+                Debug.WriteLine($"Token received: {token}");
                 var result = gitHubOAuth2Provider.Authenticate(string.Empty, token);
                 taskCompletionSource.SetResult(result);
+                Debug.WriteLine("Authentication result set.");
             }
             catch (Exception exception)
             {
+                Debug.WriteLine($"Exception in OnCodeReceived: {exception}");
                 taskCompletionSource.SetException(exception);
             }
         }
