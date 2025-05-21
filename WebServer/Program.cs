@@ -121,7 +121,7 @@ static void DependencyInjection(WebApplicationBuilder builder)
         "86j0ikb93jm78x",
         "WPL_AP1.pg2Bd1XhCi821VTG.+hatTA==",
         "http://localhost:8891/auth",
-        "openid profile email"
+        "r_liteprofile r_emailaddress"
     ));
 
     // Other supporting services
@@ -141,4 +141,8 @@ static void DependencyInjection(WebApplicationBuilder builder)
     builder.Services.AddScoped<IFacebookLocalOAuthServer>(sp =>
         new FacebookLocalOAuthServer("http://localhost:8888/"));
 
+    var provider = builder.Services.BuildServiceProvider();
+    var userRepository = provider.GetRequiredService<IUserRepository>();
+    var sessionRepository = provider.GetRequiredService<ISessionRepository>();
+    LinkedInOAuth2Provider.Initialize(userRepository, sessionRepository);
 }

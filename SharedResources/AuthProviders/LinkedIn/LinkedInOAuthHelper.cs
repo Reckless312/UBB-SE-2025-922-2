@@ -15,7 +15,7 @@ namespace DataAccess.AuthProviders.LinkedIn
         private readonly string clientId = "86j0ikb93jm78x";
         private readonly string clientSecret = "WPL_AP1.pg2Bd1XhCi821VTG.+hatTA==";
         private readonly string redirectUrl = "http://localhost:8891/auth";
-        private readonly string scope = "openid profile email";
+        private readonly string scope = "r_liteprofile r_emailaddress";
         private TaskCompletionSource<AuthenticationResponse>? taskCompletionSource;
         private readonly static LinkedInOAuth2Provider LinkedInOAuth2Provider = new ();
 
