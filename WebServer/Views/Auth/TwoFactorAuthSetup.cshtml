@@ -1,15 +1,20 @@
 ﻿@{
-    ViewData["Title"] = "Set up two‑factor authentication";
+    ViewData["Title"] = "Set up two-factor authentication";
 }
 
 <div class="container d-flex justify-content-center align-items-center" style="min-height:80vh;">
     <div class="card p-4 shadow-sm" style="max-width:420px;width:100%;">
-        <!-- missing title added -->
-        <h4 class="text-center fw-semibold mb-3">Set up two‑factor auth</h4>
+        <h4 class="text-center fw-semibold mb-3">Set up two-factor auth</h4>
+
+        @* Show error message if present *@
+        @if (ViewBag.ErrorMessage != null)
+        {
+            <div class="alert alert-danger text-center mb-3">@ViewBag.ErrorMessage</div>
+        }
 
         <p class="text-center small mb-3">
             Scan the QR code with your authenticator app,<br />
-            then enter the 6‑digit code:
+            then enter the 6-digit code:
         </p>
 
         <div class="d-flex justify-content-center mb-3">
@@ -23,12 +28,14 @@
             }
         </div>
 
-        <form asp-action="VerifySetupCode" method="post">
+        <form asp-action="VerifySetupCode" method="post" autocomplete="off">
+            <input type="hidden" name="username" value="@ViewBag.Username" />
             <div class="d-flex justify-content-center mb-3">
-                @for (int i = 0; i<6; i++)
+                @for (int i = 0; i < 6; i++)
                 {
-                    <input type="text" name="d@i" maxlength="1"
-                           class="form-control mx-1 text-center code-box" style="width:40px;" />
+                    <input type="text" name="digit[@i]" maxlength="1"
+                           class="form-control mx-1 text-center code-box"
+                           style="width:40px;" inputmode="numeric" pattern="[0-9]*" autocomplete="off" />
                 }
             </div>
 

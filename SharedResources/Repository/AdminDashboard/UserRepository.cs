@@ -173,8 +173,23 @@
         {
             try
             {
-                _context.Users.Update(user);
+                User? dbUser = await _context.Users.FindAsync(user.UserId);
+                if (dbUser == null)
+                    throw new ArgumentException($"No user found with ID {user.UserId}");
+                dbUser.Username = user.Username;
+                dbUser.PasswordHash = user.PasswordHash;
+                dbUser.EmailAddress = user.EmailAddress;
+                dbUser.NumberOfDeletedReviews = user.NumberOfDeletedReviews;
+                dbUser.HasSubmittedAppeal = user.HasSubmittedAppeal;
+                dbUser.AssignedRole = user.AssignedRole;
+                dbUser.FullName = user.FullName;
+                if (!string.IsNullOrEmpty(user.TwoFASecret) && user.TwoFASecret != dbUser.TwoFASecret)
+                {
+                    dbUser.TwoFASecret = user.TwoFASecret;
+                }
+
                 return await _context.SaveChangesAsync() > 0;
+
             }
             catch (Exception ex)
             {

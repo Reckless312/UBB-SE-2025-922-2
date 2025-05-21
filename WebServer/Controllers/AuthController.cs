@@ -62,6 +62,13 @@ namespace WebServer.Controllers
                 return View("MainWindow");
             }
             User? user = await this.authenticationService.GetUser(authResponse.SessionId);
+            if (string.IsNullOrEmpty(user.TwoFASecret) || !IsValidBase32(user.TwoFASecret))
+            {
+                System.Diagnostics.Debug.WriteLine("GitHubLogin: Generating new TwoFASecret for existing user");
+                var key = KeyGeneration.GenerateRandomKey(20);
+                user.TwoFASecret = Base32Encoding.ToString(key);
+                await this.userService.UpdateUser(user);
+            }
             string qrCode = GenerateQRCode(user.Username, user.TwoFASecret);
             ViewBag.QRCode = $"data:image/png;base64, {qrCode}";
             System.Diagnostics.Debug.WriteLine((string)ViewBag.QRCode);
@@ -74,7 +81,7 @@ namespace WebServer.Controllers
             try
             {
                 System.Diagnostics.Debug.WriteLine("GitHubLogin: Starting GitHub authentication");
-                var authResponse = await this.gitHubOAuthHelper.AuthenticateAsync();
+                var authResponse = this.gitHubOAuthHelper.AuthenticateAsync().Result;
                 if(!authResponse.AuthenticationSuccessful)
                 {
                     System.Diagnostics.Debug.WriteLine("GitHub authentication failed");
@@ -96,7 +103,7 @@ namespace WebServer.Controllers
                         EmailAddress = userInfo.Email,
                         AssignedRole = RoleType.User,
                         PasswordHash = string.Empty,
-                        TwoFASecret = Guid.NewGuid().ToString("N"),
+                        TwoFASecret = Base32Encoding.ToString(KeyGeneration.GenerateRandomKey(20)),
                         NumberOfDeletedReviews = 0,
                         HasSubmittedAppeal = false
                     };
@@ -107,20 +114,15 @@ namespace WebServer.Controllers
                     System.Diagnostics.Debug.WriteLine("GitHubLogin: User exists, updating if necessary");
                     user = existingUser;
 
-                    if (string.IsNullOrEmpty(user.TwoFASecret))
+                    if (string.IsNullOrEmpty(user.TwoFASecret) || !IsValidBase32(user.TwoFASecret))
                     {
                         System.Diagnostics.Debug.WriteLine("GitHubLogin: Generating new TwoFASecret for existing user");
-                        user.TwoFASecret = Guid.NewGuid().ToString("N");
+                        var key = KeyGeneration.GenerateRandomKey(20);
+                        user.TwoFASecret = Base32Encoding.ToString(key);
                         await this.userService.UpdateUser(user);
                     }
                 }
-                var sessionResponse = await this.authenticationService.AuthWithOAuth(OAuthService.GitHub, this.gitHubOAuthHelper);
-                if (!sessionResponse.AuthenticationSuccessful)
-                {
-                    System.Diagnostics.Debug.WriteLine("GitHubLogin: Authentication failed");
-                    ViewBag.ErrorMessage = "GitHub authentication failed";
-                    return RedirectToAction("MainWindow");
-                }
+               
                 string qrCode = GenerateQRCode(user.Username, user.TwoFASecret);
                 ViewBag.QRCode = $"data:image/png;base64, {qrCode}";
                 ViewBag.Username = user.Username;
@@ -135,25 +137,40 @@ namespace WebServer.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> VerifySetupCode(string[] digit)
+        public async Task<IActionResult> VerifySetupCode(string[] digit, string username)
         {
+            if (string.IsNullOrEmpty(username))
+            {
+                System.Diagnostics.Debug.WriteLine("Username missing");
+                ViewBag.ErrorMessage = "Username is missing.";
+                return View("MainWindow");
+            }
+
             string enteredCode = string.Join("", digit);
-            string username = ViewBag.Username;
-            var user = await this.userService.GetUserByUsername(username);
-            if(user == null)
+            User user;
+            try
+            {
+                user = await this.userService.GetUserByUsername(username);
+            }
+            catch (ArgumentException)
             {
                 ViewBag.ErrorMessage = "User not found";
                 return View("MainWindow");
             }
+
             if (string.IsNullOrEmpty(user.TwoFASecret))
             {
                 ViewBag.ErrorMessage = "Two-factor authentication is not set up for this user.";
+                ViewBag.QRCode = $"data:image/png;base64, {GenerateQRCode(user.Username, user.TwoFASecret)}";
+                ViewBag.Username = user.Username;
                 return View("TwoFactorAuthSetup");
             }
             bool isCodeValid = VerifyTwoFactorCode(user.TwoFASecret, enteredCode);
-            if(!isCodeValid)
+            if (!isCodeValid)
             {
                 ViewBag.ErrorMessage = "Invalid 2FA code";
+                ViewBag.QRCode = $"data:image/png;base64, {GenerateQRCode(user.Username, user.TwoFASecret)}";
+                ViewBag.Username = user.Username;
                 return View("TwoFactorAuthSetup");
             }
             return RedirectToAction("UserPage", "User");
@@ -206,6 +223,18 @@ namespace WebServer.Controllers
         {
             var totp = new OtpNet.Totp(Base32Encoding.ToBytes(twoFASecret));
             return totp.VerifyTotp(enteredCode, out _, VerificationWindow.RfcSpecifiedNetworkDelay);
+        }
+
+        private static bool IsValidBase32(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return false;
+            foreach(char c in input.ToUpperInvariant())
+            {
+                if (!(c >= 'A' && c <= 'Z') && !(c >= '2' && c <= '7'))
+                    return false;
+            }
+            return true;
         }
     }
 }
