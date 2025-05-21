@@ -8,20 +8,16 @@
     using System.Security.Cryptography;
     using System.Text;
     using System.Text.Json.Serialization;
-    using System.Threading;
     using System.Threading.Tasks;
     using DataAccess.Model.AdminDashboard;
     using DataAccess.Model.Authentication;
     using DataAccess.OAuthProviders;
     using IRepository;
-    //using Microsoft.UI.Dispatching;
-    using Repository.AdminDashboard;
-    using Repository.Authentication;
 
     /// <summary>
     /// A PKCE-based OAuth 2.0 flow for Twitter in a WinUI desktop app.
     /// </summary>
-    public class TwitterOAuth2Provider : GenericOAuth2Provider, ITwitterOAuth2Provider
+    public class TwitterOAuth2Provider : ITwitterOAuth2Provider
     {
         private static readonly IUserRepository UserRepository;
         private static readonly ISessionRepository SessionAdapter;
@@ -206,12 +202,12 @@
                             AssignedRole = RoleType.Admin,
                             FullName = twitterUserInfoObject?.Data.Username,
                         };
-                        UserRepository.CreateUser(user);
+                        await UserRepository.CreateUser(user);
                     }
                     else
                     {
                         // Update existing user if needed
-                        UserRepository.UpdateUser(user);
+                        await UserRepository.UpdateUser(user);
                     }
 
                     Session userSession = SessionAdapter.CreateSession(user.UserId).Result;
@@ -249,12 +245,7 @@
             }
         }
 
-        public async Task<AuthenticationResponse> SignInWithTwitterAsync()
-        {
-            throw new NotFiniteNumberException();
-        }
-
-        private string ExtractQueryParameter(string fullUrl, string targetParameter)
+        public string ExtractQueryParameter(string fullUrl, string targetParameter)
         {
             var uriObject = new Uri(fullUrl);
             var queryString = uriObject.Query.TrimStart('?');
@@ -270,7 +261,7 @@
             throw new ArgumentException($"Parameter '{targetParameter}' not found in URL: {fullUrl}", nameof(fullUrl));
         }
 
-        private (string codeVerifier, string codeChallenge) GeneratePkceData()
+        public (string codeVerifier, string codeChallenge) GeneratePkceData()
         {
             // code_verifier: a random 43–128 char string
             var cryptographicRandomGenerator = RandomNumberGenerator.Create();
@@ -296,7 +287,7 @@
             }
         }
 
-        private TwitterUserInfoResponse ExtractUserInfoFromIdToken(string jwtIdToken)
+        public TwitterUserInfoResponse ExtractUserInfoFromIdToken(string jwtIdToken)
         {
             // Split JWT into header.payload.signature
             var tokenComponents = jwtIdToken.Split('.');

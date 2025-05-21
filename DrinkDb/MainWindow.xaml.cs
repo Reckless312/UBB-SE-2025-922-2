@@ -212,17 +212,13 @@ namespace DrinkDb_Auth
         {
             try
             {
-                this.XSignInButton.IsEnabled = false;
-                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(OAuthService.Twitter, new TwitterOAuth2Provider());
+                TwitterGuiHelper twitterGuiHelper = new TwitterGuiHelper(this, new TwitterOAuth2Provider());
+                AuthenticationResponse authResponse = await twitterGuiHelper.SignInWithTwitterAsync();
                 await this.AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
             {
                 await this.ShowError("Error", ex.Message);
-            }
-            finally
-            {
-                this.XSignInButton.IsEnabled = true;
             }
         }
 
