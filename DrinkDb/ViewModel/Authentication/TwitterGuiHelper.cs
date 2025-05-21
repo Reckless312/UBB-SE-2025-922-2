@@ -32,11 +32,11 @@ namespace DrinkDb_Auth.ViewModel.Authentication
 
         public async Task<AuthenticationResponse> SignInWithTwitterAsync()
         {
-            var twitterAuthenticationCompletion = new TaskCompletionSource<AuthenticationResponse>();
+            TaskCompletionSource<AuthenticationResponse> twitterAuthenticationCompletion = new TaskCompletionSource<AuthenticationResponse>();
 
             try
             {
-                var twitterLoginDialog = new ContentDialog
+                ContentDialog twitterLoginDialog = new ContentDialog
                 {
                     Title = "Sign in with Twitter",
                     CloseButtonText = "Cancel",
@@ -44,7 +44,7 @@ namespace DrinkDb_Auth.ViewModel.Authentication
                     XamlRoot = this.parentWindow.Content.XamlRoot,
                 };
 
-                var twitterLoginWebView = new WebView2
+                WebView2 twitterLoginWebView = new WebView2
                 {
                     Width = 450,
                     Height = 600,
@@ -57,7 +57,7 @@ namespace DrinkDb_Auth.ViewModel.Authentication
                 // Listen for navigations
                 twitterLoginWebView.CoreWebView2.NavigationStarting += async (sender, navigationArgs) =>
                 {
-                    var callbackUrl = navigationArgs.Uri;
+                    string callbackUrl = navigationArgs.Uri;
                     System.Diagnostics.Debug.WriteLine($"NavigationStarting -> {callbackUrl}");
 
                     // If it's the redirect back to our loopback, we parse out the code
@@ -65,13 +65,13 @@ namespace DrinkDb_Auth.ViewModel.Authentication
                     {
                         navigationArgs.Cancel = true; // don't actually navigate to 127.0.0.1 in the WebView
 
-                        var receivedAuthCode = this.authProvider.ExtractQueryParameter(callbackUrl, "code");
+                        string receivedAuthCode = this.authProvider.ExtractQueryParameter(callbackUrl, "code");
                         System.Diagnostics.Debug.WriteLine($"Found 'code' in callback: {receivedAuthCode}");
 
-                        var twitterAuthResponse = await this.authProvider.ExchangeCodeForTokenAsync(receivedAuthCode);
+                        AuthenticationResponse twitterAuthResponse = await this.authProvider.ExchangeCodeForTokenAsync(receivedAuthCode);
 
                         // Close the dialog and return
-                        parentWindow.DispatcherQueue.TryEnqueue(() =>
+                        this.parentWindow.DispatcherQueue.TryEnqueue(() =>
                         {
                             twitterLoginDialog.Hide();
                             twitterAuthenticationCompletion.SetResult(twitterAuthResponse);
@@ -83,7 +83,7 @@ namespace DrinkDb_Auth.ViewModel.Authentication
                 twitterLoginWebView.CoreWebView2.Navigate(this.authProvider.GetAuthorizationUrl());
 
                 // Display Twitter login dialog
-                var dialogCompletionResult = await twitterLoginDialog.ShowAsync();
+                ContentDialogResult dialogCompletionResult = await twitterLoginDialog.ShowAsync();
 
                 // If user closed the dialog manually before we got a code
                 if (!twitterAuthenticationCompletion.Task.IsCompleted)
