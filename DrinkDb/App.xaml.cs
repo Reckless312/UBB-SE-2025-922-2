@@ -180,7 +180,7 @@ namespace DrinkDb_Auth
                     ));
 
                     // Register Services
-                    services.AddSingleton<IAutoCheck, AutoCheckerProxy>();
+                    services.AddSingleton<IAutoCheck, AutoCheckerProxy>(sp => new AutoCheckerProxy("http://localhost:5280/"));
                     services.AddSingleton<IBasicAuthenticationProvider>(sp =>
                         new BasicAuthenticationProvider(sp.GetRequiredService<IUserRepository>()));
                     services.AddTransient<ITwoFactorAuthenticationService, TwoFactorAuthenticationService>();
