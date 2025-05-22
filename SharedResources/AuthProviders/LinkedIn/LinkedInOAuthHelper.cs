@@ -17,16 +17,16 @@ namespace DataAccess.AuthProviders.LinkedIn
         private readonly string redirectUrl = "http://localhost:8891/auth";
         private readonly string scope = "openid profile email";
         private TaskCompletionSource<AuthenticationResponse>? taskCompletionSource;
-        private readonly LinkedInOAuth2Provider linkedInOAuth2Provider;
+        private LinkedInOAuth2Provider linkedInOAuth2Provider;
 
-        public LinkedInOAuthHelper(string clientId, string clientSecret, string redirectUri, string scope, LinkedInOAuth2Provider linkedInOAuth2Provider)
+        public LinkedInOAuthHelper(string clientId, string clientSecret, string redirectUri, string scope, LinkedInOAuth2Provider provider)
         {
             this.clientId = clientId;
             this.clientSecret = clientSecret;
             redirectUrl = redirectUri;
             this.scope = scope;
-            this.linkedInOAuth2Provider = linkedInOAuth2Provider;
             LinkedInLocalOAuthServer.OnCodeReceived += OnCodeReceived;
+            linkedInOAuth2Provider = provider;
         }
 
         private string BuildAuthorizeUrl()

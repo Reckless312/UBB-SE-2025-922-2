@@ -8,8 +8,7 @@ namespace DataAccess.AuthProviders.Facebook
 {
     public class FacebookOAuthHelper : IFacebookOAuthHelper
     {
-        private static readonly FacebookOAuth2Provider FacebookOAuth2Provider;
-        private static readonly SessionRepository SessionAdapter;
+        private FacebookOAuth2Provider FacebookOAuth2Provider;
 
         private const string ClientId = "667671795847732";
         private string redirectUri = "http://localhost:8888/auth";
@@ -25,10 +24,11 @@ namespace DataAccess.AuthProviders.Facebook
 
         private TaskCompletionSource<AuthenticationResponse> taskCompletionSource;
 
-        public FacebookOAuthHelper()
+        public FacebookOAuthHelper(FacebookOAuth2Provider provider)
         {
             taskCompletionSource = new TaskCompletionSource<AuthenticationResponse>();
             FacebookLocalOAuthServer.OnTokenReceived += OnTokenReceived;
+            this.FacebookOAuth2Provider = provider;
         }
 
         private void OnTokenReceived(string accessToken)

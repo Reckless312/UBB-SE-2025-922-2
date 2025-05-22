@@ -37,9 +37,9 @@ namespace DrinkDb_Auth.ServerProxy
             }
         }
 
-        public HashSet<string> GetOffensiveWordsList()
+        public async Task<HashSet<string>> GetOffensiveWordsList()
         {
-            return LoadOffensiveWords().GetAwaiter().GetResult();
+            return await LoadOffensiveWords();
         }
 
         public async Task AddOffensiveWordAsync(string newWord)
@@ -78,14 +78,14 @@ namespace DrinkDb_Auth.ServerProxy
             }
         }
 
-        private bool AutoCheckReview(string reviewText)
+        private async Task<bool> AutoCheckReview(string reviewText)
         {
             if (string.IsNullOrWhiteSpace(reviewText))
             {
                 return false;
             }
 
-            HashSet<string> offensiveWords = GetOffensiveWordsList();
+            HashSet<string> offensiveWords = await GetOffensiveWordsList();
             string[] words = reviewText.Split(new[] { ' ', ',', '.', '!', '?', ';', ':', '\n', '\r', '\t' }, StringSplitOptions.RemoveEmptyEntries);
             return words.Any(word => offensiveWords.Contains(word, StringComparer.OrdinalIgnoreCase));
         }

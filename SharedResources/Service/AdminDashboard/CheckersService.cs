@@ -43,7 +43,7 @@
                     continue;
                 }
 
-                bool reviewIsOffensive = this.autoCheck.AutoCheckReview(currentReview.Content);
+                bool reviewIsOffensive = await this.autoCheck.AutoCheckReview(currentReview.Content);
                 if (reviewIsOffensive)
                 {
                     checkingMessages.Add($"Review {currentReview.ReviewId} is offensive. Hiding the review.");
@@ -61,9 +61,9 @@
             return checkingMessages;
         }
 
-        public HashSet<string> GetOffensiveWordsList()
+        public async Task<HashSet<string>> GetOffensiveWordsList()
         {
-            return this.autoCheck?.GetOffensiveWordsList() ?? new HashSet<string>();
+            return await this.autoCheck?.GetOffensiveWordsList() ?? new HashSet<string>();
         }
 
         public async Task AddOffensiveWordAsync(string newWord)

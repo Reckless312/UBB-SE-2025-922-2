@@ -4,19 +4,13 @@ using System.Threading.Tasks;
 using DataAccess.AuthProviders;
 using DataAccess.AuthProviders.Facebook;
 using DataAccess.AuthProviders.Github;
-//using DataAccess.AuthProviders.Google;
 using DataAccess.AuthProviders.LinkedIn;
-//using DataAccess.AuthProviders.Twitter;
 using DataAccess.Model.Authentication;
 using DataAccess.OAuthProviders;
 using IRepository;
 using DataAccess.Service.Authentication.Interfaces;
-using Repository.Authentication;
-using Repository.AdminDashboard;
-using Org.BouncyCastle.Tls;
-using System.Collections.Generic;
 using DataAccess.Model.AdminDashboard;
-using ServerAPI.Data;
+using DataAccess.AuthProviders.Twitter;
 
 namespace DataAccess.Service.Authentication
 {
@@ -67,7 +61,7 @@ namespace DataAccess.Service.Authentication
             {
                 //OAuthService.Google => await AuthenticateWithGoogleAsync(window, authProvider as IGoogleOAuth2Provider),
                 OAuthService.Facebook => await AuthenticateWithFacebookAsync(authProvider as IFacebookOAuthHelper),
-                //OAuthService.Twitter => await AuthenticateWithTwitterAsync(window, authProvider as ITwitterOAuth2Provider),
+                //OAuthService.Twitter => await AuthenticateWithTwitterAsync(authProvider as ITwitterOAuth2Provider),
                 OAuthService.GitHub => await AuthenticateWithGitHubAsync(authProvider as IGitHubOAuthHelper),
                 OAuthService.LinkedIn => await AuthenticateWithLinkedInAsync(authProvider as ILinkedInOAuthHelper),
                 _ => throw new ArgumentException("Invalid OAuth service selected"),
@@ -185,9 +179,9 @@ namespace DataAccess.Service.Authentication
             return await faceBookHelper.AuthenticateAsync();
         }
 
-        //private static async Task<AuthenticationResponse> AuthenticateWithTwitterAsync(Window window, ITwitterOAuth2Provider twitterProvider)
+        //private static async Task<AuthenticationResponse> AuthenticateWithTwitterAsync(ITwitterOAuth2Provider twitterProvider)
         //{
-        //    return await twitterProvider.SignInWithTwitterAsync(window);
+        //    return await twitterProvider.SignInWithTwitterAsync();
         //}
 
         private static async Task<AuthenticationResponse> AuthenticateWithLinkedInAsync(ILinkedInOAuthHelper linkedInHelper)

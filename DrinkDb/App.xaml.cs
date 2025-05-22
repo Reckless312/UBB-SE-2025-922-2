@@ -100,7 +100,11 @@ namespace DrinkDb_Auth
                     });
 
                     // Register Proxy Services
-                    services.AddSingleton<ISessionService, SessionServiceProxy>();
+                    services.AddSingleton<ISessionService, SessionServiceProxy>(sp =>
+                        new SessionServiceProxy(
+                            sp.GetRequiredService<IHttpClientFactory>().CreateClient("DrinkDbClient"),
+                            "http://localhost:5280/"
+                            ));
                     services.AddSingleton<IAuthenticationService>(sp => 
                         new AuthenticationServiceProxy(
                             sp.GetRequiredService<IHttpClientFactory>().CreateClient("DrinkDbClient")));
@@ -161,9 +165,8 @@ namespace DrinkDb_Auth
                     services.AddSingleton<IGitHubHttpHelper, GitHubHttpHelper>();
                     services.AddSingleton<GitHubOAuth2Provider>(sp =>
                         new GitHubOAuth2Provider(
-                            sp.GetRequiredService<IUserRepository>(),
-                            sp.GetRequiredService<ISessionRepository>(),
-                            sp.GetRequiredService<IGitHubHttpHelper>()
+                            sp.GetRequiredService<IUserService>(),
+                            sp.GetRequiredService<ISessionService>()
                         ));
                     services.AddSingleton<IGitHubOAuthHelper>(sp =>
                         new GitHubOAuthHelper(
@@ -171,8 +174,17 @@ namespace DrinkDb_Auth
                             sp.GetRequiredService<GitHubLocalOAuthServer>()
                         ));
                     services.AddSingleton<IGoogleOAuth2Provider, GoogleOAuth2Provider>();
+                    services.AddSingleton<FacebookOAuth2Provider>(sp =>
+                        new FacebookOAuth2Provider(
+                            sp.GetRequiredService<ISessionService>(),
+                            sp.GetRequiredService<IUserService>()
+                            ));
                     services.AddSingleton<IFacebookOAuthHelper, FacebookOAuthHelper>();
-                    services.AddSingleton<LinkedInOAuth2Provider>();
+                    services.AddSingleton<LinkedInOAuth2Provider>(sp =>
+                        new LinkedInOAuth2Provider(
+                            sp.GetRequiredService<IUserService>(),
+                            sp.GetRequiredService<ISessionService>()
+                        ));
                     services.AddSingleton<ILinkedInOAuthHelper>(sp => new LinkedInOAuthHelper(
                         "86j0ikb93jm78x",
                         "WPL_AP1.pg2Bd1XhCi821VTG.+hatTA==",
@@ -182,10 +194,9 @@ namespace DrinkDb_Auth
                     ));
 
                     // Register Services
-                    services.AddSingleton<IAutoCheck, AutoCheck>();
-                    //services.AddSingleton<ICheckersService, CheckersService>();
+                    services.AddSingleton<IAutoCheck, AutoCheckerProxy>(sp => new AutoCheckerProxy("http://localhost:5280/"));
                     services.AddSingleton<IBasicAuthenticationProvider>(sp =>
-                        new BasicAuthenticationProvider(sp.GetRequiredService<IUserRepository>()));
+                        new BasicAuthenticationProviderServiceProxy(sp.GetRequiredService<IHttpClientFactory>().CreateClient("DrinkDbClient")));
                     services.AddTransient<ITwoFactorAuthenticationService, TwoFactorAuthenticationService>();
 
                     // Quartz Configuration

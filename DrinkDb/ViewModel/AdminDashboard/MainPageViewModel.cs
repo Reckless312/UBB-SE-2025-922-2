@@ -240,7 +240,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
 
         public async Task LoadOffensiveWords()
         {
-            var words = await Task.Run(() => this.checkersService.GetOffensiveWordsList());
+            var words = await this.checkersService.GetOffensiveWordsList();
             this.OffensiveWords = new ObservableCollection<string>(words);
         }
 
@@ -587,16 +587,15 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
             this.RunAICheckCommand = new RelayCommand<Review>(async review =>
                 await this.RunAICheck(review));
 
-            this.RunAutoCheckCommand = new RelayCommand(async () => 
+            this.RunAutoCheckCommand = new AsyncRelayCommand(async () =>
             {
-                try 
+                try
                 {
                     var messages = await this.RunAutoCheck();
-                    // You might want to show these messages to the user
-                    System.Diagnostics.Debug.WriteLine("Auto check completed with messages:");
+                    Console.WriteLine("Auto check completed with messages:");
                     foreach (var message in messages)
                     {
-                        System.Diagnostics.Debug.WriteLine(message);
+                        Console.WriteLine(message);
                     }
                 }
                 catch (Exception ex)
