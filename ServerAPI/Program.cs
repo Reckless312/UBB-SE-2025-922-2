@@ -83,6 +83,7 @@ static void DependencyInjection(WebApplicationBuilder builder)
     builder.Services.AddScoped<IOffensiveWordsRepository, OffensiveWordsRepository>();
     builder.Services.AddScoped<IUpgradeRequestsRepository, UpgradeRequestsRepository>();
     builder.Services.AddScoped<IRolesRepository, RolesRepository>();
+    builder.Services.AddScoped<IOffensiveWordsRepository, OffensiveWordsRepository>();
 
     // Register Services (these are the "real" services that will be called by controllers)
     // Use scoped instead of singleton for services that use repositories
@@ -130,7 +131,7 @@ static void DependencyInjection(WebApplicationBuilder builder)
     ));
 
     // Other supporting services
-    builder.Services.AddScoped<IAutoCheck, AutoCheck>();
+    builder.Services.AddScoped<IAutoCheck, AutoCheck>(sp => new AutoCheck(sp.GetRequiredService<IOffensiveWordsRepository>()));
     builder.Services.AddScoped<ICheckersService, CheckersService>();
     builder.Services.AddScoped<IBasicAuthenticationProvider>(sp =>
         new BasicAuthenticationProvider(sp.GetRequiredService<IUserRepository>()));

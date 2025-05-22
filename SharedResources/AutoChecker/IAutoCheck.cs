@@ -13,12 +13,12 @@ namespace DataAccess.AutoChecker
 
     public interface IAutoCheck
     {
-        public bool AutoCheckReview(string reviewText);
+        public Task<bool> AutoCheckReview(string reviewText);
 
         public Task AddOffensiveWordAsync(string newWord);
 
         public Task DeleteOffensiveWordAsync(string word);
 
-        public HashSet<string> GetOffensiveWordsList();
+        public Task<HashSet<string>> GetOffensiveWordsList();
     }
 }

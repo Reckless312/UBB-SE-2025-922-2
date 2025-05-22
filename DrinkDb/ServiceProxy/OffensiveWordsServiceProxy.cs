@@ -37,9 +37,9 @@ namespace DrinkDb_Auth.ServerProxy
             }
         }
 
-        public HashSet<string> GetOffensiveWordsList()
+        public async Task<HashSet<string>> GetOffensiveWordsList()
         {
-            return LoadOffensiveWords().GetAwaiter().GetResult();
+            return await LoadOffensiveWords();
         }
 
         public async Task AddOffensiveWordAsync(string newWord)

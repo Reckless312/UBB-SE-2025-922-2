@@ -240,7 +240,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
 
         public async Task LoadOffensiveWords()
         {
-            var words = await Task.Run(() => this.checkersService.GetOffensiveWordsList());
+            var words = await this.checkersService.GetOffensiveWordsList();
             this.OffensiveWords = new ObservableCollection<string>(words);
         }
 
