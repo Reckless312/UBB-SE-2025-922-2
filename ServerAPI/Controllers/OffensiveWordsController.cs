@@ -20,9 +20,9 @@ namespace ServerAPI.Controllers
         }
 
         [HttpGet]
-        public List<OffensiveWord> GetAllWords()
+        public async Task<List<OffensiveWord>> GetAllWords()
         {
-            HashSet<string> words = this.checkersService.GetOffensiveWordsList();
+            HashSet<string> words = await this.checkersService.GetOffensiveWordsList();
             List<OffensiveWord> wordsList = new List<OffensiveWord>();
             foreach (string word in words)
             {

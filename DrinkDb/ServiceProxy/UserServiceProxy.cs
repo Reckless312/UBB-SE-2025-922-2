@@ -26,7 +26,7 @@ namespace DrinkDb_Auth.ServiceProxy
 
         public async Task ChangeRoleToUser(Guid userId, Role roleToAdd)
         {
-            String userUrl = $"{ApiRoute}/byId/{userId}/addRole";
+            string userUrl = $"{ApiRoute}/byId/{userId}/addRole";
             HttpResponseMessage response = await this.httpClient.PatchAsJsonAsync(userUrl, roleToAdd);
             response.EnsureSuccessStatusCode();
         }

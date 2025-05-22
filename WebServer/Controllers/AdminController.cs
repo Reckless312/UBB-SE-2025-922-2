@@ -70,7 +70,7 @@ namespace WebServer.Controllers
         public IActionResult AutomaticallyCheckReviews()
         {
             foreach(Review review in reviewService.GetFlaggedReviews().Result)
-                if(this.autoCheckService.AutoCheckReview(review.Content))
+                if(this.autoCheckService.AutoCheckReview(review.Content).Result)
                     this.reviewService.HideReview(review.ReviewId);
 
             return RedirectToAction("AdminDashboard");
