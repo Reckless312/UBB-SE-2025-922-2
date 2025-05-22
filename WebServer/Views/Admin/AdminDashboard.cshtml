@@ -1,4 +1,5 @@
-﻿@{
+﻿@model AdminDashboardViewModel
+@{
     ViewData["Title"] = "Admin Dashboard";
 }
 
@@ -10,25 +11,11 @@
             <h3 class="mb-0 fw-semibold">Admin Dashboard</h3>
         </div>
 
-        <a asp-controller="Home" asp-action="Index" class="btn btn-light fw-semibold shadow-sm">
+        <a asp-controller="User" asp-action="UserPage" class="btn btn-light fw-semibold shadow-sm">
             Go Back
         </a>
     </div>
 </div>
-
-<style>
-    /* keep the two review‑buttons on one row without bleeding to next col */
-    .review-action-btn {
-        min-width: 240px
-    }
-
-    @@media (max-width:991px) { /* stack on tablets / phones   */
-        .review-action-btn {
-            min-width: 100% !important;
-            margin-bottom: 12px
-        }
-    }
-</style>
 
 <div class="container-fluid">
     <div class="row g-4">
@@ -39,14 +26,31 @@
 
             <input type="text" class="form-control mb-2" placeholder="Search reviews…" />
 
-            <ul class="list-group mb-3 shadow-sm" style="max-height:300px;overflow-y:auto">
-                <!-- sample items – replace with real Loop -->
-                <li class="list-group-item">
-                    <strong>User A</strong>: Review 1 content here
-                </li>
-                <li class="list-group-item">
-                    <strong>User B</strong>: Review 2 content here
-                </li>
+            <ul class="list-group mb-3 shadow-sm" style="height: 250px; overflow-y: auto;">
+                @foreach (Review review in Model.Reviews)
+                {
+                    <li class="list-group-item review-item" ondblclick="toggleReviewActions(@review.ReviewId)">
+                        <div>
+                            <strong>@review.ReviewId</strong>: @review.Content
+                        </div>
+                        <div class="review-actions" id="actions-@review.ReviewId" style="display: none">
+                            <div class="btn-group btn-group-sm mt-2" role="group">
+                                <form asp-controller="Admin" asp-action="AcceptReview" method="post" style="display: inline;">
+                                    <input type="hidden" name="reviewId" value="@review.ReviewId" />
+                                    <button type="submit" class="btn btn-success btn-sm">Accept</button>
+                                </form>
+                                <form asp-controller="Admin" asp-action="HideReview" method="post" style="display: inline;">
+                                    <input type="hidden" name="reviewId" value="@review.ReviewId" />
+                                    <button type="submit" class="btn btn-warning btn-sm">Hide</button>
+                                </form>
+                                <form asp-controller="Admin" asp-action="AICheckReview" method="post" style="display: inline;">
+                                    <input type="hidden" name="reviewId" value="@review.ReviewId" />
+                                    <button type="submit" class="btn btn-info btn-sm">AI Check</button>
+                                </form>
+                            </div>
+                        </div>
+                    </li>
+                }
             </ul>
 
             <div class="btn-group w-100 review-btn-group" role="group">
@@ -129,4 +133,11 @@
             </div>
         </div>
     </div>
-</div> 
+</div>
+
+<script>
+    function toggleReviewActions(reviewId) {
+        $('.review-actions').hide();
+        $('#actions-' + reviewId).show();
+    }
+</script>

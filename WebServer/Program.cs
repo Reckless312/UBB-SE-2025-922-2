@@ -53,7 +53,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Auth}/{action=MainWindow}/{id?}");
+    pattern: "{controller=Admin}/{action=AdminDashboard}/{id?}");
 app.MapRazorPages();
 
 app.Run();
