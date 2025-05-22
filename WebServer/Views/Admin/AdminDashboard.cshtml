@@ -76,19 +76,34 @@
             <h5 class="fw-bold mb-3">Role Upgrade Requests</h5>
 
             <ul class="list-group shadow-sm" style="max-height:300px;overflow-y:auto">
-                <li class="list-group-item d-flex justify-content-between">
-                    <span>User C requests upgrade</span>
-                    <div class="btn-group" role="group" style="height:38px;">
-                        <button class="btn btn-success btn-sm fw-semibold"
-                                style="border-top-right-radius:0; border-bottom-right-radius:0; height:100%;">
-                            Accept
-                        </button>
-                        <button class="btn btn-danger btn-sm fw-semibold"
-                                style="border-top-left-radius:0; border-bottom-left-radius:0; height:100%;">
-                            Decline
-                        </button>
-                    </div>
-                </li>
+                @foreach (var request in Model.UpgradeRequests)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>@request.RequestingUserDisplayName requests upgrade</span>
+                        <div class="btn-group" role="group" style="height:38px;">
+                            <form asp-controller="Admin" asp-action="Accept" method="post" style="display: inline;">
+                                <input type="hidden" name="id" value="@request.UpgradeRequestId" />
+                                <button type="submit" class="btn btn-success btn-sm fw-semibold"
+                                        style="border-top-right-radius:0; border-bottom-right-radius:0; height:100%;">
+                                    Accept
+                                </button>
+                            </form>
+                            <form asp-controller="Admin" asp-action="Decline" method="post" style="display: inline;">
+                                <input type="hidden" name="id" value="@request.UpgradeRequestId" />
+                                <button type="submit" class="btn btn-danger btn-sm fw-semibold"
+                                        style="border-top-left-radius:0; border-bottom-left-radius:0; height:100%;">
+                                    Decline
+                                </button>
+                            </form>
+                        </div>
+                    </li>
+                }
+                @if (!Model.UpgradeRequests.Any())
+                {
+                    <li class="list-group-item text-center text-muted">
+                        No pending upgrade requests
+                    </li>
+                }
             </ul>
         </div>
 

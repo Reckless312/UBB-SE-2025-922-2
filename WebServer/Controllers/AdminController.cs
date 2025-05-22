@@ -17,13 +17,17 @@ namespace WebServer.Controllers
         private readonly IOffensiveWordsRepository offensiveWordsService;
         private readonly ICheckersService checkersService;
         private readonly IAutoCheck autoCheckService;
-        public AdminController(IReviewService reviewService, IUpgradeRequestsService upgradeRequestService, IRolesService rolesService, IOffensiveWordsRepository offensiveWordsService, ICheckersService checkersService, IAutoCheck autoCheck)
+        private readonly IUserService userService;
+        private readonly IRolesService rolesService;
+        public AdminController(IReviewService newReviewService, IUpgradeRequestsService newUpgradeRequestService, IRolesService newRolesService, IOffensiveWordsRepository newOffensiveWordsService, ICheckersService newCheckersService, IAutoCheck autoCheck, IUserService newUserService)
         {
-            this.reviewService = reviewService;
-            this.upgradeRequestService = upgradeRequestService;
-            this.offensiveWordsService = offensiveWordsService;
-            this.checkersService = checkersService;
-            this.autoCheckService = autoCheck;
+            reviewService = newReviewService;
+            upgradeRequestService = newUpgradeRequestService;
+            offensiveWordsService = newOffensiveWordsService;
+            checkersService = newCheckersService;
+            autoCheckService = autoCheck;
+            userService = newUserService;
+            rolesService = newRolesService;
         }
 
         public IActionResult AdminDashboard()
@@ -66,9 +70,23 @@ namespace WebServer.Controllers
         public IActionResult AutomaticallyCheckReviews()
         {
             foreach(Review review in reviewService.GetFlaggedReviews().Result)
-                if(this.autoCheckService.AutoCheckReview(review.Content))
+                if(autoCheckService.AutoCheckReview(review.Content))
                     reviewService.HideReview(review.ReviewId);
 
+            return RedirectToAction("AdminDashboard");
+        }
+
+        public IActionResult Accept(int id)
+        {
+            upgradeRequestService.ProcessUpgradeRequest(true, id).Wait();
+            upgradeRequestService.RemoveUpgradeRequestByIdentifier(id).Wait();
+            return RedirectToAction("AdminDashboard");
+        }
+
+        public IActionResult Decline(int id)
+        {
+            upgradeRequestService.ProcessUpgradeRequest(false, id).Wait();
+            upgradeRequestService.RemoveUpgradeRequestByIdentifier(id).Wait();
             return RedirectToAction("AdminDashboard");
         }
     }
