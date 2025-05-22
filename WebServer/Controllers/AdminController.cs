@@ -12,29 +12,29 @@ namespace WebServer.Controllers
 {
     public class AdminController : Controller
     {
-        private readonly IReviewService reviewService;
-        private readonly IUpgradeRequestsService upgradeRequestService;
-        private readonly IOffensiveWordsRepository offensiveWordsService;
-        private readonly ICheckersService checkersService;
-        private readonly IAutoCheck autoCheckService;
-        private readonly IUserService userService;
-        private readonly IRolesService rolesService;
+        private IReviewService reviewService;
+        private IUpgradeRequestsService upgradeRequestService;
+        private IOffensiveWordsRepository offensiveWordsService;
+        private ICheckersService checkersService;
+        private IAutoCheck autoCheckService;
+        private IUserService userService;
+        private IRolesService rolesService;
         public AdminController(IReviewService newReviewService, IUpgradeRequestsService newUpgradeRequestService, IRolesService newRolesService, IOffensiveWordsRepository newOffensiveWordsService, ICheckersService newCheckersService, IAutoCheck autoCheck, IUserService newUserService)
         {
-            reviewService = newReviewService;
-            upgradeRequestService = newUpgradeRequestService;
-            offensiveWordsService = newOffensiveWordsService;
-            checkersService = newCheckersService;
-            autoCheckService = autoCheck;
-            userService = newUserService;
-            rolesService = newRolesService;
+            this.reviewService = newReviewService;
+            this.upgradeRequestService = newUpgradeRequestService;
+            this.offensiveWordsService = newOffensiveWordsService;
+            this.checkersService = newCheckersService;
+            this.autoCheckService = autoCheck;
+            this.userService = newUserService;
+            this.rolesService = newRolesService;
         }
 
         public IActionResult AdminDashboard()
         {
-            IEnumerable<Review> reviews = reviewService.GetFlaggedReviews().Result;
-            IEnumerable<UpgradeRequest> upgradeRequests = upgradeRequestService.RetrieveAllUpgradeRequests().Result;
-            IEnumerable<string> offensiveWords = offensiveWordsService.LoadOffensiveWords().Result;
+            IEnumerable<Review> reviews = this.reviewService.GetFlaggedReviews().Result;
+            IEnumerable<UpgradeRequest> upgradeRequests = this.upgradeRequestService.RetrieveAllUpgradeRequests().Result;
+            IEnumerable<string> offensiveWords = this.offensiveWordsService.LoadOffensiveWords().Result;
             AdminDashboardViewModel adminDashboardViewModel = new AdminDashboardViewModel()
             {
                 Reviews = reviews,
@@ -46,13 +46,13 @@ namespace WebServer.Controllers
 
         public IActionResult AcceptReview(int reviewId)
         {
-            reviewService.ResetReviewFlags(reviewId);
+            this.reviewService.ResetReviewFlags(reviewId);
             return RedirectToAction("AdminDashboard");
         }
 
         public IActionResult HideReview(int reviewId)
         {
-            reviewService.HideReview(reviewId);
+            this.reviewService.HideReview(reviewId);
             return RedirectToAction("AdminDashboard");
         }
 
@@ -60,7 +60,7 @@ namespace WebServer.Controllers
         {
             try
             {
-                checkersService.RunAICheckForOneReviewAsync(reviewService.GetReviewById(reviewId).Result);
+                this.checkersService.RunAICheckForOneReviewAsync(this.reviewService.GetReviewById(reviewId).Result);
             }
             catch (Exception exception) {
                 Debug.WriteLine("Couldn't run AiChecker. Make sure you have your token set correctly:", exception.Message);
@@ -70,23 +70,23 @@ namespace WebServer.Controllers
         public IActionResult AutomaticallyCheckReviews()
         {
             foreach(Review review in reviewService.GetFlaggedReviews().Result)
-                if(autoCheckService.AutoCheckReview(review.Content))
-                    reviewService.HideReview(review.ReviewId);
+                if(this.autoCheckService.AutoCheckReview(review.Content))
+                    this.reviewService.HideReview(review.ReviewId);
 
             return RedirectToAction("AdminDashboard");
         }
 
         public IActionResult Accept(int id)
         {
-            upgradeRequestService.ProcessUpgradeRequest(true, id).Wait();
-            upgradeRequestService.RemoveUpgradeRequestByIdentifier(id).Wait();
+            this.upgradeRequestService.ProcessUpgradeRequest(true, id).Wait();
+            this.upgradeRequestService.RemoveUpgradeRequestByIdentifier(id).Wait();
             return RedirectToAction("AdminDashboard");
         }
 
         public IActionResult Decline(int id)
         {
-            upgradeRequestService.ProcessUpgradeRequest(false, id).Wait();
-            upgradeRequestService.RemoveUpgradeRequestByIdentifier(id).Wait();
+            this.upgradeRequestService.ProcessUpgradeRequest(false, id).Wait();
+            this.upgradeRequestService.RemoveUpgradeRequestByIdentifier(id).Wait();
             return RedirectToAction("AdminDashboard");
         }
     }
