@@ -62,15 +62,16 @@ namespace WebServer.Controllers
             {
                 this.checkersService.RunAICheckForOneReviewAsync(this.reviewService.GetReviewById(reviewId).Result);
             }
-            catch (Exception exception) {
+            catch (Exception exception)
+            {
                 Debug.WriteLine("Couldn't run AiChecker. Make sure you have your token set correctly:", exception.Message);
             }
             return RedirectToAction("AdminDashboard");
         }
         public IActionResult AutomaticallyCheckReviews()
         {
-            foreach(Review review in reviewService.GetFlaggedReviews().Result)
-                if(this.autoCheckService.AutoCheckReview(review.Content))
+            foreach (Review review in reviewService.GetFlaggedReviews().Result)
+                if (this.autoCheckService.AutoCheckReview(review.Content))
                     this.reviewService.HideReview(review.ReviewId);
 
             return RedirectToAction("AdminDashboard");
@@ -88,6 +89,26 @@ namespace WebServer.Controllers
             this.upgradeRequestService.ProcessUpgradeRequest(false, id).Wait();
             this.upgradeRequestService.RemoveUpgradeRequestByIdentifier(id).Wait();
             return RedirectToAction("AdminDashboard");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddOffensiveWord(string word)
+        {
+            if (!string.IsNullOrWhiteSpace(word))
+            {
+                await this.offensiveWordsService.AddWord(word);
+            }
+            return Json(await this.offensiveWordsService.LoadOffensiveWords());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteOffensiveWord(string word)
+        {
+            if (!string.IsNullOrWhiteSpace(word))
+            {
+                await this.offensiveWordsService.DeleteWord(word);
+            }
+            return Json(await this.offensiveWordsService.LoadOffensiveWords());
         }
     }
 }

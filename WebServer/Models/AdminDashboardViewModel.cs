@@ -9,6 +9,5 @@ namespace WebServer.Models
         public IEnumerable<UpgradeRequest> UpgradeRequests { get; set; }
         public IEnumerable<string> OffensiveWords { get; set; }
         public string searchBarContent { get; set; } = string.Empty;
-        
     }
 }

@@ -132,15 +132,19 @@
             </div>
 
             <div class="modal-body">
-                <ul class="list-group mb-3">
-                    <li class="list-group-item d-flex justify-content-between">
-                        word1 <button class="btn btn-danger btn-sm">Delete</button>
-                    </li>
+                <ul class="list-group mb-3" id="offensiveWordsList">
+                    @foreach (var word in Model.OffensiveWords)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            @word
+                            <button class="btn btn-danger btn-sm delete-word-button" data-word="@word">Delete</button>
+                        </li>
+                    }
                 </ul>
 
                 <div class="d-flex">
-                    <input type="text" class="form-control me-2" placeholder="Add new word…">
-                    <button class="btn btn-primary">Add</button>
+                    <input type="text" id="newWordInput" class="form-control me-2" placeholder="Add new word…">
+                    <button class="btn btn-primary" id="addWordButton">Add</button>
                 </div>
             </div>
 
@@ -150,6 +154,47 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Add offensive word
+            $('#addWordButton').click(function () {
+                var word = $('#newWordInput').val().trim();
+                if (word === "") return;
+
+                $.post('/Admin/AddOffensiveWord', { word: word }, function (data) {
+                    updateOffensiveWordsList(data);
+                    $('#newWordInput').val('');
+                });
+            });
+
+            // Delete offensive word
+            $(document).on('click', '.delete-word-button', function () {
+                var word = $(this).data('word');
+
+                $.post('/Admin/DeleteOffensiveWord', { word: word }, function (data) {
+                    updateOffensiveWordsList(data);
+                });
+            });
+
+            // Refresh the offensive word list in real time
+            function updateOffensiveWordsList(words) {
+                var list = $('#offensiveWordsList');
+                list.empty();
+
+                words.forEach(function (word) {
+                    list.append(`
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    ${word}
+                                    <button class="btn btn-danger btn-sm delete-word-button" data-word="${word}">Delete</button>
+                                </li>
+                            `);
+                });
+            }
+        });
+    </script>
+}
 
 <script>
     function toggleReviewActions(reviewId) {
