@@ -79,7 +79,7 @@
                 @foreach (UpgradeRequest request in Model.UpgradeRequests)
                 {
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>@request.RequestingUserDisplayName requests upgrade</span>
+                        <span>@request.RequestingUserDisplayName</span>
                         <div class="btn-group" role="group" style="height:38px;">
                             <form asp-controller="Admin" asp-action="Accept" method="post" style="display: inline;">
                                 <input type="hidden" name="id" value="@request.UpgradeRequestId" />
