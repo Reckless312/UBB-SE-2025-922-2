@@ -16,8 +16,14 @@ namespace DataAccess.AuthProviders.LinkedIn
 {
     public class LinkedInOAuth2Provider : GenericOAuth2Provider
     {
-        private readonly static IUserRepository UserRepository;
-        private readonly static ISessionRepository SessionAdapter;
+        private static IUserRepository UserRepository;
+        private static ISessionRepository SessionAdapter;
+
+        public static void Initialize(IUserRepository userRepository, ISessionRepository sessionRepository)
+        {
+            UserRepository = userRepository;
+            SessionAdapter = sessionRepository;
+        }
 
         public AuthenticationResponse Authenticate(string userId, string token)
         {

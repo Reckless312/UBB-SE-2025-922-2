@@ -169,6 +169,12 @@
             }
         }
 
+        private bool isTheSameUser(User user1, User user2)
+        {
+            return user1.Username == user2.Username && user1.PasswordHash == user2.PasswordHash && user1.EmailAddress == user2.EmailAddress && user1.NumberOfDeletedReviews == user2.NumberOfDeletedReviews
+                && user1.HasSubmittedAppeal == user2.HasSubmittedAppeal && user1.AssignedRole == user2.AssignedRole && user1.FullName == user2.FullName && user1.TwoFASecret == user2.TwoFASecret;
+        }
+
         public async Task<bool> UpdateUser(User user)
         {
             try
@@ -176,6 +182,8 @@
                 User? dbUser = await _context.Users.FindAsync(user.UserId);
                 if (dbUser == null)
                     throw new ArgumentException($"No user found with ID {user.UserId}");
+                if (isTheSameUser(user, dbUser))
+                    return true;
                 dbUser.Username = user.Username;
                 dbUser.PasswordHash = user.PasswordHash;
                 dbUser.EmailAddress = user.EmailAddress;

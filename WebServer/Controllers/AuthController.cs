@@ -16,6 +16,8 @@ using DataAccess.Model.AdminDashboard;
 using Microsoft.IdentityModel.Tokens;
 using OtpNet;
 using DataAccess.Service.Authentication;
+using DataAccess.AuthProviders.Facebook;
+using DataAccess.AuthProviders.LinkedIn;
 
 namespace WebServer.Controllers
 {
@@ -24,12 +26,16 @@ namespace WebServer.Controllers
         private readonly IAuthenticationService authenticationService;
         private readonly IGitHubOAuthHelper gitHubOAuthHelper;
         private readonly IUserService userService;
+        private readonly IFacebookOAuthHelper facebookOAuthHelper;
+        private readonly ILinkedInOAuthHelper linkedInOAuthHelper;
 
-        public AuthController(IAuthenticationService authenticationService, IGitHubOAuthHelper gitHubOAuthHelper, IUserService userService)
+        public AuthController(IAuthenticationService authenticationService, IGitHubOAuthHelper gitHubOAuthHelper, IUserService userService, IFacebookOAuthHelper facebookOAuthHelper, ILinkedInOAuthHelper linkedInOAuthHelper)
         {
             this.authenticationService = authenticationService;
             this.gitHubOAuthHelper = gitHubOAuthHelper;
             this.userService = userService;
+            this.facebookOAuthHelper = facebookOAuthHelper;
+            this.linkedInOAuthHelper = linkedInOAuthHelper;
         }
 
         public IActionResult MainWindow()
@@ -136,6 +142,110 @@ namespace WebServer.Controllers
             }
         }
 
+        public async Task<IActionResult> FacebookLogin()
+        {
+            try
+            {
+                var authResponse = await this.facebookOAuthHelper.AuthenticateAsync();
+                if (!authResponse.AuthenticationSuccessful)
+                {
+                    ViewBag.ErrorMessage = "Facebook authentication failed";
+                    return RedirectToAction("MainWindow");
+                }
+                var userInfo = await FetchFacebookUserInfo(authResponse.OAuthToken);
+                var existingUser = await this.userService.GetUserByUsername(userInfo.Login);
+                User user;
+                if(existingUser == null)
+                {
+                    user = new User
+                    {
+                        UserId = Guid.NewGuid(),
+                        Username = userInfo.Login,
+                        FullName = userInfo.Name,
+                        EmailAddress = userInfo.Email,
+                        AssignedRole = RoleType.User,
+                        PasswordHash = string.Empty,
+                        TwoFASecret = Base32Encoding.ToString(KeyGeneration.GenerateRandomKey(20)),
+                        NumberOfDeletedReviews = 0,
+                        HasSubmittedAppeal = false
+                    };
+                    await this.userService.CreateUser(user);
+                }
+                else
+                {
+                    user = existingUser;
+                    if (string.IsNullOrEmpty(user.TwoFASecret) || !IsValidBase32(user.TwoFASecret))
+                    {
+                        var key = KeyGeneration.GenerateRandomKey(20);
+                        user.TwoFASecret = Base32Encoding.ToString(key);
+                        await this.userService.UpdateUser(user);
+                    }
+                }
+                string qrCode = GenerateQRCode(user.Username, user.TwoFASecret);
+                ViewBag.QRCode = $"data:image/png;base64, {qrCode}";
+                ViewBag.Username = user.Username;
+                return View("TwoFactorAuthSetup");
+            }
+            catch(Exception ex)
+            {
+                ViewBag.ErrorMessage = $"Facebook authentication failed: {ex.Message}";
+                return RedirectToAction("MainWindow");
+            }
+        }
+
+        public async Task<IActionResult> LinkedInLogin()
+        {
+            try
+            {
+                var authResponse = await this.linkedInOAuthHelper.AuthenticateAsync();
+                if (!authResponse.AuthenticationSuccessful)
+                {
+                    ViewBag.ErrorMessage = "LinkedIn authentication failed";
+                    return RedirectToAction("MainWindow");
+                }
+                var userInfo = await FetchLinkedInUserInfo(authResponse.OAuthToken);
+                var existingUser = await this.userService.GetUserByUsername(userInfo.Login);
+                User user;
+                if (existingUser == null)
+                {
+                    user = new User
+                    {
+                        UserId = Guid.NewGuid(),
+                        Username = userInfo.Login,
+                        FullName = userInfo.Name,
+                        EmailAddress = userInfo.Email,
+                        AssignedRole = RoleType.User,
+                        PasswordHash = string.Empty,
+                        TwoFASecret = Base32Encoding.ToString(KeyGeneration.GenerateRandomKey(20)),
+                        NumberOfDeletedReviews = 0,
+                        HasSubmittedAppeal = false
+                    };
+                    await this.userService.CreateUser(user);
+                }
+                else
+                {
+                    user = existingUser;
+                    if (string.IsNullOrEmpty(user.TwoFASecret) || !IsValidBase32(user.TwoFASecret))
+                    {
+                        var key = KeyGeneration.GenerateRandomKey(20);
+                        user.TwoFASecret = Base32Encoding.ToString(key);
+                        await this.userService.UpdateUser(user);
+                    }
+                }
+                string qrCode = GenerateQRCode(user.Username, user.TwoFASecret);
+                ViewBag.QRCode = $"data:image/png;base64, {qrCode}";
+                ViewBag.Username = user.Username;
+                return View("TwoFactorAuthSetup");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"LinkedIn authentication error: {ex.Message}");
+                ViewBag.ErrorMessage = $"LinkedIn authentication failed: {ex.Message}";
+                return RedirectToAction("MainWindow");
+            }
+        }
+
+
         [HttpPost]
         public async Task<IActionResult> VerifySetupCode(string[] digit, string username)
         {
@@ -175,6 +285,7 @@ namespace WebServer.Controllers
             }
             return RedirectToAction("UserPage", "User");
         }
+
 
         private string GenerateQRCode(string username, string twoFASecret)
         {
@@ -218,6 +329,51 @@ namespace WebServer.Controllers
 
             return (login, name, email);
         }
+
+        private async Task<(string Login, string Name, string Email)> FetchFacebookUserInfo(string accessToken)
+        {
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+            var userResponse = await client.GetAsync("https://graph.facebook.com/me?fields=id,name,email");
+            userResponse.EnsureSuccessStatusCode();
+            var userResponseBody = await userResponse.Content.ReadAsStringAsync();
+            var user = JsonDocument.Parse(userResponseBody);
+
+            var login = user.RootElement.GetProperty("id").GetString() ?? string.Empty;
+            var name = user.RootElement.GetProperty("name").GetString() ?? string.Empty;
+            var email = user.RootElement.TryGetProperty("email", out var emailProp) ? emailProp.GetString() ?? string.Empty : string.Empty;
+
+            return (login, name, email);
+        }
+
+        private async Task<(string Login, string Name, string Email)> FetchLinkedInUserInfo(string accessToken)
+        {
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+
+            var profileResponse = await client.GetAsync("https://api.linkedin.com/v2/me");
+            profileResponse.EnsureSuccessStatusCode();
+            var profileJson = await profileResponse.Content.ReadAsStringAsync();
+            var profile = JsonDocument.Parse(profileJson);
+
+            var id = profile.RootElement.GetProperty("id").GetString() ?? string.Empty;
+            var firstName = profile.RootElement.GetProperty("localizedFirstName").GetString() ?? string.Empty;
+            var lastName = profile.RootElement.GetProperty("localizedLastName").GetString() ?? string.Empty;
+            var name = $"{firstName} {lastName}".Trim();
+
+            var emailResponse = await client.GetAsync("https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))");
+            emailResponse.EnsureSuccessStatusCode();
+            var emailJson = await emailResponse.Content.ReadAsStringAsync();
+            var emailDoc = JsonDocument.Parse(emailJson);
+            var email = emailDoc.RootElement
+                .GetProperty("elements")[0]
+                .GetProperty("handle~")
+                .GetProperty("emailAddress")
+                .GetString() ?? string.Empty;
+
+            return (id, name, email);
+        }
+
 
         private bool VerifyTwoFactorCode(string twoFASecret, string enteredCode)
         {
