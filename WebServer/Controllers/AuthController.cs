@@ -32,6 +32,7 @@ namespace WebServer.Controllers
         private readonly IUserService userService;
         private readonly IFacebookOAuthHelper facebookOAuthHelper;
         private readonly ILinkedInOAuthHelper linkedInOAuthHelper;
+        public const int KEY_LENGTH = 20;
 
         public AuthController(IAuthenticationService authenticationService, IGitHubOAuthHelper gitHubOAuthHelper, IUserService userService, IFacebookOAuthHelper facebookOAuthHelper, ILinkedInOAuthHelper linkedInOAuthHelper)
         {
@@ -79,7 +80,7 @@ namespace WebServer.Controllers
                     UserId = Guid.NewGuid(),
                     Username = username,
                     PasswordHash = Convert.ToBase64String(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(password))), 
-                    TwoFASecret = Base32Encoding.ToString(KeyGeneration.GenerateRandomKey(20)),
+                    TwoFASecret = Base32Encoding.ToString(KeyGeneration.GenerateRandomKey(KEY_LENGTH)),
                     EmailAddress = string.Empty,
                     NumberOfDeletedReviews = 0,
                     HasSubmittedAppeal = false,
@@ -97,7 +98,7 @@ namespace WebServer.Controllers
             if (string.IsNullOrEmpty(user.TwoFASecret) || !IsValidBase32(user.TwoFASecret))
             {
                 System.Diagnostics.Debug.WriteLine("GitHubLogin: Generating new TwoFASecret for existing user");
-                var key = KeyGeneration.GenerateRandomKey(20);
+                var key = KeyGeneration.GenerateRandomKey(KEY_LENGTH);
                 user.TwoFASecret = Base32Encoding.ToString(key);
                 await this.userService.UpdateUser(user);
             }
@@ -140,7 +141,7 @@ namespace WebServer.Controllers
                         EmailAddress = userInfo.Email,
                         AssignedRole = RoleType.User,
                         PasswordHash = string.Empty,
-                        TwoFASecret = Base32Encoding.ToString(KeyGeneration.GenerateRandomKey(20)),
+                        TwoFASecret = Base32Encoding.ToString(KeyGeneration.GenerateRandomKey(KEY_LENGTH)),
                         NumberOfDeletedReviews = 0,
                         HasSubmittedAppeal = false
                     };
@@ -154,7 +155,7 @@ namespace WebServer.Controllers
                     if (string.IsNullOrEmpty(user.TwoFASecret) || !IsValidBase32(user.TwoFASecret))
                     {
                         System.Diagnostics.Debug.WriteLine("GitHubLogin: Generating new TwoFASecret for existing user");
-                        byte[]? key = KeyGeneration.GenerateRandomKey(20);
+                        byte[]? key = KeyGeneration.GenerateRandomKey(KEY_LENGTH);
                         user.TwoFASecret = Base32Encoding.ToString(key);
                         await this.userService.UpdateUser(user);
                     }
@@ -209,7 +210,7 @@ namespace WebServer.Controllers
                         EmailAddress = userInfo.Email,
                         AssignedRole = RoleType.User,
                         PasswordHash = string.Empty,
-                        TwoFASecret = Base32Encoding.ToString(KeyGeneration.GenerateRandomKey(20)),
+                        TwoFASecret = Base32Encoding.ToString(KeyGeneration.GenerateRandomKey(KEY_LENGTH)),
                         NumberOfDeletedReviews = 0,
                         HasSubmittedAppeal = false
                     };
@@ -220,7 +221,7 @@ namespace WebServer.Controllers
                     user = existingUser;
                     if (string.IsNullOrEmpty(user.TwoFASecret) || !IsValidBase32(user.TwoFASecret))
                     {
-                        byte[]? key = KeyGeneration.GenerateRandomKey(20);
+                        byte[]? key = KeyGeneration.GenerateRandomKey(KEY_LENGTH);
                         user.TwoFASecret = Base32Encoding.ToString(key);
                         await this.userService.UpdateUser(user);
                     }
@@ -271,7 +272,7 @@ namespace WebServer.Controllers
                         EmailAddress = userInfo.Email,
                         AssignedRole = RoleType.User,
                         PasswordHash = string.Empty,
-                        TwoFASecret = Base32Encoding.ToString(KeyGeneration.GenerateRandomKey(20)),
+                        TwoFASecret = Base32Encoding.ToString(KeyGeneration.GenerateRandomKey(KEY_LENGTH)),
                         NumberOfDeletedReviews = 0,
                         HasSubmittedAppeal = false
                     };
@@ -284,7 +285,7 @@ namespace WebServer.Controllers
                     if (string.IsNullOrEmpty(user.TwoFASecret) || !IsValidBase32(user.TwoFASecret))
                     {
                         System.Diagnostics.Debug.WriteLine("LinkedInLogin: Generating new TwoFASecret for existing user");
-                        byte[]? key = KeyGeneration.GenerateRandomKey(20);
+                        byte[]? key = KeyGeneration.GenerateRandomKey(KEY_LENGTH);
                         user.TwoFASecret = Base32Encoding.ToString(key);
                         await this.userService.UpdateUser(user);
                     }
@@ -345,7 +346,7 @@ namespace WebServer.Controllers
                 ViewBag.Username = user.Username;
                 return View("TwoFactorAuthSetup");
             }
-            return RedirectToAction("UserPage", "User");
+            return RedirectToAction("SuccessPage", "Success");
         }
 
 
@@ -357,7 +358,7 @@ namespace WebServer.Controllers
             using QRCodeGenerator? qrGenerator = new QRCodeGenerator();
             using QRCodeData qrCodeData = qrGenerator.CreateQrCode(totpUri, QRCodeGenerator.ECCLevel.Q);
             Base64QRCode? base64QRCode = new Base64QRCode(qrCodeData);
-            return base64QRCode.GetGraphic(20);
+            return base64QRCode.GetGraphic(KEY_LENGTH);
         }
 
         private async Task<(string Login, string Name, string Email)> FetchGitHubUserInfo(string accessToken)
