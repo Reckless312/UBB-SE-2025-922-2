@@ -9,20 +9,20 @@ using System.Text.Json;
 using System.Linq;
 using Repository.AdminDashboard;
 using Repository.Authentication;
+using DataAccess.Service.AdminDashboard.Interfaces;
+using DataAccess.Service.Authentication.Interfaces;
 
 namespace DataAccess.AuthProviders.Github
 {
     public class GitHubOAuth2Provider : GenericOAuth2Provider
     {
-        private IUserRepository userRepository;
-        private ISessionRepository sessionRepository;
-        private IGitHubHttpHelper gitHubHttpHelper;
+        private IUserService userService;
+        private ISessionService sessionService;
 
-        public GitHubOAuth2Provider(IUserRepository userRepository, ISessionRepository sessionAdapter, IGitHubHttpHelper gitHubHttpHelper)
+        public GitHubOAuth2Provider(IUserService userService, ISessionService sessionService)
         {
-            this.userRepository = userRepository;
-            this.sessionRepository = sessionAdapter;
-            this.gitHubHttpHelper = gitHubHttpHelper;
+            this.userService = userService;
+            this.sessionService = sessionService;
         }
 
         public AuthenticationResponse Authenticate(string? userId, string token)
@@ -34,7 +34,7 @@ namespace DataAccess.AuthProviders.Github
         {
             try
             {
-                var (gitHubId, gitHubLogin, email) = FetchGitHubUserInfo(token);
+                var (gitHubId, gitHubLogin, email) = await FetchGitHubUserInfo(token);
 
                 if (string.IsNullOrEmpty(gitHubLogin))
                 {
@@ -51,15 +51,15 @@ namespace DataAccess.AuthProviders.Github
                 if (await UserExists(gitHubLogin))
                 {
                     // User exists, so proceed.
-                    User user = userRepository.GetUserByUsername(gitHubLogin).Result ?? throw new Exception("User not found");
+                    User user = userService.GetUserByUsername(gitHubLogin).Result ?? throw new Exception("User not found");
 
                     if (user.EmailAddress != email)
                     {
                         user.EmailAddress = email;
-                        userRepository.UpdateUser(user);
+                        await userService.UpdateUser(user) ;
                     }
 
-                    Session session = sessionRepository.CreateSession(user.UserId).Result;
+                    Session session = sessionService.CreateSessionAsync(user.UserId).Result;
 
                     return new AuthenticationResponse
                     {
@@ -76,7 +76,7 @@ namespace DataAccess.AuthProviders.Github
                     if (newUserId != Guid.Empty)
                     {
                         // Successfully inserted, so login is successful.
-                        Session session = sessionRepository.CreateSession(newUserId).Result;
+                        Session session = sessionService.CreateSessionAsync(newUserId).Result;
                         return new AuthenticationResponse
                         {
                             AuthenticationSuccessful = true,
@@ -110,7 +110,7 @@ namespace DataAccess.AuthProviders.Github
             }
         }
 
-        private (string gitHubId, string gitHubLogin, string email) FetchGitHubUserInfo(string token)
+        private async Task<(string gitHubId, string gitHubLogin, string email)> FetchGitHubUserInfo(string token)
         {
             using (HttpClient client = new HttpClient())
             {
@@ -118,13 +118,13 @@ namespace DataAccess.AuthProviders.Github
                 client.DefaultRequestHeaders.Add("User-Agent", "DrinkDb_Auth-App");
 
                 // First get the user info
-                var userResponse = client.GetAsync("https://api.github.com/user").Result;
+                var userResponse = await client.GetAsync("https://api.github.com/user");
                 if (!userResponse.IsSuccessStatusCode)
                 {
                     throw new Exception($"Failed to fetch user info from GitHub. Status code: {userResponse.StatusCode}");
                 }
 
-                string userJson = userResponse.Content.ReadAsStringAsync().Result;
+                string userJson = await userResponse.Content.ReadAsStringAsync();
                 using (JsonDocument userDoc = JsonDocument.Parse(userJson))
                 {
                     var root = userDoc.RootElement;
@@ -132,13 +132,13 @@ namespace DataAccess.AuthProviders.Github
                     string gitHubLogin = root.GetProperty("login").ToString();
 
                     // Then get the user's email
-                    var emailResponse = client.GetAsync("https://api.github.com/user/emails").Result;
+                    var emailResponse = await client.GetAsync("https://api.github.com/user/emails");
                     if (!emailResponse.IsSuccessStatusCode)
                     {
                         throw new Exception($"Failed to fetch email from GitHub. Status code: {emailResponse.StatusCode}");
                     }
 
-                    string emailJson = emailResponse.Content.ReadAsStringAsync().Result;
+                    string emailJson = await emailResponse.Content.ReadAsStringAsync();
                     using (JsonDocument emailDoc = JsonDocument.Parse(emailJson))
                     {
                         var emails = emailDoc.RootElement.EnumerateArray();
@@ -155,7 +155,7 @@ namespace DataAccess.AuthProviders.Github
         {
             try
             {
-                User? user = await userRepository.GetUserByUsername(gitHubLogin);
+                User? user = await userService.GetUserByUsername(gitHubLogin);
                 if (user != null)
                 {
                     return true;
@@ -184,7 +184,7 @@ namespace DataAccess.AuthProviders.Github
                     AssignedRole = RoleType.Manager,
                     FullName = gitHubLogin.Trim()
                 };
-                userRepository.CreateUser(newUser);
+                userService.CreateUser(newUser);
                 return newUser.UserId;
             }
             catch (Exception exception)

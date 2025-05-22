@@ -111,9 +111,8 @@ static void DependencyInjection(WebApplicationBuilder builder)
     builder.Services.AddScoped<IGitHubHttpHelper, GitHubHttpHelper>();
     builder.Services.AddScoped<GitHubOAuth2Provider>(sp =>
         new GitHubOAuth2Provider(
-            sp.GetRequiredService<IUserRepository>(),
-            sp.GetRequiredService<ISessionRepository>(),
-            sp.GetRequiredService<IGitHubHttpHelper>()
+            sp.GetRequiredService<IUserService>(),
+            sp.GetRequiredService<ISessionService>()
         ));
     builder.Services.AddScoped<IGitHubOAuthHelper>(sp =>
         new GitHubOAuthHelper(
@@ -121,12 +120,23 @@ static void DependencyInjection(WebApplicationBuilder builder)
             sp.GetRequiredService<GitHubLocalOAuthServer>()
         ));
     builder.Services.AddScoped<IGoogleOAuth2Provider, GoogleOAuth2Provider>();
+    builder.Services.AddScoped<FacebookOAuth2Provider>(sp =>
+                        new FacebookOAuth2Provider(
+                            sp.GetRequiredService<ISessionService>(),
+                            sp.GetRequiredService<IUserService>()
+                            ));
     builder.Services.AddScoped<IFacebookOAuthHelper, FacebookOAuthHelper>();
+    builder.Services.AddScoped<LinkedInOAuth2Provider>(sp =>
+        new LinkedInOAuth2Provider(
+            sp.GetRequiredService<IUserService>(),
+            sp.GetRequiredService<ISessionService>()
+        ));
     builder.Services.AddScoped<ILinkedInOAuthHelper>(sp => new LinkedInOAuthHelper(
         "86j0ikb93jm78x",
         "WPL_AP1.pg2Bd1XhCi821VTG.+hatTA==",
         "http://localhost:8891/auth",
-        "openid profile email"
+        "openid profile email",
+        sp.GetRequiredService<LinkedInOAuth2Provider>()
     ));
 
     // Other supporting services

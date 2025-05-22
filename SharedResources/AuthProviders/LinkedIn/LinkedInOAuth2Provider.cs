@@ -7,6 +7,8 @@ using System.Text.Json;
 using DataAccess.Model.AdminDashboard;
 using DataAccess.Model.Authentication;
 using DataAccess.OAuthProviders;
+using DataAccess.Service.AdminDashboard.Interfaces;
+using DataAccess.Service.Authentication.Interfaces;
 using IRepository;
 using Microsoft.Data.SqlClient;
 using Repository.AdminDashboard;
@@ -16,13 +18,13 @@ namespace DataAccess.AuthProviders.LinkedIn
 {
     public class LinkedInOAuth2Provider : GenericOAuth2Provider
     {
-        private static IUserRepository UserRepository;
-        private static ISessionRepository SessionAdapter;
+        private IUserService userService;
+        private ISessionService sessionService;
 
-        public static void Initialize(IUserRepository userRepository, ISessionRepository sessionRepository)
+        public LinkedInOAuth2Provider(IUserService userService, ISessionService sessionService)
         {
-            UserRepository = userRepository;
-            SessionAdapter = sessionRepository;
+            this.userService = userService;
+            this.sessionService = sessionService;
         }
 
         public AuthenticationResponse Authenticate(string userId, string token)
@@ -55,7 +57,15 @@ namespace DataAccess.AuthProviders.LinkedIn
                 };
             }
 
-            User user = UserRepository.GetUserByUsername(name).Result;
+            User? user;
+            try
+            {
+                user = userService.GetUserByUsername(name).Result;
+            }
+            catch(Exception ex)
+            {
+                user = null;
+            }
             if (user == null)
             {
                 User newUser = new User
@@ -71,8 +81,8 @@ namespace DataAccess.AuthProviders.LinkedIn
                     FullName = name,
                 };
 
-                UserRepository.CreateUser(newUser);
-                Session session = SessionAdapter.CreateSession(newUser.UserId).Result;
+                bool created = this.userService.CreateUser(newUser).Result;
+                Session session = sessionService.CreateSessionAsync(newUser.UserId).Result;
                 return new AuthenticationResponse
                 {
                     AuthenticationSuccessful = true,
@@ -87,10 +97,10 @@ namespace DataAccess.AuthProviders.LinkedIn
                 if (user.EmailAddress != email)
                 {
                     user.EmailAddress = email;
-                    UserRepository.UpdateUser(user);
+                    bool updated = userService.UpdateUser(user).Result;
                 }
 
-                Session session = SessionAdapter.CreateSession(user.UserId).Result;
+                Session session = sessionService.CreateSessionAsync(user.UserId).Result;
                 return new AuthenticationResponse
                 {
                     AuthenticationSuccessful = true,
