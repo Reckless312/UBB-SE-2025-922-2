@@ -189,7 +189,7 @@
 
                     TwitterUserInfoResponse? twitterUserInfoObject = System.Text.Json.JsonSerializer.Deserialize<TwitterUserInfoResponse>(userInfoResponseBody);
                     System.Diagnostics.Debug.WriteLine($"Authenticated user: {twitterUserInfoObject?.Data.Id} ({twitterUserInfoObject?.Data.Username})");
-                    User? user = UserRepository.GetUserByUsername(twitterUserInfoObject?.Data.Username ?? throw new Exception("user not found in json response payload for Twitter authentication")).Result;
+                    User? user = await UserRepository.GetUserByUsername(twitterUserInfoObject?.Data.Username ?? throw new Exception("user not found in json response payload for Twitter authentication"));
                     if (user == null)
                     {
                         // Create a new user
@@ -213,7 +213,7 @@
                         await UserRepository.UpdateUser(user);
                     }
 
-                    Session userSession = SessionAdapter.CreateSession(user.UserId).Result;
+                    Session userSession = await SessionAdapter.CreateSession(user.UserId);
                     return new AuthenticationResponse
                     {
                         OAuthToken = twitterTokenResult.AccessToken,

@@ -91,6 +91,7 @@ namespace ServerAPI.Controllers
         {
             bool result = await userService.CreateUser(user);
             return result ? Ok(result) : BadRequest("Failed to create user");
+            
         }
 
         [HttpGet("validateAction")]
