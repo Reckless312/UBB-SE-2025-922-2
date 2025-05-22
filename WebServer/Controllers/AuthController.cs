@@ -117,8 +117,8 @@ namespace WebServer.Controllers
             try
             {
                 System.Diagnostics.Debug.WriteLine("GitHubLogin: Starting GitHub authentication");
-                AuthenticationResponse? authResponse = await this.gitHubOAuthHelper.AuthenticateAsync();
-                if(!authResponse.AuthenticationSuccessful)
+                AuthenticationResponse? authResponse = await this.authenticationService.AuthWithOAuth(OAuthService.GitHub, this.gitHubOAuthHelper);
+                if (!authResponse.AuthenticationSuccessful)
                 {
                     System.Diagnostics.Debug.WriteLine("GitHub authentication failed");
                     ViewBag.ErrorMessage = "GitHub authentication failed";
@@ -159,14 +159,6 @@ namespace WebServer.Controllers
                         user.TwoFASecret = Base32Encoding.ToString(key);
                         await this.userService.UpdateUser(user);
                     }
-                }
-                AuthenticationResponse? sessionResponse = await this.authenticationService.AuthWithOAuth(OAuthService.GitHub, gitHubOAuthHelper);
-                System.Diagnostics.Debug.WriteLine($"Session creation response: {JsonSerializer.Serialize(sessionResponse)}");
-                if (!sessionResponse.AuthenticationSuccessful)
-                {
-                    System.Diagnostics.Debug.WriteLine("Failed to create session for GitHub user");
-                    ViewBag.ErrorMessage = "Failed to create session for GitHub user";
-                    return View("MainWindow");
                 }
                 ViewBag.ShowQRCode = isNewUser;
                 if (isNewUser)

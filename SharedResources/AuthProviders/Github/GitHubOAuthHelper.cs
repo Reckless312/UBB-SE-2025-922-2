@@ -17,6 +17,7 @@ namespace DataAccess.AuthProviders.Github
         private GenericOAuth2Provider gitHubOAuth2Provider;
         private TaskCompletionSource<AuthenticationResponse> taskCompletionSource;
         private GitHubLocalOAuthServer localServer;
+        private bool handlerExecuted = false;
 
         public GitHubOAuthHelper(GenericOAuth2Provider gitHubOAuth2Provider, GitHubLocalOAuthServer localServer)
         {
@@ -37,6 +38,11 @@ namespace DataAccess.AuthProviders.Github
 
         private async void OnCodeReceived(string code)
         {
+            if (this.handlerExecuted) 
+                return;
+            this.handlerExecuted = true;
+            GitHubLocalOAuthServer.OnCodeReceived -= OnCodeReceived;
+
             Debug.WriteLine($"OnCodeReceived called with code: {code}");
             if (taskCompletionSource == null || taskCompletionSource.Task.IsCompleted)
             {
@@ -62,6 +68,10 @@ namespace DataAccess.AuthProviders.Github
 
         public async Task<AuthenticationResponse> AuthenticateAsync()
         {
+
+            this.handlerExecuted = false;
+            GitHubLocalOAuthServer.OnCodeReceived -= OnCodeReceived;
+            GitHubLocalOAuthServer.OnCodeReceived += OnCodeReceived;
             taskCompletionSource = new TaskCompletionSource<AuthenticationResponse>();
 
             var authorizeUri = new Uri(BuildAuthorizeUrl());
