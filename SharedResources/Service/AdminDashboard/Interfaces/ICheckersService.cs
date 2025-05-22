@@ -11,7 +11,7 @@
     {
         public Task<List<string>> RunAutoCheck(List<Review> reviews);
 
-        public HashSet<string> GetOffensiveWordsList();
+        public Task<HashSet<string>> GetOffensiveWordsList();
 
         public Task AddOffensiveWordAsync(string newWord);
 

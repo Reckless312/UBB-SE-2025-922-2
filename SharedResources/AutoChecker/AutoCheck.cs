@@ -30,15 +30,15 @@ namespace DataAccess.AutoChecker
             this.offensiveWords = await this.repository.LoadOffensiveWords();
         }
 
-        public bool AutoCheckReview(string reviewText)
+        public Task<bool> AutoCheckReview(string reviewText)
         {
             if (string.IsNullOrWhiteSpace(reviewText))
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             string[] words = reviewText.Split(WordDelimiters, StringSplitOptions.RemoveEmptyEntries);
-            return words.Any(word => offensiveWords.Contains(word, StringComparer.OrdinalIgnoreCase));
+            return Task.FromResult(words.Any(word => offensiveWords.Contains(word, StringComparer.OrdinalIgnoreCase)));
         }
 
         public async Task AddOffensiveWordAsync(string newWord)
@@ -73,9 +73,9 @@ namespace DataAccess.AutoChecker
             offensiveWords.Remove(word);
         }
 
-        public HashSet<string> GetOffensiveWordsList()
+        public Task<HashSet<string>> GetOffensiveWordsList()
         {
-            return new HashSet<string>(offensiveWords, StringComparer.OrdinalIgnoreCase);
+            return Task.FromResult(new HashSet<string>(offensiveWords, StringComparer.OrdinalIgnoreCase));
         }
     }
 }

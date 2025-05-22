@@ -53,7 +53,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Success}/{action=SuccessPage}/{id?}");
+    pattern: "{controller=Auth}/{action=MainWindow}/{id?}");
 app.MapRazorPages();
 
 app.Run();
