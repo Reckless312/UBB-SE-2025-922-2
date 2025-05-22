@@ -122,11 +122,13 @@ static void DependencyInjection(WebApplicationBuilder builder)
         ));
     builder.Services.AddScoped<IGoogleOAuth2Provider, GoogleOAuth2Provider>();
     builder.Services.AddScoped<IFacebookOAuthHelper, FacebookOAuthHelper>();
+    builder.Services.AddScoped<LinkedInOAuth2Provider>();
     builder.Services.AddScoped<ILinkedInOAuthHelper>(sp => new LinkedInOAuthHelper(
         "86j0ikb93jm78x",
         "WPL_AP1.pg2Bd1XhCi821VTG.+hatTA==",
         "http://localhost:8891/auth",
-        "openid profile email"
+        "openid profile email",
+        sp.GetRequiredService<LinkedInOAuth2Provider>()
     ));
 
     // Other supporting services

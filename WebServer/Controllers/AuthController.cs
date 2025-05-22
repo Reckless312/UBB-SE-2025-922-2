@@ -20,6 +20,8 @@ using DataAccess.AuthProviders.Facebook;
 using DataAccess.AuthProviders.LinkedIn;
 using BCrypt.Net;
 using System.Security.Cryptography;
+using System.IdentityModel.Tokens.Jwt;
+using Azure.Core;
 
 namespace WebServer.Controllers
 {
@@ -119,7 +121,7 @@ namespace WebServer.Controllers
                 {
                     System.Diagnostics.Debug.WriteLine("GitHub authentication failed");
                     ViewBag.ErrorMessage = "GitHub authentication failed";
-                    return RedirectToAction("MainWindow");
+                    return View("MainWindow");
                 }
                 System.Diagnostics.Debug.WriteLine("GitHubLogin: Authentication successful");
                 var userInfo = await FetchGitHubUserInfo(authResponse.OAuthToken);
@@ -163,7 +165,7 @@ namespace WebServer.Controllers
                 {
                     System.Diagnostics.Debug.WriteLine("Failed to create session for GitHub user");
                     ViewBag.ErrorMessage = "Failed to create session for GitHub user";
-                    return RedirectToAction("MainWindow");
+                    return View("MainWindow");
                 }
                 ViewBag.ShowQRCode = isNewUser;
                 if (isNewUser)
@@ -178,7 +180,7 @@ namespace WebServer.Controllers
             catch(Exception ex)
             {
                 ViewBag.ErrorMessage = $"GitHub authentication failed: {ex.Message}";
-                return RedirectToAction("MainWindow");
+                return View("MainWindow");
             }
         }
 
@@ -190,7 +192,7 @@ namespace WebServer.Controllers
                 if (!authResponse.AuthenticationSuccessful)
                 {
                     ViewBag.ErrorMessage = "Facebook authentication failed";
-                    return RedirectToAction("MainWindow");
+                    return View("MainWindow");
                 }
                 var userInfo = await FetchFacebookUserInfo(authResponse.OAuthToken);
                 User? existingUser = await this.userService.GetUserByUsername(userInfo.Login);
@@ -235,7 +237,7 @@ namespace WebServer.Controllers
             catch(Exception ex)
             {
                 ViewBag.ErrorMessage = $"Facebook authentication failed: {ex.Message}";
-                return RedirectToAction("MainWindow");
+                return View("MainWindow");
             }
         }
 
@@ -243,19 +245,24 @@ namespace WebServer.Controllers
         {
             try
             {
+                System.Diagnostics.Debug.WriteLine("LinkedInLogin: Starting LinkedIn authentication");
                 AuthenticationResponse? authResponse = await this.linkedInOAuthHelper.AuthenticateAsync();
+                System.Diagnostics.Debug.WriteLine($"LinkedInLogin: AuthenticationResponse - Success: {authResponse.AuthenticationSuccessful}, Token: {authResponse.OAuthToken}");
                 if (!authResponse.AuthenticationSuccessful)
                 {
+                    System.Diagnostics.Debug.WriteLine("LinkedInLogin: Authentication failed");
                     ViewBag.ErrorMessage = "LinkedIn authentication failed";
-                    return RedirectToAction("MainWindow");
+                    return View("MainWindow");
                 }
                 var userInfo = await FetchLinkedInUserInfo(authResponse.OAuthToken);
+                System.Diagnostics.Debug.WriteLine($"LinkedInLogin: Fetched user info - Login: {userInfo.Login}, Name: {userInfo.Name}, Email: {userInfo.Email}");
                 User? existingUser = await this.userService.GetUserByUsername(userInfo.Login);
                 User user;
                 bool isNewUser = false;
                 if (existingUser == null)
                 {
                     isNewUser = true;
+                    System.Diagnostics.Debug.WriteLine("LinkedInLogin: Creating new user");
                     user = new User
                     {
                         UserId = Guid.NewGuid(),
@@ -273,9 +280,11 @@ namespace WebServer.Controllers
                 else
                 {
                     user = existingUser;
+                    System.Diagnostics.Debug.WriteLine("LinkedInLogin: User exists, updating if necessary");
                     if (string.IsNullOrEmpty(user.TwoFASecret) || !IsValidBase32(user.TwoFASecret))
                     {
-                        var key = KeyGeneration.GenerateRandomKey(20);
+                        System.Diagnostics.Debug.WriteLine("LinkedInLogin: Generating new TwoFASecret for existing user");
+                        byte[]? key = KeyGeneration.GenerateRandomKey(20);
                         user.TwoFASecret = Base32Encoding.ToString(key);
                         await this.userService.UpdateUser(user);
                     }
@@ -287,13 +296,14 @@ namespace WebServer.Controllers
                     ViewBag.QRCode = $"data:image/png;base64, {qrCode}";
                 }
                 ViewBag.Username = user.Username;
+                System.Diagnostics.Debug.WriteLine($"LinkedInLogin: Redirecting to TwoFactorAuthSetup for user {user.Username}");
                 return View("TwoFactorAuthSetup");
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"LinkedIn authentication error: {ex.Message}");
                 ViewBag.ErrorMessage = $"LinkedIn authentication failed: {ex.Message}";
-                return RedirectToAction("MainWindow");
+                return View("MainWindow");
             }
         }
 
@@ -398,6 +408,10 @@ namespace WebServer.Controllers
             return (login, name, email);
         }
 
+        public IActionResult Cancel2FA()
+        {
+            return RedirectToAction("MainWindow");
+        }
         private async Task<(string Login, string Name, string Email)> FetchLinkedInUserInfo(string accessToken)
         {
             using HttpClient? client = new HttpClient();

@@ -15,16 +15,17 @@ namespace DataAccess.AuthProviders.LinkedIn
         private readonly string clientId = "86j0ikb93jm78x";
         private readonly string clientSecret = "WPL_AP1.pg2Bd1XhCi821VTG.+hatTA==";
         private readonly string redirectUrl = "http://localhost:8891/auth";
-        private readonly string scope = "r_liteprofile r_emailaddress";
+        private readonly string scope = "openid profile email";
         private TaskCompletionSource<AuthenticationResponse>? taskCompletionSource;
-        private readonly static LinkedInOAuth2Provider LinkedInOAuth2Provider = new ();
+        private readonly LinkedInOAuth2Provider linkedInOAuth2Provider;
 
-        public LinkedInOAuthHelper(string clientId, string clientSecret, string redirectUri, string scope)
+        public LinkedInOAuthHelper(string clientId, string clientSecret, string redirectUri, string scope, LinkedInOAuth2Provider linkedInOAuth2Provider)
         {
             this.clientId = clientId;
             this.clientSecret = clientSecret;
             redirectUrl = redirectUri;
             this.scope = scope;
+            this.linkedInOAuth2Provider = linkedInOAuth2Provider;
             LinkedInLocalOAuthServer.OnCodeReceived += OnCodeReceived;
         }
 
@@ -41,22 +42,27 @@ namespace DataAccess.AuthProviders.LinkedIn
 
         private async void OnCodeReceived(string code)
         {
+            Debug.WriteLine("OnCodeReceived called with code: " + code);
             if (taskCompletionSource == null || taskCompletionSource.Task.IsCompleted)
             {
+                Debug.WriteLine("TaskCompletionSource is null or already completed.");
                 return;
             }
 
             try
             {
                 var token = await ExchangeCodeForToken(code);
-                var response = LinkedInOAuth2Provider.Authenticate(string.Empty, token);
+                var response =  this.linkedInOAuth2Provider.Authenticate(string.Empty, token);
+                Debug.WriteLine("Authentication response received.");
                 taskCompletionSource.SetResult(response);
             }
             catch (Exception ex)
             {
+                Debug.WriteLine("Exception in OnCodeReceived: " + ex);
                 taskCompletionSource.SetException(ex);
             }
         }
+
 
         public async Task<AuthenticationResponse> AuthenticateAsync()
         {

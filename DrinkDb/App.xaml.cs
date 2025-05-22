@@ -172,11 +172,13 @@ namespace DrinkDb_Auth
                         ));
                     services.AddSingleton<IGoogleOAuth2Provider, GoogleOAuth2Provider>();
                     services.AddSingleton<IFacebookOAuthHelper, FacebookOAuthHelper>();
+                    services.AddSingleton<LinkedInOAuth2Provider>();
                     services.AddSingleton<ILinkedInOAuthHelper>(sp => new LinkedInOAuthHelper(
                         "86j0ikb93jm78x",
                         "WPL_AP1.pg2Bd1XhCi821VTG.+hatTA==",
                         "http://localhost:8891/auth",
-                        "openid profile email"
+                        "openid profile email",
+                        sp.GetRequiredService<LinkedInOAuth2Provider>()
                     ));
 
                     // Register Services

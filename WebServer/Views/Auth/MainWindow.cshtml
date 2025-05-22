@@ -56,44 +56,20 @@
                 </a>
 
 
-                <button class="btn w-100 text-white mb-3 d-flex align-items-center justify-content-center" style="background-color: #3b5998;" onclick="openFacebookLogin()">
+                <a href="/Auth/FacebookLogin" class="btn w-100 text-white mb-3 d-flex align-items-center justify-content-center" style="background-color: #3b5998;">
                     <img src="/Assets/facebook_logo.png" class="me-2" width="20" height="20" />
                     Sign in with Facebook
-                </button>
-                <script>
-                    function openFacebookLogin() {
-                        var width = 600, height = 700;
-                        var left = (screen.width/2)-(width/2);
-                        var top = (screen.height/2)-(height/2);
-                        window.open('/Auth/FacebookLogin', 'FacebookLogin', 'width=' + width + ',height=' + height + ',top=' + top + ',left=' + left);
-                    }
-                </script>
+                </a>
 
                 <button class="btn w-100 text-white mb-3 d-flex align-items-center justify-content-center" style="background-color: black;">
                     <img src="/Assets/x-twitter-logo-on-black.png" class="me-2" width="30" height="20" />
                     Sign in with X
                 </button>
 
-                <button class="btn w-100 text-white d-flex align-items-center justify-content-center" style="background-color: #0077B5;" onclick="openLinkedInLogin()">
+                <a href="/Auth/LinkedInLogin" class="btn w-100 text-white d-flex align-items-center justify-content-center mb-3" style="background-color: #0077B5;">
                     <img src="/Assets/linkedin_logo.png" class="me-2" width="20" height="20" />
                     Sign in with LinkedIn
-                </button>
-                <script>
-                    function openLinkedInLogin() {
-                        const width = 600;
-                        const height = 700;
-                        const left = (screen.width / 2) - (width / 2);
-                        const top = (screen.height / 2) - (height / 2);
-                        const popup = window.open('/Auth/LinkedInLogin', 'LinkedIn Login', `width=${width},height=${height},top=${top},left=${left}`);
-
-                        const interval = setInterval(() => {
-                            if (popup.closed) {
-                                clearInterval(interval);
-                                window.location.reload();
-                            }
-                        }, 500);
-                    }
-                </script>
+                </a>
             </div>
         </div>
 

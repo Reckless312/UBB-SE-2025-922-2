@@ -16,13 +16,13 @@ namespace DataAccess.AuthProviders.LinkedIn
 {
     public class LinkedInOAuth2Provider : GenericOAuth2Provider
     {
-        private static IUserRepository UserRepository;
-        private static ISessionRepository SessionAdapter;
+        private readonly IUserRepository userRepository;
+        private readonly ISessionRepository sessionRepository;
 
-        public static void Initialize(IUserRepository userRepository, ISessionRepository sessionRepository)
+        public LinkedInOAuth2Provider(IUserRepository userRepository, ISessionRepository sessionRepository)
         {
-            UserRepository = userRepository;
-            SessionAdapter = sessionRepository;
+            this.userRepository = userRepository;
+            this.sessionRepository = sessionRepository;
         }
 
         public AuthenticationResponse Authenticate(string userId, string token)
@@ -55,7 +55,7 @@ namespace DataAccess.AuthProviders.LinkedIn
                 };
             }
 
-            User user = UserRepository.GetUserByUsername(name).Result;
+            User user = this.userRepository.GetUserByUsername(name).Result;
             if (user == null)
             {
                 User newUser = new User
@@ -71,8 +71,8 @@ namespace DataAccess.AuthProviders.LinkedIn
                     FullName = name,
                 };
 
-                UserRepository.CreateUser(newUser);
-                Session session = SessionAdapter.CreateSession(newUser.UserId).Result;
+                this.userRepository.CreateUser(newUser);
+                Session session = this.sessionRepository.CreateSession(newUser.UserId).Result;
                 return new AuthenticationResponse
                 {
                     AuthenticationSuccessful = true,
@@ -87,10 +87,10 @@ namespace DataAccess.AuthProviders.LinkedIn
                 if (user.EmailAddress != email)
                 {
                     user.EmailAddress = email;
-                    UserRepository.UpdateUser(user);
+                    this.userRepository.UpdateUser(user);
                 }
 
-                Session session = SessionAdapter.CreateSession(user.UserId).Result;
+                Session session = this.sessionRepository.CreateSession(user.UserId).Result;
                 return new AuthenticationResponse
                 {
                     AuthenticationSuccessful = true,
