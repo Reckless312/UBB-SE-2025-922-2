@@ -11,6 +11,8 @@ namespace DrinkDb_Auth
     using DataAccess.Service.Authentication;
     using DataAccess.Service.Authentication.Interfaces;
     using DrinkDb_Auth.AuthProviders.Google;
+    using DrinkDb_Auth.ProxyRepository.AdminDashboard;
+    using DrinkDb_Auth.ProxyRepository.Authentification;
     using DrinkDb_Auth.Service.Authentication;
     using DrinkDb_Auth.ViewModel.Authentication;
     using Microsoft.Extensions.DependencyInjection;
@@ -212,17 +214,13 @@ namespace DrinkDb_Auth
         {
             try
             {
-                this.XSignInButton.IsEnabled = false;
-                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(OAuthService.Twitter, new TwitterOAuth2Provider());
+                TwitterGuiHelper twitterGuiHelper = new TwitterGuiHelper(this, new TwitterOAuth2Provider(new UserProxyRepository(), new SessionProxyRepository() /*temporary fix, full twitter service needed*/));
+                AuthenticationResponse authResponse = await twitterGuiHelper.SignInWithTwitterAsync();
                 await this.AuthenticationComplete(authResponse);
             }
             catch (Exception ex)
             {
                 await this.ShowError("Error", ex.Message);
-            }
-            finally
-            {
-                this.XSignInButton.IsEnabled = true;
             }
         }
 

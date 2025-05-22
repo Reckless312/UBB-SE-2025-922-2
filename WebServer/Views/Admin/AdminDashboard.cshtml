@@ -1,4 +1,5 @@
-﻿@{
+﻿@model AdminDashboardViewModel
+@{
     ViewData["Title"] = "Admin Dashboard";
 }
 
@@ -10,25 +11,11 @@
             <h3 class="mb-0 fw-semibold">Admin Dashboard</h3>
         </div>
 
-        <a asp-controller="Home" asp-action="Index" class="btn btn-light fw-semibold shadow-sm">
+        <a asp-controller="User" asp-action="UserPage" class="btn btn-light fw-semibold shadow-sm">
             Go Back
         </a>
     </div>
 </div>
-
-<style>
-    /* keep the two review‑buttons on one row without bleeding to next col */
-    .review-action-btn {
-        min-width: 240px
-    }
-
-    @@media (max-width:991px) { /* stack on tablets / phones   */
-        .review-action-btn {
-            min-width: 100% !important;
-            margin-bottom: 12px
-        }
-    }
-</style>
 
 <div class="container-fluid">
     <div class="row g-4">
@@ -39,23 +26,41 @@
 
             <input type="text" class="form-control mb-2" placeholder="Search reviews…" />
 
-            <ul class="list-group mb-3 shadow-sm" style="max-height:300px;overflow-y:auto">
-                <!-- sample items – replace with real Loop -->
-                <li class="list-group-item">
-                    <strong>User A</strong>: Review 1 content here
-                </li>
-                <li class="list-group-item">
-                    <strong>User B</strong>: Review 2 content here
-                </li>
+            <ul class="list-group mb-3 shadow-sm" style="height: 250px; overflow-y: auto;">
+                @foreach (Review review in Model.Reviews)
+                {
+                    <li class="list-group-item review-item" ondblclick="toggleReviewActions(@review.ReviewId)">
+                        <div>
+                            <strong>@review.ReviewId</strong>: @review.Content
+                        </div>
+                        <div class="review-actions" id="actions-@review.ReviewId" style="display: none">
+                            <div class="btn-group btn-group-sm mt-2" role="group">
+                                <form asp-controller="Admin" asp-action="AcceptReview" method="post" style="display: inline;">
+                                    <input type="hidden" name="reviewId" value="@review.ReviewId" />
+                                    <button type="submit" class="btn btn-success btn-sm">Accept</button>
+                                </form>
+                                <form asp-controller="Admin" asp-action="HideReview" method="post" style="display: inline;">
+                                    <input type="hidden" name="reviewId" value="@review.ReviewId" />
+                                    <button type="submit" class="btn btn-warning btn-sm">Hide</button>
+                                </form>
+                                <form asp-controller="Admin" asp-action="AICheckReview" method="post" style="display: inline;">
+                                    <input type="hidden" name="reviewId" value="@review.ReviewId" />
+                                    <button type="submit" class="btn btn-info btn-sm">AI Check</button>
+                                </form>
+                            </div>
+                        </div>
+                    </li>
+                }
             </ul>
 
             <div class="btn-group w-100 review-btn-group" role="group">
-                <button type="button"
-                        class="btn btn-primary w-50 fw-semibold"
-                        style="border-top-right-radius:0;border-bottom-right-radius:0;">
-                    Automatically check reviews
-                </button>
-
+                <form asp-controller="Admin" asp-action="AutomaticallyCheckReviews" method="post">
+                    <button type="submit"
+                            class="btn btn-primary w-50 fw-semibold"
+                            style="border-top-right-radius:0;border-bottom-right-radius:0;">
+                        Automatically check reviews
+                    </button>
+                </form>
                 <button type="button"
                         class="btn btn-secondary w-50 fw-semibold"
                         data-bs-toggle="modal"
@@ -71,19 +76,34 @@
             <h5 class="fw-bold mb-3">Role Upgrade Requests</h5>
 
             <ul class="list-group shadow-sm" style="max-height:300px;overflow-y:auto">
-                <li class="list-group-item d-flex justify-content-between">
-                    <span>User C requests upgrade</span>
-                    <div class="btn-group" role="group" style="height:38px;">
-                        <button class="btn btn-success btn-sm fw-semibold"
-                                style="border-top-right-radius:0; border-bottom-right-radius:0; height:100%;">
-                            Accept
-                        </button>
-                        <button class="btn btn-danger btn-sm fw-semibold"
-                                style="border-top-left-radius:0; border-bottom-left-radius:0; height:100%;">
-                            Decline
-                        </button>
-                    </div>
-                </li>
+                @foreach (UpgradeRequest request in Model.UpgradeRequests)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>@request.RequestingUserDisplayName</span>
+                        <div class="btn-group" role="group" style="height:38px;">
+                            <form asp-controller="Admin" asp-action="Accept" method="post" style="display: inline;">
+                                <input type="hidden" name="id" value="@request.UpgradeRequestId" />
+                                <button type="submit" class="btn btn-success btn-sm fw-semibold"
+                                        style="border-top-right-radius:0; border-bottom-right-radius:0; height:100%;">
+                                    Accept
+                                </button>
+                            </form>
+                            <form asp-controller="Admin" asp-action="Decline" method="post" style="display: inline;">
+                                <input type="hidden" name="id" value="@request.UpgradeRequestId" />
+                                <button type="submit" class="btn btn-danger btn-sm fw-semibold"
+                                        style="border-top-left-radius:0; border-bottom-left-radius:0; height:100%;">
+                                    Decline
+                                </button>
+                            </form>
+                        </div>
+                    </li>
+                }
+                @if (!Model.UpgradeRequests.Any())
+                {
+                    <li class="list-group-item text-center text-muted">
+                        No pending upgrade requests
+                    </li>
+                }
             </ul>
         </div>
 
@@ -130,3 +150,10 @@
         </div>
     </div>
 </div>
+
+<script>
+    function toggleReviewActions(reviewId) {
+        $('.review-actions').hide();
+        $('#actions-' + reviewId).show();
+    }
+</script>
