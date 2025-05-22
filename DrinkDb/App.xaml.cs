@@ -183,7 +183,7 @@ namespace DrinkDb_Auth
                     services.AddSingleton<IAutoCheck, AutoCheck>();
                     //services.AddSingleton<ICheckersService, CheckersService>();
                     services.AddSingleton<IBasicAuthenticationProvider>(sp =>
-                        new BasicAuthenticationProvider(sp.GetRequiredService<IUserRepository>()));
+                        new BasicAuthenticationProviderServiceProxy(sp.GetRequiredService<IHttpClientFactory>().CreateClient("DrinkDbClient")));
                     services.AddTransient<ITwoFactorAuthenticationService, TwoFactorAuthenticationService>();
 
                     // Quartz Configuration
