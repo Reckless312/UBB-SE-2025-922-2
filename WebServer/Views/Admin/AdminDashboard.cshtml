@@ -54,12 +54,13 @@
             </ul>
 
             <div class="btn-group w-100 review-btn-group" role="group">
-                <button type="button"
-                        class="btn btn-primary w-50 fw-semibold"
-                        style="border-top-right-radius:0;border-bottom-right-radius:0;">
-                    Automatically check reviews
-                </button>
-
+                <form asp-controller="Admin" asp-action="AutomaticallyCheckReviews" method="post">
+                    <button type="submit"
+                            class="btn btn-primary w-50 fw-semibold"
+                            style="border-top-right-radius:0;border-bottom-right-radius:0;">
+                        Automatically check reviews
+                    </button>
+                </form>
                 <button type="button"
                         class="btn btn-secondary w-50 fw-semibold"
                         data-bs-toggle="modal"

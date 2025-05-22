@@ -1,4 +1,5 @@
-﻿using DataAccess.Model.AdminDashboard;
+﻿using DataAccess.AutoChecker;
+using DataAccess.Model.AdminDashboard;
 using DataAccess.Model.AutoChecker;
 using DataAccess.Service.AdminDashboard.Interfaces;
 using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
@@ -15,11 +16,14 @@ namespace WebServer.Controllers
         private readonly IUpgradeRequestsService upgradeRequestService;
         private readonly IOffensiveWordsRepository offensiveWordsService;
         private readonly ICheckersService checkersService;
-        public AdminController(IReviewService reviewService, IUpgradeRequestsService upgradeRequestService, IRolesService rolesService, IOffensiveWordsRepository offensiveWordsService)
+        private readonly IAutoCheck autoCheckService;
+        public AdminController(IReviewService reviewService, IUpgradeRequestsService upgradeRequestService, IRolesService rolesService, IOffensiveWordsRepository offensiveWordsService, ICheckersService checkersService, IAutoCheck autoCheck)
         {
             this.reviewService = reviewService;
             this.upgradeRequestService = upgradeRequestService;
             this.offensiveWordsService = offensiveWordsService;
+            this.checkersService = checkersService;
+            this.autoCheckService = autoCheck;
         }
 
         public IActionResult AdminDashboard()
@@ -55,8 +59,16 @@ namespace WebServer.Controllers
                 checkersService.RunAICheckForOneReviewAsync(reviewService.GetReviewById(reviewId).Result);
             }
             catch (Exception exception) {
-                Debug.WriteLine("Couldn't run AiChecker. Make sure you have your token set correctly.");
+                Debug.WriteLine("Couldn't run AiChecker. Make sure you have your token set correctly:", exception.Message);
             }
+            return RedirectToAction("AdminDashboard");
+        }
+        public IActionResult AutomaticallyCheckReviews()
+        {
+            foreach(Review review in reviewService.GetFlaggedReviews().Result)
+                if(this.autoCheckService.AutoCheckReview(review.Content))
+                    reviewService.HideReview(review.ReviewId);
+
             return RedirectToAction("AdminDashboard");
         }
     }
