@@ -18,6 +18,8 @@ using OtpNet;
 using DataAccess.Service.Authentication;
 using DataAccess.AuthProviders.Facebook;
 using DataAccess.AuthProviders.LinkedIn;
+using BCrypt.Net;
+using System.Security.Cryptography;
 
 namespace WebServer.Controllers
 {
@@ -61,13 +63,35 @@ namespace WebServer.Controllers
                 ViewBag.ErrorMessage = "Username and password are required!";
                 return View("MainWindow");
             }
+            User user = null;
+            bool isNewUser = false;
+            try
+            {
+                user = await this.userService.GetUserByUsername(username);
+            }
+            catch
+            {
+                isNewUser = true;
+                user = new User
+                {
+                    UserId = Guid.NewGuid(),
+                    Username = username,
+                    PasswordHash = Convert.ToBase64String(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(password))), 
+                    TwoFASecret = Base32Encoding.ToString(KeyGeneration.GenerateRandomKey(20)),
+                    EmailAddress = string.Empty,
+                    NumberOfDeletedReviews = 0,
+                    HasSubmittedAppeal = false,
+                    AssignedRole = RoleType.User,
+                    FullName = string.Empty
+                };
+                await this.userService.CreateUser(user);
+            }
             AuthenticationResponse? authResponse = await this.authenticationService.AuthWithUserPass(username, password);
             if(!authResponse.AuthenticationSuccessful)
             {
                 ViewBag.ErrorMessage = "Invalid username or password";
                 return View("MainWindow");
             }
-            User? user = await this.authenticationService.GetUser(authResponse.SessionId);
             if (string.IsNullOrEmpty(user.TwoFASecret) || !IsValidBase32(user.TwoFASecret))
             {
                 System.Diagnostics.Debug.WriteLine("GitHubLogin: Generating new TwoFASecret for existing user");
@@ -75,9 +99,12 @@ namespace WebServer.Controllers
                 user.TwoFASecret = Base32Encoding.ToString(key);
                 await this.userService.UpdateUser(user);
             }
-            string qrCode = GenerateQRCode(user.Username, user.TwoFASecret);
-            ViewBag.QRCode = $"data:image/png;base64, {qrCode}";
-            System.Diagnostics.Debug.WriteLine((string)ViewBag.QRCode);
+            ViewBag.ShowQRCode = isNewUser;
+            if (isNewUser)
+            {
+                string qrCode = GenerateQRCode(user.Username, user.TwoFASecret);
+                ViewBag.QRCode = $"data:image/png;base64, {qrCode}";
+            }
             ViewBag.Username = user.Username;
             return View("TwoFactorAuthSetup");
         }
@@ -87,7 +114,7 @@ namespace WebServer.Controllers
             try
             {
                 System.Diagnostics.Debug.WriteLine("GitHubLogin: Starting GitHub authentication");
-                var authResponse = this.gitHubOAuthHelper.AuthenticateAsync().Result;
+                AuthenticationResponse? authResponse = await this.gitHubOAuthHelper.AuthenticateAsync();
                 if(!authResponse.AuthenticationSuccessful)
                 {
                     System.Diagnostics.Debug.WriteLine("GitHub authentication failed");
@@ -97,10 +124,12 @@ namespace WebServer.Controllers
                 System.Diagnostics.Debug.WriteLine("GitHubLogin: Authentication successful");
                 var userInfo = await FetchGitHubUserInfo(authResponse.OAuthToken);
                 System.Diagnostics.Debug.WriteLine($"GitHubLogin: Fetched user info - Login: {userInfo.Login}, Name: {userInfo.Name}, Email: {userInfo.Email}");
-                var existingUser = await this.userService.GetUserByUsername(userInfo.Login);
+                User? existingUser = await this.userService.GetUserByUsername(userInfo.Login);
                 User user;
+                bool isNewUser = false;
                 if (existingUser == null)
                 {
+                    isNewUser = true;
                     user = new User
                     {
                         UserId = Guid.NewGuid(),
@@ -123,14 +152,25 @@ namespace WebServer.Controllers
                     if (string.IsNullOrEmpty(user.TwoFASecret) || !IsValidBase32(user.TwoFASecret))
                     {
                         System.Diagnostics.Debug.WriteLine("GitHubLogin: Generating new TwoFASecret for existing user");
-                        var key = KeyGeneration.GenerateRandomKey(20);
+                        byte[]? key = KeyGeneration.GenerateRandomKey(20);
                         user.TwoFASecret = Base32Encoding.ToString(key);
                         await this.userService.UpdateUser(user);
                     }
                 }
-               
-                string qrCode = GenerateQRCode(user.Username, user.TwoFASecret);
-                ViewBag.QRCode = $"data:image/png;base64, {qrCode}";
+                AuthenticationResponse? sessionResponse = await this.authenticationService.AuthWithOAuth(OAuthService.GitHub, gitHubOAuthHelper);
+                System.Diagnostics.Debug.WriteLine($"Session creation response: {JsonSerializer.Serialize(sessionResponse)}");
+                if (!sessionResponse.AuthenticationSuccessful)
+                {
+                    System.Diagnostics.Debug.WriteLine("Failed to create session for GitHub user");
+                    ViewBag.ErrorMessage = "Failed to create session for GitHub user";
+                    return RedirectToAction("MainWindow");
+                }
+                ViewBag.ShowQRCode = isNewUser;
+                if (isNewUser)
+                {
+                    string qrCode = GenerateQRCode(user.Username, user.TwoFASecret);
+                    ViewBag.QRCode = $"data:image/png;base64, {qrCode}";
+                }
                 ViewBag.Username = user.Username;
                 System.Diagnostics.Debug.WriteLine($"GitHubLogin: Redirecting to TwoFactorAuthSetup for user {user.Username}");
                 return View("TwoFactorAuthSetup");
@@ -146,17 +186,19 @@ namespace WebServer.Controllers
         {
             try
             {
-                var authResponse = await this.facebookOAuthHelper.AuthenticateAsync();
+                AuthenticationResponse? authResponse = await this.facebookOAuthHelper.AuthenticateAsync();
                 if (!authResponse.AuthenticationSuccessful)
                 {
                     ViewBag.ErrorMessage = "Facebook authentication failed";
                     return RedirectToAction("MainWindow");
                 }
                 var userInfo = await FetchFacebookUserInfo(authResponse.OAuthToken);
-                var existingUser = await this.userService.GetUserByUsername(userInfo.Login);
+                User? existingUser = await this.userService.GetUserByUsername(userInfo.Login);
                 User user;
-                if(existingUser == null)
+                bool isNewUser = false;
+                if (existingUser == null)
                 {
+                    isNewUser = true;
                     user = new User
                     {
                         UserId = Guid.NewGuid(),
@@ -176,13 +218,17 @@ namespace WebServer.Controllers
                     user = existingUser;
                     if (string.IsNullOrEmpty(user.TwoFASecret) || !IsValidBase32(user.TwoFASecret))
                     {
-                        var key = KeyGeneration.GenerateRandomKey(20);
+                        byte[]? key = KeyGeneration.GenerateRandomKey(20);
                         user.TwoFASecret = Base32Encoding.ToString(key);
                         await this.userService.UpdateUser(user);
                     }
                 }
-                string qrCode = GenerateQRCode(user.Username, user.TwoFASecret);
-                ViewBag.QRCode = $"data:image/png;base64, {qrCode}";
+                ViewBag.ShowQRCode = isNewUser;
+                if (isNewUser)
+                {
+                    string qrCode = GenerateQRCode(user.Username, user.TwoFASecret);
+                    ViewBag.QRCode = $"data:image/png;base64, {qrCode}";
+                }
                 ViewBag.Username = user.Username;
                 return View("TwoFactorAuthSetup");
             }
@@ -197,17 +243,19 @@ namespace WebServer.Controllers
         {
             try
             {
-                var authResponse = await this.linkedInOAuthHelper.AuthenticateAsync();
+                AuthenticationResponse? authResponse = await this.linkedInOAuthHelper.AuthenticateAsync();
                 if (!authResponse.AuthenticationSuccessful)
                 {
                     ViewBag.ErrorMessage = "LinkedIn authentication failed";
                     return RedirectToAction("MainWindow");
                 }
                 var userInfo = await FetchLinkedInUserInfo(authResponse.OAuthToken);
-                var existingUser = await this.userService.GetUserByUsername(userInfo.Login);
+                User? existingUser = await this.userService.GetUserByUsername(userInfo.Login);
                 User user;
+                bool isNewUser = false;
                 if (existingUser == null)
                 {
+                    isNewUser = true;
                     user = new User
                     {
                         UserId = Guid.NewGuid(),
@@ -232,8 +280,12 @@ namespace WebServer.Controllers
                         await this.userService.UpdateUser(user);
                     }
                 }
-                string qrCode = GenerateQRCode(user.Username, user.TwoFASecret);
-                ViewBag.QRCode = $"data:image/png;base64, {qrCode}";
+                ViewBag.ShowQRCode = isNewUser;
+                if (isNewUser)
+                {
+                    string qrCode = GenerateQRCode(user.Username, user.TwoFASecret);
+                    ViewBag.QRCode = $"data:image/png;base64, {qrCode}";
+                }
                 ViewBag.Username = user.Username;
                 return View("TwoFactorAuthSetup");
             }
@@ -304,20 +356,20 @@ namespace WebServer.Controllers
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
             client.DefaultRequestHeaders.Add("User-Agent", "DrinkDb");
 
-            var userResponse = await client.GetAsync("https://api.github.com/user");
+            HttpResponseMessage? userResponse = await client.GetAsync("https://api.github.com/user");
             userResponse.EnsureSuccessStatusCode();
-            var userResponseBody = await userResponse.Content.ReadAsStringAsync();
-            var user = JsonDocument.Parse(userResponseBody);
+            string? userResponseBody = await userResponse.Content.ReadAsStringAsync();
+            JsonDocument? user = JsonDocument.Parse(userResponseBody);
 
-            var login = user.RootElement.GetProperty("login").GetString() ?? string.Empty;
-            var name = user.RootElement.TryGetProperty("name", out var nameProperty) ? nameProperty.GetString() ?? string.Empty : string.Empty;
+            string? login = user.RootElement.GetProperty("login").GetString() ?? string.Empty;
+            string? name = user.RootElement.TryGetProperty("name", out var nameProperty) ? nameProperty.GetString() ?? string.Empty : string.Empty;
 
-            var emailResponse = await client.GetAsync("https://api.github.com/user/emails");
+            HttpResponseMessage? emailResponse = await client.GetAsync("https://api.github.com/user/emails");
             emailResponse.EnsureSuccessStatusCode();
-            var emailResponseBody = await emailResponse.Content.ReadAsStringAsync();
-            var emails = JsonDocument.Parse(emailResponseBody);
+            string? emailResponseBody = await emailResponse.Content.ReadAsStringAsync();
+            JsonDocument? emails = JsonDocument.Parse(emailResponseBody);
 
-            var email = string.Empty;
+            String? email = string.Empty;
             foreach (var emailElement in emails.RootElement.EnumerateArray())
             {
                 if (emailElement.GetProperty("primary").GetBoolean())
@@ -332,40 +384,40 @@ namespace WebServer.Controllers
 
         private async Task<(string Login, string Name, string Email)> FetchFacebookUserInfo(string accessToken)
         {
-            using var client = new HttpClient();
+            using HttpClient? client = new HttpClient();
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
-            var userResponse = await client.GetAsync("https://graph.facebook.com/me?fields=id,name,email");
+            HttpResponseMessage? userResponse = await client.GetAsync("https://graph.facebook.com/me?fields=id,name,email");
             userResponse.EnsureSuccessStatusCode();
-            var userResponseBody = await userResponse.Content.ReadAsStringAsync();
-            var user = JsonDocument.Parse(userResponseBody);
+            String? userResponseBody = await userResponse.Content.ReadAsStringAsync();
+            JsonDocument? user = JsonDocument.Parse(userResponseBody);
 
-            var login = user.RootElement.GetProperty("id").GetString() ?? string.Empty;
-            var name = user.RootElement.GetProperty("name").GetString() ?? string.Empty;
-            var email = user.RootElement.TryGetProperty("email", out var emailProp) ? emailProp.GetString() ?? string.Empty : string.Empty;
+            String? login = user.RootElement.GetProperty("id").GetString() ?? string.Empty;
+            String? name = user.RootElement.GetProperty("name").GetString() ?? string.Empty;
+            String? email = user.RootElement.TryGetProperty("email", out JsonElement emailProp) ? emailProp.GetString() ?? string.Empty : string.Empty;
 
             return (login, name, email);
         }
 
         private async Task<(string Login, string Name, string Email)> FetchLinkedInUserInfo(string accessToken)
         {
-            using var client = new HttpClient();
+            using HttpClient? client = new HttpClient();
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
 
-            var profileResponse = await client.GetAsync("https://api.linkedin.com/v2/me");
+            HttpResponseMessage? profileResponse = await client.GetAsync("https://api.linkedin.com/v2/me");
             profileResponse.EnsureSuccessStatusCode();
-            var profileJson = await profileResponse.Content.ReadAsStringAsync();
-            var profile = JsonDocument.Parse(profileJson);
+            String? profileJson = await profileResponse.Content.ReadAsStringAsync();
+            JsonDocument? profile = JsonDocument.Parse(profileJson);
 
-            var id = profile.RootElement.GetProperty("id").GetString() ?? string.Empty;
-            var firstName = profile.RootElement.GetProperty("localizedFirstName").GetString() ?? string.Empty;
-            var lastName = profile.RootElement.GetProperty("localizedLastName").GetString() ?? string.Empty;
-            var name = $"{firstName} {lastName}".Trim();
+            String? id = profile.RootElement.GetProperty("id").GetString() ?? string.Empty;
+            String? firstName = profile.RootElement.GetProperty("localizedFirstName").GetString() ?? string.Empty;
+            String? lastName = profile.RootElement.GetProperty("localizedLastName").GetString() ?? string.Empty;
+            String? name = $"{firstName} {lastName}".Trim();
 
-            var emailResponse = await client.GetAsync("https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))");
+            HttpResponseMessage? emailResponse = await client.GetAsync("https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))");
             emailResponse.EnsureSuccessStatusCode();
-            var emailJson = await emailResponse.Content.ReadAsStringAsync();
-            var emailDoc = JsonDocument.Parse(emailJson);
-            var email = emailDoc.RootElement
+            String? emailJson = await emailResponse.Content.ReadAsStringAsync();
+            JsonDocument emailDoc = JsonDocument.Parse(emailJson);
+            String? email = emailDoc.RootElement
                 .GetProperty("elements")[0]
                 .GetProperty("handle~")
                 .GetProperty("emailAddress")
@@ -377,7 +429,7 @@ namespace WebServer.Controllers
 
         private bool VerifyTwoFactorCode(string twoFASecret, string enteredCode)
         {
-            var totp = new OtpNet.Totp(Base32Encoding.ToBytes(twoFASecret));
+            Totp? totp = new OtpNet.Totp(Base32Encoding.ToBytes(twoFASecret));
             return totp.VerifyTotp(enteredCode, out _, VerificationWindow.RfcSpecifiedNetworkDelay);
         }
 
