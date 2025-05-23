@@ -8,52 +8,150 @@ using Microsoft.EntityFrameworkCore;
 using DataAccess.Model.Authentication;
 using ServerAPI.Data;
 using DataAccess.Model.AdminDashboard;
-using IRepository;
-using DataAccess.Service.Authentication.Interfaces;
-using DataAccess.Service.AdminDashboard.Interfaces;
-using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
-using WebServer.Models;
 
 namespace WebServer.Controllers
 {
     public class UserController : Controller
     {
+        private readonly DatabaseContext context;
 
-        IUserService userService;
-        IReviewService reviewService;
-        public UserController( IUserService userServ, IReviewService reviewServ)
+        public UserController(DatabaseContext context)
         {
-            userService = userServ;
-            reviewService = reviewServ;
+            this.context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            User currentUser = userService.GetCurrentUser().Result;
-            IEnumerable<Review> reviews = reviewService.GetReviewsByUser(currentUser.UserId).Result;
-            UserPageModel userPageModel = new UserPageModel()
+            return View(await this.context.Users.ToListAsync());
+        }
+
+        public async Task<IActionResult> Details(Guid? id)
+        {
+            if (id == null)
             {
-                currentUser = currentUser,
-                currentUserReviews = reviews,
-                currentUserDrinks = new List<string>() { "beer", "lemonade", "vodka"}
-            };
-            return View(userPageModel);
+                return NotFound();
+            }
+
+            User? user = await context.Users
+                .FirstOrDefaultAsync(model => model.UserId == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user);
+        }
+
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("UserId,Username,PasswordHash,TwoFASecret,EmailAddress,NumberOfDeletedReviews,HasSubmittedAppeal,AssignedRole,FullName")] User user)
+        {
+            if (ModelState.IsValid)
+            {
+                user.UserId = Guid.NewGuid();
+                this.context.Add(user);
+                await this.context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(user);
+        }
+
+        public async Task<IActionResult> Edit(Guid? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            User? user = await this.context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            ViewBag.Roles = new SelectList(Enum.GetValues(typeof(RoleType)).Cast<RoleType>().Select(role => new
+            {
+                Value = role,
+                Text = role.ToString()
+            }), "Value", "Text", user.AssignedRole);
+            return View(user);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Guid id, [Bind("UserId,Username,PasswordHash,TwoFASecret,EmailAddress,NumberOfDeletedReviews,HasSubmittedAppeal,AssignedRole,FullName")] User user)
+        {
+            if (id != user.UserId)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    this.context.Update(user);
+                    await this.context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!UserExists(user.UserId))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            ViewBag.Roles = new SelectList(this.context.Roles.ToList(), "RoleType", "RoleName", user.AssignedRole);
+            return View(user);
+        }
+
+        public async Task<IActionResult> Delete(Guid? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            User? user = await context.Users
+                .FirstOrDefaultAsync(model => model.UserId == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        {
+            User? user = await this.context.Users.FindAsync(id);
+            if (user != null)
+            {
+                this.context.Users.Remove(user);
+            }
+
+            await this.context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        private bool UserExists(Guid id)
+        {
+            return this.context.Users.Any(existingUser => existingUser.UserId == id);
         }
         public IActionResult UserPage()
         {
-            User currentUser = userService.GetCurrentUser().Result;
-            IEnumerable<Review> reviews = reviewService.GetReviewsByUser(currentUser.UserId).Result;
-            UserPageModel userPageModel = new UserPageModel()
-            {
-                currentUser = currentUser,
-                currentUserReviews = reviews,
-                currentUserDrinks = new List<string>() { "beer", "lemonade", "vodka" }
-            };
-            return View(userPageModel);
-        }
-        public IActionResult LogOut()
-        {
-            return RedirectToAction("MainWindow", "Auth");
+            return View();
         }
     }
 }
