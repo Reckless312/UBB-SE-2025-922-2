@@ -20,15 +20,14 @@
 
                 <div class="text-center mb-3">
                     <p id="StatusTextBlock">Status: Online</p>
-                </div>
-                @if (@Model.currentUser.AssignedRole == RoleType.Admin || @Model.currentUser.AssignedRole == RoleType.Manager)
-                {
-                    <div class="d-grid gap-2">
-                            <!--<button id="AdminDashboardButton" class="btn btn-outline-dark">Admin Dashboard</button>-->
+				</div>
+				<div class="d-grid gap-2">
+                    @if (@Model.currentUser.AssignedRole == RoleType.Admin || @Model.currentUser.AssignedRole == RoleType.Manager)
+                    {
                         <a asp-controller="Admin" asp-action="AdminDashboard" class="btn btn-primary">Admin Dashboard</a>
-                        <button id="LogoutButton" class="btn btn-outline-dark">Logout</button>
-                    </div>
-                }
+                    } 
+                    <a asp-controller="User" asp-action="LogOut"  class="btn btn-outline-dark">Logout</a>
+                </div>
             </div>
         </div>
 

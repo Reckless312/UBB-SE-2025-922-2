@@ -51,6 +51,9 @@ namespace WebServer.Controllers
             };
             return View(userPageModel);
         }
-
+        public IActionResult LogOut()
+        {
+            return RedirectToAction("MainWindow", "Auth");
+        }
     }
 }
