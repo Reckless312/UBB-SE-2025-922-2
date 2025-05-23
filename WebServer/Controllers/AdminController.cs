@@ -2,6 +2,7 @@
 using DataAccess.Model.AdminDashboard;
 using DataAccess.Model.Authentication;
 using DataAccess.Model.AutoChecker;
+using DataAccess.Service;
 using DataAccess.Service.AdminDashboard.Interfaces;
 using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
 using IRepository;
@@ -33,10 +34,10 @@ namespace WebServer.Controllers
             this.rolesService = newRolesService;
         }
 
-      
 
 
-        public IActionResult AdminDashboard()
+
+        public async Task <IActionResult> AdminDashboard()
         {
 
             IEnumerable<Review> reviews = this.reviewService.GetFlaggedReviews().Result;
@@ -44,7 +45,10 @@ namespace WebServer.Controllers
             IEnumerable<string> offensiveWords = this.offensiveWordsService.LoadOffensiveWords().Result;
             //AdminDashboardViewModel adminDashboardViewModel = new AdminDashboardViewModel()
 
-
+            // Add no-cache headers
+            Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+            Response.Headers["Pragma"] = "no-cache";
+            Response.Headers["Expires"] = "0";
 
 
             var allUsers = this.userService.GetAllUsers().Result;
@@ -71,7 +75,6 @@ namespace WebServer.Controllers
 
 
 
-
         public IActionResult AcceptReview(int reviewId)
         {
             this.reviewService.ResetReviewFlags(reviewId);
@@ -90,15 +93,16 @@ namespace WebServer.Controllers
             {
                 this.checkersService.RunAICheckForOneReviewAsync(this.reviewService.GetReviewById(reviewId).Result);
             }
-            catch (Exception exception) {
+            catch (Exception exception)
+            {
                 Debug.WriteLine("Couldn't run AiChecker. Make sure you have your token set correctly:", exception.Message);
             }
             return RedirectToAction("AdminDashboard");
         }
         public IActionResult AutomaticallyCheckReviews()
         {
-            foreach(Review review in reviewService.GetFlaggedReviews().Result)
-                if(this.autoCheckService.AutoCheckReview(review.Content))
+            foreach (Review review in reviewService.GetFlaggedReviews().Result)
+                if (this.autoCheckService.AutoCheckReview(review.Content))
                     this.reviewService.HideReview(review.ReviewId);
 
             return RedirectToAction("AdminDashboard");
@@ -120,43 +124,53 @@ namespace WebServer.Controllers
 
 
         [HttpPost]
-        public IActionResult AcceptAppeal(Guid userId)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AcceptAppeal(Guid userId)
         {
-            var user = this.userService.GetUserById(userId).Result;
+            User user = await userService.GetUserById(userId);
             if (user == null) return NotFound();
 
-            user.AssignedRole      = RoleType.User;
-            user.HasSubmittedAppeal = false;         
-            this.userService.UpdateUser(user).Wait();
-
-            return RedirectToAction("AdminDashboard");
-        }
-
-
-        [HttpPost]
-        public IActionResult KeepBan(Guid userId)
-        {
-            var user = this.userService.GetUserById(userId).Result;
-            if (user == null) return NotFound();
-
-            user.HasSubmittedAppeal = false;                     
-            this.userService.UpdateUser(user).Wait();
-
-            return RedirectToAction("AdminDashboard");
-        }
-
-
-
-        [HttpPost]
-        public IActionResult CloseAppealCase(Guid userId)
-        {
-            var user = this.userService.GetUserById(userId).Result;
-            if (user == null) return NotFound();
+            user.AssignedRole = RoleType.User;
             user.HasSubmittedAppeal = false;
-            this.userService.UpdateUser(user).Wait();
+            await userService.UpdateUser(user);
+            return RedirectToAction("AdminDashboard");
+        }
+
+      
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> KeepBan(Guid userId)
+        {
+            User user = await userService.GetUserById(userId);
+            if (user == null) return NotFound();
+
+            user.HasSubmittedAppeal = false;
+            await userService.UpdateUser(user);
             return RedirectToAction("AdminDashboard");
         }
 
 
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CloseAppealCase(Guid userId)
+        {
+            User user = await userService.GetUserById(userId);
+            if (user == null) return NotFound();
+
+            user.HasSubmittedAppeal = false;
+            await userService.UpdateUser(user);
+            return RedirectToAction("AdminDashboard");
+        }
     }
 }
+
+
+
+
+
+
+
+
+

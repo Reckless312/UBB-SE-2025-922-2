@@ -143,6 +143,7 @@
                             <p><em>No reviews.</em></p>
                         }
                         <div class="d-grid gap-2 mt-2">
+
                             <!-- Keep Ban -->
                             <form asp-controller="Admin" asp-action="KeepBan" method="post">
                                 @Html.AntiForgeryToken()
@@ -171,80 +172,98 @@
             </div>
         </div>
 
+        <!-- ───────── MODAL : FORBIDDEN WORDS ───────── -->
+        <div class="modal fade" id="forbiddenWordsModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content shadow-lg">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Forbidden Words</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
 
-<!-- ───────── MODAL : FORBIDDEN WORDS ───────── -->
-<div class="modal fade" id="forbiddenWordsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content shadow-lg">
-            <div class="modal-header">
-                <h5 class="modal-title">Forbidden Words</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
+                    <div class="modal-body">
+                        <ul class="list-group mb-3">
+                            <li class="list-group-item d-flex justify-content-between">
+                                word1 <button class="btn btn-danger btn-sm">Delete</button>
+                            </li>
+                        </ul>
 
-            <div class="modal-body">
-                <ul class="list-group mb-3">
-                    <li class="list-group-item d-flex justify-content-between">
-                        word1 <button class="btn btn-danger btn-sm">Delete</button>
-                    </li>
-                </ul>
+                        <div class="d-flex">
+                            <input type="text" class="form-control me-2" placeholder="Add new word…">
+                            <button class="btn btn-primary">Add</button>
+                        </div>
+                    </div>
 
-                <div class="d-flex">
-                    <input type="text" class="form-control me-2" placeholder="Add new word…">
-                    <button class="btn btn-primary">Add</button>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
                 </div>
             </div>
-
-            <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
         </div>
-    </div>
-</div>
 
 
 
 
-@section Scripts {
-    <script>
-        // Existing Reviews helper
-        function toggleReviewActions(reviewId) {
-            $('.review-actions').hide();
-            $('#actions-' + reviewId).show();
-        }
-    </script>
-
-    <script>
-        $(function() {
-            // Initially hide all appeal details
-            $('.appeal-body').hide();
-
-            // Click on a header toggles its panel and hides all others
-            $(document).on('click', '.appeal-header', function () {
-                var $body = $(this).next('.appeal-body');
-                if ($body.is(':visible')) {
-                    $body.slideUp();
-                } else {
-                    $('.appeal-body').slideUp();
-                    $body.slideDown();
+        @section Scripts {
+            <script>
+                // Existing Reviews helper
+                function toggleReviewActions(reviewId) {
+                    $('.review-actions').hide();
+                    $('#actions-' + reviewId).show();
                 }
-            });
+            </script>
 
-            // Live-search filter by UserId or Email
-            $('#appealSearch').on('keyup', function () {
-                var term = $(this).val().toLowerCase();
-                $('.appeal-header').each(function () {
-                    var text = $(this).text().toLowerCase();
-                    var match = text.indexOf(term) !== -1;
-                    $(this).toggle(match);
-                    if (!match) {
-                        // Also hide any open detail panel
-                        $(this).next('.appeal-body').hide();
-                    }
+            <script>
+                $(function() {
+                    // Initially hide all appeal details
+                    $('.appeal-body').hide();
+
+                    // Click on a header toggles its panel and hides all others
+                    $(document).on('click', '.appeal-header', function () {
+                        var $body = $(this).next('.appeal-body');
+                        if ($body.is(':visible')) {
+                            $body.slideUp();
+                        } else {
+                            $('.appeal-body').slideUp();
+                            $body.slideDown();
+                        }
+                    });
+
+                    // Live-search filter by UserId or Email
+                    $('#appealSearch').on('keyup', function () {
+                        var term = $(this).val().toLowerCase();
+                        $('.appeal-header').each(function () {
+                            var text = $(this).text().toLowerCase();
+                            var match = text.indexOf(term) !== -1;
+                            $(this).toggle(match);
+                            if (!match) {
+                                // Also hide any open detail panel
+                                $(this).next('.appeal-body').hide();
+                            }
+                        });
+                    });
                 });
-            });
-        });
-    </script>
-}
+                                // Replace the existing form submit handler with:
+                $(document).on('submit', 'form', function(e) {
+                    e.preventDefault(); // Prevent default form submission
+
+                    $.ajax({
+                        url: $(this).attr('action'),
+                        method: $(this).attr('method'),
+                        data: $(this).serialize(),
+                        success: function() {
+                            // Close open accordion and refresh
+                            $('.appeal-body').slideUp();
+                            window.location.reload(true); // Force fresh load from server
+                        },
+                        error: function(xhr) {
+                            console.error('Error:', xhr.responseText);
+                        }
+                    });
+                });
+
+            </script>
+        }
 
 
 
