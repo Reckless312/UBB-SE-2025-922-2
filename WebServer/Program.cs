@@ -99,15 +99,19 @@ static void DependencyInjection(WebApplicationBuilder builder)
         sp.GetRequiredService<LinkedInLocalOAuthServer>());
     builder.Services.AddSingleton<IGitHubLocalOAuthServer>(sp =>
         sp.GetRequiredService<GitHubLocalOAuthServer>());
+    builder.Services.AddScoped<FacebookOAuth2Provider>(sp =>
+                        new FacebookOAuth2Provider(
+                            sp.GetRequiredService<ISessionService>(),
+                            sp.GetRequiredService<IUserService>()
+                            ));
     builder.Services.AddSingleton<IFacebookLocalOAuthServer>(sp =>
         sp.GetRequiredService<FacebookLocalOAuthServer>());
 
     builder.Services.AddScoped<IGitHubHttpHelper, GitHubHttpHelper>();
     builder.Services.AddScoped<GitHubOAuth2Provider>(sp =>
         new GitHubOAuth2Provider(
-            sp.GetRequiredService<IUserRepository>(),
-            sp.GetRequiredService<ISessionRepository>(),
-            sp.GetRequiredService<IGitHubHttpHelper>()
+            sp.GetRequiredService<IUserService>(),
+            sp.GetRequiredService<ISessionService>()
         ));
     builder.Services.AddScoped<IGitHubOAuthHelper>(sp =>
         new GitHubOAuthHelper(
