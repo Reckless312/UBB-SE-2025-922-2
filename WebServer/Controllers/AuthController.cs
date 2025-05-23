@@ -32,15 +32,17 @@ namespace WebServer.Controllers
         private readonly IUserService userService;
         private readonly IFacebookOAuthHelper facebookOAuthHelper;
         private readonly ILinkedInOAuthHelper linkedInOAuthHelper;
+        private readonly ISessionService sessionService;
         public const int KEY_LENGTH = 20;
 
-        public AuthController(IAuthenticationService authenticationService, IGitHubOAuthHelper gitHubOAuthHelper, IUserService userService, IFacebookOAuthHelper facebookOAuthHelper, ILinkedInOAuthHelper linkedInOAuthHelper)
+        public AuthController(IAuthenticationService authenticationService, IGitHubOAuthHelper gitHubOAuthHelper, IUserService userService, IFacebookOAuthHelper facebookOAuthHelper, ILinkedInOAuthHelper linkedInOAuthHelper,ISessionService sessionservice)
         {
             this.authenticationService = authenticationService;
             this.gitHubOAuthHelper = gitHubOAuthHelper;
             this.userService = userService;
             this.facebookOAuthHelper = facebookOAuthHelper;
             this.linkedInOAuthHelper = linkedInOAuthHelper;
+            this.sessionService = sessionservice;
         }
 
         public IActionResult MainWindow()
@@ -109,6 +111,8 @@ namespace WebServer.Controllers
                 ViewBag.QRCode = $"data:image/png;base64, {qrCode}";
             }
             ViewBag.Username = user.Username;
+            Session currentSession = sessionService.CreateSessionAsync(user.UserId).Result;
+            userService.SetCurrentSession(currentSession.SessionId);
             return View("TwoFactorAuthSetup");
         }
 

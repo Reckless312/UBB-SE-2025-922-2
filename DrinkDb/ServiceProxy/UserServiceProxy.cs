@@ -9,6 +9,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using Org.BouncyCastle.Tls.Crypto;
 
 namespace DrinkDb_Auth.ServiceProxy
 {
@@ -17,6 +18,7 @@ namespace DrinkDb_Auth.ServiceProxy
         private const string ApiRoute = "api/users";
         private readonly HttpClient httpClient;
         private readonly JsonSerializerOptions jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        private Guid currentSessionId = Guid.Empty;
 
         public UserServiceProxy(string baseApiUrl)
         {
@@ -222,6 +224,8 @@ namespace DrinkDb_Auth.ServiceProxy
                 throw;
             }
         }
-       
+        public void SetCurrentSession(Guid sessionId) { 
+            currentSessionId = sessionId;
+        }
     }
 } 

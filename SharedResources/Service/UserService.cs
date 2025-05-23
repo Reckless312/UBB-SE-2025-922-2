@@ -43,7 +43,7 @@ namespace DataAccess.Service
         //    userRepository = repository;
         //    authenticationService = authService;
         //}
-
+        public void SetCurrentSession(Guid sessionId) { currentSessionId = sessionId; }
         public async Task<User> GetUserById(Guid userId)
         {
             try

@@ -13,6 +13,7 @@
         Task<User> GetUserByUsername(string username);
 
         Task<User> GetCurrentUser();
+        void SetCurrentSession(Guid sessionId);
 
         Task<List<User>> GetUsersByRoleType(RoleType roleType);
 
