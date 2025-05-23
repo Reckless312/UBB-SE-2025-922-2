@@ -182,8 +182,8 @@
                 User? dbUser = await _context.Users.FindAsync(user.UserId);
                 if (dbUser == null)
                     throw new ArgumentException($"No user found with ID {user.UserId}");
-                if (isTheSameUser(user, dbUser))
-                    return true;
+                //if (isTheSameUser(user, dbUser))
+                //    return true;
                 dbUser.Username = user.Username;
                 dbUser.PasswordHash = user.PasswordHash;
                 dbUser.EmailAddress = user.EmailAddress;
@@ -195,7 +195,7 @@
                 {
                     dbUser.TwoFASecret = user.TwoFASecret;
                 }
-
+                _context.SaveChanges();
                 return await _context.SaveChangesAsync() > 0;
 
             }

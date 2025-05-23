@@ -1,5 +1,6 @@
 ﻿using DataAccess.AutoChecker;
 using DataAccess.Model.AdminDashboard;
+using DataAccess.Model.Authentication;
 using DataAccess.Model.AutoChecker;
 using DataAccess.Service.AdminDashboard.Interfaces;
 using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
@@ -35,11 +36,13 @@ namespace WebServer.Controllers
             IEnumerable<Review> reviews = this.reviewService.GetFlaggedReviews().Result;
             IEnumerable<UpgradeRequest> upgradeRequests = this.upgradeRequestService.RetrieveAllUpgradeRequests().Result;
             IEnumerable<string> offensiveWords = this.offensiveWordsService.LoadOffensiveWords().Result;
+            IEnumerable<User> appealingUsers = userService.GetUsersWhoHaveSubmittedAppeals().Result;
             AdminDashboardViewModel adminDashboardViewModel = new AdminDashboardViewModel()
             {
                 Reviews = reviews,
                 UpgradeRequests = upgradeRequests,
-                OffensiveWords = offensiveWords
+                OffensiveWords = offensiveWords,
+                AppealingUsers = appealingUsers           
             };
             return View(adminDashboardViewModel);
         }
@@ -110,5 +113,24 @@ namespace WebServer.Controllers
             }
             return Json(await this.offensiveWordsService.LoadOffensiveWords());
         }
+        public IActionResult AcceptAppeal (string userIdString)
+        {
+            Guid userId = Guid.Parse(userIdString);
+            User user = userService.GetUserById(userId).Result;
+            user.HasSubmittedAppeal = false;
+            user.AssignedRole = RoleType.User;
+            userService.UpdateUser(user);
+            return RedirectToAction("AdminDashboard");
+        }
+
+        public IActionResult DenyAppeal(string userIdString)
+        {
+            Guid userId = Guid.Parse(userIdString);
+            User user = userService.GetUserById(userId).Result;
+            user.HasSubmittedAppeal = false;
+            userService.UpdateUser(user);
+            return RedirectToAction("AdminDashboard");
+        }
+
     }
 }
