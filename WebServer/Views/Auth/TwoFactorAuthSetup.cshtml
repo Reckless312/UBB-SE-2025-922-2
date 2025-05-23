@@ -18,15 +18,19 @@
         </p>
 
         <div class="d-flex justify-content-center mb-3">
-            @if (ViewBag.QRCode != null)
+            @if (ViewBag.ShowQRCode == true)
             {
-                <img src="@ViewBag.QRCode" alt="QR Code" width="200" height="200" />
+                <div>
+                    <p class="text-center">Scan this QR code with your authenticator app:</p>
+                    <img src="@ViewBag.QRCode" alt="2FA QR Code" style="width: 150px; height: 150px;" class="mx-auto d-block" />
+                </div>
             }
             else
             {
-                <p class="text-danger">Failed to generate QR code. Please try again.</p>
+                <p>2FA is already set up for your account.</p>
             }
         </div>
+
 
         <form asp-action="VerifySetupCode" method="post" autocomplete="off">
             <input type="hidden" name="username" value="@ViewBag.Username" />

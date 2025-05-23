@@ -56,7 +56,6 @@ namespace DataAccess.AuthProviders.LinkedIn
                     NewAccount = false
                 };
             }
-
             User? user;
             try
             {
