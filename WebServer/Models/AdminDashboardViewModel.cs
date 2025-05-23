@@ -2,6 +2,7 @@
 using DataAccess.Model.Authentication;
 using DataAccess.Model.AutoChecker;
 
+
 namespace WebServer.Models
 {
     public class AdminDashboardViewModel
@@ -11,5 +12,7 @@ namespace WebServer.Models
         public IEnumerable<string> OffensiveWords { get; set; }
         public IEnumerable<User> AppealingUsers { get; set; }
         public string searchBarContent { get; set; } = string.Empty;
+        public IEnumerable<User> AppealsList { get; set; }  //  pending appeals (banned users who appealed)
+        public IEnumerable<AppealDetailsViewModel> AppealsWithDetails { get; set; }
     }
 }
