@@ -1,14 +1,12 @@
-using DataAccess.Model.AdminDashboard;
-using DataAccess.Model.Authentication;
-using DataAccess.Service.AdminDashboard.Interfaces;
-using IRepository;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Diagnostics;
+using DataAccess.Model.AdminDashboard;
+using DataAccess.Model.Authentication;
+using DataAccess.Service.AdminDashboard.Interfaces;
 
 namespace DrinkDb_Auth.ServiceProxy
 {
@@ -42,7 +40,7 @@ namespace DrinkDb_Auth.ServiceProxy
         {
             HttpResponseMessage response = await this.httpClient.GetAsync(ApiRoute);
             response.EnsureSuccessStatusCode();
-            List<User> users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
+            List<User>? users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
             return users ?? new List<User>();
         }
 
@@ -50,7 +48,7 @@ namespace DrinkDb_Auth.ServiceProxy
         {
             HttpResponseMessage response = await this.httpClient.GetAsync($"{ApiRoute}/banned/appealed");
             response.EnsureSuccessStatusCode();
-            List<User> users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
+            List<User>? users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
             return users ?? new List<User>();
         }
 
@@ -65,7 +63,9 @@ namespace DrinkDb_Auth.ServiceProxy
         {
             HttpResponseMessage response = await this.httpClient.GetAsync($"{ApiRoute}/byId/{userId}");
             if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
                 return null;
+            }
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<User>(jsonOptions);
         }
@@ -74,7 +74,9 @@ namespace DrinkDb_Auth.ServiceProxy
         {
             HttpResponseMessage response = await this.httpClient.GetAsync($"{ApiRoute}/byUserName/{username}");
             if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
                 return null;
+            }
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<User>(jsonOptions);
         }
@@ -83,7 +85,7 @@ namespace DrinkDb_Auth.ServiceProxy
         {
             HttpResponseMessage response = await this.httpClient.GetAsync($"{ApiRoute}/byRole/{roleType}");
             response.EnsureSuccessStatusCode();
-            List<User> users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
+            List<User>? users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
             return users ?? new List<User>();
         }
 
@@ -91,7 +93,7 @@ namespace DrinkDb_Auth.ServiceProxy
         {
             HttpResponseMessage response = await this.httpClient.GetAsync($"{ApiRoute}/appealed");
             response.EnsureSuccessStatusCode();
-            List<User> users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
+            List<User>? users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
             return users ?? new List<User>();
         }
 
@@ -109,18 +111,11 @@ namespace DrinkDb_Auth.ServiceProxy
             return await response.Content.ReadFromJsonAsync<bool>();
         }
 
-        public async Task<User> GetCurrentUser()
-        {
-            HttpResponseMessage response = await this.httpClient.GetAsync($"{ApiRoute}/current");
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<User>(jsonOptions);
-        }
-
         public async Task<List<User>> GetActiveUsersByRoleType(RoleType roleType)
         {
             HttpResponseMessage response = await this.httpClient.GetAsync($"{ApiRoute}/active/byRole/{roleType}");
             response.EnsureSuccessStatusCode();
-            List<User> users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
+            List<User>? users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
             return users ?? new List<User>();
         }
 
@@ -128,7 +123,7 @@ namespace DrinkDb_Auth.ServiceProxy
         {
             HttpResponseMessage response = await this.httpClient.GetAsync($"{ApiRoute}/banned");
             response.EnsureSuccessStatusCode();
-            List<User> users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
+            List<User>? users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
             return users ?? new List<User>();
         }
 
@@ -136,7 +131,7 @@ namespace DrinkDb_Auth.ServiceProxy
         {
             HttpResponseMessage response = await this.httpClient.GetAsync($"{ApiRoute}/admins");
             response.EnsureSuccessStatusCode();
-            List<User> users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
+            List<User>? users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
             return users ?? new List<User>();
         }
 
@@ -144,7 +139,7 @@ namespace DrinkDb_Auth.ServiceProxy
         {
             HttpResponseMessage response = await this.httpClient.GetAsync($"{ApiRoute}/managers");
             response.EnsureSuccessStatusCode();
-            List<User> users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
+            List<User>? users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
             return users ?? new List<User>();
         }
 
@@ -152,11 +147,11 @@ namespace DrinkDb_Auth.ServiceProxy
         {
             HttpResponseMessage response = await this.httpClient.GetAsync($"{ApiRoute}/regular");
             response.EnsureSuccessStatusCode();
-            List<User> users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
+            List<User>? users = await response.Content.ReadFromJsonAsync<List<User>>(jsonOptions);
             return users ?? new List<User>();
         }
 
-        public async Task<RoleType> GetHighestRoleTypeForUser(Guid id)
+        public async Task<RoleType?> GetHighestRoleTypeForUser(Guid id)
         {
             HttpResponseMessage response = await this.httpClient.GetAsync($"{ApiRoute}/byId/{id}/highestRole");
             response.EnsureSuccessStatusCode();
@@ -165,63 +160,34 @@ namespace DrinkDb_Auth.ServiceProxy
 
         public async Task UpdateUserRole(Guid userId, RoleType roleType)
         {
-            try
+            string url = $"{ApiRoute}/byId/{userId}/addRole";
+            Role role = new Role { RoleType = roleType };
+            HttpResponseMessage response = await this.httpClient.PatchAsJsonAsync(url, role);
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                string url = $"{ApiRoute}/byId/{userId}/addRole";
-
-                // Create a new Role object with the desired RoleType
-                Role role = new Role { RoleType = roleType };
-
-                HttpResponseMessage response = await this.httpClient.PatchAsJsonAsync(url, role);
-                
-                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-                {
-                    throw new Exception($"User {userId} not found");
-                }
-                
-                if (!response.IsSuccessStatusCode)
-                {
-                    string content = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Failed to update role. Status: {response.StatusCode}, Content: {content}");
-                }
+                return;
             }
-            catch (Exception ex)
+            if (!response.IsSuccessStatusCode)
             {
-                throw;
+                return;
             }
         }
 
-        public async Task<string> GetUserFullNameById(Guid userId)
+        public async Task<string?> GetUserFullNameById(Guid userId)
         {
             HttpResponseMessage response = await this.httpClient.GetAsync($"{ApiRoute}/byId/{userId}/fullName");
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<string>(jsonOptions);
         }
 
-        public void LogoutUser()
-        {
-            // This is typically handled by the client-side session management
-            // No need to make an API call for logout
-        }
-
         public async Task UpdateUserAppleaed(User user, bool newValue)
         {
-            try
-            {
                 HttpResponseMessage response = await this.httpClient.PatchAsJsonAsync($"{ApiRoute}/byId/{user.UserId}/appealed", newValue);
-                
                 if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
-                    throw new Exception($"User {user.UserId} not found");
+                    return;
                 }
-                
                 response.EnsureSuccessStatusCode();
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
         }
-       
     }
-} 
+}

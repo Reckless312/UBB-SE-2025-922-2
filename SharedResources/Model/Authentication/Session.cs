@@ -1,6 +1,3 @@
-using System;
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace DataAccess.Model.Authentication
 {
     public class Session
@@ -8,63 +5,20 @@ namespace DataAccess.Model.Authentication
         public Guid SessionId { get; set; }
         public Guid UserId { get; set; }
 
-        public bool IsActive()
-        {
-            return UserId != Guid.Empty;
-        }
-
-
         public Session()
         {
-            SessionId = Guid.NewGuid();
+            this.SessionId = Guid.NewGuid();
         }
 
         public Session(Guid sessionId, Guid userId)
         {
-            SessionId = sessionId;
-            UserId = userId;
+            this.SessionId = sessionId;
+            this.UserId = userId;
         }
 
-        public static Session CreateSessionForUser(Guid userId)
+        public bool IsActive()
         {
-            if (userId == Guid.Empty)
-            {
-                throw new ArgumentException("User ID cannot be empty", nameof(userId));
-            }
-
-            var session = new Session();
-            session.UserId = userId;
-            return session;
-        }
-
-        public static Session CreateSessionWithIds(Guid sessionId, Guid userId)
-        {
-            if (userId == Guid.Empty)
-            {
-                throw new ArgumentException("User ID cannot be empty", nameof(userId));
-            }
-
-            if (sessionId == Guid.Empty)
-            {
-                throw new ArgumentException("Session ID cannot be empty", nameof(sessionId));
-            }
-
-            return new Session(sessionId, userId);
-        }
-
-        public void EndSessionForUser(Guid userId)
-        {
-            if (userId == Guid.Empty)
-            {
-                throw new ArgumentException("User ID cannot be empty", nameof(userId));
-            }
-
-            if (UserId != userId)
-            {
-                throw new InvalidOperationException("Session does not belong to specified user");
-            }
-
-            UserId = Guid.Empty;
+            return this.UserId != Guid.Empty;
         }
 
         public override string ToString()

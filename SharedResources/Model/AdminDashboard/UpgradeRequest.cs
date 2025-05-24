@@ -1,22 +1,17 @@
-﻿// <copyright file="UpgradeRequest.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-using System;
-
-namespace DataAccess.Model.AdminDashboard
+﻿namespace DataAccess.Model.AdminDashboard
 {
     public class UpgradeRequest
     {
 
         public UpgradeRequest()
         {
+            this.RequestingUserDisplayName = string.Empty;
         }
         public UpgradeRequest(int upgradeRequestId, Guid requestingUserIdentifier, string requestingUserDisplayName)
         {
-            UpgradeRequestId = upgradeRequestId;
-            RequestingUserIdentifier = requestingUserIdentifier;
-            RequestingUserDisplayName = requestingUserDisplayName;
+            this.UpgradeRequestId = upgradeRequestId;
+            this.RequestingUserIdentifier = requestingUserIdentifier;
+            this.RequestingUserDisplayName = requestingUserDisplayName;
         }
 
         public int UpgradeRequestId { get; set; }

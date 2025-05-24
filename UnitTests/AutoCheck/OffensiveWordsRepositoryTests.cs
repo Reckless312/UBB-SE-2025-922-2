@@ -2,13 +2,13 @@ namespace UnitTests.Autocheck
 {
     using System;
     using System.IO;
+    using DataAccess.Repository.AdminDashboard;
     using DrinkDb_Auth.ProxyRepository.AdminDashboard;
     using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Repository.AdminDashboard;
     using ServerAPI.Data;
-    using ServerAPI.Repository.AutoChecker;
     using Xunit;
 
     /// <summary>

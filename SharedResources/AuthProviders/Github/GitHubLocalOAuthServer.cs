@@ -1,13 +1,12 @@
-﻿using System;
+﻿using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 using System.Web;
 
 namespace DataAccess.AuthProviders.Github
 {
     public class GitHubLocalOAuthServer : IGitHubLocalOAuthServer
     {
-        private readonly IGitHubHttpHelper listener;
+        private IGitHubHttpHelper listener;
 
         public static event Action<string>? OnCodeReceived;
 
@@ -15,8 +14,8 @@ namespace DataAccess.AuthProviders.Github
 
         public GitHubLocalOAuthServer(string prefix)
         {
-            listener = new GitHubHttpHelper();
-            listener.Prefixes.Add(prefix);
+            this.listener = new GitHubHttpHelper();
+            this.listener.Prefixes.Add(prefix);
         }
 
         public GitHubLocalOAuthServer(IGitHubHttpHelper listener)
@@ -26,21 +25,22 @@ namespace DataAccess.AuthProviders.Github
 
         public async Task StartAsync()
         {
-            isRunning = true;
-            listener.Start();
-            Console.WriteLine("GitHub local OAuth server listening on: " + string.Join(", ", listener.Prefixes));
+            this.isRunning = true;
+            this.listener.Start();
+            Console.WriteLine("GitHub local OAuth server listening on: " + string.Join(", ", this.listener.Prefixes));
 
-            while (isRunning && listener.IsListening)
+            while (this.isRunning && this.listener.IsListening)
             {
                 try
                 {
-                    var context = await listener.GetContextAsync();
+                    HttpListenerContext context = await listener.GetContextAsync();
                     if (context.Request.Url == null)
                     {
                         context.Response.StatusCode = 400;
                         context.Response.OutputStream.Close();
                         continue;
                     }
+
                     if (context.Request.Url.AbsolutePath.Equals("/auth", StringComparison.OrdinalIgnoreCase))
                     {
                         // GitHub redirects here with ?code=...
@@ -58,7 +58,7 @@ namespace DataAccess.AuthProviders.Github
                              && context.Request.HttpMethod == "POST")
                     {
                         // We read the 'code' from the request body and notify any subscribers
-                        using (var reader = new System.IO.StreamReader(context.Request.InputStream, context.Request.ContentEncoding))
+                        using (StreamReader reader = new StreamReader(context.Request.InputStream, context.Request.ContentEncoding))
                         {
                             string code = (await reader.ReadToEndAsync()).Trim();
                             if (!string.IsNullOrEmpty(code))
@@ -86,13 +86,6 @@ namespace DataAccess.AuthProviders.Github
                     break;
                 }
             }
-        }
-
-        // TODO delete function since it has 0 references
-        public void Stop()
-        {
-            isRunning = false;
-            listener.Stop();
         }
 
         private string GetHtmlResponse(string code)

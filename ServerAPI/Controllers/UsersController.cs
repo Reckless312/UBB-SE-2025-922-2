@@ -1,12 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using DataAccess.Model.AdminDashboard;
+﻿using DataAccess.Model.AdminDashboard;
 using DataAccess.Model.Authentication;
-using Repository.AdminDashboard;
-
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using DataAccess.Service.AdminDashboard.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ServerAPI.Controllers
 {
@@ -18,7 +13,7 @@ namespace ServerAPI.Controllers
 
         public UsersController(IUserService service)
         {
-            this.userService = service ?? throw new ArgumentNullException(nameof(service));
+            this.userService = service;
         }
 
         [HttpGet]
@@ -48,7 +43,7 @@ namespace ServerAPI.Controllers
         [HttpGet("byId/{userId}/role")]
         public async Task<ActionResult<RoleType>> GetHighestRoleTypeForUser(Guid userId)
         {
-            RoleType role = await userService.GetHighestRoleTypeForUser(userId);
+            RoleType? role = await this.userService.GetHighestRoleTypeForUser(userId);
             return role == null ? NotFound() : role;
         }
 
@@ -61,83 +56,55 @@ namespace ServerAPI.Controllers
         [HttpGet("byId/{userID}")]
         public async Task<ActionResult<User>> GetUserById(Guid userId)
         {
-            User user = await userService.GetUserById(userId);
+            User? user = await this.userService.GetUserById(userId);
             return user == null ? NotFound() : user;
         }
 
         [HttpGet("byUserName/{username}")]
         public async Task<ActionResult<User>> GetUserByName(string username)
         {
-            try
-            {
-                User user = await userService.GetUserByUsername(username);
-                return user == null ? NotFound() : user;
-            }
-            catch (Exception)
-            {
-                return NotFound();
-            }
+            User? user = await this.userService.GetUserByUsername(username);
+            return user == null ? NotFound() : user;
         }
 
         [HttpPatch("{userId}/updateUser")]
         public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] User user)
         {
-            bool result = await userService.UpdateUser(user);
+            bool result = await this.userService.UpdateUser(user);
             return result ? Ok(result) : BadRequest("Failed to update user");
         }
 
         [HttpPost("add")]
         public async Task<IActionResult> CreateUser([FromBody] User user)
         {
-            bool result = await userService.CreateUser(user);
+            bool result = await this.userService.CreateUser(user);
             return result ? Ok(result) : BadRequest("Failed to create user");
-            
-        }
-
-        [HttpGet("validateAction")]
-        public async Task<bool> ValidateAction([FromQuery] Guid userID, [FromQuery] string resource, [FromQuery] string action)
-        {
-            return await userService.ValidateAction(userID, resource, action);
         }
 
         [HttpPatch("byId/{userId}/appealed")]
         public async Task<IActionResult> UpdateUserAppealed(Guid userId, [FromBody] bool newValue)
         {
-            try
+            User? user = await this.userService.GetUserById(userId);
+            if (user == null)
             {
-                User user = await userService.GetUserById(userId);
-                if (user == null)
-                {
-                    return NotFound();
-                }
+                return NotFound();
+            }
 
-                userService.UpdateUserAppleaed(user, newValue);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            await this.userService.UpdateUserAppleaed(user, newValue);
+            return Ok();
         }
 
         [HttpPatch("byId/{userId}/role")]
         public async Task<IActionResult> UpdateUserRole(Guid userId, [FromBody] RoleType roleType)
         {
-            try
-            {
-                User user = await userService.GetUserById(userId);
+                User? user = await this.userService.GetUserById(userId);
                 if (user == null)
                 {
                     return NotFound();
                 }
 
-                await userService.UpdateUserRole(userId, roleType);
+                await this.userService.UpdateUserRole(userId, roleType);
                 return Ok();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
         }
     }
 }

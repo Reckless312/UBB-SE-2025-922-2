@@ -1,53 +1,50 @@
-﻿using DataAccess.AutoChecker;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using DataAccess.AutoChecker;
 
-namespace DrinkDb_Auth.ServiceProxy
+namespace DrinkDb_Auth.ServiceProxy.AdminDashboard
 {
     internal class AutoCheckerProxy : IAutoCheck
     {
         private readonly HttpClient httpClient;
         private readonly string baseUrl;
-        private const string apiBaseRoute = "api/autocheck";
+        private const string API_BASE_ROUTE = "api/autocheck";
         private readonly JsonSerializerOptions jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-
 
         public AutoCheckerProxy(string baseUrl)
         {
-            this.httpClient = new HttpClient();
+            httpClient = new HttpClient();
             this.baseUrl = baseUrl;
         }
 
         public async Task AddOffensiveWordAsync(string newWord)
         {
-            HttpResponseMessage response = await this.httpClient.PostAsync($"{this.baseUrl}/{apiBaseRoute}/add?newWord={newWord}", null);
+            HttpResponseMessage response = await httpClient.PostAsync($"{baseUrl}/{API_BASE_ROUTE}/add?newWord={newWord}", null);
             response.EnsureSuccessStatusCode();
         }
 
         public async Task<bool> AutoCheckReview(string reviewText)
         {
-            HttpResponseMessage response = await this.httpClient.PostAsJsonAsync($"{this.baseUrl}/{apiBaseRoute}/review", reviewText);
+            HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{baseUrl}/{API_BASE_ROUTE}/review", reviewText);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<bool>();
         }
 
         public async Task DeleteOffensiveWordAsync(string word)
         {
-            HttpResponseMessage response = await this.httpClient.DeleteAsync($"{this.baseUrl}/{apiBaseRoute}/delete?word={word}");
+            HttpResponseMessage response = await httpClient.DeleteAsync($"{baseUrl}/{API_BASE_ROUTE}/delete?word={word}");
             response.EnsureSuccessStatusCode();
         }
 
         public async Task<HashSet<string>> GetOffensiveWordsList()
         {
-            HttpResponseMessage response = await this.httpClient.GetAsync($"{this.baseUrl}/{apiBaseRoute}/words");
+            HttpResponseMessage response = await httpClient.GetAsync($"{baseUrl}/{API_BASE_ROUTE}/words");
             response.EnsureSuccessStatusCode();
-            HashSet<string> words = await response.Content.ReadFromJsonAsync<HashSet<string>>(jsonOptions);
+            HashSet<string>? words = await response.Content.ReadFromJsonAsync<HashSet<string>>(jsonOptions);
             return words ?? new HashSet<string>();
         }
     }

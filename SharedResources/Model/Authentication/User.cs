@@ -14,7 +14,12 @@ namespace DataAccess.Model.Authentication
             this.AssignedRole = assignedRole;
             this.FullName = fullName;
         }
-        public User() { AssignedRole = RoleType.User; }
+        public User()
+        {
+            this.AssignedRole = RoleType.User;
+            this.EmailAddress = string.Empty;
+            this.FullName = string.Empty;
+        }
         public required Guid UserId { get; set; }
 
         public required string Username { get; set; }
@@ -30,12 +35,8 @@ namespace DataAccess.Model.Authentication
         public bool HasSubmittedAppeal { get; set; }
 
         public RoleType AssignedRole { get; set; }
-        public string FullName { get; set; }
 
-        public void Returns(User user)
-        {
-            throw new NotImplementedException();
-        }
+        public string FullName { get; set; }
 
         public override string ToString()
         {

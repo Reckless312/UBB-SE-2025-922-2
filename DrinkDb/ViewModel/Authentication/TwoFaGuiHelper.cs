@@ -1,18 +1,16 @@
-﻿
-namespace DrinkDb_Auth.ViewModel.Authentication
+﻿namespace DrinkDb_Auth.ViewModel.Authentication
 {
     using System;
     using System.Threading.Tasks;
     using DataAccess.Model.Authentication;
+    using DataAccess.Service.AdminDashboard.Interfaces;
     using DataAccess.Service.Authentication.Interfaces;
-    using DrinkDb_Auth.ProxyRepository.AdminDashboard;
     using DrinkDb_Auth.Service.Authentication.Components;
     using DrinkDb_Auth.View;
     using DrinkDb_Auth.View.Authentication;
     using DrinkDb_Auth.View.Authentication.Interfaces;
     using DrinkDb_Auth.ViewModel.AdminDashboard.Components;
     using DrinkDb_Auth.ViewModel.Authentication.Interfaces;
-    using IRepository;
     using Microsoft.UI.Xaml;
 
     internal class TwoFaGuiHelper
@@ -24,15 +22,16 @@ namespace DrinkDb_Auth.ViewModel.Authentication
         private Window? window;
         private RelayCommand? submitRelayCommand;
         private RelayCommand cancelRelayCommand;
-        private IUserRepository? userRepository = new UserProxyRepository();
+        private IUserService userService;
         private IVerify? twoFactorSecretVerifier = new Verify2FactorAuthenticationSecret();
 
         private TaskCompletionSource<bool> authentificationTask;
         private TaskCompletionSource<bool> authentificationCompleteTask;
 
-        public TwoFaGuiHelper(Window? window)
+        public TwoFaGuiHelper(Window? window, IUserService userService)
         {
             this.window = window;
+            this.userService = userService;
             this.authentificationTask = new TaskCompletionSource<bool>();
             this.authentificationCompleteTask = new TaskCompletionSource<bool>();
             this.cancelRelayCommand = new RelayCommand(() => { this.authentificationCompleteTask.SetResult(false); });
@@ -67,7 +66,7 @@ namespace DrinkDb_Auth.ViewModel.Authentication
 
         private RelayCommand CreateSubmitRelayCommand(IAuthenticationWindowSetup authentificationHandler, User user, byte[] twoFactorSecret, TaskCompletionSource<bool> codeSetupTask, bool updateDatabase)
         {
-            return new RelayCommand(() =>
+            return new RelayCommand(async () =>
             {
                 string providedCode = authentificationHandler.FirstDigit
                             + authentificationHandler.SecondDigit
@@ -78,13 +77,11 @@ namespace DrinkDb_Auth.ViewModel.Authentication
                 switch (this.twoFactorSecretVerifier?.Verify2FAForSecret(twoFactorSecret, providedCode))
                 {
                     case true:
-                        // Test updating database or not
                         switch (updateDatabase)
                         {
                             case true:
-                                bool result = this.userRepository?.UpdateUser(user).Result ?? false;
+                                bool result = await this.userService.UpdateUser(user);
 
-                                // Test both branches of updating 2fa
                                 if (!result)
                                 {
                                     throw new InvalidOperationException("Failed to update user with 2FA secret.");

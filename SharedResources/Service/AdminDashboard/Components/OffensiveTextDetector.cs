@@ -1,7 +1,6 @@
 ﻿namespace DataAccess.Service.AdminDashboard.Components
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Net.Http;
@@ -9,16 +8,12 @@
     using System.Text;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.Configuration.Json;
-    using Microsoft.ML;
     using Newtonsoft.Json;
 
     public static class OffensiveTextDetector
     {
         private static readonly string HuggingFaceApiUrl = "https://api-inference.huggingface.co/models/cardiffnlp/twitter-roberta-base-offensive";
-        private static readonly string HuggingFaceApiToken; // add your token in the appsettings.json file.
-        // MAKE SURE YOU NEVER COMMIT THE TOKEN
-
+        private static readonly string HuggingFaceApiToken;
         static OffensiveTextDetector()
         {
             string projectRoot = GetProjectRoot();
@@ -27,7 +22,7 @@
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-            HuggingFaceApiToken = configuration["HuggingFaceApiToken"] ?? string.Empty;
+            OffensiveTextDetector.HuggingFaceApiToken = configuration["HuggingFaceApiToken"] ?? string.Empty;
         }
 
         public static string DetectOffensiveContent(string text)
@@ -37,7 +32,7 @@
                 return "Error: Empty text provided";
             }
 
-            return TryApiRequest(HuggingFaceApiUrl, text);
+            return TryApiRequest(OffensiveTextDetector.HuggingFaceApiUrl, text);
         }
 
         private static string GetProjectRoot([CallerFilePath] string filePath = "")
@@ -58,6 +53,7 @@
             client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 DrinkDBApp");
             client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
+            // Would change from var but it's "anonymous type"
             var payload = new { inputs = text };
             StringContent jsonContent = new StringContent(
                 JsonConvert.SerializeObject(payload),
@@ -66,7 +62,6 @@
 
             try
             {
-                // client.Timeout = TimeSpan.FromSeconds(30);
                 HttpResponseMessage response = client.PostAsync(apiUrl, jsonContent).GetAwaiter().GetResult();
                 string responseContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 

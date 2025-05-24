@@ -1,22 +1,21 @@
-﻿using DataAccess.Model.AdminDashboard;
-using DataAccess.Model.AutoChecker;
-using DataAccess.Service.AdminDashboard.Interfaces;
-using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DataAccess.Model.AdminDashboard;
+using DataAccess.Service.AdminDashboard.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ServerAPI.Controllers
 {
     [ApiController]
     [Route("api/offensiveWords")]
-    public class OffensiveWordsController: ControllerBase
+    public class OffensiveWordsController : ControllerBase
     {
         private readonly ICheckersService checkersService;
 
         public OffensiveWordsController(ICheckersService checkersService)
         {
-            this.checkersService = checkersService ?? throw new ArgumentNullException(nameof(checkersService));
+            this.checkersService = checkersService;
         }
 
         [HttpGet]
@@ -36,13 +35,13 @@ namespace ServerAPI.Controllers
         {
             try
             {
-                await checkersService.AddOffensiveWordAsync(word.Word);
+                await this.checkersService.AddOffensiveWordAsync(word.Word);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-            return null;
+            return Ok();
         }
 
         [HttpDelete("delete/{word}")]
@@ -50,33 +49,33 @@ namespace ServerAPI.Controllers
         {
             try
             {
-                await checkersService.DeleteOffensiveWordAsync(word);
+                await this.checkersService.DeleteOffensiveWordAsync(word);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-            return null;
+            return Ok();
         }
 
         [HttpPost("check")]
         public async Task<List<string>> CheckReviews([FromBody] List<Review> reviews)
         {
-            return await checkersService.RunAutoCheck(reviews);
+            return await this.checkersService.RunAutoCheck(reviews);
         }
 
         [HttpPost("checkOne")]
-        public async Task<IActionResult> CheckOneReview([FromBody] Review review)
+        public IActionResult CheckOneReview([FromBody] Review review)
         {
             try
             {
-                await checkersService.RunAICheckForOneReviewAsync(review);
+                this.checkersService.RunAICheckForOneReviewAsync(review);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-            return null;
+            return Ok();
         }
     }
 }

@@ -1,50 +1,49 @@
-﻿namespace DrinkDb_Auth.ProxyRepository.AdminDashboard
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System;
+using System.Linq;
+using System.Net.Http.Json;
+using DataAccess.Model.AdminDashboard;
+using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
+
+namespace DrinkDb_Auth.ServiceProxy.AdminDashboard
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Net.Http;
-    using System.Net.Http.Json;
-    using System.Text;
-    using System.Threading.Tasks;
-    using DataAccess.Model.AdminDashboard;
-    using IRepository;
-
-    public class ReviewsProxyRepository : IReviewsRepository
+    public class ReviewsServiceProxy : IReviewService
     {
-        private const string ApiRoute = "api/reviews";
         private readonly HttpClient httpClient;
+        private const string ApiRoute = "api/reviews";
 
-        public ReviewsProxyRepository(string baseApiUrl)
+        public ReviewsServiceProxy(string baseUrl)
         {
-            this.httpClient = new HttpClient();
-            this.httpClient.BaseAddress = new Uri(baseApiUrl);
+            httpClient = new HttpClient();
+            httpClient.BaseAddress = new Uri(baseUrl);
         }
 
         public async Task<int> AddReview(Review review)
         {
-            var response = await httpClient.PostAsJsonAsync(ApiRoute, review);
+            HttpResponseMessage response = await httpClient.PostAsJsonAsync(ApiRoute, review);
             response.EnsureSuccessStatusCode();
             return review.ReviewId + 1;
         }
 
         public async Task<List<Review>> GetAllReviews()
         {
-            var response = await this.httpClient.GetAsync(ApiRoute);
+            HttpResponseMessage response = await httpClient.GetAsync(ApiRoute);
             response.EnsureSuccessStatusCode();
-            List<Review> reviews = await response.Content.ReadFromJsonAsync<List<Review>>();
+            List<Review>? reviews = await response.Content.ReadFromJsonAsync<List<Review>>();
             return reviews ?? new List<Review>();
         }
 
         public async Task<double> GetAverageRatingForVisibleReviews()
         {
-            List<Review> reviews = await this.GetAllReviews();
+            List<Review> reviews = await GetAllReviews();
             double average = 0;
             int numberOfVisibleReviews = 0;
-            foreach(Review review in reviews)
+            foreach (Review review in reviews)
             {
                 if (review.IsHidden == false)
-                { 
+                {
                     average += review.Rating;
                     numberOfVisibleReviews++;
                 }
@@ -54,7 +53,7 @@
 
         public async Task<List<Review>> GetFlaggedReviews(int minFlags)
         {
-            var response = await this.httpClient.GetAsync(ApiRoute);
+            HttpResponseMessage response = await httpClient.GetAsync(ApiRoute);
             response.EnsureSuccessStatusCode();
             List<Review> reviews = await response.Content.ReadFromJsonAsync<List<Review>>() ?? new List<Review>();
 
@@ -63,7 +62,7 @@
 
         public async Task<List<Review>> GetHiddenReviews()
         {
-            var response = await this.httpClient.GetAsync(ApiRoute);
+            HttpResponseMessage response = await httpClient.GetAsync(ApiRoute);
             response.EnsureSuccessStatusCode();
             List<Review> reviews = await response.Content.ReadFromJsonAsync<List<Review>>() ?? new List<Review>();
             return reviews.Where(review => review.IsHidden).ToList() ?? new List<Review>();
@@ -71,16 +70,16 @@
 
         public async Task<List<Review>> GetMostRecentReviews(int count)
         {
-            var response = await this.httpClient.GetAsync(ApiRoute);
+            HttpResponseMessage response = await httpClient.GetAsync(ApiRoute);
             response.EnsureSuccessStatusCode();
             List<Review> reviews = await response.Content.ReadFromJsonAsync<List<Review>>() ?? new List<Review>();
 
             return reviews.Where(review => !review.IsHidden).OrderByDescending(review => review.CreatedDate).Take(count).ToList();
         }
 
-        public async Task<Review> GetReviewById(int reviewID)
+        public async Task<Review?> GetReviewById(int reviewID)
         {
-            var response = await this.httpClient.GetAsync(ApiRoute);
+            HttpResponseMessage response = await httpClient.GetAsync(ApiRoute);
             response.EnsureSuccessStatusCode();
             List<Review> reviews = await response.Content.ReadFromJsonAsync<List<Review>>() ?? new List<Review>();
 
@@ -89,7 +88,7 @@
 
         public async Task<int> GetReviewCountAfterDate(DateTime date)
         {
-            var response = await this.httpClient.GetAsync(ApiRoute);
+            HttpResponseMessage response = await httpClient.GetAsync(ApiRoute);
             response.EnsureSuccessStatusCode();
             List<Review> reviews = await response.Content.ReadFromJsonAsync<List<Review>>() ?? new List<Review>();
 
@@ -98,16 +97,16 @@
 
         public async Task<List<Review>> GetReviewsByUser(Guid userId)
         {
-            var response = await this.httpClient.GetAsync(ApiRoute);
+            HttpResponseMessage response = await httpClient.GetAsync(ApiRoute);
             response.EnsureSuccessStatusCode();
-            List<Review> reviews =  await response.Content.ReadFromJsonAsync<List<Review>>() ?? new List<Review>();
+            List<Review> reviews = await response.Content.ReadFromJsonAsync<List<Review>>() ?? new List<Review>();
 
             return reviews.Where(review => review.UserId == userId).ToList();
         }
 
         public async Task<List<Review>> GetReviewsSince(DateTime date)
         {
-            var response =  await this.httpClient.GetAsync(ApiRoute);
+            HttpResponseMessage response = await httpClient.GetAsync(ApiRoute);
             response.EnsureSuccessStatusCode();
             List<Review> reviews = await response.Content.ReadFromJsonAsync<List<Review>>() ?? new List<Review>();
 
@@ -116,23 +115,44 @@
 
         public async Task RemoveReviewById(int reviewID)
         {
-            var reviewUrl = $"{ApiRoute}/{reviewID}";
-            var response =  await this.httpClient.DeleteAsync(reviewUrl);
+            string reviewUrl = $"{ApiRoute}/{reviewID}";
+            HttpResponseMessage response = await httpClient.DeleteAsync(reviewUrl);
             response.EnsureSuccessStatusCode();
         }
 
-        public async Task UpdateNumberOfFlagsForReview(int reviewID, int numberOfFlags)
+        public async void UpdateNumberOfFlagsForReview(int reviewID, int numberOfFlags)
         {
-            var reviewUrl = $"{ApiRoute}/{reviewID}/updateFlags";
-            var response = await httpClient.PatchAsJsonAsync(reviewUrl, numberOfFlags);
+            string reviewUrl = $"{ApiRoute}/{reviewID}/updateFlags";
+            HttpResponseMessage response = await httpClient.PatchAsJsonAsync(reviewUrl, numberOfFlags);
             response.EnsureSuccessStatusCode();
         }
 
-        public async Task UpdateReviewVisibility(int reviewID, bool isHidden)
+        public async void UpdateReviewVisibility(int reviewID, bool isHidden)
         {
-            var reviewUrl = $"{ApiRoute}/{reviewID}/updateVisibility";
-            var response = await httpClient.PatchAsJsonAsync(reviewUrl, isHidden);
+            string reviewUrl = $"{ApiRoute}/{reviewID}/updateVisibility";
+            HttpResponseMessage response = await httpClient.PatchAsJsonAsync(reviewUrl, isHidden);
             response.EnsureSuccessStatusCode();
+        }
+
+        public void HideReview(int reviewID)
+        {
+            UpdateReviewVisibility(reviewID, true);
+        }
+
+        public void ResetReviewFlags(int reviewId)
+        {
+            UpdateNumberOfFlagsForReview(reviewId, 0);
+        }
+
+        public async Task<List<Review>> GetReviewsForReport()
+        {
+            return await GetAllReviews();
+        }
+
+        public async Task<List<Review>> FilterReviewsByContent(string content)
+        {
+            List<Review> reviews = await GetAllReviews();
+            return reviews.Where(review => review.Content.Contains(content, StringComparison.OrdinalIgnoreCase)).ToList();
         }
     }
-}
+} 

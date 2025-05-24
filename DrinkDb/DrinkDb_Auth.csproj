@@ -23,11 +23,11 @@
     <!-- Microsoft.ML specific configuration -->
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
 	    <PlatformTarget>x64</PlatformTarget>
-        <CodeAnalysisRuleSet>SE.ruleset</CodeAnalysisRuleSet>
+        <CodeAnalysisRuleSet></CodeAnalysisRuleSet>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
 	    <PlatformTarget>x64</PlatformTarget>
-        <CodeAnalysisRuleSet>SE.ruleset</CodeAnalysisRuleSet>
+        <CodeAnalysisRuleSet></CodeAnalysisRuleSet>
     </PropertyGroup>
 
 	<ItemGroup>
@@ -92,11 +92,6 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.5" />
 	  <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Database\" />
-    <Folder Include="Service Proxy\" />
-    <Folder Include="View\AdminDashboard\" />
-  </ItemGroup>
 	<ItemGroup>
 		<Page Update="Views\MainPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
@@ -153,12 +148,20 @@
 	<ItemGroup>
 	  <Compile Remove="Adapter\**" />
 	  <Compile Remove="Logs\**" />
+	  <Compile Remove="Service Proxy\**" />
+	  <Compile Remove="View\AdminDashboard\**" />
 	  <EmbeddedResource Remove="Adapter\**" />
 	  <EmbeddedResource Remove="Logs\**" />
+	  <EmbeddedResource Remove="Service Proxy\**" />
+	  <EmbeddedResource Remove="View\AdminDashboard\**" />
 	  <None Remove="Adapter\**" />
 	  <None Remove="Logs\**" />
+	  <None Remove="Service Proxy\**" />
+	  <None Remove="View\AdminDashboard\**" />
 	  <Page Remove="Adapter\**" />
 	  <Page Remove="Logs\**" />
+	  <Page Remove="Service Proxy\**" />
+	  <Page Remove="View\AdminDashboard\**" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -172,5 +175,13 @@
 
 	<ItemGroup>
 	  <PRIResource Remove="Logs\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PRIResource Remove="Service Proxy\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PRIResource Remove="View\AdminDashboard\**" />
 	</ItemGroup>
 </Project>

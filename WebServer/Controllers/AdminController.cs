@@ -1,6 +1,5 @@
 ﻿using DataAccess.AutoChecker;
 using DataAccess.Model.AdminDashboard;
-using DataAccess.Model.AutoChecker;
 using DataAccess.Service.AdminDashboard.Interfaces;
 using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
 using IRepository;
@@ -17,17 +16,13 @@ namespace WebServer.Controllers
         private IOffensiveWordsRepository offensiveWordsService;
         private ICheckersService checkersService;
         private IAutoCheck autoCheckService;
-        private IUserService userService;
-        private IRolesService rolesService;
-        public AdminController(IReviewService newReviewService, IUpgradeRequestsService newUpgradeRequestService, IRolesService newRolesService, IOffensiveWordsRepository newOffensiveWordsService, ICheckersService newCheckersService, IAutoCheck autoCheck, IUserService newUserService)
+        public AdminController(IReviewService newReviewService, IUpgradeRequestsService newUpgradeRequestService, IRolesService newRolesService, IOffensiveWordsRepository newOffensiveWordsService, ICheckersService newCheckersService, IAutoCheck autoCheck)
         {
             this.reviewService = newReviewService;
             this.upgradeRequestService = newUpgradeRequestService;
             this.offensiveWordsService = newOffensiveWordsService;
             this.checkersService = newCheckersService;
             this.autoCheckService = autoCheck;
-            this.userService = newUserService;
-            this.rolesService = newRolesService;
         }
 
         public IActionResult AdminDashboard()

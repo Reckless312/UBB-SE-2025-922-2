@@ -1,23 +1,24 @@
 using System;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using DataAccess.Model.Authentication;
-using DataAccess.Service.Authentication.Interfaces;
 using DataAccess.OAuthProviders;
 using DataAccess.Service.Authentication;
-using System.Text;
+using DataAccess.Service.Authentication.Interfaces;
+using Newtonsoft.Json;
 
-namespace DrinkDb_Auth.ServiceProxy
+namespace DrinkDb_Auth.ServiceProxy.Authentication
 {
     public class AuthenticationServiceProxy : IAuthenticationService
     {
         private readonly HttpClient httpClient;
         private const string ApiBaseRoute = "api/auth";
 
-        public AuthenticationServiceProxy(HttpClient httpClient)
+        public AuthenticationServiceProxy(string baseUrl)
         {
-            this.httpClient = httpClient;
+            this.httpClient = new HttpClient();
+            this.httpClient.BaseAddress = new Uri(baseUrl);
         }
 
         public async Task<AuthenticationResponse> AuthWithUserPass(string username, string password)
@@ -30,23 +31,28 @@ namespace DrinkDb_Auth.ServiceProxy
             HttpResponseMessage response = await httpClient.PostAsync($"{ApiBaseRoute}/login", content);
             response.EnsureSuccessStatusCode();
             string json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<AuthenticationResponse>(json);
+            AuthenticationResponse? authenticationResponse = JsonConvert.DeserializeObject<AuthenticationResponse>(json);
+            if (authenticationResponse == null)
+            {
+                return new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = null, SessionId = Guid.Empty };
+            }
+            return authenticationResponse;
         }
 
         public async Task<AuthenticationResponse> AuthWithOAuth(OAuthService selectedService, object authProvider)
         {
-            //StringContent content = new StringContent(
-            //    JsonConvert.SerializeObject(new { Service = selectedService, Provider = authProvider }),
-            //    Encoding.UTF8,
-            //    "application/json");
-
             HttpResponseMessage response = await httpClient.PostAsync($"{ApiBaseRoute}/oauth?service={selectedService}", null);
             response.EnsureSuccessStatusCode();
             string json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<AuthenticationResponse>(json);
+           AuthenticationResponse? authenticationResponse = JsonConvert.DeserializeObject<AuthenticationResponse>(json);
+            if (authenticationResponse == null)
+            {
+                return new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = null, SessionId = Guid.Empty };
+            }
+            return authenticationResponse;
         }
 
-        public async Task<User> GetUser(Guid sessionId)
+        public async Task<User?> GetUser(Guid sessionId)
         {
             HttpResponseMessage response = await httpClient.GetAsync($"api/auth/user?sessionId={sessionId}");
             response.EnsureSuccessStatusCode();
@@ -60,4 +66,4 @@ namespace DrinkDb_Auth.ServiceProxy
             response.EnsureSuccessStatusCode();
         }
     }
-} 
+}

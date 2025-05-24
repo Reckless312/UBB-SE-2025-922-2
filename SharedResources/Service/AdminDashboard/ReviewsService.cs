@@ -1,122 +1,232 @@
-﻿// <copyright file="ReviewsService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace DrinkDb_Auth.Service.AdminDashboard
+﻿namespace DrinkDb_Auth.Service.AdminDashboard
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using DataAccess.Model.AdminDashboard;
-    using DataAccess.Service.AdminDashboard.Interfaces;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
     using IRepository;
 
     public class ReviewsService : IReviewService
     {
-        private readonly IReviewsRepository reviewsRepository;
+        private IReviewsRepository reviewsRepository;
+        private const int REVIEW_ID_FAILURE = -1;
 
         public ReviewsService(IReviewsRepository reviewsRepository)
         {
             this.reviewsRepository = reviewsRepository;
         }
 
-        public Task<int> AddReview(Review review)
+        public async Task<int> AddReview(Review review)
         {
-            return reviewsRepository.AddReview(review);
+            try
+            {
+                return await this.reviewsRepository.AddReview(review);
+            }
+            catch
+            {
+                return ReviewsService.REVIEW_ID_FAILURE;
+            }
         }
 
-        public Task RemoveReviewById(int reviewId)
+        public async Task RemoveReviewById(int reviewId)
         {
-            return reviewsRepository.RemoveReviewById(reviewId);
+            try
+            {
+                await this.reviewsRepository.RemoveReviewById(reviewId);
+            }
+            catch
+            {
+            }
         }
 
-        public Task<Review> GetReviewById(int reviewId)
+        public async Task<Review?> GetReviewById(int reviewId)
         {
-            return reviewsRepository.GetReviewById(reviewId);
+            try
+            {
+                return await this.reviewsRepository.GetReviewById(reviewId);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
-        public Task UpdateNumberOfFlagsForReview(int reviewId, int numberOfFlags)
+        public void UpdateNumberOfFlagsForReview(int reviewId, int numberOfFlags)
         {
-            return reviewsRepository.UpdateNumberOfFlagsForReview(reviewId, numberOfFlags);
+            try
+            {
+                this.reviewsRepository.UpdateNumberOfFlagsForReview(reviewId, numberOfFlags);
+            }
+            catch
+            {
+            }
         }
 
-        public Task UpdateReviewVisibility(int reviewId, bool isHidden)
+        public void UpdateReviewVisibility(int reviewId, bool isHidden)
         {
-            return reviewsRepository.UpdateReviewVisibility(reviewId, isHidden);
+            try
+            {
+                this.reviewsRepository.UpdateReviewVisibility(reviewId, isHidden);
+            }
+            catch
+            {
+            }
         }
 
-        public async Task ResetReviewFlags(int reviewId)
+        public void ResetReviewFlags(int reviewId)
         {
-            await reviewsRepository.UpdateNumberOfFlagsForReview(reviewId, 0);
+            try
+            {
+                this.reviewsRepository.UpdateNumberOfFlagsForReview(reviewId, 0);
+            }
+            catch
+            {
+            }
         }
 
-        public async Task HideReview(int reviewId)
+        public void HideReview(int reviewId)
         {
-            await reviewsRepository.UpdateReviewVisibility(reviewId, true);
+            try
+            {
+                this.reviewsRepository.UpdateReviewVisibility(reviewId, true);
+            }
+            catch
+            {
+            }
         }
 
         public async Task<List<Review>> GetFlaggedReviews(int minFlags = 1)
         {
-            return await reviewsRepository.GetFlaggedReviews(minFlags);
+            try
+            {
+                return await this.reviewsRepository.GetFlaggedReviews(minFlags);
+            }
+            catch
+            {
+                return new List<Review>();
+            }
         }
 
         public async Task<List<Review>> GetHiddenReviews()
         {
-            List<Review> reviews = await reviewsRepository.GetAllReviews();
-            return reviews.Where(review => review.IsHidden == true).ToList();
+            try
+            {
+                List<Review> reviews = await this.reviewsRepository.GetAllReviews();
+                return reviews.Where(review => review.IsHidden == true).ToList();
+            }
+            catch
+            {
+                return new List<Review>();
+            }
         }
 
         public async Task<List<Review>> GetAllReviews()
         {
-            return await reviewsRepository.GetAllReviews();
+            try
+            {
+                return await this.reviewsRepository.GetAllReviews();
+            }
+            catch
+            {
+                return new List<Review>();
+            }
         }
 
         public async Task<List<Review>> GetReviewsSince(DateTime date)
         {
-            return await reviewsRepository.GetReviewsSince(date);
+            try
+            {
+                return await this.reviewsRepository.GetReviewsSince(date);
+            }
+            catch
+            {
+                return new List<Review>();
+            }
         }
 
         public async Task<double> GetAverageRatingForVisibleReviews()
         {
-            return await reviewsRepository.GetAverageRatingForVisibleReviews();
+            try
+            {
+                return await this.reviewsRepository.GetAverageRatingForVisibleReviews();
+            }
+            catch
+            {
+                return 0.0;
+            }
         }
 
         public async Task<List<Review>> GetMostRecentReviews(int count)
         {
-            return await reviewsRepository.GetMostRecentReviews(count);
+            try
+            {
+                return await this.reviewsRepository.GetMostRecentReviews(count);
+            }
+            catch
+            {
+                return new List<Review>();
+            }
         }
 
         public async Task<int> GetReviewCountAfterDate(DateTime date)
         {
-            return await reviewsRepository.GetReviewCountAfterDate(date);
+            try
+            {
+                return await this.reviewsRepository.GetReviewCountAfterDate(date);
+            }
+            catch
+            {
+                return 0;
+            }
         }
 
         public async Task<List<Review>> GetReviewsByUser(Guid userId)
         {
-            return await reviewsRepository.GetReviewsByUser(userId);
+            try
+            {
+                return await this.reviewsRepository.GetReviewsByUser(userId);
+            }
+            catch
+            {
+                return new List<Review>();
+            }
         }
 
         public async Task<List<Review>> GetReviewsForReport()
         {
-            DateTime date = DateTime.Now.AddDays(-1);
-            int count = await reviewsRepository.GetReviewCountAfterDate(date);
+            try
+            {
+                DateTime date = DateTime.Now.AddDays(-1);
+                int count = await this.reviewsRepository.GetReviewCountAfterDate(date);
 
-            List<Review> reviews = await reviewsRepository.GetMostRecentReviews(count);
-            return reviews ?? [];
+                List<Review> reviews = await this.reviewsRepository.GetMostRecentReviews(count);
+                return reviews ?? [];
+            }
+            catch
+            {
+                return new List<Review>();
+            }
         }
 
         public async Task<List<Review>> FilterReviewsByContent(string content)
         {
-            if (string.IsNullOrEmpty(content))
+            try
             {
-                return await GetFlaggedReviews();
-            }
+                if (string.IsNullOrEmpty(content))
+                {
+                    return await this.GetFlaggedReviews();
+                }
 
-            content = content.ToLower();
-            List<Review> reviews = await GetFlaggedReviews();
-            return reviews.Where(review => review.Content.ToLower().Contains(content)).ToList();
+                content = content.ToLower();
+                List<Review> reviews = await this.GetFlaggedReviews();
+                return reviews.Where(review => review.Content.ToLower().Contains(content)).ToList();
+            }
+            catch
+            {
+                return new List<Review>();
+            }
         }
     }
 }

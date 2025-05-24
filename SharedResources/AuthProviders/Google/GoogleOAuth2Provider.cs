@@ -1,21 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using System.Security.Cryptography;
-using DataAccess.Model.Authentication;
-using IRepository;
-using Repository.Authentication;
-using Repository.AdminDashboard;
-using DataAccess.OAuthProviders;
-
 namespace DrinkDb_Auth.AuthProviders.Google
 {
-    public class GoogleOAuth2Provider : GenericOAuth2Provider, IGoogleOAuth2Provider
+    using System.Net.Http.Json;
+    using System.Security.Cryptography;
+    using System.Text;
+    using System.Text.Json.Serialization;
+    using DataAccess.Model.Authentication;
+    using DataAccess.OAuthProviders;
+    using DataAccess.Service.AdminDashboard.Interfaces;
+    using DataAccess.Service.Authentication.Interfaces;
+
+    public class GoogleOAuth2Provider : IGenericOAuth2Provider, IGoogleOAuth2Provider
     {
         public static Guid CreateGloballyUniqueIdentifier(string identifier)
         {
@@ -36,58 +30,53 @@ namespace DrinkDb_Auth.AuthProviders.Google
 
         private readonly string[] userResourcesScope = { "profile", "email" };
         private HttpClient httpClient;
-        private static readonly ISessionRepository SessionRepository;
-        private static readonly IUserRepository UserRepository;
+        private ISessionService sessionService;
+        private IUserService userService;
+
+        public GoogleOAuth2Provider(ISessionService sessionService, IUserService userService)
+        {
+            this.httpClient = new HttpClient();
+            this.sessionService = sessionService;
+            this.userService = userService;
+
+            this.ClientId = "311954949107-k5agbsvuvrsuttupcu7av2lceuk4vlag.apps.googleusercontent.com";
+            this.ClientSecret = "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";
+            this.RedirectUniformResourceIdentifier = "urn:ietf:wg:oauth:2.0:oob";
+            this.AuthorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth";
+            this.TokenEndpoint = "https://oauth2.googleapis.com/token";
+            this.UserInformationEndpoint = "https://www.googleapis.com/oauth2/v3/userinfo";
+        }
+
         private async Task<Guid> EnsureUserExists(string identifier, string email, string name)
         {
-            // Use provider's display name as username, like Facebook/GitHub
-            User? user = await UserRepository.GetUserByUsername(name);
+            User? user = await this.userService.GetUserByUsername(name);
             Guid userId;
             if (user == null)
             {
                 userId = Guid.NewGuid();
-                User newUser = new User { UserId = userId, Username = name, PasswordHash = string.Empty, TwoFASecret = null, EmailAddress = email, FullName = name, AssignedRole = DataAccess.Model.AdminDashboard.RoleType.Banned };
-                await UserRepository.CreateUser(newUser);
+                User newUser = new User { UserId = userId, Username = name, PasswordHash = string.Empty, TwoFASecret = null, EmailAddress = email, FullName = name, AssignedRole = DataAccess.Model.AdminDashboard.RoleType.User };
+                await this.userService.CreateUser(newUser);
             }
             else
             {
                 userId = user.UserId;
-                // Update email if it's different
                 if (user.EmailAddress != email)
                 {
                     user.EmailAddress = email;
-                    await UserRepository.UpdateUser(user);
+                    await this.userService.UpdateUser(user);
                 }
             }
             return userId;
         }
 
-        public GoogleOAuth2Provider()
-        {
-            System.Collections.Specialized.NameValueCollection appSettings = System.Configuration.ConfigurationManager.AppSettings;
-            httpClient = new HttpClient();
-
-            ClientId = "311954949107-k5agbsvuvrsuttupcu7av2lceuk4vlag.apps.googleusercontent.com";
-            ClientSecret = "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";
-            RedirectUniformResourceIdentifier = "urn:ietf:wg:oauth:2.0:oob";
-            AuthorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth";
-            TokenEndpoint = "https://oauth2.googleapis.com/token";
-            UserInformationEndpoint = "https://www.googleapis.com/oauth2/v3/userinfo";
-        }
-
-        public AuthenticationResponse Authenticate(string userId, string token)
-        {
-            return new AuthenticationResponse { AuthenticationSuccessful = !string.IsNullOrEmpty(token), OAuthToken = token, SessionId = Guid.Empty, NewAccount = false };
-        }
-
         public string GetAuthorizationUrl()
         {
-            string allowedResourcesScope = string.Join(" ", userResourcesScope);
+            string allowedResourcesScope = string.Join(" ", this.userResourcesScope);
 
             Dictionary<string, string> authorizationData = new Dictionary<string, string>
             {
-                { "client_id", ClientId },
-                { "redirect_uri", RedirectUniformResourceIdentifier },
+                { "client_id", this.ClientId },
+                { "redirect_uri", this.RedirectUniformResourceIdentifier },
                 { "response_type", "code" },
                 { "scope", allowedResourcesScope },
                 { "access_type", "offline" },
@@ -95,7 +84,7 @@ namespace DrinkDb_Auth.AuthProviders.Google
             };
 
             string transformedURLData = string.Join("&", authorizationData.Select(row => $"{Uri.EscapeDataString(row.Key)}={Uri.EscapeDataString(row.Value)}"));
-            string fullAuthorizationURL = $"{AuthorizationEndpoint}?{transformedURLData}";
+            string fullAuthorizationURL = $"{this.AuthorizationEndpoint}?{transformedURLData}";
 
             return fullAuthorizationURL;
         }
@@ -169,7 +158,15 @@ namespace DrinkDb_Auth.AuthProviders.Google
 
                                         userInformation = ExtractUserInfoFromIdToken(tokenResult.IdToken);
                                         userId = await EnsureUserExists(userInformation.Identifier, httpClientInformation.Email, httpClientInformation.Name);
-                                        return new AuthenticationResponse { AuthenticationSuccessful = true, OAuthToken = tokenResult.AccessToken, SessionId = SessionRepository.CreateSession(userId).Result.SessionId, NewAccount = false };
+
+                                        Session? session = await sessionService.CreateSessionAsync(userId);
+
+                                        if (session == null)
+                                        {
+                                            throw new Exception("Couldn't create session for user");
+                                        }
+
+                                        return new AuthenticationResponse { AuthenticationSuccessful = true, OAuthToken = tokenResult.AccessToken, SessionId = session.SessionId, NewAccount = false };
                                     case false:
                                         if (string.IsNullOrEmpty(tokenResult.IdToken))
                                         {
@@ -186,7 +183,15 @@ namespace DrinkDb_Auth.AuthProviders.Google
                         {
                             userInformation = ExtractUserInfoFromIdToken(tokenResult.IdToken);
                             userId = await EnsureUserExists(userInformation.Identifier, userInformation.Email, userInformation.Name);
-                            return new AuthenticationResponse { AuthenticationSuccessful = true, OAuthToken = tokenResult.AccessToken, SessionId = SessionRepository.CreateSession(userId).Result.SessionId, NewAccount = false };
+
+                            Session? session = await sessionService.CreateSessionAsync(userId);
+
+                            if (session == null)
+                            {
+                                throw new Exception("Couldn't create session for user");
+                            }
+
+                            return new AuthenticationResponse { AuthenticationSuccessful = true, OAuthToken = tokenResult.AccessToken, SessionId = session.SessionId, NewAccount = false };
                         }
                     case false:
                         throw new Exception("Trigger Catch | Repeated code to attempt a failed authentication");
@@ -200,7 +205,7 @@ namespace DrinkDb_Auth.AuthProviders.Google
 
         public async Task<AuthenticationResponse> SignInWithGoogleAsync()
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("SignInWithGoogleAsync is not implemented in GoogleOAuth2Provider. Use ExchangeCodeForTokenAsync instead.");
         }
 
         private UserInfoResponse ExtractUserInfoFromIdToken(string idToken)
@@ -235,47 +240,52 @@ namespace DrinkDb_Auth.AuthProviders.Google
                 throw new Exception($"Error parsing ID token: {ex.Message}", ex);
             }
         }
-    }
 
-    internal class TokenResponse
-    {
-        [JsonPropertyName("access_token")]
-        public required string AccessToken { get; set; }
+        public Task<AuthenticationResponse> Authenticate(string userId, string token)
+        {
+            return Task.FromResult(new AuthenticationResponse { AuthenticationSuccessful = !string.IsNullOrEmpty(token), OAuthToken = token, SessionId = Guid.Empty, NewAccount = false });
+        }
 
-        [JsonPropertyName("token_type")]
-        public required string TokenType { get; set; }
+        internal class TokenResponse
+        {
+            [JsonPropertyName("access_token")]
+            public required string AccessToken { get; set; }
 
-        [JsonPropertyName("expires_in")]
-        public required int ExpiresIn { get; set; }
+            [JsonPropertyName("token_type")]
+            public required string TokenType { get; set; }
 
-        [JsonPropertyName("refresh_token")]
-        public required string RefreshToken { get; set; }
+            [JsonPropertyName("expires_in")]
+            public required int ExpiresIn { get; set; }
 
-        [JsonPropertyName("id_token")]
-        public required string IdToken { get; set; }
-    }
+            [JsonPropertyName("refresh_token")]
+            public required string RefreshToken { get; set; }
 
-    internal class UserInfoResponse
-    {
-        [JsonPropertyName("sub")]
-        public required string Identifier { get; set; }
+            [JsonPropertyName("id_token")]
+            public required string IdToken { get; set; }
+        }
 
-        [JsonPropertyName("name")]
-        public required string Name { get; set; }
+        internal class UserInfoResponse
+        {
+            [JsonPropertyName("sub")]
+            public required string Identifier { get; set; }
 
-        [JsonPropertyName("given_name")]
-        public required string GivenName { get; set; }
+            [JsonPropertyName("name")]
+            public required string Name { get; set; }
 
-        [JsonPropertyName("family_name")]
-        public required string FamilyName { get; set; }
+            [JsonPropertyName("given_name")]
+            public required string GivenName { get; set; }
 
-        [JsonPropertyName("picture")]
-        public required string Picture { get; set; }
+            [JsonPropertyName("family_name")]
+            public required string FamilyName { get; set; }
 
-        [JsonPropertyName("email")]
-        public required string Email { get; set; }
+            [JsonPropertyName("picture")]
+            public required string Picture { get; set; }
 
-        [JsonPropertyName("email_verified")]
-        public required bool EmailVerified { get; set; }
+            [JsonPropertyName("email")]
+            public required string Email { get; set; }
+
+            [JsonPropertyName("email_verified")]
+            public required bool EmailVerified { get; set; }
+        }
     }
 }

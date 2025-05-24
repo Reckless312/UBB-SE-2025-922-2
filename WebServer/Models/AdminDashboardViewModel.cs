@@ -1,5 +1,4 @@
 ﻿using DataAccess.Model.AdminDashboard;
-using DataAccess.Model.AutoChecker;
 
 namespace WebServer.Models
 {

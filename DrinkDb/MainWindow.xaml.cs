@@ -8,12 +8,9 @@ namespace DrinkDb_Auth
     using DataAccess.AuthProviders.Twitter;
     using DataAccess.Model.Authentication;
     using DataAccess.OAuthProviders;
+    using DataAccess.Service.AdminDashboard.Interfaces;
     using DataAccess.Service.Authentication;
     using DataAccess.Service.Authentication.Interfaces;
-    using DrinkDb_Auth.AuthProviders.Google;
-    using DrinkDb_Auth.ProxyRepository.AdminDashboard;
-    using DrinkDb_Auth.ProxyRepository.Authentification;
-    using DrinkDb_Auth.Service.Authentication;
     using DrinkDb_Auth.ViewModel.Authentication;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.IdentityModel.Tokens;
@@ -27,19 +24,21 @@ namespace DrinkDb_Auth
 
     public sealed partial class MainWindow : Window
     {
-        private readonly IAuthenticationService authenticationService;
-        private readonly ITwoFactorAuthenticationService twoFactorAuthentificationService;
-        private readonly IScheduler scheduler;
-
+        private IAuthenticationService authenticationService;
+        private ITwoFactorAuthenticationService twoFactorAuthentificationService;
+        private IUserService userService;
+        private TwitterOAuth2Provider twitterOAuth2Provider;
         public Frame NavigationFrame { get; private set; }
 
-        public MainWindow(IAuthenticationService authenticationService, IScheduler scheduler, ITwoFactorAuthenticationService twoFactorAuthenticationService)
+        public MainWindow(IAuthenticationService authenticationService, ITwoFactorAuthenticationService twoFactorAuthenticationService,
+            IUserService userService, TwitterOAuth2Provider twitterOAuth2Provider)
         {
             this.authenticationService = authenticationService;
-            this.scheduler = scheduler;
             this.twoFactorAuthentificationService = twoFactorAuthenticationService;
             this.InitializeComponent();
             this.NavigationFrame = this.MainFrame;
+            this.userService = userService;
+            this.twitterOAuth2Provider = twitterOAuth2Provider;
 
             this.Title = "DrinkDb - Sign In";
 
@@ -50,8 +49,6 @@ namespace DrinkDb_Auth
             });
             this.AppWindow.Move(new PointInt32(0, 0));
 
-            this.ScheduleDelayedEmailAutomatically().ConfigureAwait(false);
-
             IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             WindowId windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
             AppWindow appWindow = AppWindow.GetFromWindowId(windowId);
@@ -60,64 +57,40 @@ namespace DrinkDb_Auth
             {
                 presenter.Maximize();
             }
+
+            this.twitterOAuth2Provider = twitterOAuth2Provider;
         }
 
-        private async Task InitializeScheduler()
+        private async Task<bool> AuthenticationComplete(AuthenticationResponse response)
         {
-            try
+            if (response.AuthenticationSuccessful)
             {
-                StdSchedulerFactory factory = new StdSchedulerFactory();
-                await this.scheduler.Start();
-                System.Diagnostics.Debug.WriteLine("Scheduler initialized successfully");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Scheduler initialization failed: {ex}");
-            }
-        }
+                User? user = await this.authenticationService.GetUser(response.SessionId);
 
-        private async Task ScheduleDelayedEmailAutomatically()
-        {
-            try
-            {
-                IJobDetail job = JobBuilder.Create<EmailJob>()
-                    .WithIdentity("autoEmailJob", "emailGroup")
-                    .Build();
+                if (user == null)
+                {
+                    return false;
+                }
 
-                ITrigger trigger = TriggerBuilder.Create()
-                    .WithIdentity("autoTrigger", "emailGroup")
-                    .StartNow()
-                    .WithSchedule(CronScheduleBuilder.WeeklyOnDayAndHourAndMinute(DayOfWeek.Monday, 11, 40))
-                    .Build();
-
-                await this.scheduler.ScheduleJob(job, trigger);
-                System.Diagnostics.Debug.WriteLine($"Job scheduled to run every 1 minute");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Job scheduling failed: {ex}");
-            }
-        }
-
-        private async Task<bool> AuthenticationComplete(AuthenticationResponse res)
-        {
-            if (res.AuthenticationSuccessful)
-            {
-                User user = await this.authenticationService.GetUser(res.SessionId);
                 bool twoFAresponse = false;
                 bool firstTimeSetup = user.TwoFASecret.IsNullOrEmpty();
                 this.twoFactorAuthentificationService.UserId = user.UserId;
                 this.twoFactorAuthentificationService.IsFirstTimeSetup = firstTimeSetup;
-                TwoFaGuiHelper twoFaGuiHelper = new TwoFaGuiHelper(this);
-                (User currentUser, string uniformResourceIdentifier, byte[] twoFactorSecret)
-                    values = this.twoFactorAuthentificationService.Get2FAValues();
+                TwoFaGuiHelper twoFaGuiHelper = new TwoFaGuiHelper(this, this.userService);
+                (User? currentUser, string uniformResourceIdentifier, byte[] twoFactorSecret) values = await this.twoFactorAuthentificationService.Get2FAValues();
+
+                if (values.currentUser == null)
+                {
+                    return false;
+                }
+
                 twoFaGuiHelper.InitializeOtherComponents(firstTimeSetup, values.currentUser, values.uniformResourceIdentifier, values.twoFactorSecret);
                 twoFAresponse = await twoFaGuiHelper.SetupOrVerifyTwoFactor();
 
                 if (twoFAresponse)
                 {
                     App.CurrentUserId = user.UserId;
-                    App.CurrentSessionId = res.SessionId;
+                    App.CurrentSessionId = response.SessionId;
                     this.NavigationFrame.Navigate(typeof(SuccessPage), this);
                 }
 
@@ -159,7 +132,7 @@ namespace DrinkDb_Auth
             try
             {
                 var githubHelper = App.Host.Services.GetRequiredService<IGitHubOAuthHelper>();
-                AuthenticationResponse authResponse = null;
+                AuthenticationResponse? authResponse = null;
                 try
                 {
                     authResponse = await this.authenticationService.AuthWithOAuth(OAuthService.GitHub, githubHelper);
@@ -176,26 +149,6 @@ namespace DrinkDb_Auth
                 await this.ShowError("Authentication Error", ex.ToString());
             }
         }
-
-        public async void GoogleSignInButton_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                this.GoogleSignInButton.IsEnabled = false;
-                var googleHelper = App.Host.Services.GetRequiredService<IGoogleOAuth2Provider>();
-                AuthenticationResponse authResponse = await this.authenticationService.AuthWithOAuth(OAuthService.Google, googleHelper);
-                await this.AuthenticationComplete(authResponse);
-            }
-            catch (Exception ex)
-            {
-                await ShowError("Error", ex.Message);
-            }
-            finally
-            {
-                this.GoogleSignInButton.IsEnabled = true;
-            }
-        }
-
         public async void FacebookSignInButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -214,7 +167,7 @@ namespace DrinkDb_Auth
         {
             try
             {
-                TwitterGuiHelper twitterGuiHelper = new TwitterGuiHelper(this, new TwitterOAuth2Provider(new UserProxyRepository(), new SessionProxyRepository() /*temporary fix, full twitter service needed*/));
+                TwitterGuiHelper twitterGuiHelper = new TwitterGuiHelper(this, this.twitterOAuth2Provider);
                 AuthenticationResponse authResponse = await twitterGuiHelper.SignInWithTwitterAsync();
                 await this.AuthenticationComplete(authResponse);
             }

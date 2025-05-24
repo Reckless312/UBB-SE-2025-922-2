@@ -1,13 +1,6 @@
-﻿// <copyright file="IOffensiveWordsRepository.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace IRepository
+﻿namespace IRepository
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
 
     public interface IOffensiveWordsRepository
@@ -17,7 +10,5 @@ namespace IRepository
         Task AddWord(string word);
 
         Task DeleteWord(string word);
-
-
     }
 }

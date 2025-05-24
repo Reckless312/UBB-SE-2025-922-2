@@ -1,43 +1,38 @@
-﻿using System;
-using System.Linq;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using DataAccess.Model.Authentication;
-using IRepository;
-using Repository.AdminDashboard;
+using DataAccess.Service.AdminDashboard.Interfaces;
 
 namespace DataAccess.AuthProviders
 {
-    public class UserNotFoundException : Exception
-    {
-        public UserNotFoundException(string message) : base(message)
-        {
-        }
-    }
     public class BasicAuthenticationProvider : IBasicAuthenticationProvider
     {
-        private readonly IUserRepository userRepository;
-        public BasicAuthenticationProvider(IUserRepository userRepo)
+        public class UserNotFoundException : Exception
         {
-            userRepository = userRepo;
+            public UserNotFoundException(string message) : base(message)
+            {
+            }
+        }
+
+        private IUserService userService;
+        public BasicAuthenticationProvider(IUserService userService)
+        {
+            this.userService = userService;
         }
 
         public async Task<bool> AuthenticateAsync(string username, string password)
         {
-            System.Diagnostics.Debug.WriteLine($"BasicAuthenticationProvider: Attempting to authenticate {username}");
-            User? user = await userRepository.GetUserByUsername(username);
+            // I changed this function to return both false if the user password is not correct and if he is not in the database
+            // changes will be made in desktop at the very least
+
+            User? user = await userService.GetUserByUsername(username);
             if (user == null)
             {
-                System.Diagnostics.Debug.WriteLine("BasicAuthenticationProvider: User not found");
-                throw new UserNotFoundException($"User {username} not found");
+                throw new UserNotFoundException("User not found!");
             }
 
-            System.Diagnostics.Debug.WriteLine($"BasicAuthenticationProvider: Found user with hash: {user.PasswordHash}");
             string hashedPassword = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(password)));
-            System.Diagnostics.Debug.WriteLine($"BasicAuthenticationProvider: Computed hash: {hashedPassword}");
             bool isAuthenticated = user.PasswordHash == hashedPassword;
-            System.Diagnostics.Debug.WriteLine($"BasicAuthenticationProvider: Authentication result: {isAuthenticated}");
             return isAuthenticated;
         }
 

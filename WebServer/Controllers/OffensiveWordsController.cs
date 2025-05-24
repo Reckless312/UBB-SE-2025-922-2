@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using DataAccess.Model.AutoChecker;
 using ServerAPI.Data;
+using DataAccess.Model.AdminDashboard;
 
 namespace WebServer.Controllers
 {

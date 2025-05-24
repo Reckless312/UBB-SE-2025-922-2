@@ -13,25 +13,9 @@ namespace DrinkDb_Auth.View
     using Microsoft.Extensions.DependencyInjection;
     using DataAccess.AutoChecker;
     using DataAccess.Service.AdminDashboard.Interfaces;
-
-    /// <summary>
-    /// a page.
-    /// </summary>
     public sealed partial class MainPage : Page
     {
-        /// <summary>
-        /// Gets correspinding view model.
-        /// </summary>
         public MainPageViewModel ViewModel { get; }
-
-        /// <summary>
-        /// main page initialization.
-        /// </summary>
-        /// <param name="reviewsService">given review service.</param>
-        /// <param name="userService">given user service.</param>
-        /// <param name="upgradeRequestsService">given update request service.</param>
-        /// <param name="checkersService">given checker service.</param>
-        /// <param name="autoCheck">given auto check.</param>
         public MainPage()
         {
             this.InitializeComponent();
@@ -42,28 +26,23 @@ namespace DrinkDb_Auth.View
             ICheckersService checkersService = App.Host.Services.GetRequiredService<ICheckersService>();
             IAutoCheck autoCheck = App.Host.Services.GetRequiredService<IAutoCheck>();
 
-            ViewModel = new MainPageViewModel(
-                reviewsService,
-                userService,
-                upgradeRequestsService,
-                checkersService,
-                autoCheck);
+            this.ViewModel = new MainPageViewModel(reviewsService, userService, upgradeRequestsService, checkersService);
 
-            ViewModel.PropertyChanged += ViewModel_PropertyChanged;
+            this.ViewModel.PropertyChanged += ViewModel_PropertyChanged;
 
-            DataContext = ViewModel;
+            this.DataContext = ViewModel;
 
-            Unloaded += MainPage_Unloaded;
+            this.Unloaded += MainPage_Unloaded;
         }
 
         private void MainPage_Unloaded(object sender, RoutedEventArgs e)
         {
-            ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
+            this.ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
         }
 
-        private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs eventArgs)
         {
-            if (e.PropertyName == nameof(ViewModel.IsWordListVisible))
+            if (eventArgs.PropertyName == nameof(ViewModel.IsWordListVisible))
             {
                 this.WordListPopup.Visibility = ViewModel.IsWordListVisible ? Visibility.Visible : Visibility.Collapsed;
             }
@@ -193,30 +172,30 @@ namespace DrinkDb_Auth.View
             flyout.ShowAt((FrameworkElement)anchor);
         }
 
-        private void AcceptUpgradeRequestButton_Click(object sender, RoutedEventArgs e)
+        private async void AcceptUpgradeRequestButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is int requestId)
             {
-                ViewModel.HandleUpgradeRequest(true, requestId);
+                await ViewModel.HandleUpgradeRequest(true, requestId);
             }
         }
 
-        private void DeclineUpgradeRequestButton_Click(object sender, RoutedEventArgs e)
+        private async void DeclineUpgradeRequestButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is int requestId)
             {
-                ViewModel.HandleUpgradeRequest(false, requestId);
+                await ViewModel.HandleUpgradeRequest(false, requestId);
             }
         }
 
-        private void ReviewSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private async void ReviewSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            ViewModel.FilterReviews(this.ReviewSearchTextBox.Text);
+            await ViewModel.FilterReviews(this.ReviewSearchTextBox.Text);
         }
 
-        private void BannedUserSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private async void BannedUserSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            ViewModel.FilterAppeals(this.BannedUserSearchTextBox.Text);
+            await ViewModel.FilterAppeals(this.BannedUserSearchTextBox.Text);
         }
 
         private void MenuFlyoutAllowReview_Click(object sender, RoutedEventArgs e)
@@ -235,11 +214,11 @@ namespace DrinkDb_Auth.View
             }
         }
 
-        private void MenuFlyoutAICheck_Click_2(object sender, RoutedEventArgs e)
+        private async void MenuFlyoutAICheck_Click_2(object sender, RoutedEventArgs e)
         {
             if (sender is MenuFlyoutItem menuItem && menuItem.DataContext is Review review)
             {
-                ViewModel.RunAICheck(review);
+                await ViewModel.RunAICheck(review);
             }
         }
 

@@ -7,7 +7,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
     Title="IMBD for Drinks - Admin"
     xmlns:models="using:DataAccess.Model.AdminDashboard" 
     xmlns:views="using:DrinkDb_Auth.View"
@@ -80,20 +79,6 @@
                             <Border Height="1" Background="{ThemeResource SystemBaseMediumColor}" Width="100" VerticalAlignment="Center" Margin="10,0,0,0"/>
                         </StackPanel>
 
-                        <!-- Sign in with Google -->
-                        <Button x:Name="GoogleSignInButton"
-                                Margin="0,20,0,0"
-                                Height="45"
-                                HorizontalAlignment="Stretch"
-                                Background="#4285F4"
-                                Foreground="White"
-                                Click="GoogleSignInButton_Click">
-                            <StackPanel Orientation="Horizontal">
-                                <Image Source="/Assets/google_logo.png" Width="20" Height="20" Margin="0,0,10,0"/>
-                                <TextBlock Text="Sign in with Google"/>
-                            </StackPanel>
-                        </Button>
-                  
                         <Button x:Name="GithubSignInButton"
                                 Margin="0,10,0,0"
                                 Height="45"

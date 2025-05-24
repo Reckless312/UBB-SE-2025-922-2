@@ -1,22 +1,9 @@
-﻿// <copyright file="AdminReportData.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-using System;
-using System.Collections.Generic;
-using DataAccess.Model.AdminDashboard;
+﻿using DataAccess.Model.AdminDashboard;
 using DataAccess.Model.Authentication;
 
 public class AdminReportData
 {
-    public AdminReportData(
-        DateTime reportDate,
-        List<User> adminUsers,
-        int activeUsersCount,
-        int bannedUsersCount,
-        int newReviewsCount,
-        double averageRating,
-        List<Review> recentReviews)
+    public AdminReportData(DateTime reportDate, List<User> adminUsers, int activeUsersCount, int bannedUsersCount, int newReviewsCount, double averageRating, List<Review> recentReviews)
     {
         this.ReportDate = reportDate;
         this.AdminUsers = adminUsers;

@@ -1,11 +1,11 @@
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using DataAccess.Model.Authentication;
 using DataAccess.Service.Authentication.Interfaces;
-using System;
+using Newtonsoft.Json;
 
-namespace DrinkDb_Auth.ServiceProxy
+namespace DrinkDb_Auth.ServiceProxy.Authentication
 {
     public class SessionServiceProxy : ISessionService
     {
@@ -13,15 +13,15 @@ namespace DrinkDb_Auth.ServiceProxy
         private readonly string baseUrl;
         private const string ApiBaseRoute = "api/sessions";
 
-        public SessionServiceProxy(HttpClient httpClient, string baseUrl)
+        public SessionServiceProxy(string baseUrl)
         {
-            this.httpClient = httpClient;
+            this.httpClient = new HttpClient();
             this.baseUrl = baseUrl.TrimEnd('/');
         }
 
-        public async Task<Session> CreateSessionAsync(Guid userId)
+        public async Task<Session?> CreateSessionAsync(Guid userId)
         {
-            HttpResponseMessage response = await httpClient.PostAsync($"{this.baseUrl}/{ApiBaseRoute}/add?userId={userId}", null);
+            HttpResponseMessage response = await httpClient.PostAsync($"{baseUrl}/{ApiBaseRoute}/add?userId={userId}", null);
             response.EnsureSuccessStatusCode();
             string json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<Session>(json);
@@ -29,21 +29,21 @@ namespace DrinkDb_Auth.ServiceProxy
 
         public async Task<bool> EndSessionAsync(Guid sessionId)
         {
-            HttpResponseMessage response = await this.httpClient.DeleteAsync($"{this.baseUrl}/{ApiBaseRoute}/{sessionId}");
+            HttpResponseMessage response = await httpClient.DeleteAsync($"{baseUrl}/{ApiBaseRoute}/{sessionId}");
             return response.IsSuccessStatusCode;
         }
 
-        public async Task<Session> GetSessionAsync(Guid sessionId)
+        public async Task<Session?> GetSessionAsync(Guid sessionId)
         {
-            HttpResponseMessage response = await this.httpClient.GetAsync($"{this.baseUrl}/{ApiBaseRoute}/{sessionId}");
+            HttpResponseMessage response = await httpClient.GetAsync($"{baseUrl}/{ApiBaseRoute}/{sessionId}");
             response.EnsureSuccessStatusCode();
             string json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<Session>(json);
         }
 
-        public async Task<Session> GetSessionByUserIdAsync(Guid userId)
+        public async Task<Session?> GetSessionByUserIdAsync(Guid userId)
         {
-            HttpResponseMessage response = await this.httpClient.GetAsync($"{this.baseUrl}/{ApiBaseRoute}/by-user/{userId}");
+            HttpResponseMessage response = await httpClient.GetAsync($"{baseUrl}/{ApiBaseRoute}/by-user/{userId}");
             response.EnsureSuccessStatusCode();
             string json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<Session>(json);
@@ -51,18 +51,10 @@ namespace DrinkDb_Auth.ServiceProxy
 
         public async Task<bool> AuthorizeActionAsync(Guid sessionId, string resource, string action)
         {
-            HttpResponseMessage response = await this.httpClient.GetAsync($"{this.baseUrl}/{ApiBaseRoute}/{sessionId}/authorize?resource={resource}&action={action}");
-            response.EnsureSuccessStatusCode();
-            string json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<bool>(json);
-        }
-
-        public async Task<bool> ValidateSessionAsync(Guid sessionId)
-        {
-            HttpResponseMessage response = await this.httpClient.GetAsync($"{this.baseUrl}/{ApiBaseRoute}/{sessionId}/validate");
+            HttpResponseMessage response = await httpClient.GetAsync($"{baseUrl}/{ApiBaseRoute}/{sessionId}/authorize?resource={resource}&action={action}");
             response.EnsureSuccessStatusCode();
             string json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<bool>(json);
         }
     }
-} 
+}

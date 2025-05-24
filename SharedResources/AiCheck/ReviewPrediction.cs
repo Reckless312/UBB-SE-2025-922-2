@@ -1,8 +1,4 @@
-﻿// <copyright file="ReviewPrediction.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace DataAccess.AiCheck
+﻿namespace DataAccess.AiCheck
 {
     using Microsoft.ML.Data;
 

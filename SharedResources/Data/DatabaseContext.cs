@@ -1,10 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using DataAccess.Model.AdminDashboard;
 using DataAccess.Model.Authentication;
-using System.Collections.Generic;
-using System.Reflection.Emit;
-using Azure.Core;
-using DataAccess.Model.AutoChecker;
 
 namespace ServerAPI.Data
 {
@@ -48,11 +44,9 @@ namespace ServerAPI.Data
                 role.Property(currentRole => currentRole.RoleName).IsRequired().HasMaxLength(10);
             });
             modelBuilder.Entity<Role>().HasData(
-                new Role(RoleType.Banned, "Banned"), 
-                new Role(RoleType.User, "User"), 
-                new Role(RoleType.Admin, "Admin"), 
-                new Role(RoleType.Manager, "Manager")
-             );
+                new Role(RoleType.Banned, "Banned"),
+                new Role(RoleType.User, "User"),
+                new Role(RoleType.Admin, "Admin"));
             // configure upgrade request
             modelBuilder.Entity<UpgradeRequest>(request =>
             {
@@ -86,7 +80,6 @@ namespace ServerAPI.Data
                 word.HasKey(offensiveWord => offensiveWord.OffensiveWordId);
                 word.Property(offensiveWord => offensiveWord.Word);
             });
-
         }
     }
 }

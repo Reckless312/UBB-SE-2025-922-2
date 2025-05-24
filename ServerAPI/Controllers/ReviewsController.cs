@@ -12,7 +12,7 @@ namespace ServerAPI.Controllers
 
         public ReviewsController(IReviewService reviewService)
         {
-            this.reviewService = reviewService ?? throw new ArgumentNullException(nameof(reviewService));
+            this.reviewService = reviewService;
         }
 
         [HttpGet("")]
@@ -26,19 +26,19 @@ namespace ServerAPI.Controllers
         {
             return await this.reviewService.GetReviewsSince(date);
         }
-        
+
         [HttpGet("averageRatingVisibleReviews")]
         public async Task<double> GetAverageRatingForVisibleReviews()
         {
             return await this.reviewService.GetAverageRatingForVisibleReviews();
         }
-        
+
         [HttpGet("mostRecent")]
         public async Task<IEnumerable<Review>> GetMostRecentReviews([FromQuery] int count)
         {
             return await this.reviewService.GetMostRecentReviews(count);
         }
-        
+
         [HttpGet("countAfterDate")]
         public async Task<int> GetReviewCountAfterDate([FromQuery] DateTime date)
         {
@@ -56,23 +56,23 @@ namespace ServerAPI.Controllers
         {
             return await this.reviewService.GetReviewsByUser(userId);
         }
-        
+
         [HttpGet("{id}")]
-        public async Task<Review> GetReviewById(int id)
+        public async Task<Review?> GetReviewById(int id)
         {
             return await this.reviewService.GetReviewById(id);
         }
 
         [HttpPatch("{id}/updateFlags")]
-        public async Task UpdateNumberOfFlagsForReview(int id, [FromBody] int numberOfFlags)
+        public void UpdateNumberOfFlagsForReview(int id, [FromBody] int numberOfFlags)
         {
-            await this.reviewService.UpdateNumberOfFlagsForReview(id, numberOfFlags);
+            this.reviewService.UpdateNumberOfFlagsForReview(id, numberOfFlags);
         }
 
         [HttpPatch("{id}/updateVisibility")]
-        public async Task UpdateReviewVisibility(int id, [FromBody] bool isHidden)
+        public void UpdateReviewVisibility(int id, [FromBody] bool isHidden)
         {
-            await this.reviewService.UpdateReviewVisibility(id, isHidden);
+            this.reviewService.UpdateReviewVisibility(id, isHidden);
         }
 
         [HttpPost("add")]
@@ -90,7 +90,7 @@ namespace ServerAPI.Controllers
         [HttpGet("hidden")]
         public async Task<IEnumerable<Review>> GetHiddenReviews()
         {
-            return await reviewService.GetHiddenReviews();
+            return await this.reviewService.GetHiddenReviews();
         }
 
         [HttpGet("report")]

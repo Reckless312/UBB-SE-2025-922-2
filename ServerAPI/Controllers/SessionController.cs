@@ -2,7 +2,6 @@
 using DataAccess.Model.Authentication;
 using DataAccess.Service.Authentication.Interfaces;
 
-
 namespace ServerAPI.Controllers
 {
     [ApiController]
@@ -13,11 +12,11 @@ namespace ServerAPI.Controllers
 
         public SessionController(ISessionService service)
         {
-            this.sessionService = service ?? throw new ArgumentNullException(nameof(service));
+            this.sessionService = service;
         }
 
         [HttpPost("add")]
-        public async Task<Session> CreateSession([FromQuery] Guid userId)
+        public async Task<Session?> CreateSession([FromQuery] Guid userId)
         {
             return await this.sessionService.CreateSessionAsync(userId);
         }
@@ -29,14 +28,14 @@ namespace ServerAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<Session> GetSession(Guid id)
-        { 
+        public async Task<Session?> GetSession(Guid id)
+        {
             return await this.sessionService.GetSessionAsync(id);
         }
-        
+
         [HttpGet("byUserId/{id}")]
-        public async Task<Session> GetSessionByUserID(Guid id)
-        { 
+        public async Task<Session?> GetSessionByUserID(Guid id)
+        {
             return await this.sessionService.GetSessionByUserIdAsync(id);
         }
     }

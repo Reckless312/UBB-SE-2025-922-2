@@ -1,22 +1,21 @@
 using System;
 using System.Net.Http;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using DataAccess.Model.Authentication;
-using IRepository;
-using DataAccess.AuthProviders;
 using System.Text;
+using System.Threading.Tasks;
+using DataAccess.AuthProviders;
+using Newtonsoft.Json;
 
-namespace DrinkDb_Auth.ServiceProxy
+namespace DrinkDb_Auth.ServiceProxy.Authentication
 {
     public class BasicAuthenticationProviderServiceProxy : IBasicAuthenticationProvider
     {
         private readonly HttpClient httpClient;
         private const string ApiBaseRoute = "api/auth";
 
-        public BasicAuthenticationProviderServiceProxy(HttpClient httpClient)
+        public BasicAuthenticationProviderServiceProxy(string baseUrl)
         {
-            this.httpClient = httpClient;
+            this.httpClient = new HttpClient();
+            this.httpClient.BaseAddress = new Uri(baseUrl);
         }
 
         public async Task<bool> AuthenticateAsync(string username, string password)
@@ -28,7 +27,7 @@ namespace DrinkDb_Auth.ServiceProxy
                     Encoding.UTF8,
                     "application/json");
 
-                HttpResponseMessage response = await this.httpClient.PostAsync($"{ApiBaseRoute}/authenticate", content);
+                HttpResponseMessage response = await httpClient.PostAsync($"{ApiBaseRoute}/authenticate", content);
                 response.EnsureSuccessStatusCode();
                 return true;
             }
@@ -44,4 +43,4 @@ namespace DrinkDb_Auth.ServiceProxy
             return AuthenticateAsync(username, password).GetAwaiter().GetResult();
         }
     }
-} 
+}

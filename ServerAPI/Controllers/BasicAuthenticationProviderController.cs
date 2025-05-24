@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using DataAccess.AuthProviders;
 using DataAccess.Model.Authentication;
-using IRepository;
+using DataAccess.Service.AdminDashboard.Interfaces;
 
 namespace ServerAPI.Controllers
 {
@@ -10,48 +10,40 @@ namespace ServerAPI.Controllers
     public class BasicAuthenticationProviderController : ControllerBase
     {
         private readonly IBasicAuthenticationProvider basicAuthProvider;
-        private readonly IUserRepository userRepository;
+        private readonly IUserService userService;
 
-        public BasicAuthenticationProviderController(
-            IBasicAuthenticationProvider basicAuthProvider,
-            IUserRepository userRepository)
+        public BasicAuthenticationProviderController(IBasicAuthenticationProvider basicAuthProvider, IUserService userService)
         {
             this.basicAuthProvider = basicAuthProvider;
-            this.userRepository = userRepository;
+            this.userService = userService;
         }
 
         [HttpPost("authenticate")]
         public async Task<ActionResult<bool>> Authenticate([FromBody] LoginRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
-                return BadRequest("Username and password must be provided.");
-
-            try
             {
-                bool isAuthenticated = await this.basicAuthProvider.AuthenticateAsync(request.Username, request.Password);
-                return Ok(isAuthenticated);
+                return BadRequest("Username and password must be provided.");
             }
-            catch (UserNotFoundException)
+            bool isAuthenticated = await this.basicAuthProvider.AuthenticateAsync(request.Username, request.Password);
+
+            if (!isAuthenticated)
             {
                 return NotFound($"User {request.Username} not found.");
             }
+            return Ok(isAuthenticated);
         }
 
         [HttpGet("user/{username}")]
         public async Task<ActionResult<User>> GetUserByUsername(string username)
         {
-            try
+            User? user = await this.userService.GetUserByUsername(username);
+            if (user == null)
             {
-                User? user = await this.userRepository.GetUserByUsername(username);
-                if (user == null)
-                    return NotFound($"User {username} not found.");
-                
-                return Ok(user);
+                return NotFound($"User {username} not found.");
             }
-            catch (Exception)
-            {
-                return StatusCode(500, "An error occurred while retrieving the user.");
-            }
+
+            return Ok(user);
         }
     }
 }

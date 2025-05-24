@@ -1,17 +1,7 @@
-﻿// <copyright file="FileTemplateProvider.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
+﻿using DataAccess.Service.AdminDashboard.Interfaces;
 
 namespace DataAccess.Service.AdminDashboard.Components
 {
-    using DataAccess.Service.AdminDashboard.Interfaces;
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-
     public class FileTemplateProvider : ITemplateProvider
     {
         private static readonly string EmailPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Templates", "EmailContentTemplate.html");
@@ -20,17 +10,17 @@ namespace DataAccess.Service.AdminDashboard.Components
 
         public string GetEmailTemplate()
         {
-            return File.ReadAllText(EmailPath);
+            return File.ReadAllText(FileTemplateProvider.EmailPath);
         }
 
         public string GetPlainTextTemplate()
         {
-            return File.ReadAllText(PlainTextPath);
+            return File.ReadAllText(FileTemplateProvider.PlainTextPath);
         }
 
         public string GetReviewRowTemplate()
         {
-            return File.ReadAllText(ReviewPath);
+            return File.ReadAllText(FileTemplateProvider.ReviewPath);
         }
     }
 }

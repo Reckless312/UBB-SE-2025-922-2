@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using DataAccess.Model.AdminDashboard;
 using DataAccess.Service.AdminDashboard.Interfaces;
-using IRepository;
 
 namespace ServerAPI.Controllers
 {
@@ -13,7 +12,7 @@ namespace ServerAPI.Controllers
 
         public UpgradeRequestsController(IUpgradeRequestsService upgradeRequestsService)
         {
-            this.upgradeRequestsService = upgradeRequestsService ?? throw new ArgumentNullException(nameof(upgradeRequestsService));
+            this.upgradeRequestsService = upgradeRequestsService;
         }
 
         [HttpGet]
@@ -29,7 +28,7 @@ namespace ServerAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<UpgradeRequest> Get(int id)
+        public async Task<UpgradeRequest?> Get(int id)
         {
             return await this.upgradeRequestsService.RetrieveUpgradeRequestByIdentifier(id);
         }
