@@ -11,6 +11,7 @@ namespace DrinkDb_Auth
     using DataAccess.Service.AdminDashboard.Interfaces;
     using DataAccess.Service.Authentication;
     using DataAccess.Service.Authentication.Interfaces;
+    using DrinkDb_Auth.AuthProviders.Google;
     using DrinkDb_Auth.ViewModel.Authentication;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.IdentityModel.Tokens;
@@ -28,10 +29,11 @@ namespace DrinkDb_Auth
         private ITwoFactorAuthenticationService twoFactorAuthentificationService;
         private IUserService userService;
         private TwitterOAuth2Provider twitterOAuth2Provider;
+        private IGoogleOAuth2Provider googleOAuth2Provider;
         public Frame NavigationFrame { get; private set; }
 
         public MainWindow(IAuthenticationService authenticationService, ITwoFactorAuthenticationService twoFactorAuthenticationService,
-            IUserService userService, TwitterOAuth2Provider twitterOAuth2Provider)
+            IUserService userService, TwitterOAuth2Provider twitterOAuth2Provider, IGoogleOAuth2Provider googleOAuth2Provider)
         {
             this.authenticationService = authenticationService;
             this.twoFactorAuthentificationService = twoFactorAuthenticationService;
@@ -39,6 +41,7 @@ namespace DrinkDb_Auth
             this.NavigationFrame = this.MainFrame;
             this.userService = userService;
             this.twitterOAuth2Provider = twitterOAuth2Provider;
+            this.googleOAuth2Provider = googleOAuth2Provider;
 
             this.Title = "DrinkDb - Sign In";
 
@@ -127,11 +130,25 @@ namespace DrinkDb_Auth
             }
         }
 
+        public async void GoogleSignInButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                GoogleGuiHelper googleGuiHelper = new GoogleGuiHelper(this, this.googleOAuth2Provider);
+                AuthenticationResponse authenticationResponse = await googleGuiHelper.SignInWithGoogleAsync();
+                await this.AuthenticationComplete(authenticationResponse);
+            }
+            catch (Exception ex)
+            {
+                await this.ShowError("Error", ex.Message);
+            }
+        }
+
         public async void GithubSignInButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                var githubHelper = App.Host.Services.GetRequiredService<IGitHubOAuthHelper>();
+                IGitHubOAuthHelper githubHelper = App.Host.Services.GetRequiredService<IGitHubOAuthHelper>();
                 AuthenticationResponse? authResponse = null;
                 try
                 {

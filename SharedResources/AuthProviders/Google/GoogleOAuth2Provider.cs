@@ -54,7 +54,7 @@ namespace DrinkDb_Auth.AuthProviders.Google
             if (user == null)
             {
                 userId = Guid.NewGuid();
-                User newUser = new User { UserId = userId, Username = name, PasswordHash = string.Empty, TwoFASecret = null, EmailAddress = email, FullName = name, AssignedRole = DataAccess.Model.AdminDashboard.RoleType.User };
+                User newUser = new User { UserId = userId, Username = email, PasswordHash = string.Empty, TwoFASecret = null, EmailAddress = email, FullName = name, AssignedRole = DataAccess.Model.AdminDashboard.RoleType.User };
                 await this.userService.CreateUser(newUser);
             }
             else
@@ -201,11 +201,6 @@ namespace DrinkDb_Auth.AuthProviders.Google
             {
                 return new AuthenticationResponse { AuthenticationSuccessful = false, OAuthToken = string.Empty, SessionId = Guid.Empty, NewAccount = false };
             }
-        }
-
-        public async Task<AuthenticationResponse> SignInWithGoogleAsync()
-        {
-            throw new NotImplementedException("SignInWithGoogleAsync is not implemented in GoogleOAuth2Provider. Use ExchangeCodeForTokenAsync instead.");
         }
 
         private UserInfoResponse ExtractUserInfoFromIdToken(string idToken)

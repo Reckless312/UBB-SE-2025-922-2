@@ -7,6 +7,5 @@ namespace DrinkDb_Auth.AuthProviders.Google
         Task<AuthenticationResponse> Authenticate(string userId, string token);
         Task<AuthenticationResponse> ExchangeCodeForTokenAsync(string code);
         string GetAuthorizationUrl();
-        Task<AuthenticationResponse> SignInWithGoogleAsync();
     }
 }
