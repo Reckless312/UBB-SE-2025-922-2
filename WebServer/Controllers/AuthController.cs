@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using DataAccess.AuthProviders.Facebook;
+﻿using DataAccess.AuthProviders.Facebook;
 using DataAccess.AuthProviders.Github;
 using DataAccess.AuthProviders.LinkedIn;
 using DataAccess.AuthProviders.Twitter;
@@ -12,7 +11,6 @@ using DrinkDb_Auth.AuthProviders.Google;
 using DrinkDb_Auth.Service.Authentication.Components;
 using Microsoft.AspNetCore.Mvc;
 using QRCoder;
-using static QRCoder.PayloadGenerator;
 
 namespace WebServer.Controllers
 {

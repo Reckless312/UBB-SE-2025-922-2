@@ -61,23 +61,31 @@ namespace WebServer.Controllers
             return View(adminDashboardViewModel);
         }
 
-        public IActionResult AcceptReview(int reviewId)
+        public async Task<IActionResult> AcceptReview(int reviewId)
         {
-            this.reviewService.ResetReviewFlags(reviewId);
+            await this.reviewService.ResetReviewFlags(reviewId);
             return RedirectToAction("AdminDashboard");
         }
 
-        public IActionResult HideReview(int reviewId)
+        public async Task<IActionResult> HideReview(int reviewId)
         {
-            this.reviewService.HideReview(reviewId);
+            await this.reviewService.HideReview(reviewId);
             return RedirectToAction("AdminDashboard");
         }
 
-        public IActionResult AICheckReview(int reviewId)
+        public async Task<IActionResult> AICheckReview(int reviewId)
         {
             try
             {
-                this.checkersService.RunAICheckForOneReviewAsync(this.reviewService.GetReviewById(reviewId).Result);
+                Review? review = await this.reviewService.GetReviewById(reviewId);
+
+                if (review == null)
+                {
+                    ViewBag.ErrorMessage = "Review not found. Please try again.";
+                    return RedirectToAction("AdminDashboard");
+                }
+
+                this.checkersService.RunAICheckForOneReviewAsync(review);
             }
             catch (Exception exception)
             {
@@ -85,26 +93,30 @@ namespace WebServer.Controllers
             }
             return RedirectToAction("AdminDashboard");
         }
-        public IActionResult AutomaticallyCheckReviews()
+        public async Task<IActionResult> AutomaticallyCheckReviews()
         {
-            foreach (Review review in reviewService.GetFlaggedReviews().Result)
-                if (this.autoCheckService.AutoCheckReview(review.Content).Result)
-                    this.reviewService.HideReview(review.ReviewId);
+            foreach (Review review in await reviewService.GetFlaggedReviews())
+            {
+                if (await this.autoCheckService.AutoCheckReview(review.Content))
+                {
+                    await this.reviewService.HideReview(review.ReviewId);
+                }
+            }
 
             return RedirectToAction("AdminDashboard");
         }
 
-        public IActionResult Accept(int id)
+        public async Task<IActionResult> Accept(int id)
         {
-            this.upgradeRequestService.ProcessUpgradeRequest(true, id).Wait();
-            this.upgradeRequestService.RemoveUpgradeRequestByIdentifier(id).Wait();
+            await this.upgradeRequestService.ProcessUpgradeRequest(true, id);
+            await this.upgradeRequestService.RemoveUpgradeRequestByIdentifier(id);
             return RedirectToAction("AdminDashboard");
         }
 
-        public IActionResult Decline(int id)
+        public async Task<IActionResult> Decline(int id)
         {
-            this.upgradeRequestService.ProcessUpgradeRequest(false, id).Wait();
-            this.upgradeRequestService.RemoveUpgradeRequestByIdentifier(id).Wait();
+            await this.upgradeRequestService.ProcessUpgradeRequest(false, id);
+            await this.upgradeRequestService.RemoveUpgradeRequestByIdentifier(id);
             return RedirectToAction("AdminDashboard");
         }
 
