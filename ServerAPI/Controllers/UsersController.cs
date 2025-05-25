@@ -48,9 +48,9 @@ namespace ServerAPI.Controllers
         }
 
         [HttpPatch("byId/{userId}/addRole")]
-        public void AddRoleToUser(Guid userId, Role role)
+        public async Task AddRoleToUser(Guid userId, Role role)
         {
-            this.userService.ChangeRoleToUser(userId, role);
+            await this.userService.ChangeRoleToUser(userId, role);
         }
 
         [HttpGet("byId/{userID}")]

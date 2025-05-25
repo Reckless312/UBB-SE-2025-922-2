@@ -163,14 +163,7 @@ namespace DrinkDb_Auth.ServiceProxy
             string url = $"{ApiRoute}/byId/{userId}/addRole";
             Role role = new Role { RoleType = roleType };
             HttpResponseMessage response = await this.httpClient.PatchAsJsonAsync(url, role);
-            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                return;
-            }
-            if (!response.IsSuccessStatusCode)
-            {
-                return;
-            }
+            return;
         }
 
         public async Task<string?> GetUserFullNameById(Guid userId)
