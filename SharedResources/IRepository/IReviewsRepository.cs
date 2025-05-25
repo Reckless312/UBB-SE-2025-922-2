@@ -22,9 +22,9 @@
 
         Task<Review?> GetReviewById(int reviewID);
 
-        void UpdateReviewVisibility(int reviewID, bool isHidden);
+        Task UpdateReviewVisibility(int reviewID, bool isHidden);
 
-        void UpdateNumberOfFlagsForReview(int reviewID, int numberOfFlags);
+        Task UpdateNumberOfFlagsForReview(int reviewID, int numberOfFlags);
 
         Task<int> AddReview(Review review);
 

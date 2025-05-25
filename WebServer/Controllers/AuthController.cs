@@ -96,6 +96,9 @@ namespace WebServer.Controllers
                     ViewBag.ShowQRCode = false;
                 }
 
+                AuthenticationService.SetCurrentSessionId(response.SessionId);
+                AuthenticationService.SetCurrentUserId(currentUser.UserId);
+
                 ViewBag.Username = currentUser.Username;
                 return View("TwoFactorAuthSetup");
             }

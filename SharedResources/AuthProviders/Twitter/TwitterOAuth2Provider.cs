@@ -174,10 +174,10 @@
                             PasswordHash = string.Empty,
                             UserId = Guid.NewGuid(),
                             TwoFASecret = string.Empty,
-                            EmailAddress = "cevaemail",
+                            EmailAddress = "mockemail@gmail.com",
                             NumberOfDeletedReviews = 0,
                             HasSubmittedAppeal = false,
-                            AssignedRole = RoleType.Admin,
+                            AssignedRole = RoleType.User,
                             FullName = twitterUserInfoObject.Data.Username,
                         };
                         await this.userService.CreateUser(user);

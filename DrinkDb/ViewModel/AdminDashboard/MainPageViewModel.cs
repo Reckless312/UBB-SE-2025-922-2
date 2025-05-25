@@ -6,7 +6,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using DataAccess.AutoChecker;
 using DataAccess.Model.AdminDashboard;
 using DataAccess.Model.Authentication;
 using DataAccess.Service.AdminDashboard.Interfaces;
@@ -263,14 +262,14 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
 
         public async void ResetReviewFlags(int reviewId)
         {
-            this.reviewsService.ResetReviewFlags(reviewId);
+            await this.reviewsService.ResetReviewFlags(reviewId);
             await this.LoadFlaggedReviews();
         }
 
         public async void HideReview(int reviewId)
         {
-            this.reviewsService.HideReview(reviewId);
-            this.reviewsService.ResetReviewFlags(reviewId);
+            await this.reviewsService.HideReview(reviewId);
+            await this.reviewsService.ResetReviewFlags(reviewId);
             await this.LoadFlaggedReviews();
         }
 

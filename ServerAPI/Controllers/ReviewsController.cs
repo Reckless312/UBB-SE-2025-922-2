@@ -64,15 +64,15 @@ namespace ServerAPI.Controllers
         }
 
         [HttpPatch("{id}/updateFlags")]
-        public void UpdateNumberOfFlagsForReview(int id, [FromBody] int numberOfFlags)
+        public async Task UpdateNumberOfFlagsForReview(int id, [FromBody] int numberOfFlags)
         {
-            this.reviewService.UpdateNumberOfFlagsForReview(id, numberOfFlags);
+            await this.reviewService.UpdateNumberOfFlagsForReview(id, numberOfFlags);
         }
 
         [HttpPatch("{id}/updateVisibility")]
-        public void UpdateReviewVisibility(int id, [FromBody] bool isHidden)
+        public async Task UpdateReviewVisibility(int id, [FromBody] bool isHidden)
         {
-            this.reviewService.UpdateReviewVisibility(id, isHidden);
+            await this.reviewService.UpdateReviewVisibility(id, isHidden);
         }
 
         [HttpPost("add")]

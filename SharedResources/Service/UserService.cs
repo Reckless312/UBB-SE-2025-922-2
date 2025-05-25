@@ -3,13 +3,11 @@
     using DataAccess.Model.AdminDashboard;
     using DataAccess.Model.Authentication;
     using DataAccess.Service.AdminDashboard.Interfaces;
-    using DataAccess.Service.Authentication.Interfaces;
     using IRepository;
 
     public class UserService : IUserService
     {
         private IUserRepository userRepository;
-        public static Guid CurrentSessionId { private get; set; }
 
         public UserService(IUserRepository userRepository)
         {

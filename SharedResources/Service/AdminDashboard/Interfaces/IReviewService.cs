@@ -13,11 +13,11 @@
 
         Task<Review?> GetReviewById(int reviewId);
 
-        void UpdateNumberOfFlagsForReview(int reviewId, int numberOfFlags);
+        Task UpdateNumberOfFlagsForReview(int reviewId, int numberOfFlags);
 
-        void UpdateReviewVisibility(int reviewId, bool isHidden);
+        Task UpdateReviewVisibility(int reviewId, bool isHidden);
 
-        void HideReview(int reviewID);
+        Task HideReview(int reviewID);
 
         Task<List<Review>> GetFlaggedReviews(int minFlags = 1);
 
@@ -37,7 +37,7 @@
 
         Task<List<Review>> GetReviewsByUser(Guid userId);
 
-        void ResetReviewFlags(int reviewId);
+        Task ResetReviewFlags(int reviewId);
 
         Task<List<Review>> FilterReviewsByContent(string content);
     }

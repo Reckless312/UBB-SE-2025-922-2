@@ -120,28 +120,28 @@ namespace DrinkDb_Auth.ServiceProxy.AdminDashboard
             response.EnsureSuccessStatusCode();
         }
 
-        public async void UpdateNumberOfFlagsForReview(int reviewID, int numberOfFlags)
+        public async Task UpdateNumberOfFlagsForReview(int reviewID, int numberOfFlags)
         {
             string reviewUrl = $"{ApiRoute}/{reviewID}/updateFlags";
             HttpResponseMessage response = await httpClient.PatchAsJsonAsync(reviewUrl, numberOfFlags);
             response.EnsureSuccessStatusCode();
         }
 
-        public async void UpdateReviewVisibility(int reviewID, bool isHidden)
+        public async Task UpdateReviewVisibility(int reviewID, bool isHidden)
         {
             string reviewUrl = $"{ApiRoute}/{reviewID}/updateVisibility";
             HttpResponseMessage response = await httpClient.PatchAsJsonAsync(reviewUrl, isHidden);
             response.EnsureSuccessStatusCode();
         }
 
-        public void HideReview(int reviewID)
+        public async Task HideReview(int reviewID)
         {
-            UpdateReviewVisibility(reviewID, true);
+            await UpdateReviewVisibility(reviewID, true);
         }
 
-        public void ResetReviewFlags(int reviewId)
+        public async Task ResetReviewFlags(int reviewId)
         {
-            UpdateNumberOfFlagsForReview(reviewId, 0);
+            await UpdateNumberOfFlagsForReview(reviewId, 0);
         }
 
         public async Task<List<Review>> GetReviewsForReport()
@@ -155,4 +155,4 @@ namespace DrinkDb_Auth.ServiceProxy.AdminDashboard
             return reviews.Where(review => review.Content.Contains(content, StringComparison.OrdinalIgnoreCase)).ToList();
         }
     }
-} 
+}

@@ -85,8 +85,7 @@
             return await this.dataContext.Reviews.FirstOrDefaultAsync(r => r.ReviewId == reviewId);
         }
 
-        // I changed this from task to void cause no await was used in the original code.
-        public void UpdateReviewVisibility(int reviewId, bool isHidden)
+        public async Task UpdateReviewVisibility(int reviewId, bool isHidden)
         {
             Review? review = this.dataContext.Reviews.Find(reviewId);
 
@@ -97,10 +96,10 @@
 
             review.IsHidden = isHidden;
             this.dataContext.Reviews.Update(review);
-            this.dataContext.SaveChanges();
+            await this.dataContext.SaveChangesAsync();
         }
 
-        public void UpdateNumberOfFlagsForReview(int reviewId, int numberOfFlags)
+        public async Task UpdateNumberOfFlagsForReview(int reviewId, int numberOfFlags)
         {
             Review? review = this.dataContext.Reviews.Find(reviewId);
 
@@ -111,7 +110,7 @@
 
             review.NumberOfFlags = numberOfFlags;
             this.dataContext.Reviews.Update(review);
-            this.dataContext.SaveChanges();
+            await this.dataContext.SaveChangesAsync();
         }
 
         public async Task<int> AddReview(Review review)

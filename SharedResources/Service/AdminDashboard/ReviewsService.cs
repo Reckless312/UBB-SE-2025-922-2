@@ -53,44 +53,46 @@
             }
         }
 
-        public void UpdateNumberOfFlagsForReview(int reviewId, int numberOfFlags)
+        public async Task UpdateNumberOfFlagsForReview(int reviewId, int numberOfFlags)
         {
             try
             {
-                this.reviewsRepository.UpdateNumberOfFlagsForReview(reviewId, numberOfFlags);
+                await this.reviewsRepository.UpdateNumberOfFlagsForReview(reviewId, numberOfFlags);
             }
             catch
             {
             }
         }
 
-        public void UpdateReviewVisibility(int reviewId, bool isHidden)
+        public async Task UpdateReviewVisibility(int reviewId, bool isHidden)
         {
             try
             {
-                this.reviewsRepository.UpdateReviewVisibility(reviewId, isHidden);
+                await this.reviewsRepository.UpdateReviewVisibility(reviewId, isHidden);
             }
             catch
             {
             }
         }
 
-        public void ResetReviewFlags(int reviewId)
+        public async Task ResetReviewFlags(int reviewId)
         {
             try
             {
-                this.reviewsRepository.UpdateNumberOfFlagsForReview(reviewId, 0);
+                await this.reviewsRepository.UpdateNumberOfFlagsForReview(reviewId, 0);
+                Console.WriteLine("Review has 0 flags: " + reviewId);
             }
             catch
             {
             }
         }
 
-        public void HideReview(int reviewId)
+        public async Task HideReview(int reviewId)
         {
             try
             {
-                this.reviewsRepository.UpdateReviewVisibility(reviewId, true);
+                await this.reviewsRepository.UpdateReviewVisibility(reviewId, true);
+                Console.WriteLine("Review is hidden");
             }
             catch
             {

@@ -1,10 +1,11 @@
-﻿using DataAccess.AutoChecker;
+﻿using System.Diagnostics;
+using DataAccess.AutoChecker;
 using DataAccess.Model.AdminDashboard;
+using DataAccess.Model.Authentication;
 using DataAccess.Service.AdminDashboard.Interfaces;
 using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
 using IRepository;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 using WebServer.Models;
 
 namespace WebServer.Controllers
@@ -15,27 +16,48 @@ namespace WebServer.Controllers
         private IUpgradeRequestsService upgradeRequestService;
         private IOffensiveWordsRepository offensiveWordsService;
         private ICheckersService checkersService;
+        private IUserService userService;
         private IAutoCheck autoCheckService;
-        public AdminController(IReviewService newReviewService, IUpgradeRequestsService newUpgradeRequestService, IRolesService newRolesService, IOffensiveWordsRepository newOffensiveWordsService, ICheckersService newCheckersService, IAutoCheck autoCheck)
+        public AdminController(IReviewService newReviewService, IUpgradeRequestsService newUpgradeRequestService, IRolesService newRolesService,
+            IOffensiveWordsRepository newOffensiveWordsService, ICheckersService newCheckersService, IAutoCheck autoCheck, IUserService userService)
         {
             this.reviewService = newReviewService;
             this.upgradeRequestService = newUpgradeRequestService;
             this.offensiveWordsService = newOffensiveWordsService;
             this.checkersService = newCheckersService;
             this.autoCheckService = autoCheck;
+            this.userService = userService;
         }
 
-        public IActionResult AdminDashboard()
+        public async Task<IActionResult> AdminDashboard()
         {
-            IEnumerable<Review> reviews = this.reviewService.GetFlaggedReviews().Result;
-            IEnumerable<UpgradeRequest> upgradeRequests = this.upgradeRequestService.RetrieveAllUpgradeRequests().Result;
-            IEnumerable<string> offensiveWords = this.offensiveWordsService.LoadOffensiveWords().Result;
+            IEnumerable<Review> reviews = await this.reviewService.GetFlaggedReviews();
+            IEnumerable<UpgradeRequest> upgradeRequests = await this.upgradeRequestService.RetrieveAllUpgradeRequests();
+            IEnumerable<string> offensiveWords = await this.offensiveWordsService.LoadOffensiveWords();
+            List<User> users = await this.userService.GetAllUsers();
+            IEnumerable<User> appealeadUsers = users.Where(user => user.HasSubmittedAppeal && user.AssignedRole == RoleType.Banned);
+
             AdminDashboardViewModel adminDashboardViewModel = new AdminDashboardViewModel()
             {
                 Reviews = reviews,
                 UpgradeRequests = upgradeRequests,
-                OffensiveWords = offensiveWords
+                OffensiveWords = offensiveWords,
+                AppealsList = appealeadUsers
             };
+
+            List<AppealDetailsViewModel> appealsWithDetails = new List<AppealDetailsViewModel>();
+
+            foreach (User user in appealeadUsers)
+            {
+                List<Review> userReviews = await this.reviewService.GetReviewsByUser(user.UserId);
+                appealsWithDetails.Add(new AppealDetailsViewModel()
+                {
+                    User = user,
+                    Reviews = userReviews
+                });
+            }
+            adminDashboardViewModel.AppealsWithDetails = appealsWithDetails;
+
             return View(adminDashboardViewModel);
         }
 
@@ -104,6 +126,56 @@ namespace WebServer.Controllers
                 await this.offensiveWordsService.DeleteWord(word);
             }
             return Json(await this.offensiveWordsService.LoadOffensiveWords());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AcceptAppeal(Guid userId)
+        {
+            User? user = await this.userService.GetUserById(userId);
+
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = "User not found. Please try again.";
+                return RedirectToAction("AdminDashboard");
+            }
+
+            user.AssignedRole = RoleType.User;
+            user.HasSubmittedAppeal = false;
+            await this.userService.UpdateUser(user);
+
+            return RedirectToAction("AdminDashboard");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> KeepBan(Guid userId)
+        {
+            User? user = await this.userService.GetUserById(userId);
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = "User not found. Please try again.";
+                return RedirectToAction("AdminDashboard");
+            }
+
+            user.HasSubmittedAppeal = false;
+            await this.userService.UpdateUser(user);
+
+            return RedirectToAction("AdminDashboard");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CloseAppealCase(Guid userId)
+        {
+            User? user = await this.userService.GetUserById(userId);
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = "User not found. Please try again.";
+                return RedirectToAction("AdminDashboard");
+            }
+
+            user.HasSubmittedAppeal = false;
+            await this.userService.UpdateUser(user);
+
+            return RedirectToAction("AdminDashboard");
         }
     }
 }

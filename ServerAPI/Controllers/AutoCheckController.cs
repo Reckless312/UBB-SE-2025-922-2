@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ServerAPI.Controllers
 {
-
     [ApiController]
     [Route("api/autocheck")]
     public class AutoCheckController
