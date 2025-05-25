@@ -12,52 +12,38 @@
     using DataAccess.Model.AdminDashboard;
     using DataAccess.Model.Authentication;
     using DataAccess.OAuthProviders;
-    using IRepository;
+    using DataAccess.Service.AdminDashboard.Interfaces;
+    using DataAccess.Service.Authentication.Interfaces;
 
-    /// <summary>
-    /// A PKCE-based OAuth 2.0 flow for Twitter in a WinUI desktop app.
-    /// </summary>
     public class TwitterOAuth2Provider : ITwitterOAuth2Provider
     {
-        private IUserRepository UserRepository;
-        private ISessionRepository SessionAdapter;
-        // ▼▼▼ 1) Set these appropriately ▼▼▼
+        private IUserService userService;
+        private ISessionService sessionService;
 
-        // In "Native App" flows, we typically do NOT use a Client Secret.
-        // but if you still have one in your config, you can read it; just don't send it.
         private string ClientId { get; }
-        private string ClientSecret { get; } // not used if truly "native"
+        private string ClientSecret { get; }
 
-        // The same Callback/Redirect URI you registered in Twitter Developer Portal.
-        // e.g. "http://127.0.0.1:5000/x-callback"
         private const string RedirectUri = "http://127.0.0.1:5000/x-callback";
 
-        // Twitter endpoints:
         private const string AuthorizationEndpoint = "https://twitter.com/i/oauth2/authorize";
         private const string TokenEndpoint = "https://api.twitter.com/2/oauth2/token";
         private const string UserInfoEndpoint = "https://api.twitter.com/2/users/me";
 
-        // Example scopes. If you want refresh tokens, include "offline.access".
         private readonly string[] scopes = { "tweet.read", "users.read" };
 
-        // Private fields for PKCE
-        private string codeVerifier = string.Empty;
+        public string codeVerifier = string.Empty;
 
         private readonly HttpClient httpClient;
 
-        public TwitterOAuth2Provider(IUserRepository UserRepository, ISessionRepository SessionAdapter)
+        public TwitterOAuth2Provider(IUserService userService, ISessionService sessionService)
         {
-            httpClient = new HttpClient();
+            this.httpClient = new HttpClient();
 
-            // Load from config (if you wish):
-            ClientId = "ODVNN2VYRGR4ZWNfcm9LQnlzS2Q6MTpjaQ";
-            ClientSecret = "B7eMoprWDmTGzsYz - 3kK8Hsqpc5oJ4i4Gt9tjqtFb73J5dBQyz";
+            this.ClientId = "ODVNN2VYRGR4ZWNfcm9LQnlzS2Q6MTpjaQ";
+            this.ClientSecret = "B7eMoprWDmTGzsYz - 3kK8Hsqpc5oJ4i4Gt9tjqtFb73J5dBQyz";
 
-            System.Diagnostics.Debug.WriteLine($"Loaded Twitter ClientId: {ClientId}");
-            System.Diagnostics.Debug.WriteLine($"Loaded Twitter ClientSecret: {ClientSecret.Substring(0, Math.Min(4, ClientSecret.Length))}... (not used in PKCE)");
-
-            this.UserRepository = UserRepository;
-            this.SessionAdapter = SessionAdapter;
+            this.userService = userService;
+            this.sessionService = sessionService;
         }
 
         public AuthenticationResponse Authenticate(string userId, string token)
@@ -73,64 +59,48 @@
 
         public string GetAuthorizationUrl()
         {
-            // 2) PKCE: Generate a code_verifier & code_challenge
-            (string generatedCodeVerifier, string generatedCodeChallenge) = GeneratePkceData();
-            this.codeVerifier = generatedCodeVerifier;  // store for later use in token request
+            (string generatedCodeVerifier, string generatedCodeChallenge) = this.GeneratePkceData();
+            this.codeVerifier = generatedCodeVerifier;
 
-            string concatenatedScopes = string.Join(" ", scopes);
+            string concatenatedScopes = string.Join(" ", this.scopes);
 
             Dictionary<string, string> authorizationParameters = new Dictionary<string, string>
             {
-                { "client_id", ClientId },
-                { "redirect_uri", RedirectUri },
+                { "client_id", this.ClientId },
+                { "redirect_uri", TwitterOAuth2Provider.RedirectUri },
                 { "response_type", "code" },
                 { "scope", concatenatedScopes },
                 { "state", Guid.NewGuid().ToString() },
-
-                // PKCE
                 { "code_challenge", generatedCodeChallenge },
                 { "code_challenge_method", "S256" }
             };
 
-            // Build the query string
             string encodedQueryString = string.Join("&", authorizationParameters
-                .Select(p => $"{Uri.EscapeDataString(p.Key)}={Uri.EscapeDataString(p.Value)}"));
+                .Select(item => $"{Uri.EscapeDataString(item.Key)}={Uri.EscapeDataString(item.Value)}"));
 
-            string fullAuthorizationUrl = $"{AuthorizationEndpoint}?{encodedQueryString}";
-            System.Diagnostics.Debug.WriteLine($"Generated authorization URL: {fullAuthorizationUrl}");
+            string fullAuthorizationUrl = $"{TwitterOAuth2Provider.AuthorizationEndpoint}?{encodedQueryString}";
             return fullAuthorizationUrl;
         }
 
         public async Task<AuthenticationResponse> ExchangeCodeForTokenAsync(string code)
         {
-            // 3) PKCE: Provide the stored code_verifier in the token request
             Dictionary<string, string> tokenRequestParameters = new Dictionary<string, string>
             {
                 { "code", code },
-                { "client_id", ClientId },
-                { "redirect_uri", RedirectUri },
+                { "client_id", this.ClientId },
+                { "redirect_uri", TwitterOAuth2Provider.RedirectUri },
                 { "grant_type", "authorization_code" },
-                { "code_verifier", codeVerifier }, // crucial for PKCE
+                { "code_verifier", this.codeVerifier },
             };
-
-            System.Diagnostics.Debug.WriteLine("Exchanging code for token (PKCE).");
-            foreach (KeyValuePair<string, string> tokenParameter in tokenRequestParameters)
-            {
-                System.Diagnostics.Debug.WriteLine($"  {tokenParameter.Key}: {tokenParameter.Value}");
-            }
 
             try
             {
                 using FormUrlEncodedContent requestContent = new FormUrlEncodedContent(tokenRequestParameters);
-                HttpResponseMessage tokenResponse = await httpClient.PostAsync(TokenEndpoint, requestContent);
+                HttpResponseMessage tokenResponse = await httpClient.PostAsync(TwitterOAuth2Provider.TokenEndpoint, requestContent);
                 string tokenResponseContent = await tokenResponse.Content.ReadAsStringAsync();
-
-                System.Diagnostics.Debug.WriteLine($"Token Response status: {tokenResponse.StatusCode}");
-                System.Diagnostics.Debug.WriteLine($"Token Response content: {tokenResponseContent}");
 
                 if (!tokenResponse.IsSuccessStatusCode)
                 {
-                    System.Diagnostics.Debug.WriteLine("Token request failed with non-success status.");
                     return new AuthenticationResponse
                     {
                         AuthenticationSuccessful = false,
@@ -140,7 +110,6 @@
                     };
                 }
 
-                // Deserialize token response
                 TwitterTokenResponse? twitterTokenResult;
                 try
                 {
@@ -148,7 +117,6 @@
                 }
                 catch
                 {
-                    // fallback if ReadFromJsonAsync fails
                     twitterTokenResult = System.Text.Json.JsonSerializer.Deserialize<TwitterTokenResponse>(tokenResponseContent);
                 }
 
@@ -164,20 +132,17 @@
                     };
                 }
 
-                // 4) Optionally, get user info
                 try
                 {
                     using HttpClient twitterUserInfoClient = new HttpClient();
                     twitterUserInfoClient.DefaultRequestHeaders.Authorization =
                         new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", twitterTokenResult.AccessToken);
 
-                    HttpResponseMessage userInfoResponse = await twitterUserInfoClient.GetAsync(UserInfoEndpoint);
+                    HttpResponseMessage userInfoResponse = await twitterUserInfoClient.GetAsync(TwitterOAuth2Provider.UserInfoEndpoint);
                     string userInfoResponseBody = await userInfoResponse.Content.ReadAsStringAsync();
 
                     if (!userInfoResponse.IsSuccessStatusCode)
                     {
-                        System.Diagnostics.Debug.WriteLine($"User info request failed. Response: {userInfoResponseBody}");
-                        // We still have a valid token though
                         return new AuthenticationResponse
                         {
                             AuthenticationSuccessful = false,
@@ -188,32 +153,53 @@
                     }
 
                     TwitterUserInfoResponse? twitterUserInfoObject = System.Text.Json.JsonSerializer.Deserialize<TwitterUserInfoResponse>(userInfoResponseBody);
-                    System.Diagnostics.Debug.WriteLine($"Authenticated user: {twitterUserInfoObject?.Data.Id} ({twitterUserInfoObject?.Data.Username})");
-                    User? user = await UserRepository.GetUserByUsername(twitterUserInfoObject?.Data.Username ?? throw new Exception("user not found in json response payload for Twitter authentication"));
+
+                    if (twitterUserInfoObject == null || twitterUserInfoObject.Data == null || twitterUserInfoObject.Data.Username == null)
+                    {
+                        return new AuthenticationResponse
+                        {
+                            AuthenticationSuccessful = false,
+                            OAuthToken = twitterTokenResult.AccessToken,
+                            SessionId = Guid.Empty,
+                            NewAccount = false
+                        };
+                    }
+
+                    User? user = await userService.GetUserByUsername(twitterUserInfoObject.Data.Username);
                     if (user == null)
                     {
-                        // Create a new user
                         user = new User
                         {
-                            Username = twitterUserInfoObject?.Data.Username,
+                            Username = twitterUserInfoObject.Data.Username,
                             PasswordHash = string.Empty,
                             UserId = Guid.NewGuid(),
                             TwoFASecret = string.Empty,
-                            EmailAddress = "cevaemail",
+                            EmailAddress = "mockemail@gmail.com",
                             NumberOfDeletedReviews = 0,
                             HasSubmittedAppeal = false,
-                            AssignedRole = RoleType.Admin,
-                            FullName = twitterUserInfoObject?.Data.Username,
+                            AssignedRole = RoleType.User,
+                            FullName = twitterUserInfoObject.Data.Username,
                         };
-                        await UserRepository.CreateUser(user);
+                        await this.userService.CreateUser(user);
                     }
                     else
                     {
-                        // Update existing user if needed
-                        await UserRepository.UpdateUser(user);
+                        await this.userService.UpdateUser(user);
                     }
 
-                    Session userSession = await SessionAdapter.CreateSession(user.UserId);
+                    Session? userSession = await this.sessionService.CreateSessionAsync(user.UserId);
+
+                    if (userSession == null)
+                    {
+                        return new AuthenticationResponse
+                        {
+                            AuthenticationSuccessful = false,
+                            OAuthToken = twitterTokenResult.AccessToken,
+                            SessionId = Guid.Empty,
+                            NewAccount = false
+                        };
+                    }
+
                     return new AuthenticationResponse
                     {
                         OAuthToken = twitterTokenResult.AccessToken,
@@ -222,10 +208,9 @@
                         NewAccount = false
                     };
                 }
-                catch (Exception userInfoException)
+                catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Exception fetching user info: {userInfoException.Message}");
-                    // We'll still consider the token valid
+                    Console.WriteLine($"Error fetching user info: {ex.Message}");
                     return new AuthenticationResponse
                     {
                         AuthenticationSuccessful = false,
@@ -235,9 +220,8 @@
                     };
                 }
             }
-            catch (Exception tokenExchangeException)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"ExchangeCodeForTokenAsync exception: {tokenExchangeException.Message}");
                 return new AuthenticationResponse
                 {
                     AuthenticationSuccessful = false,
@@ -266,18 +250,15 @@
 
         public (string codeVerifier, string codeChallenge) GeneratePkceData()
         {
-            // code_verifier: a random 43–128 char string
             RandomNumberGenerator cryptographicRandomGenerator = RandomNumberGenerator.Create();
             byte[] randomVerifierBytes = new byte[32];
             cryptographicRandomGenerator.GetBytes(randomVerifierBytes);
 
-            // Base64Url-encode without padding
             string codeVerifier = Convert.ToBase64String(randomVerifierBytes)
                 .TrimEnd('=')
                 .Replace('+', '-')
                 .Replace('/', '_');
 
-            // code_challenge: SHA256 hash of verifier, then Base64Url-encode
             using (SHA256 sha256Hasher = SHA256.Create())
             {
                 byte[] verifierHashBytes = sha256Hasher.ComputeHash(Encoding.UTF8.GetBytes(codeVerifier));
@@ -292,29 +273,23 @@
 
         public TwitterUserInfoResponse ExtractUserInfoFromIdToken(string jwtIdToken)
         {
-            // Split JWT into header.payload.signature
             string[] tokenComponents = jwtIdToken.Split('.');
             if (tokenComponents.Length != 3)
             {
                 throw new ArgumentException("Invalid ID token format.", nameof(jwtIdToken));
             }
 
-            // Get the payload (middle part of JWT)
             string base64UrlEncodedPayload = tokenComponents[1];
             while (base64UrlEncodedPayload.Length % 4 != 0)
             {
                 base64UrlEncodedPayload += '=';
             }
-            // Convert from Base64URL to regular Base64 and decode
             byte[] decodedPayloadBytes = Convert.FromBase64String(base64UrlEncodedPayload.Replace('-', '+').Replace('_', '/'));
             string decodedPayloadJson = Encoding.UTF8.GetString(decodedPayloadBytes);
-
-            // Configure JSON deserialization options
             System.Text.Json.JsonSerializerOptions jsonDeserializerOptions = new System.Text.Json.JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             };
-            // Deserialize the JSON payload into our user info model
             return System.Text.Json.JsonSerializer.Deserialize<TwitterUserInfoResponse>(decodedPayloadJson, jsonDeserializerOptions)
                 ?? throw new Exception("Failed to deserialize ID token payload.");
         }

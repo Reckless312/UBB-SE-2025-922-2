@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Quartz;
 using Quartz.Spi;
 
@@ -19,9 +18,8 @@ public class JobFactory : IJobFactory
             IJob? job = this.serviceProvider.GetRequiredService(bundle.JobDetail.JobType) as IJob;
             return job == null ? throw new Exception("Couldn't retrieve the required service") : job;
         }
-        catch (Exception ex)
+        catch
         {
-            System.Diagnostics.Debug.WriteLine($"Job creation failed: {ex}");
             throw;
         }
     }

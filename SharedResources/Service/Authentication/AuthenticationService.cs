@@ -1,6 +1,4 @@
-using System;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
 using DataAccess.AuthProviders;
 using DataAccess.AuthProviders.Facebook;
 using DataAccess.AuthProviders.Github;
@@ -10,7 +8,7 @@ using DataAccess.OAuthProviders;
 using IRepository;
 using DataAccess.Service.Authentication.Interfaces;
 using DataAccess.Model.AdminDashboard;
-using DataAccess.AuthProviders.Twitter;
+using static DataAccess.AuthProviders.BasicAuthenticationProvider;
 
 namespace DataAccess.Service.Authentication
 {
@@ -25,24 +23,18 @@ namespace DataAccess.Service.Authentication
 
     public class AuthenticationService : IAuthenticationService
     {
-        private readonly ISessionRepository sessionRepository;
-        private readonly IUserRepository userRepository;
-        private readonly ILinkedInLocalOAuthServer linkedinLocalServer;
-        private readonly IGitHubLocalOAuthServer githubLocalServer;
-        private readonly IFacebookLocalOAuthServer facebookLocalServer;
-        private readonly IBasicAuthenticationProvider basicAuthenticationProvider;
+        private ISessionRepository sessionRepository;
+        private IUserRepository userRepository;
+        private ILinkedInLocalOAuthServer linkedinLocalServer;
+        private IGitHubLocalOAuthServer githubLocalServer;
+        private IFacebookLocalOAuthServer facebookLocalServer;
+        private IBasicAuthenticationProvider basicAuthenticationProvider;
         private static Guid currentSessionId = Guid.Empty;
         private static Guid currentUserId = Guid.Empty;
 
-        public AuthenticationService(
-            ISessionRepository sessionRepository,
-            IUserRepository userRepository,
-            ILinkedInLocalOAuthServer linkedinLocalServer,
-            IGitHubLocalOAuthServer githubLocalServer,
-            IFacebookLocalOAuthServer facebookLocalServer,
-            IBasicAuthenticationProvider basicAuthenticationProvider)
+        public AuthenticationService(ISessionRepository sessionRepository, IUserRepository userRepository, ILinkedInLocalOAuthServer linkedinLocalServer,
+            IGitHubLocalOAuthServer githubLocalServer, IFacebookLocalOAuthServer facebookLocalServer, IBasicAuthenticationProvider basicAuthenticationProvider)
         {
-            System.Diagnostics.Debug.WriteLine("AuthenticationService: Constructor called with original implementation");
             this.sessionRepository = sessionRepository;
             this.userRepository = userRepository;
             this.linkedinLocalServer = linkedinLocalServer;
@@ -57,52 +49,55 @@ namespace DataAccess.Service.Authentication
 
         public async Task<AuthenticationResponse> AuthWithOAuth(OAuthService selectedService, object authProvider)
         {
-            AuthenticationResponse authResponse = selectedService switch
+            switch (selectedService)
             {
-                //OAuthService.Google => await AuthenticateWithGoogleAsync(window, authProvider as IGoogleOAuth2Provider),
-                OAuthService.Facebook => await AuthenticateWithFacebookAsync(authProvider as IFacebookOAuthHelper),
-                //OAuthService.Twitter => await AuthenticateWithTwitterAsync(authProvider as ITwitterOAuth2Provider),
-                OAuthService.GitHub => await AuthenticateWithGitHubAsync(authProvider as IGitHubOAuthHelper),
-                OAuthService.LinkedIn => await AuthenticateWithLinkedInAsync(authProvider as ILinkedInOAuthHelper),
-                _ => throw new ArgumentException("Invalid OAuth service selected"),
-            };
-
-            if (authResponse.AuthenticationSuccessful)
-            {
-                currentSessionId = authResponse.SessionId;
-                Session session = await sessionRepository.GetSession(currentSessionId);
-                currentUserId = session.UserId;
+                /*case OAuthService.Google:
+                    break;*/
+                case OAuthService.Facebook:
+                    return await AuthenticateWithFacebookAsync((IFacebookOAuthHelper)authProvider);
+                /*case OAuthService.Twitter:
+                    break;*/
+                case OAuthService.GitHub:
+                    return await AuthenticateWithGitHubAsync((IGitHubOAuthHelper)authProvider);
+                case OAuthService.LinkedIn:
+                    return await AuthenticateWithLinkedInAsync((ILinkedInOAuthHelper)authProvider);
+                default:
+                    return new AuthenticationResponse { AuthenticationSuccessful = false, NewAccount = false, OAuthToken = string.Empty, SessionId = Guid.Empty };
             }
-
-            return authResponse;
         }
 
         public virtual void Logout()
         {
-            sessionRepository.EndSession(currentSessionId);
-            currentSessionId = Guid.Empty;
-            currentUserId = Guid.Empty;
+            this.sessionRepository.EndSession(AuthenticationService.currentSessionId);
+            AuthenticationService.currentSessionId = Guid.Empty;
+            AuthenticationService.currentUserId = Guid.Empty;
         }
 
-        public virtual async Task<User> GetUser(Guid sessionId)
+        public virtual async Task<User?> GetUser(Guid sessionId)
         {
-            Session session = await sessionRepository.GetSession(sessionId);
-            User user = await userRepository.GetUserById(session.UserId);
-            return user ?? throw new UserNotFoundException("User not found");
+            Session? session = await this.sessionRepository.GetSession(sessionId);
+
+            if (session == null)
+            {
+                return null;
+            }
+
+            return await this.userRepository.GetUserById(session.UserId);
         }
 
         public async Task<AuthenticationResponse> AuthWithUserPass(string username, string password)
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine($"AuthenticationService: Attempting to authenticate user {username}");
-                if (await basicAuthenticationProvider.AuthenticateAsync(username, password))
+                if (await this.basicAuthenticationProvider.AuthenticateAsync(username, password))
                 {
-                    System.Diagnostics.Debug.WriteLine("AuthenticationService: Basic authentication successful");
-                    User user = await userRepository.GetUserByUsername(username) ?? throw new UserNotFoundException("User not found");
-                    System.Diagnostics.Debug.WriteLine($"AuthenticationService: Found user {user.UserId}");
+                    User? user = await this.userRepository.GetUserByUsername(username);
+
+                    if (user == null)
+                    {
+                        throw new UserNotFoundException("Go to catch");
+                    }
                     Session session = await sessionRepository.CreateSession(user.UserId);
-                    System.Diagnostics.Debug.WriteLine($"AuthenticationService: Created session {session.SessionId}");
                     return new AuthenticationResponse
                     {
                         AuthenticationSuccessful = true,
@@ -113,7 +108,6 @@ namespace DataAccess.Service.Authentication
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine("AuthenticationService: Basic authentication failed");
                     return new AuthenticationResponse
                     {
                         AuthenticationSuccessful = false,
@@ -125,9 +119,7 @@ namespace DataAccess.Service.Authentication
             }
             catch (UserNotFoundException)
             {
-                System.Diagnostics.Debug.WriteLine("AuthenticationService: User not found, creating new account");
-                // create user
-                User user = new()
+                User user = new ()
                 {
                     Username = username,
                     PasswordHash = Convert.ToBase64String(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(password)) ?? throw new Exception("Hashing failed")),
@@ -139,27 +131,14 @@ namespace DataAccess.Service.Authentication
                     EmailAddress = "ionutcora66@gmail.com"
                 };
 
-                await userRepository.CreateUser(user);
-                System.Diagnostics.Debug.WriteLine($"AuthenticationService: Created new user {user.UserId}");
-                Session session = await sessionRepository.CreateSession(user.UserId);
-                System.Diagnostics.Debug.WriteLine($"AuthenticationService: Created session {session.SessionId} for new user");
+                await this.userRepository.CreateUser(user);
+                Session session = await this.sessionRepository.CreateSession(user.UserId);
                 return new AuthenticationResponse
                 {
                     AuthenticationSuccessful = true,
                     NewAccount = true,
                     OAuthToken = string.Empty,
                     SessionId = session.SessionId,
-                };
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"AuthenticationService: Unexpected error: {ex}");
-                return new AuthenticationResponse
-                {
-                    AuthenticationSuccessful = false,
-                    NewAccount = false,
-                    OAuthToken = string.Empty,
-                    SessionId = Guid.Empty,
                 };
             }
         }
@@ -169,24 +148,44 @@ namespace DataAccess.Service.Authentication
             return await gitHubHelper.AuthenticateAsync();
         }
 
-        //private static async Task<AuthenticationResponse> AuthenticateWithGoogleAsync(Window window, IGoogleOAuth2Provider googleProvider)
-        //{
+        // private static async Task<AuthenticationResponse> AuthenticateWithGoogleAsync(Window window, IGoogleOAuth2Provider googleProvider)
+        // {
         //    return await googleProvider.SignInWithGoogleAsync(window);
-        //}
+        // }
 
         private static async Task<AuthenticationResponse> AuthenticateWithFacebookAsync(IFacebookOAuthHelper faceBookHelper)
         {
             return await faceBookHelper.AuthenticateAsync();
         }
 
-        //private static async Task<AuthenticationResponse> AuthenticateWithTwitterAsync(ITwitterOAuth2Provider twitterProvider)
-        //{
+        // private static async Task<AuthenticationResponse> AuthenticateWithTwitterAsync(ITwitterOAuth2Provider twitterProvider)
+        // {
         //    return await twitterProvider.SignInWithTwitterAsync();
-        //}
+        // }
 
         private static async Task<AuthenticationResponse> AuthenticateWithLinkedInAsync(ILinkedInOAuthHelper linkedInHelper)
         {
             return await linkedInHelper.AuthenticateAsync();
+        }
+
+        public static Guid GetCurrentSessionId()
+        {
+            return AuthenticationService.currentSessionId;
+        }
+
+        public static Guid GetCurrentUserId()
+        {
+            return AuthenticationService.currentUserId;
+        }
+
+        public static void SetCurrentSessionId(Guid sessionId)
+        {
+            AuthenticationService.currentSessionId = sessionId;
+        }
+
+        public static void SetCurrentUserId(Guid userId)
+        {
+            AuthenticationService.currentUserId = userId;
         }
     }
 }

@@ -7,256 +7,114 @@
     using DataAccess.Model.AdminDashboard;
     using DataAccess.Model.Authentication;
     using IRepository;
-    using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
-    using Repository.Authentication;
     using ServerAPI.Data;
-
-    /// <summary>
-    /// Repository for managing user data and operations.
-    /// </summary>
     public class UserRepository : IUserRepository
     {
-        private readonly DatabaseContext _context;
+        private readonly DatabaseContext dataContext;
         public UserRepository(DatabaseContext context)
         {
-            _context = context;
+            this.dataContext = context;
         }
 
-        /// <summary>
-        /// Retrieves all users who have submitted appeals.
-        /// </summary>
-        /// <returns>A list of users who have submitted appeals.</returns>
-        /// <exception cref="RepositoryException">Thrown when an error occurs while retrieving users.</exception>
         public async Task<List<User>> GetUsersWhoHaveSubmittedAppeals()
         {
-            try
-            {
-                return await _context.Users
-                    .Where(user => user.HasSubmittedAppeal)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException("Failed to retrieve users who have submitted appeals.", ex);
-            }
+            return await this.dataContext.Users
+                .Where(user => user.HasSubmittedAppeal)
+                .ToListAsync();
         }
 
-        /// <summary>
-        /// Retrieves all users with a specific role type.
-        /// </summary>
-        /// <param name="roleType">The role type to filter users by.</param>
-        /// <returns>A list of users with the specified role type.</returns>
-        /// <exception cref="RepositoryException">Thrown when an error occurs while retrieving users.</exception>
         public async Task<List<User>> GetUsersByRoleType(RoleType roleType)
         {
-            try
-            {
-                return await _context.Users
-                    .Where(user => user.AssignedRole == roleType)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException($"Failed to retrieve users with role type '{roleType}'.", ex);
-            }
+            return await this.dataContext.Users
+                .Where(user => user.AssignedRole == roleType)
+                .ToListAsync();
         }
 
-        /// <summary>
-        /// Retrieves the highest role type assigned to a user.
-        /// </summary>
-        /// <param name="userId">The ID of the user.</param>
-        /// <returns>The highest role type assigned to the user.</returns>
-        /// <exception cref="RepositoryException">Thrown when the user has no roles or does not exist.</exception>
-        public async Task<RoleType> GetRoleTypeForUser(Guid userId)
+        public async Task<RoleType?> GetRoleTypeForUser(Guid userId)
         {
-            try
-            {
-                User user = await GetUserById(userId);
-                return user.AssignedRole;
-            }
-            catch (ArgumentException ex)
-            {
-                throw new RepositoryException("User has no roles assigned.", ex);
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException($"Failed to get highest role type for user with ID {userId}.", ex);
-            }
+            User? user = await this.GetUserById(userId);
+            return user?.AssignedRole;
         }
 
-        /// <summary>
-        /// Retrieves all banned users who have submitted appeals.
-        /// </summary>
-        /// <returns>A list of banned users who have submitted appeals.</returns>
-        /// <exception cref="RepositoryException">Thrown when an error occurs while retrieving users.</exception>
         public async Task<List<User>> GetBannedUsersWhoHaveSubmittedAppeals()
         {
-             return await _context.Users
+             return await dataContext.Users
                 .Where(user => user.HasSubmittedAppeal && user.AssignedRole == RoleType.Banned).ToListAsync();
-           
         }
 
-        /// <summary>
-        /// Adds a role to a user.
-        /// </summary>
-        /// <param name="userId">The ID of the user to add the role to.</param>
-        /// <param name="roleToAdd">The role to add to the user.</param>
-        /// <exception cref="RepositoryException">Thrown when the user does not exist or an error occurs.</exception>
         public async Task ChangeRoleToUser(Guid userId, Role roleToAdd)
         {
-            User user = GetUserById(userId).Result;
+            User? user = await this.GetUserById(userId);
+
+            if (user == null)
+            {
+                return;
+            }
+
             user.AssignedRole = roleToAdd.RoleType;
-            _context.Users.Update(user);
-            _context.SaveChanges();
+            this.dataContext.Users.Update(user);
+            await this.dataContext.SaveChangesAsync();
         }
 
-        /// <summary>
-        /// Retrieves all users.
-        /// </summary>
-        /// <returns>A list of all users.</returns>
-        /// <exception cref="RepositoryException">Thrown when an error occurs while retrieving users.</exception>
         public async Task<List<User>> GetAllUsers()
         {
-            try
-            {
-                return await _context.Users.ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException("Failed to retrieve all users.", ex);
-            }
-        }
-
-        /// <summary>
-        /// Exception class for repository-related errors.
-        /// </summary>
-        public class RepositoryException : Exception
-        {
-            /// <summary>
-            /// Initializes a new instance of the <see cref="RepositoryException"/> class.
-            /// </summary>
-            /// <param name="message">The error message.</param>
-            /// <param name="innerException">The inner exception.</param>
-            public RepositoryException(string message, Exception innerException)
-                : base(message, innerException)
-            {
-            }
+            return await this.dataContext.Users.ToListAsync();
         }
 
         public virtual async Task<User?> GetUserById(Guid userId)
         {
-            var user = await _context.Users.Where(user => user.UserId == userId).FirstOrDefaultAsync();
-            if (user == null)
-            {
-                throw new ArgumentException($"No user found with ID {userId}");
-            }
-            return user;
+            return await this.dataContext.Users.Where(user => user.UserId == userId).FirstOrDefaultAsync();
         }
 
         public virtual async Task<User?> GetUserByUsername(string username)
         {
-            try
-            {
-                return await _context.Users
-                    .Where(user => user.Username == username)
-                    .FirstOrDefaultAsync();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"UserRepository: Error getting user by username: {ex}");
-                throw new RepositoryException($"Failed to get user with username {username}", ex);
-            }
-        }
-
-        private bool isTheSameUser(User user1, User user2)
-        {
-            return user1.Username == user2.Username && user1.PasswordHash == user2.PasswordHash && user1.EmailAddress == user2.EmailAddress && user1.NumberOfDeletedReviews == user2.NumberOfDeletedReviews
-                && user1.HasSubmittedAppeal == user2.HasSubmittedAppeal && user1.AssignedRole == user2.AssignedRole && user1.FullName == user2.FullName && user1.TwoFASecret == user2.TwoFASecret;
+            return await this.dataContext.Users.Where(user => user.Username == username).FirstOrDefaultAsync();
         }
 
         public async Task<bool> UpdateUser(User user)
         {
-            try
-            {
-                User? dbUser = await _context.Users.FindAsync(user.UserId);
-                if (dbUser == null)
-                    throw new ArgumentException($"No user found with ID {user.UserId}");
-                if (isTheSameUser(user, dbUser))
-                    return true;
-                dbUser.Username = user.Username;
-                dbUser.PasswordHash = user.PasswordHash;
-                dbUser.EmailAddress = user.EmailAddress;
-                dbUser.NumberOfDeletedReviews = user.NumberOfDeletedReviews;
-                dbUser.HasSubmittedAppeal = user.HasSubmittedAppeal;
-                dbUser.AssignedRole = user.AssignedRole;
-                dbUser.FullName = user.FullName;
-                if (!string.IsNullOrEmpty(user.TwoFASecret) && user.TwoFASecret != dbUser.TwoFASecret)
-                {
-                    dbUser.TwoFASecret = user.TwoFASecret;
-                }
+            User? dbUser = await this.dataContext.Users.FindAsync(user.UserId);
 
-                return await _context.SaveChangesAsync() > 0;
-
-            }
-            catch (Exception ex)
+            if (dbUser == null)
             {
-                throw new RepositoryException($"Failed to update user with ID {user.UserId}.", ex);
+                throw new Exception($"No user found with ID {user.UserId}");
             }
+
+            dbUser.Username = user.Username;
+            dbUser.PasswordHash = user.PasswordHash;
+            dbUser.EmailAddress = user.EmailAddress;
+            dbUser.NumberOfDeletedReviews = user.NumberOfDeletedReviews;
+            dbUser.HasSubmittedAppeal = user.HasSubmittedAppeal;
+            dbUser.AssignedRole = user.AssignedRole;
+            dbUser.FullName = user.FullName;
+
+            // When is the TwoFactor empty?
+            if (!string.IsNullOrEmpty(user.TwoFASecret) && user.TwoFASecret != dbUser.TwoFASecret)
+            {
+                dbUser.TwoFASecret = user.TwoFASecret;
+            }
+
+            // If the update itself has no changes, but no errors occured, return true
+            return await this.dataContext.SaveChangesAsync() >= 0;
         }
         public async Task<bool> DeleteUser(Guid userId)
         {
-            try
-            {
-                User? user = await GetUserById(userId);
-                if (user == null)
-                {
-                    throw new ArgumentException($"No user found with ID {userId}");
-                }
+            User? user = await this.GetUserById(userId);
 
-                _context.Users.Remove(user);
-                return await _context.SaveChangesAsync() > 0;
-            }
-            catch (Exception ex)
+            if (user == null)
             {
-                throw new RepositoryException($"Failed to delete user with ID {userId}.", ex);
+                return false;
             }
+
+            this.dataContext.Users.Remove(user);
+            return await this.dataContext.SaveChangesAsync() > 0;
         }
 
         public async Task<bool> CreateUser(User user)
         {
-            try
-            {
-                _context.Users.Add(user);
-                return await _context.SaveChangesAsync() > 0;
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException($"Failed to create user with username {user.Username}.", ex);
-            }
-        }
-
-        public virtual async Task<bool> ValidateAction(Guid userId, string resource, string action)
-        {
-            bool result = false;
-            string sql = "SELECT dbo.fnValidateAction(@userId, @resource, @action)";
-
-            using (SqlConnection connection = DrinkDbConnectionHelper.GetConnection())
-            using (SqlCommand command = new(sql, connection))
-            {
-                command.Parameters.AddWithValue("@userId", userId);
-                command.Parameters.AddWithValue("@resource", resource);
-                command.Parameters.AddWithValue("@action", action);
-
-                connection.Open();
-                var scalarResult = command.ExecuteScalar();
-                if (scalarResult != null && scalarResult != DBNull.Value)
-                {
-                    result = Convert.ToBoolean(scalarResult);
-                }
-            }
-
-            return result;
+            this.dataContext.Users.Add(user);
+            return await this.dataContext.SaveChangesAsync() > 0;
         }
     }
 }

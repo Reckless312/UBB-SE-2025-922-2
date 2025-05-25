@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using DataAccess.Model.AdminDashboard;
-using Repository.AdminDashboard;
 using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
 
 namespace ServerAPI.Controllers
 {
-
     [ApiController]
     [Route("api/roles")]
     public class RolesController : ControllerBase
@@ -13,7 +11,7 @@ namespace ServerAPI.Controllers
         private IRolesService rolesService;
         public RolesController(IRolesService service)
         {
-            this.rolesService = service ?? throw new ArgumentNullException(nameof(service));
+            this.rolesService = service;
         }
 
         [HttpGet]
@@ -23,7 +21,7 @@ namespace ServerAPI.Controllers
         }
 
         [HttpGet("next")]
-        public async Task<Role> GetNextRoleInHierarchy([FromQuery] RoleType currentRoleType)
+        public async Task<Role?> GetNextRoleInHierarchy([FromQuery] RoleType currentRoleType)
         {
             return await this.rolesService.GetNextRoleInHierarchyAsync(currentRoleType);
         }

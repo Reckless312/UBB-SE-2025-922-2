@@ -1,25 +1,18 @@
 ﻿namespace DataAccess.Service.AdminDashboard
 {
-    using System;
     using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Net.Http;
-    using System.Runtime.CompilerServices;
-    using System.Text;
     using System.Threading.Tasks;
     using DataAccess.Model.AdminDashboard;
     using DataAccess.AutoChecker;
     using DataAccess.Service.AdminDashboard.Components;
     using DataAccess.Service.AdminDashboard.Interfaces;
-    using Microsoft.ML;
     using Newtonsoft.Json;
     using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
 
     public class CheckersService : ICheckersService
     {
-        private readonly IReviewService reviewsService;
-        private readonly IAutoCheck autoCheck;
+        private IReviewService reviewsService;
+        private IAutoCheck autoCheck;
 
         public CheckersService(IReviewService reviewsService, IAutoCheck autoCheck)
         {
@@ -36,34 +29,46 @@
 
             List<string> checkingMessages = new List<string>();
 
-            foreach (Review currentReview in receivedReviews)
+            try
             {
-                if (currentReview?.Content == null)
+                foreach (Review currentReview in receivedReviews)
                 {
-                    continue;
+                    if (currentReview?.Content == null)
+                    {
+                        continue;
+                    }
+
+                    bool reviewIsOffensive = await this.autoCheck.AutoCheckReview(currentReview.Content);
+                    if (reviewIsOffensive)
+                    {
+                        checkingMessages.Add($"Review {currentReview.ReviewId} is offensive. Hiding the review.");
+                        await this.reviewsService.HideReview(currentReview.ReviewId);
+                        await this.reviewsService.ResetReviewFlags(currentReview.ReviewId);
+                    }
+                    else
+                    {
+                        checkingMessages.Add($"Review {currentReview.ReviewId} is not offensive.");
+                    }
                 }
 
-                bool reviewIsOffensive = await this.autoCheck.AutoCheckReview(currentReview.Content);
-                if (reviewIsOffensive)
-                {
-                    checkingMessages.Add($"Review {currentReview.ReviewId} is offensive. Hiding the review.");
-                    await Task.Run(() => {
-                        this.reviewsService.HideReview(currentReview.ReviewId);
-                        this.reviewsService.ResetReviewFlags(currentReview.ReviewId);
-                    });
-                }
-                else
-                {
-                    checkingMessages.Add($"Review {currentReview.ReviewId} is not offensive.");
-                }
+                return checkingMessages;
             }
-
-            return checkingMessages;
+            catch
+            {
+                return new List<string>();
+            }
         }
 
         public async Task<HashSet<string>> GetOffensiveWordsList()
         {
-            return await this.autoCheck?.GetOffensiveWordsList() ?? new HashSet<string>();
+            try
+            {
+                return await this.autoCheck.GetOffensiveWordsList();
+            }
+            catch
+            {
+                return new HashSet<string>();
+            }
         }
 
         public async Task AddOffensiveWordAsync(string newWord)
@@ -73,9 +78,17 @@
                 return;
             }
 
-            if (this.autoCheck != null)
+            if (this.autoCheck == null)
+            {
+                return;
+            }
+
+            try
             {
                 await this.autoCheck.AddOffensiveWordAsync(newWord);
+            }
+            catch
+            {
             }
         }
 
@@ -86,29 +99,40 @@
                 return;
             }
 
-            if (this.autoCheck != null)
+            if (this.autoCheck == null)
+            {
+                return;
+            }
+
+            try
             {
                 await this.autoCheck.DeleteOffensiveWordAsync(word);
             }
+            catch
+            {
+            }
         }
 
-        public async Task RunAICheckForOneReviewAsync(Review review)
+        public void RunAICheckForOneReviewAsync(Review review)
         {
             if (review?.Content == null)
             {
                 return;
             }
 
-            bool reviewIsOffensive = await Task.Run(() => CheckReviewWithAI(review));
-            if (!reviewIsOffensive)
+            try
             {
-                return;
-            }
-
-            await Task.Run(() => {
+                bool reviewIsOffensive = CheckersService.CheckReviewWithAI(review);
+                if (!reviewIsOffensive)
+                {
+                    return;
+                }
                 this.reviewsService.HideReview(review.ReviewId);
                 this.reviewsService.ResetReviewFlags(review.ReviewId);
-            });
+            }
+            catch
+            {
+            }
         }
 
         private static bool CheckReviewWithAI(Review review)
@@ -127,39 +151,38 @@
                     return false;
                 }
 
-                try
+                List<List<Dictionary<string, object>>>? arrayResults = JsonConvert.DeserializeObject<List<List<Dictionary<string, object>>>>(response);
+
+                if (arrayResults == null)
                 {
-                    List<List<Dictionary<string, object>>> arrayResults = JsonConvert.DeserializeObject<List<List<Dictionary<string, object>>>>(response);
-                    if (arrayResults?.Count > 0 && arrayResults[0]?.Count > 0)
+                    return false;
+                }
+
+                if (arrayResults?.Count > 0 && arrayResults[0]?.Count > 0)
+                {
+                    Dictionary<string, object> prediction = arrayResults[0][0];
+
+                    // This if is diabolical
+                    if (prediction != null &&
+                        prediction.TryGetValue("label", out object labelObj) &&
+                        prediction.TryGetValue("score", out object scoreObj) &&
+                        labelObj != null && scoreObj != null)
                     {
-                        Dictionary<string, object> prediction = arrayResults[0][0];
-                        if (prediction != null && 
-                            prediction.TryGetValue("label", out object labelObj) &&
-                            prediction.TryGetValue("score", out object scoreObj) &&
-                            labelObj != null && scoreObj != null)
+                        string label = labelObj.ToString().ToLower();
+                        if (double.TryParse(scoreObj.ToString(), out double score))
                         {
-                            string label = labelObj.ToString().ToLower();
-                            if (double.TryParse(scoreObj.ToString(), out double score))
+                            if (label == "offensive" && score > 0.6)
                             {
-                                if (label == "offensive" && score > 0.6)
-                                {
-                                    return true;
-                                }
+                                return true;
                             }
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Error parsing AI response: {ex.Message}");
-                    return false;
-                }
 
                 return false;
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"Error in AI check: {ex.Message}");
                 return false;
             }
         }

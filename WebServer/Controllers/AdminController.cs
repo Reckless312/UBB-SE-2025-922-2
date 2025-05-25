@@ -1,11 +1,11 @@
-﻿using DataAccess.AutoChecker;
+﻿using System.Diagnostics;
+using DataAccess.AutoChecker;
 using DataAccess.Model.AdminDashboard;
-using DataAccess.Model.AutoChecker;
+using DataAccess.Model.Authentication;
 using DataAccess.Service.AdminDashboard.Interfaces;
 using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
 using IRepository;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 using WebServer.Models;
 
 namespace WebServer.Controllers
@@ -14,53 +14,76 @@ namespace WebServer.Controllers
     {
         private IReviewService reviewService;
         private IUpgradeRequestsService upgradeRequestService;
-        private IOffensiveWordsRepository offensiveWordsService;
         private ICheckersService checkersService;
-        private IAutoCheck autoCheckService;
         private IUserService userService;
-        private IRolesService rolesService;
-        public AdminController(IReviewService newReviewService, IUpgradeRequestsService newUpgradeRequestService, IRolesService newRolesService, IOffensiveWordsRepository newOffensiveWordsService, ICheckersService newCheckersService, IAutoCheck autoCheck, IUserService newUserService)
+        private IAutoCheck autoCheckService;
+        public AdminController(IReviewService newReviewService, IUpgradeRequestsService newUpgradeRequestService, IRolesService newRolesService,
+            ICheckersService newCheckersService, IAutoCheck autoCheck, IUserService userService)
         {
             this.reviewService = newReviewService;
             this.upgradeRequestService = newUpgradeRequestService;
-            this.offensiveWordsService = newOffensiveWordsService;
             this.checkersService = newCheckersService;
             this.autoCheckService = autoCheck;
-            this.userService = newUserService;
-            this.rolesService = newRolesService;
+            this.userService = userService;
         }
 
-        public IActionResult AdminDashboard()
+        public async Task<IActionResult> AdminDashboard()
         {
-            IEnumerable<Review> reviews = this.reviewService.GetFlaggedReviews().Result;
-            IEnumerable<UpgradeRequest> upgradeRequests = this.upgradeRequestService.RetrieveAllUpgradeRequests().Result;
-            IEnumerable<string> offensiveWords = this.offensiveWordsService.LoadOffensiveWords().Result;
+            IEnumerable<Review> reviews = await this.reviewService.GetFlaggedReviews();
+            IEnumerable<UpgradeRequest> upgradeRequests = await this.upgradeRequestService.RetrieveAllUpgradeRequests();
+            IEnumerable<string> offensiveWords = await this.checkersService.GetOffensiveWordsList();
+            List<User> users = await this.userService.GetAllUsers();
+            IEnumerable<User> appealeadUsers = users.Where(user => user.HasSubmittedAppeal && user.AssignedRole == RoleType.Banned);
+
             AdminDashboardViewModel adminDashboardViewModel = new AdminDashboardViewModel()
             {
                 Reviews = reviews,
                 UpgradeRequests = upgradeRequests,
-                OffensiveWords = offensiveWords
+                OffensiveWords = offensiveWords,
+                AppealsList = appealeadUsers
             };
+
+            List<AppealDetailsViewModel> appealsWithDetails = new List<AppealDetailsViewModel>();
+
+            foreach (User user in appealeadUsers)
+            {
+                List<Review> userReviews = await this.reviewService.GetReviewsByUser(user.UserId);
+                appealsWithDetails.Add(new AppealDetailsViewModel()
+                {
+                    User = user,
+                    Reviews = userReviews
+                });
+            }
+            adminDashboardViewModel.AppealsWithDetails = appealsWithDetails;
+
             return View(adminDashboardViewModel);
         }
 
-        public IActionResult AcceptReview(int reviewId)
+        public async Task<IActionResult> AcceptReview(int reviewId)
         {
-            this.reviewService.ResetReviewFlags(reviewId);
+            await this.reviewService.ResetReviewFlags(reviewId);
             return RedirectToAction("AdminDashboard");
         }
 
-        public IActionResult HideReview(int reviewId)
+        public async Task<IActionResult> HideReview(int reviewId)
         {
-            this.reviewService.HideReview(reviewId);
+            await this.reviewService.HideReview(reviewId);
             return RedirectToAction("AdminDashboard");
         }
 
-        public IActionResult AICheckReview(int reviewId)
+        public async Task<IActionResult> AICheckReview(int reviewId)
         {
             try
             {
-                this.checkersService.RunAICheckForOneReviewAsync(this.reviewService.GetReviewById(reviewId).Result);
+                Review? review = await this.reviewService.GetReviewById(reviewId);
+
+                if (review == null)
+                {
+                    ViewBag.ErrorMessage = "Review not found. Please try again.";
+                    return RedirectToAction("AdminDashboard");
+                }
+
+                this.checkersService.RunAICheckForOneReviewAsync(review);
             }
             catch (Exception exception)
             {
@@ -68,26 +91,25 @@ namespace WebServer.Controllers
             }
             return RedirectToAction("AdminDashboard");
         }
-        public IActionResult AutomaticallyCheckReviews()
+        public async Task<IActionResult> AutomaticallyCheckReviews()
         {
-            foreach (Review review in reviewService.GetFlaggedReviews().Result)
-                if (this.autoCheckService.AutoCheckReview(review.Content).Result)
-                    this.reviewService.HideReview(review.ReviewId);
+            List<Review> reviews = await this.reviewService.GetFlaggedReviews();
+            List<string> messages = await Task.Run(() => this.checkersService.RunAutoCheck(reviews));
 
             return RedirectToAction("AdminDashboard");
         }
 
-        public IActionResult Accept(int id)
+        public async Task<IActionResult> Accept(int id)
         {
-            this.upgradeRequestService.ProcessUpgradeRequest(true, id).Wait();
-            this.upgradeRequestService.RemoveUpgradeRequestByIdentifier(id).Wait();
+            await this.upgradeRequestService.ProcessUpgradeRequest(true, id);
+            await this.upgradeRequestService.RemoveUpgradeRequestByIdentifier(id);
             return RedirectToAction("AdminDashboard");
         }
 
-        public IActionResult Decline(int id)
+        public async Task<IActionResult> Decline(int id)
         {
-            this.upgradeRequestService.ProcessUpgradeRequest(false, id).Wait();
-            this.upgradeRequestService.RemoveUpgradeRequestByIdentifier(id).Wait();
+            await this.upgradeRequestService.ProcessUpgradeRequest(false, id);
+            await this.upgradeRequestService.RemoveUpgradeRequestByIdentifier(id);
             return RedirectToAction("AdminDashboard");
         }
 
@@ -96,9 +118,9 @@ namespace WebServer.Controllers
         {
             if (!string.IsNullOrWhiteSpace(word))
             {
-                await this.offensiveWordsService.AddWord(word);
+                await this.checkersService.AddOffensiveWordAsync(word);
             }
-            return Json(await this.offensiveWordsService.LoadOffensiveWords());
+            return Json(await this.checkersService.GetOffensiveWordsList());
         }
 
         [HttpPost]
@@ -106,9 +128,59 @@ namespace WebServer.Controllers
         {
             if (!string.IsNullOrWhiteSpace(word))
             {
-                await this.offensiveWordsService.DeleteWord(word);
+                await this.checkersService.DeleteOffensiveWordAsync(word);
             }
-            return Json(await this.offensiveWordsService.LoadOffensiveWords());
+            return Json(await this.checkersService.GetOffensiveWordsList());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AcceptAppeal(Guid userId)
+        {
+            User? user = await this.userService.GetUserById(userId);
+
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = "User not found. Please try again.";
+                return RedirectToAction("AdminDashboard");
+            }
+
+            user.AssignedRole = RoleType.User;
+            user.HasSubmittedAppeal = false;
+            await this.userService.UpdateUser(user);
+
+            return RedirectToAction("AdminDashboard");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> KeepBan(Guid userId)
+        {
+            User? user = await this.userService.GetUserById(userId);
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = "User not found. Please try again.";
+                return RedirectToAction("AdminDashboard");
+            }
+
+            user.HasSubmittedAppeal = false;
+            await this.userService.UpdateUser(user);
+
+            return RedirectToAction("AdminDashboard");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CloseAppealCase(Guid userId)
+        {
+            User? user = await this.userService.GetUserById(userId);
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = "User not found. Please try again.";
+                return RedirectToAction("AdminDashboard");
+            }
+
+            user.HasSubmittedAppeal = false;
+            await this.userService.UpdateUser(user);
+
+            return RedirectToAction("AdminDashboard");
         }
     }
 }

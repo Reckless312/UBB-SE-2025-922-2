@@ -1,50 +1,38 @@
-﻿using System;
-using System.Threading.Tasks;
-using DataAccess.AuthProviders.Facebook;
-using DataAccess.OAuthProviders;
-using Repository.Authentication;
+﻿using DataAccess.OAuthProviders;
 
 namespace DataAccess.AuthProviders.Facebook
 {
     public class FacebookOAuthHelper : IFacebookOAuthHelper
     {
-        private FacebookOAuth2Provider FacebookOAuth2Provider;
+        private FacebookOAuth2Provider facebookOAuth2Provider;
 
         private const string ClientId = "667671795847732";
         private string redirectUri = "http://localhost:8888/auth";
         private const string Scope = "email";
-        private string BuildAuthorizeUrl()
-        {
-            Console.WriteLine($"RedirectUri: {redirectUri}");
-            return $"https://www.facebook.com/v22.0/dialog/oauth?client_id={ClientId}" +
-                   $"&display=popup" +
-                   $"&redirect_uri={Uri.EscapeDataString(redirectUri)}" +
-                   $"&response_type=token&scope={Scope}";
-        }
 
         private TaskCompletionSource<AuthenticationResponse> taskCompletionSource;
 
         public FacebookOAuthHelper(FacebookOAuth2Provider provider)
         {
-            taskCompletionSource = new TaskCompletionSource<AuthenticationResponse>();
+            this.taskCompletionSource = new TaskCompletionSource<AuthenticationResponse>();
             FacebookLocalOAuthServer.OnTokenReceived += OnTokenReceived;
-            this.FacebookOAuth2Provider = provider;
+            this.facebookOAuth2Provider = provider;
         }
 
-        private void OnTokenReceived(string accessToken)
+        private async void OnTokenReceived(string accessToken)
         {
-            if (taskCompletionSource != null && !taskCompletionSource.Task.IsCompleted)
+            if (this.taskCompletionSource != null && !this.taskCompletionSource.Task.IsCompleted)
             {
-                AuthenticationResponse res = FacebookOAuth2Provider.Authenticate(string.Empty, accessToken);
-                taskCompletionSource.TrySetResult(res);
+                AuthenticationResponse response = await this.facebookOAuth2Provider.Authenticate(string.Empty, accessToken);
+                this.taskCompletionSource.TrySetResult(response);
             }
         }
 
         public async Task<AuthenticationResponse> AuthenticateAsync()
         {
-            taskCompletionSource = new TaskCompletionSource<AuthenticationResponse>();
+            this.taskCompletionSource = new TaskCompletionSource<AuthenticationResponse>();
 
-            var authorizeUri = new Uri(BuildAuthorizeUrl());
+            Uri authorizeUri = new Uri(BuildAuthorizeUrl());
 
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
             {
@@ -54,6 +42,15 @@ namespace DataAccess.AuthProviders.Facebook
 
             AuthenticationResponse response = await taskCompletionSource.Task;
             return response;
+        }
+
+        private string BuildAuthorizeUrl()
+        {
+            Console.WriteLine($"RedirectUri: {redirectUri}");
+            return $"https://www.facebook.com/v22.0/dialog/oauth?client_id={ClientId}" +
+                   $"&display=popup" +
+                   $"&redirect_uri={Uri.EscapeDataString(redirectUri)}" +
+                   $"&response_type=token&scope={Scope}";
         }
     }
 }

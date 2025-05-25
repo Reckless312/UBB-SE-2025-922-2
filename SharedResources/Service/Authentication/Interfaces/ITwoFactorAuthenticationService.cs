@@ -7,6 +7,6 @@
         Guid UserId { get; set; }
         bool IsFirstTimeSetup { get; set; }
 
-        (User currentUser, string uniformResourceIdentifier, byte[] twoFactorSecret) Get2FAValues();
+        Task<(User? currentUser, string uniformResourceIdentifier, byte[] twoFactorSecret)> Get2FAValues();
     }
 }

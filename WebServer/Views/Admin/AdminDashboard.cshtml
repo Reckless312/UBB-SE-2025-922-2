@@ -11,7 +11,7 @@
             <h3 class="mb-0 fw-semibold">Admin Dashboard</h3>
         </div>
 
-        <a asp-controller="User" asp-action="UserPage" class="btn btn-light fw-semibold shadow-sm">
+        <a asp-controller="Profile" asp-action="UserPage" class="btn btn-light fw-semibold shadow-sm">
             Go Back
         </a>
     </div>
@@ -56,8 +56,7 @@
             <div class="btn-group w-100 review-btn-group" role="group">
                 <form asp-controller="Admin" asp-action="AutomaticallyCheckReviews" method="post">
                     <button type="submit"
-                            class="btn btn-primary w-50 fw-semibold"
-                            style="border-top-right-radius:0;border-bottom-right-radius:0;">
+                            class="btn btn-primary w-100 fw-semibold rounded-0 rounded-start">
                         Automatically check reviews
                     </button>
                 </form>
@@ -111,13 +110,61 @@
         <div class="col-lg-4">
             <h5 class="fw-bold mb-3">List of all appeals</h5>
 
-            <input type="text" class="form-control mb-2" placeholder="Search appeals…" />
+            <input id="appealSearch" type="text" class="form-control mb-2" placeholder="Search appeals…" />
 
-            <ul class="list-group shadow-sm" style="max-height:300px;overflow-y:auto">
-                <li class="list-group-item">
-                    Appeal 1 – <span class="text-muted">User D</span>
-                </li>
-            </ul>
+            <div class="list-group" id="appealsList">
+                @foreach (var appeal in Model.AppealsWithDetails)
+                {
+                    <!-- Collapsed header: shows ID and Email -->
+                    <button type="button"
+                            class="list-group-item list-group-item-action bg-dark text-white appeal-header text-start"
+                            data-userid="@appeal.User.UserId">
+                        <strong>ID:</strong> @appeal.User.UserId,
+                        <strong>Email:</strong> @appeal.User.EmailAddress
+                    </button>
+                    <div class="list-group-item bg-dark text-white appeal-body" style="display:none;">
+                        <p><strong>Status:</strong> @appeal.User.AssignedRole</p>
+                        <p><strong>User Reviews:</strong></p>
+                        @if (appeal.Reviews.Any())
+                        {
+                            <ul class="mb-2">
+                                @foreach (var r in appeal.Reviews)
+                                {
+                                    <li><strong>#@r.ReviewId</strong>: @r.Content</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p><em>No reviews.</em></p>
+                        }
+                        <div class="d-grid gap-2 mt-2">
+                            <!-- Keep Ban -->
+                            <form asp-controller="Admin" asp-action="KeepBan" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="userId" value="@appeal.User.UserId" />
+                                <button type="submit" class="btn btn-danger w-100">Keep Ban</button>
+                            </form>
+                            <!-- Accept Appeal -->
+                            <form asp-controller="Admin" asp-action="AcceptAppeal" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="userId" value="@appeal.User.UserId" />
+                                <button type="submit" class="btn btn-success w-100">Accept Appeal</button>
+                            </form>
+                            <!-- Close Appeal Case -->
+                            <form asp-controller="Admin" asp-action="CloseAppealCase" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="userId" value="@appeal.User.UserId" />
+                                <button type="submit" class="btn btn-secondary w-100">Close Appeal Case</button>
+                            </form>
+                        </div>
+                    </div>
+                }
+                @if (!Model.AppealsWithDetails.Any())
+                {
+                    <div class="list-group-item text-center text-muted">No pending appeals</div>
+                }
+            </div>
         </div>
     </div>
 </div>
@@ -156,6 +203,39 @@
 </div>
 
 @section Scripts {
+    <script>
+        function toggleReviewActions(reviewId) {
+            $('.review-actions').hide();
+            $('#actions-' + reviewId).show();
+        }
+    </script>
+
+    <script>
+        $(function() {
+            $('.appeal-body').hide();
+            $(document).on('click', '.appeal-header', function () {
+                var $body = $(this).next('.appeal-body');
+                if ($body.is(':visible')) {
+                    $body.slideUp();
+                } else {
+                    $('.appeal-body').slideUp();
+                    $body.slideDown();
+                }
+            });
+            $('#appealSearch').on('keyup', function () {
+                var term = $(this).val().toLowerCase();
+                $('.appeal-header').each(function () {
+                    var text = $(this).text().toLowerCase();
+                    var match = text.indexOf(term) !== -1;
+                    $(this).toggle(match);
+                    if (!match) {
+                        $(this).next('.appeal-body').hide();
+                    }
+                });
+            });
+        });
+    </script>
+
     <script>
         $(document).ready(function () {
             // Add offensive word

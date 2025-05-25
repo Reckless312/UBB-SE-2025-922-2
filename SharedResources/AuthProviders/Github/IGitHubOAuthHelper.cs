@@ -1,5 +1,4 @@
 ﻿using DataAccess.OAuthProviders;
-using System.Threading.Tasks;
 
 namespace DataAccess.AuthProviders.Github
 {

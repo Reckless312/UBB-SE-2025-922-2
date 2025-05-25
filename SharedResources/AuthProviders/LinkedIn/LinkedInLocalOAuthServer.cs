@@ -1,34 +1,32 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 using System.Web;
 
 namespace DataAccess.AuthProviders.LinkedIn
 {
     public class LinkedInLocalOAuthServer : ILinkedInLocalOAuthServer
     {
-        private readonly HttpListener listener;
+        private HttpListener listener;
         public static event Action<string>? OnCodeReceived;
         private bool isRunning;
 
         public LinkedInLocalOAuthServer(string prefix)
         {
-            listener = new HttpListener();
-            listener.Prefixes.Add(prefix);
+            this.listener = new HttpListener();
+            this.listener.Prefixes.Add(prefix);
         }
 
         public async Task StartAsync()
         {
-            isRunning = true;
-            listener.Start();
-            Console.WriteLine("LinkedIn local OAuth server listening on: " + string.Join(", ", listener.Prefixes));
+            this.isRunning = true;
+            this.listener.Start();
+            Console.WriteLine("LinkedIn local OAuth server listening on: " + string.Join(", ", this.listener.Prefixes));
 
-            while (isRunning && listener.IsListening)
+            while (this.isRunning && this.listener.IsListening)
             {
                 try
                 {
-                    var context = await listener.GetContextAsync();
+                    HttpListenerContext context = await this.listener.GetContextAsync();
                     if (context.Request.Url == null)
                     {
                         throw new Exception("Request URL is null.");
@@ -48,7 +46,7 @@ namespace DataAccess.AuthProviders.LinkedIn
                     else if (context.Request.Url.AbsolutePath.Equals("/exchange", StringComparison.OrdinalIgnoreCase) &&
                              context.Request.HttpMethod == "POST")
                     {
-                        using (var reader = new System.IO.StreamReader(context.Request.InputStream, context.Request.ContentEncoding))
+                        using (StreamReader reader = new StreamReader(context.Request.InputStream, context.Request.ContentEncoding))
                         {
                             string code = (await reader.ReadToEndAsync()).Trim();
                             if (!string.IsNullOrEmpty(code))
@@ -78,36 +76,30 @@ namespace DataAccess.AuthProviders.LinkedIn
             }
         }
 
-        public void Stop()
-        {
-            isRunning = false;
-            listener.Stop();
-        }
-
         private string GetHtmlResponse(string code)
         {
             return $@"
-                    <!DOCTYPE html>
-                    <html>
-                      <head>
-                        <title>LinkedIn OAuth Login Successful!</title>
-                        <script>
-                            window.onload = () => {{
-                                fetch('http://localhost:8891/exchange', {{
-                                    method: 'POST',
-                                    headers: {{
-                                        'Content-Type': 'text/plain'
-                                    }},
-                                    body: '{code}'
-                                }});
-                            }}
-                         </script>
-                      </head>
-                      <body>
-                        <h1>Authentication successful!</h1>
-                        <p>You can close this tab.</p>
-                      </body>
-                    </html>";
+            <!DOCTYPE html>
+            <html>
+                <head>
+                <title>LinkedIn OAuth Login Successful!</title>
+                <script>
+                    window.onload = () => {{
+                        fetch('http://localhost:8891/exchange', {{
+                            method: 'POST',
+                            headers: {{
+                                'Content-Type': 'text/plain'
+                            }},
+                            body: '{code}'
+                        }});
+                    }}
+                    </script>
+                </head>
+                <body>
+                <h1>Authentication successful!</h1>
+                <p>You can close this tab.</p>
+                </body>
+            </html>";
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using DataAccess.Service.Authentication;
 using DataAccess.Model.Authentication;
-using DataAccess.Service.Authentication.Interfaces;
 using IRepository;
 using DataAccess.AuthProviders.Facebook;
 using DataAccess.AuthProviders.Github;
@@ -17,33 +16,26 @@ namespace ServerAPI.Controllers
     {
         private readonly AuthenticationService authenticationService;
 
-        public AuthenticationController(
-            ISessionRepository sessionRepository,
-            IUserRepository userRepository,
-            ILinkedInLocalOAuthServer linkedinLocalOAuth,
-            IGitHubLocalOAuthServer githubLocalOAuth,
-            IFacebookLocalOAuthServer facebookLocalOAuth,
-            IBasicAuthenticationProvider basicAuthProvider)
+        public AuthenticationController(ISessionRepository sessionRepository, IUserRepository userRepository, ILinkedInLocalOAuthServer linkedinLocalOAuth,
+            IGitHubLocalOAuthServer githubLocalOAuth, IFacebookLocalOAuthServer facebookLocalOAuth, IBasicAuthenticationProvider basicAuthProvider)
         {
-            authenticationService = new AuthenticationService(
-                sessionRepository,
-                userRepository,
-                linkedinLocalOAuth,
-                githubLocalOAuth,
-                facebookLocalOAuth,
-                basicAuthProvider
-            );
+            authenticationService = new AuthenticationService(sessionRepository, userRepository, linkedinLocalOAuth,
+                githubLocalOAuth, facebookLocalOAuth, basicAuthProvider);
         }
 
         [HttpPost("login")]
         public async Task<ActionResult<AuthenticationResponse>> LoginWithCredentials([FromBody] LoginRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
+            {
                 return BadRequest("Username and password must be provided.");
+            }
 
-            AuthenticationResponse response = await authenticationService.AuthWithUserPass(request.Username, request.Password);
+            AuthenticationResponse response = await this.authenticationService.AuthWithUserPass(request.Username, request.Password);
             if (!response.AuthenticationSuccessful)
+            {
                 return Unauthorized();
+            }
 
             return Ok(response);
         }
@@ -51,7 +43,7 @@ namespace ServerAPI.Controllers
         [HttpPost("oauth")]
         public async Task<ActionResult<AuthenticationResponse>> LoginWithOAuth([FromQuery] OAuthService service)
         {
-            object helper = service switch
+            object? helper = service switch
             {
                 OAuthService.GitHub => HttpContext.RequestServices.GetService(typeof(IGitHubOAuthHelper)),
                 OAuthService.Facebook => HttpContext.RequestServices.GetService(typeof(IFacebookOAuthHelper)),
@@ -60,11 +52,15 @@ namespace ServerAPI.Controllers
             };
 
             if (helper == null)
+            {
                 return BadRequest("OAuth rolesService not supported or helper not found.");
+            }
 
             AuthenticationResponse response = await authenticationService.AuthWithOAuth(service, helper);
             if (!response.AuthenticationSuccessful)
+            {
                 return Unauthorized();
+            }
 
             return Ok(response);
         }
@@ -72,22 +68,20 @@ namespace ServerAPI.Controllers
         [HttpPost("logout")]
         public IActionResult Logout()
         {
-            authenticationService.Logout();
+            this.authenticationService.Logout();
             return Ok("Logged out successfully.");
         }
 
         [HttpGet("user")]
         public async Task<ActionResult<User>> GetCurrentUser([FromQuery] Guid sessionId)
         {
-            try
-            {
-                User user = await authenticationService.GetUser(sessionId);
-                return Ok(user);
-            }
-            catch (UserNotFoundException)
+            User? user = await authenticationService.GetUser(sessionId);
+
+            if (user == null)
             {
                 return NotFound("User not found for the given session.");
             }
+            return Ok(user);
         }
     }
 

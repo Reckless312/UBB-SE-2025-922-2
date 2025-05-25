@@ -1,27 +1,18 @@
-﻿// <copyright file="AutoCheck.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
+﻿using IRepository;
 
 namespace DataAccess.AutoChecker
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Data;
-    using System.Linq;
-    using IRepository;
-    using Microsoft.Data.SqlClient;
-    using System.Threading.Tasks;
-
     public class AutoCheck : IAutoCheck
     {
-        private readonly IOffensiveWordsRepository repository;
+        private IOffensiveWordsRepository repository;
         private HashSet<string> offensiveWords;
 
         private static readonly char[] WordDelimiters = new[] { ' ', ',', '.', '!', '?', ';', ':', '\n', '\r', '\t' };
 
         public AutoCheck(IOffensiveWordsRepository repository)
         {
-            this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            this.repository = repository;
+            this.offensiveWords = new HashSet<string>();
             InitializeOffensiveWords().GetAwaiter().GetResult();
         }
 
@@ -37,8 +28,8 @@ namespace DataAccess.AutoChecker
                 return Task.FromResult(false);
             }
 
-            string[] words = reviewText.Split(WordDelimiters, StringSplitOptions.RemoveEmptyEntries);
-            return Task.FromResult(words.Any(word => offensiveWords.Contains(word, StringComparer.OrdinalIgnoreCase)));
+            string[] words = reviewText.Split(AutoCheck.WordDelimiters, StringSplitOptions.RemoveEmptyEntries);
+            return Task.FromResult(words.Any(word => this.offensiveWords.Contains(word, StringComparer.OrdinalIgnoreCase)));
         }
 
         public async Task AddOffensiveWordAsync(string newWord)
@@ -48,13 +39,13 @@ namespace DataAccess.AutoChecker
                 return;
             }
 
-            if (offensiveWords.Contains(newWord, StringComparer.OrdinalIgnoreCase))
+            if (this.offensiveWords.Contains(newWord, StringComparer.OrdinalIgnoreCase))
             {
                 return;
             }
 
-            await repository.AddWord(newWord);
-            offensiveWords.Add(newWord);
+            await this.repository.AddWord(newWord);
+            this.offensiveWords.Add(newWord);
         }
 
         public async Task DeleteOffensiveWordAsync(string word)
@@ -64,18 +55,18 @@ namespace DataAccess.AutoChecker
                 return;
             }
 
-            if (!offensiveWords.Contains(word, StringComparer.OrdinalIgnoreCase))
+            if (!this.offensiveWords.Contains(word, StringComparer.OrdinalIgnoreCase))
             {
                 return;
             }
 
-            await repository.DeleteWord(word);
-            offensiveWords.Remove(word);
+            await this.repository.DeleteWord(word);
+            this.offensiveWords.Remove(word);
         }
 
         public Task<HashSet<string>> GetOffensiveWordsList()
         {
-            return Task.FromResult(new HashSet<string>(offensiveWords, StringComparer.OrdinalIgnoreCase));
+            return Task.FromResult(new HashSet<string>(this.offensiveWords, StringComparer.OrdinalIgnoreCase));
         }
     }
 }

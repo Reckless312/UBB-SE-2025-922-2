@@ -1,10 +1,6 @@
-﻿using DataAccess.OAuthProviders;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Net.Http;
+﻿using System.Diagnostics;
 using System.Text.Json;
-using System.Threading.Tasks;
+using DataAccess.OAuthProviders;
 
 namespace DataAccess.AuthProviders.Github
 {
@@ -14,95 +10,91 @@ namespace DataAccess.AuthProviders.Github
         private const string ClientSecret = "791dfaf36750b2a34a752c4fe3fb3703cef18836";
         private const string RedirectUri = "http://localhost:8890/auth";
         private const string Scope = "read:user user:email";
-        private GenericOAuth2Provider gitHubOAuth2Provider;
+        private IGenericOAuth2Provider gitHubOAuth2Provider;
         private TaskCompletionSource<AuthenticationResponse> taskCompletionSource;
         private GitHubLocalOAuthServer localServer;
         private bool handlerExecuted = false;
 
-        public GitHubOAuthHelper(GenericOAuth2Provider gitHubOAuth2Provider, GitHubLocalOAuthServer localServer)
+        public GitHubOAuthHelper(IGenericOAuth2Provider gitHubOAuth2Provider, GitHubLocalOAuthServer localServer)
         {
             this.gitHubOAuth2Provider = gitHubOAuth2Provider;
             this.localServer = localServer;
-            taskCompletionSource = new TaskCompletionSource<AuthenticationResponse>();
+            this.taskCompletionSource = new TaskCompletionSource<AuthenticationResponse>();
             GitHubLocalOAuthServer.OnCodeReceived += OnCodeReceived;
         }
 
         private string BuildAuthorizeUrl()
         {
             return $"https://github.com/login/oauth/authorize" +
-                   $"?client_id={ClientId}" +
-                   $"&redirect_uri={Uri.EscapeDataString(RedirectUri)}" +
-                   $"&scope={Uri.EscapeDataString(Scope)}" +
+                   $"?client_id={GitHubOAuthHelper.ClientId}" +
+                   $"&redirect_uri={Uri.EscapeDataString(GitHubOAuthHelper.RedirectUri)}" +
+                   $"&scope={Uri.EscapeDataString(GitHubOAuthHelper.Scope)}" +
                    $"&response_type=code";
         }
 
         private async void OnCodeReceived(string code)
         {
-            if (this.handlerExecuted) 
+            if (this.handlerExecuted)
+            {
                 return;
+            }
+
             this.handlerExecuted = true;
             GitHubLocalOAuthServer.OnCodeReceived -= OnCodeReceived;
 
-            Debug.WriteLine($"OnCodeReceived called with code: {code}");
-            if (taskCompletionSource == null || taskCompletionSource.Task.IsCompleted)
+            if (this.taskCompletionSource == null || this.taskCompletionSource.Task.IsCompleted)
             {
-                Debug.WriteLine("OnCodeReceived: taskCompletionSource is null or already completed.");
                 return;
             }
 
             try
             {
-                Debug.WriteLine("Exchanging code for token...");
-                var token = await ExchangeCodeForToken(code);
-                Debug.WriteLine($"Token received: {token}");
-                var result = gitHubOAuth2Provider.Authenticate(string.Empty, token);
-                taskCompletionSource.SetResult(result);
-                Debug.WriteLine("Authentication result set.");
+                string token = await ExchangeCodeForToken(code);
+                AuthenticationResponse result = await gitHubOAuth2Provider.Authenticate(string.Empty, token);
+                this.taskCompletionSource.SetResult(result);
             }
             catch (Exception exception)
             {
-                Debug.WriteLine($"Exception in OnCodeReceived: {exception}");
-                taskCompletionSource.SetException(exception);
+                this.taskCompletionSource.SetException(exception);
             }
         }
 
         public async Task<AuthenticationResponse> AuthenticateAsync()
         {
-
             this.handlerExecuted = false;
             GitHubLocalOAuthServer.OnCodeReceived -= OnCodeReceived;
             GitHubLocalOAuthServer.OnCodeReceived += OnCodeReceived;
-            taskCompletionSource = new TaskCompletionSource<AuthenticationResponse>();
+            this.taskCompletionSource = new TaskCompletionSource<AuthenticationResponse>();
 
-            var authorizeUri = new Uri(BuildAuthorizeUrl());
+            Uri authorizeUri = new Uri(BuildAuthorizeUrl());
             Process.Start(new ProcessStartInfo
             {
                 FileName = authorizeUri.ToString(),
                 UseShellExecute = true
             });
 
-            return await taskCompletionSource.Task;
+            return await this.taskCompletionSource.Task;
         }
 
         private async Task<string> ExchangeCodeForToken(string code)
         {
-            using (var client = new HttpClient())
+            using (HttpClient client = new HttpClient())
             {
-                var request = new HttpRequestMessage(HttpMethod.Post, "https://github.com/login/oauth/access_token");
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://github.com/login/oauth/access_token");
                 request.Headers.Add("Accept", "application/json"); // we want JSON response
-                var content = new FormUrlEncodedContent(new[]
+                FormUrlEncodedContent content = new FormUrlEncodedContent(new[]
                 {
-                    new KeyValuePair<string, string>("client_id", ClientId),
-                    new KeyValuePair<string, string>("client_secret", ClientSecret),
+                    new KeyValuePair<string, string>("client_id", GitHubOAuthHelper.ClientId),
+                    new KeyValuePair<string, string>("client_secret", GitHubOAuthHelper.ClientSecret),
                     new KeyValuePair<string, string>("code", code),
-                    new KeyValuePair<string, string>("redirect_uri", RedirectUri)
+                    new KeyValuePair<string, string>("redirect_uri", GitHubOAuthHelper.RedirectUri)
                 });
                 request.Content = content;
 
-                var response = await client.SendAsync(request);
-                var responseBody = await response.Content.ReadAsStringAsync();
+                HttpResponseMessage response = await client.SendAsync(request);
+                string responseBody = await response.Content.ReadAsStringAsync();
 
-                using var responseDocument = JsonDocument.Parse(responseBody);
+                using JsonDocument responseDocument = JsonDocument.Parse(responseBody);
                 if (responseDocument.RootElement.TryGetProperty("access_token", out var tokenProperty))
                 {
                     return tokenProperty.GetString() ?? throw new Exception("Access token is null.");

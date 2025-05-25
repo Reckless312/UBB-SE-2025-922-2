@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace DataAccess.AuthProviders
+﻿namespace DataAccess.AuthProviders
 {
     public interface IBasicAuthenticationProvider
     {

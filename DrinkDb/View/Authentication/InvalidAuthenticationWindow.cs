@@ -3,7 +3,6 @@ using DrinkDb_Auth.View.Authentication.Interfaces;
 using DrinkDb_Auth.ViewModel.AdminDashboard.Components;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Windows.Foundation;
 
 namespace DrinkDb_Auth.View.Authentication
 {

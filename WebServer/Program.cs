@@ -3,36 +3,28 @@ using DataAccess.AuthProviders.Github;
 using DataAccess.AuthProviders.LinkedIn;
 using DataAccess.AuthProviders;
 using DataAccess.AutoChecker;
-using DataAccess.Service;
-using DataAccess.Service.AdminDashboard;
 using DataAccess.Service.AdminDashboard.Interfaces;
 using DataAccess.Service.Authentication.Interfaces;
-using DataAccess.Service.Authentication;
-using IRepository;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Repository.AdminDashboard;
-using Repository.Authentication;
 using ServerAPI.Data;
-using ServerAPI.Repository.AutoChecker;
 using DrinkDb_Auth.AuthProviders.Google;
 using DrinkDb_Auth.Service.AdminDashboard.Interfaces;
-using DrinkDb_Auth.Service.AdminDashboard;
-using DrinkDb_Auth.Service.Authentication;
+using DrinkDb_Auth.Service.Authentication.Components;
+using DataAccess.AuthProviders.Twitter;
+using DrinkDb_Auth.ServiceProxy.AdminDashboard;
+using DrinkDb_Auth.ServiceProxy.Authentication;
+using DrinkDb_Auth.ServiceProxy;
+using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<DatabaseContext>();
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<DatabaseContext>();
 builder.Services.AddControllersWithViews();
-
 
 DependencyInjection(builder);
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
@@ -40,7 +32,6 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -48,6 +39,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseDeveloperExceptionPage();
 
 app.UseAuthorization();
 
@@ -60,33 +53,24 @@ app.Run();
 
 static void DependencyInjection(WebApplicationBuilder builder)
 {
+    // Still needed for the controllers, they require new functions in services and repos, so I didn't bother doing it now
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-    builder.Services.AddDbContextFactory<DatabaseContext>(options =>
-        options.UseSqlServer(connectionString));
-    builder.Services.AddScoped<DatabaseContext>(sp =>
-        sp.GetRequiredService<IDbContextFactory<DatabaseContext>>().CreateDbContext());
+    builder.Services.AddDbContextFactory<DatabaseContext>(options => options.UseSqlServer(connectionString));
+    builder.Services.AddScoped<DatabaseContext>(sp => sp.GetRequiredService<IDbContextFactory<DatabaseContext>>().CreateDbContext());
 
-    // Repositories
-    builder.Services.AddScoped<ISessionRepository, SessionRepository>();
-    builder.Services.AddScoped<IUserRepository, UserRepository>();
-    builder.Services.AddScoped<IReviewsRepository, ReviewsRepository>();
-    builder.Services.AddScoped<IOffensiveWordsRepository, OffensiveWordsRepository>();
-    builder.Services.AddScoped<IUpgradeRequestsRepository, UpgradeRequestsRepository>();
-    builder.Services.AddScoped<IRolesRepository, RolesRepository>();
+    string apiRoute = "http://localhost:5280/";
 
-    builder.Services.AddScoped<ISessionService, SessionService>();
-    builder.Services.AddScoped<IUserService, UserService>();
-    builder.Services.AddScoped<IReviewService, ReviewsService>();
-    builder.Services.AddScoped<IUpgradeRequestsService, UpgradeRequestsService>();
-    builder.Services.AddScoped<IRolesService, RolesService>();
-    builder.Services.AddScoped<IAuthenticationService>(sp => new AuthenticationService(
-        sp.GetRequiredService<ISessionRepository>(),
-        sp.GetRequiredService<IUserRepository>(),
-        sp.GetRequiredService<LinkedInLocalOAuthServer>(),
-        sp.GetRequiredService<GitHubLocalOAuthServer>(),
-        sp.GetRequiredService<FacebookLocalOAuthServer>(),
-        sp.GetRequiredService<IBasicAuthenticationProvider>()));
+    builder.Services.AddSingleton<ISessionService, SessionServiceProxy>(sp => new SessionServiceProxy(apiRoute));
+    builder.Services.AddSingleton<IAuthenticationService>(sp => new AuthenticationServiceProxy(apiRoute));
+    builder.Services.AddSingleton<IUserService>(sp => new UserServiceProxy(apiRoute));
+    builder.Services.AddSingleton<ICheckersService>(sp => new OffensiveWordsServiceProxy(apiRoute));
+    builder.Services.AddSingleton<IReviewService>(sp => new ReviewsServiceProxy(apiRoute));
+    builder.Services.AddSingleton<IUpgradeRequestsService>(sp => new UpgradeRequestsServiceProxy(apiRoute));
+    builder.Services.AddSingleton<IRolesService, RolesProxyService>(sp => new RolesProxyService(apiRoute));
+    builder.Services.AddSingleton<IAutoCheck, AutoCheckerProxy>(sp => new AutoCheckerProxy(apiRoute));
+    builder.Services.AddSingleton<IBasicAuthenticationProvider>(sp => new BasicAuthenticationProviderServiceProxy(apiRoute));
+    builder.Services.AddSingleton<ITwoFactorAuthenticationService>(sp => new TwoFactorAuthenticationServiceProxy(apiRoute));
 
     builder.Services.AddSingleton<LinkedInLocalOAuthServer>(sp =>
         new LinkedInLocalOAuthServer("http://localhost:8891/"));
@@ -102,8 +86,7 @@ static void DependencyInjection(WebApplicationBuilder builder)
     builder.Services.AddScoped<FacebookOAuth2Provider>(sp =>
                         new FacebookOAuth2Provider(
                             sp.GetRequiredService<ISessionService>(),
-                            sp.GetRequiredService<IUserService>()
-                            ));
+                            sp.GetRequiredService<IUserService>()));
     builder.Services.AddSingleton<IFacebookLocalOAuthServer>(sp =>
         sp.GetRequiredService<FacebookLocalOAuthServer>());
 
@@ -111,13 +94,11 @@ static void DependencyInjection(WebApplicationBuilder builder)
     builder.Services.AddScoped<GitHubOAuth2Provider>(sp =>
         new GitHubOAuth2Provider(
             sp.GetRequiredService<IUserService>(),
-            sp.GetRequiredService<ISessionService>()
-        ));
+            sp.GetRequiredService<ISessionService>()));
     builder.Services.AddScoped<IGitHubOAuthHelper>(sp =>
         new GitHubOAuthHelper(
             sp.GetRequiredService<GitHubOAuth2Provider>(),
-            sp.GetRequiredService<GitHubLocalOAuthServer>()
-        ));
+            sp.GetRequiredService<GitHubLocalOAuthServer>()));
     builder.Services.AddScoped<IGoogleOAuth2Provider, GoogleOAuth2Provider>();
     builder.Services.AddScoped<IFacebookOAuthHelper, FacebookOAuthHelper>();
 
@@ -128,12 +109,11 @@ static void DependencyInjection(WebApplicationBuilder builder)
             "WPL_AP1.pg2Bd1XhCi821VTG.+hatTA==",
             "http://localhost:8891/auth",
             "openid profile email",
-            sp.GetRequiredService<LinkedInOAuth2Provider>()
-        ));
+            sp.GetRequiredService<LinkedInOAuth2Provider>()));
 
-    builder.Services.AddScoped<IAutoCheck, AutoCheck>();
-    builder.Services.AddScoped<ICheckersService, CheckersService>();
-    builder.Services.AddScoped<IBasicAuthenticationProvider>(sp =>
-        new BasicAuthenticationProvider(sp.GetRequiredService<IUserRepository>()));
-    builder.Services.AddScoped<ITwoFactorAuthenticationService, TwoFactorAuthenticationService>();
+    builder.Services.AddScoped<IVerify, Verify2FactorAuthenticationSecret>();
+    builder.Services.AddScoped<ITwitterOAuth2Provider, TwitterOAuth2Provider>(sp =>
+        new TwitterOAuth2Provider(
+            sp.GetRequiredService<IUserService>(),
+            sp.GetRequiredService<ISessionService>()));
 }

@@ -1,99 +1,54 @@
-using System;
-using System.Data;
 using DataAccess.Model.Authentication;
 using IRepository;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using ServerAPI.Data;
-using static Repository.AdminDashboard.UserRepository;
 
 namespace Repository.Authentication
 {
     public class SessionRepository : ISessionRepository
     {
-        private readonly DatabaseContext _context;
+        private DatabaseContext dataContext;
 
         public SessionRepository(DatabaseContext context)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            this.dataContext = context;
         }
         public async Task<Session> CreateSession(Guid userId)
         {
-            try
+            Session session = new Session
             {
-                var session = new Session
-                {
-                    SessionId = Guid.NewGuid(),
-                    UserId = userId
-                };
+                SessionId = Guid.NewGuid(),
+                UserId = userId
+            };
 
-                _context.Sessions.Add(session);
-                _context.SaveChanges();
-                
-                return session;
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException("Failed to create a new session.", ex);
-            }
+            await this.dataContext.Sessions.AddAsync(session);
+            await this.dataContext.SaveChangesAsync();
+
+            return session;
         }
 
         public async Task<bool> EndSession(Guid sessionId)
         {
-            try
-            {
-                var session = await _context.Sessions.FirstOrDefaultAsync(s => s.SessionId == sessionId);
+            Session? session = await this.dataContext.Sessions.FirstOrDefaultAsync(s => s.SessionId == sessionId);
 
-                if (session == null)
-                {
-                    throw new ArgumentException($"No session found with ID {sessionId}");
-                }
-
-                _context.Sessions.Remove(session);
-                return await _context.SaveChangesAsync() > 0;
-            }
-            catch (Exception ex)
+            if (session == null)
             {
-                throw new RepositoryException($"Failed to end session with ID {sessionId}.", ex);
+                // I consider this true if we didn't have the session itself
+                return true;
             }
+
+            this.dataContext.Sessions.Remove(session);
+            return await this.dataContext.SaveChangesAsync() > 0;
         }
 
-        public async Task<Session> GetSession(Guid sessionId)
+        public async Task<Session?> GetSession(Guid sessionId)
         {
-            try
-            {
-                var session = _context.Sessions.FirstOrDefaultAsync(s => s.SessionId == sessionId).Result;
-
-                if (session == null)
-                {
-                    throw new ArgumentException($"No session found with ID {sessionId}");
-                }
-
-                return session;
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException($"Failed to retrieve session with ID {sessionId}.", ex);
-            }
+            return await this.dataContext.Sessions.FirstOrDefaultAsync(item => item.SessionId == sessionId);
         }
 
-        public async Task<Session> GetSessionByUserId(Guid userId)
+        public async Task<Session?> GetSessionByUserId(Guid userId)
         {
-            try
-            {
-                var session = await _context.Sessions.FirstOrDefaultAsync(s => s.UserId == userId);
-
-                if (session == null)
-                {
-                    throw new ArgumentException($"No session found for user with ID {userId}");
-                }
-
-                return session;
-            }
-            catch (Exception ex)
-            {
-                throw new RepositoryException($"Failed to retrieve session for user with ID {userId}.", ex);
-            }
+            return await dataContext.Sessions.FirstOrDefaultAsync(s => s.UserId == userId);
         }
     }
 }

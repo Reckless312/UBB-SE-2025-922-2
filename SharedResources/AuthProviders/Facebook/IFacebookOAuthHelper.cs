@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using DataAccess.OAuthProviders;
+﻿using DataAccess.OAuthProviders;
 
 namespace DataAccess.AuthProviders.Facebook
 {

@@ -1,13 +1,9 @@
 ﻿namespace DataAccess.Service.AdminDashboard.Components
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
     using Service.AdminDashboard.Interfaces;
     using MailKit.Net.Smtp;
-    using Microsoft.Extensions.Configuration;
     using MimeKit;
 
     public class SmtpEmailSender : IEmailSender
@@ -31,7 +27,7 @@
 
             try
             {
-                using var client = new SmtpClient();
+                using SmtpClient client = new SmtpClient();
                 await client.ConnectAsync("smtp.gmail.com", 587, false);
                 await client.AuthenticateAsync(smtpEmail, smtpPassword);
                 await client.SendAsync(message);

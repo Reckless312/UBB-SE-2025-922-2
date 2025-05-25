@@ -1,8 +1,4 @@
-﻿// <copyright file="ReviewModelTrainer.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace DataAccess.AiCheck
+﻿namespace DataAccess.AiCheck
 {
     using System;
     using System.Collections.Generic;
@@ -10,8 +6,6 @@ namespace DataAccess.AiCheck
     using System.Linq;
     using System.Runtime.CompilerServices;
     using Microsoft.ML;
-    using Microsoft.ML.Data;
-    using Microsoft.ML.FastTree;
     using static Microsoft.ML.DataOperationsCatalog;
 
     public class ReviewModelTrainer
@@ -30,7 +24,7 @@ namespace DataAccess.AiCheck
 
         public static bool TrainModel()
         {
-            return TrainModel(DefaultDataPath, DefaultModelPath, DefaultLogPath);
+            return TrainModel(ReviewModelTrainer.DefaultDataPath, ReviewModelTrainer.DefaultModelPath, ReviewModelTrainer.DefaultLogPath);
         }
 
         public static bool TrainModel(string customDataPath)
@@ -42,7 +36,7 @@ namespace DataAccess.AiCheck
 
         public static bool TrainModel(string dataPath, string modelPath, string logPath)
         {
-            LogToFile($"Starting model training process. Project root: {ProjectRoot}", logPath);
+            LogToFile($"Starting model training process. Project root: {ReviewModelTrainer.ProjectRoot}", logPath);
             LogToFile($"Looking for training data at: {dataPath}", logPath);
 
             if (!File.Exists(dataPath))
@@ -61,7 +55,7 @@ namespace DataAccess.AiCheck
 
                 IEstimator<ITransformer> modelPipeline = CreateModelPipeline(machineLearningContext);
 
-                TrainTestData trainTestSplit = machineLearningContext.Data.TrainTestSplit(trainingData, testFraction: TestFraction);
+                TrainTestData trainTestSplit = machineLearningContext.Data.TrainTestSplit(trainingData, testFraction: ReviewModelTrainer.TestFraction);
 
                 ITransformer trainedModel = modelPipeline.Fit(trainTestSplit.TrainSet);
 
@@ -110,12 +104,12 @@ namespace DataAccess.AiCheck
         {
             if (!ValidateDataFormat(dataPath))
             {
-                throw new InvalidOperationException("Invalid data format. Expected separator character is '" + CsvSeparator + "'.");
+                throw new InvalidOperationException("Invalid data format. Expected separator character is '" + ReviewModelTrainer.CsvSeparator + "'.");
             }
 
             return machineLearningContext.Data.LoadFromTextFile<ReviewData>(
                 path: dataPath,
-                separatorChar: CsvSeparator,
+                separatorChar: ReviewModelTrainer.CsvSeparator,
                 hasHeader: true);
         }
 
@@ -129,7 +123,7 @@ namespace DataAccess.AiCheck
                     return false;
                 }
 
-                if (!firstLine.Contains(CsvSeparator))
+                if (!firstLine.Contains(ReviewModelTrainer.CsvSeparator))
                 {
                     return false;
                 }
@@ -150,12 +144,12 @@ namespace DataAccess.AiCheck
                         continue;
                     }
 
-                    if (!line.Contains(CsvSeparator))
+                    if (!line.Contains(ReviewModelTrainer.CsvSeparator))
                     {
                         return false;
                     }
 
-                    string[] columns = line.Split(CsvSeparator);
+                    string[] columns = line.Split(ReviewModelTrainer.CsvSeparator);
                     if (columns.Length < 2)
                     {
                         return false;
@@ -164,7 +158,7 @@ namespace DataAccess.AiCheck
                     bool isBoolean = bool.TryParse(columns[1].Trim(), out _);
                     bool isInteger = int.TryParse(columns[1].Trim(), out int value);
 
-                    if (!isBoolean && (!isInteger || value != 0 && value != 1))
+                    if (!isBoolean && (!isInteger || (value != 0 && value != 1)))
                     {
                         return false;
                     }
@@ -189,10 +183,10 @@ namespace DataAccess.AiCheck
             .Append(machineLearningContext.BinaryClassification.Trainers.FastTree(
                 labelColumnName: nameof(ReviewData.IsOffensiveContent),
                 featureColumnName: "Features",
-                numberOfTrees: NumberOfTrees,
-                numberOfLeaves: NumberOfLeaves,
+                numberOfTrees: ReviewModelTrainer.NumberOfTrees,
+                numberOfLeaves: ReviewModelTrainer.NumberOfLeaves,
                 minimumExampleCountPerLeaf: MinimumExampleCountPerLeaf,
-                learningRate: LearningRate));
+                learningRate: ReviewModelTrainer.LearningRate));
         }
 
         private static void EvaluateModel(MLContext machineLearningContext, ITransformer trainedModel, IDataView testData, string logPath)
@@ -230,11 +224,9 @@ namespace DataAccess.AiCheck
             {
                 string timestampedMessage = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}";
                 File.AppendAllText(logPath, timestampedMessage + Environment.NewLine);
-                Console.WriteLine(timestampedMessage);
             }
-            catch (Exception exception)
+            catch
             {
-                Console.WriteLine($"LOG FAILED: {message}. Error: {exception.Message}");
             }
         }
     }

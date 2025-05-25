@@ -1,13 +1,25 @@
 ﻿using DataAccess.Model.AdminDashboard;
-using DataAccess.Model.AutoChecker;
+using DataAccess.Model.Authentication;
 
 namespace WebServer.Models
 {
     public class AdminDashboardViewModel
     {
-        public IEnumerable<Review> Reviews { get; set; }
-        public IEnumerable<UpgradeRequest> UpgradeRequests { get; set; }
-        public IEnumerable<string> OffensiveWords { get; set; }
-        public string searchBarContent { get; set; } = string.Empty;
+        public required IEnumerable<Review> Reviews { get; set; }
+
+        public required IEnumerable<UpgradeRequest> UpgradeRequests { get; set; }
+
+        public required IEnumerable<string> OffensiveWords { get; set; }
+
+        public required IEnumerable<User> AppealsList { get; set; }
+
+        public IEnumerable<AppealDetailsViewModel> AppealsWithDetails { get; set; }
+
+        public string SearchBarContent { get; set; } = string.Empty;
+
+        public AdminDashboardViewModel()
+        {
+            this.AppealsWithDetails = new List<AppealDetailsViewModel>();
+        }
     }
 }

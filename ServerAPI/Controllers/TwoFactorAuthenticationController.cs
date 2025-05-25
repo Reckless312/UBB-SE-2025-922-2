@@ -1,11 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using DataAccess.Model.Authentication;
-using IRepository;
-using DataAccess.Service.Authentication.Interfaces;
-using OtpNet;
-using System;
-using System.Threading.Tasks;
+﻿using DataAccess.Model.Authentication;
 using DataAccess.Service.Authentication.Components;
+using DataAccess.Service.Authentication.Interfaces;
+using IRepository;
+using Microsoft.AspNetCore.Mvc;
+using OtpNet;
 
 namespace ServerAPI.Controllers
 {
@@ -25,12 +23,14 @@ namespace ServerAPI.Controllers
         [HttpPost("setup")]
         public async Task<IActionResult> Setup2FA([FromBody] TwoFASetupRequest request)
         {
-            var user = await this.userRepository.GetUserById(request.UserId);
+            User? user = await this.userRepository.GetUserById(request.UserId);
             if (user == null)
+            {
                 return NotFound("User not found.");
+            }
 
             byte[] twoFactorSecret;
-            string uniformResourceIdentifier = "";
+            string uniformResourceIdentifier = string.Empty;
 
             if (request.IsFirstTimeSetup)
             {

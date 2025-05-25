@@ -1,62 +1,64 @@
-using System;
-using System.Threading.Tasks;
 using DataAccess.Model.Authentication;
-using DataAccess.Service;
-using DataAccess.Service.AdminDashboard.Interfaces;
-using DataAccess.Service.Authentication;
 using DataAccess.Service.Authentication.Interfaces;
 using IRepository;
-using Repository.AdminDashboard;
-using ServerAPI.Data;
 
 namespace DrinkDb_Auth.Service.Authentication
 {
     public class SessionService : ISessionService
     {
-        private readonly ISessionRepository sessionRepository;
-        private readonly IUserService userService;
+        private ISessionRepository sessionRepository;
 
-        public SessionService(ISessionRepository sessionRepository, IUserService userService)
+        public SessionService(ISessionRepository sessionRepository)
         {
             this.sessionRepository = sessionRepository;
-            this.userService = userService;
         }
 
-        public async Task<Session> CreateSessionAsync(Guid userId)
+        public async Task<Session?> CreateSessionAsync(Guid userId)
         {
-            return await this.sessionRepository.CreateSession(userId);
+            try
+            {
+                return await this.sessionRepository.CreateSession(userId);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public async Task<bool> EndSessionAsync(Guid sessionId)
         {
-            return await this.sessionRepository.EndSession(sessionId);
-        }
-
-        public async Task<Session> GetSessionAsync(Guid sessionId)
-        {
-            return await this.sessionRepository.GetSession(sessionId);
-        }
-
-        public async Task<bool> ValidateSessionAsync(Guid sessionId)
-        {
-            Session session = await this.GetSessionAsync(sessionId);
-            return session != null && session.IsActive();
-        }
-
-        public async Task<bool> AuthorizeActionAsync(Guid sessionId, string resource, string action)
-        {
-            Session session = await this.GetSessionAsync(sessionId);
-            if (session == null || !session.IsActive())
+            try
+            {
+                return await this.sessionRepository.EndSession(sessionId);
+            }
+            catch
             {
                 return false;
             }
-
-            return await userService.ValidateAction(session.UserId, resource, action);
         }
 
-        public async Task<Session> GetSessionByUserIdAsync(Guid userId)
+        public async Task<Session?> GetSessionAsync(Guid sessionId)
         {
-            return await this.sessionRepository.GetSessionByUserId(userId);
+            try
+            {
+                return await this.sessionRepository.GetSession(sessionId);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<Session?> GetSessionByUserIdAsync(Guid userId)
+        {
+            try
+            {
+                return await this.sessionRepository.GetSessionByUserId(userId);
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

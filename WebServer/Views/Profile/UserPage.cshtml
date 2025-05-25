@@ -1,0 +1,66 @@
+﻿@model UserPageModel
+@{
+    ViewData["Title"] = "UserPage";
+}
+
+
+<div class="container-fluid bg-white py-5">
+    <div class="row">
+        <!-- LEFT COLUMN: User Info -->
+        <div class="col-md-4 d-flex justify-content-center align-items-center">
+            <div class="card border-dark p-4" style="width: 100%; max-width: 400px;">
+                <div class="text-center mb-4 d-flex justify-content-center align-items-center">
+                    <div class="rounded-circle bg-secondary" style="width: 100px; height: 100px;"></div>
+                </div>
+
+                <div class="text-center mb-3">
+                    <h4 id="NameTextBlock" class="fw-bold">@Model.CurrentUser.Username</h4>
+                    <p id="UsernameTextBlock" class="text-muted">@Model.CurrentUser.EmailAddress</p>
+                </div>
+
+                <div class="text-center mb-3">
+                    <p id="StatusTextBlock">Status: Online</p>
+                </div>
+                <div class="d-grid gap-2">
+                    @if (@Model.CurrentUser.AssignedRole == RoleType.Admin)
+                    {
+                        <a asp-controller="Admin" asp-action="AdminDashboard" class="btn btn-primary">Admin Dashboard</a>
+                    }
+                    <a asp-controller="Profile" asp-action="LogOut" class="btn btn-outline-dark">Logout</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Reviews and Drinklist -->
+        <div class="col-md-8">
+            <div class="mb-5">
+                <h4 class="fw-bold">Reviews</h4>
+                <div id="ReviewsItemsControl" class="list-group">
+                    <ul>
+                        @foreach (Review review in Model.CurrentUserReviews)
+                        {
+                            <li class="list-group-item">
+                                <strong>@review.Rating</strong><br />
+                                <span>@review.Content</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="fw-bold">Drinklist</h4>
+                <div id="DrinklistItemsControl" class="list-group">
+                    <ul>
+                        @foreach (string drink in Model.CurrentUserDrinks)
+                        {
+                            <li class="list-group-item">
+                                <strong>@drink</strong><br />
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

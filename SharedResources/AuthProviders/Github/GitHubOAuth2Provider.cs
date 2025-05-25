@@ -1,20 +1,13 @@
-using System;
+using System.Text.Json;
 using DataAccess.Model.AdminDashboard;
-using System.Collections.Generic;
 using DataAccess.Model.Authentication;
 using DataAccess.OAuthProviders;
-using IRepository;
-using System.Net.Http;
-using System.Text.Json;
-using System.Linq;
-using Repository.AdminDashboard;
-using Repository.Authentication;
 using DataAccess.Service.AdminDashboard.Interfaces;
 using DataAccess.Service.Authentication.Interfaces;
 
 namespace DataAccess.AuthProviders.Github
 {
-    public class GitHubOAuth2Provider : GenericOAuth2Provider
+    public class GitHubOAuth2Provider : IGenericOAuth2Provider
     {
         private IUserService userService;
         private ISessionService sessionService;
@@ -25,58 +18,36 @@ namespace DataAccess.AuthProviders.Github
             this.sessionService = sessionService;
         }
 
-        public AuthenticationResponse Authenticate(string? userId, string token)
+        public async Task<AuthenticationResponse> Authenticate(string? userId, string token)
         {
-            return AuthenticateAsync(userId, token).Result;
+            return await this.AuthenticateAsync(userId, token);
         }
 
         private async Task<AuthenticationResponse> AuthenticateAsync(string? userId, string token)
         {
             try
             {
-                var (gitHubId, gitHubLogin, email) = await FetchGitHubUserInfo(token);
+                (string gitHubId, string gitHubLogin, string email) = await this.FetchGitHubUserInfo(token);
 
                 if (string.IsNullOrEmpty(gitHubLogin))
                 {
-                    return new AuthenticationResponse
-                    {
-                        AuthenticationSuccessful = false,
-                        OAuthToken = string.Empty,
-                        SessionId = Guid.Empty,
-                        NewAccount = false
-                    };
+                    throw new Exception("GitHub login is empty or null.");
                 }
 
-                // Check if a user exists by using the GitHub username.
-                if (await UserExists(gitHubLogin))
+                User? user = await this.userService.GetUserByUsername(gitHubLogin);
+
+                if (user == null)
                 {
-                    // User exists, so proceed.
-                    User user = userService.GetUserByUsername(gitHubLogin).Result ?? throw new Exception("User not found");
-
-                    if (user.EmailAddress != email)
-                    {
-                        user.EmailAddress = email;
-                        await userService.UpdateUser(user) ;
-                    }
-
-                    Session session = sessionService.CreateSessionAsync(user.UserId).Result;
-
-                    return new AuthenticationResponse
-                    {
-                        AuthenticationSuccessful = true,
-                        OAuthToken = token,
-                        SessionId = session.SessionId,
-                        NewAccount = false
-                    };
-                }
-                else
-                {
-                    // User does not exist. Insert the new user.
-                    Guid newUserId = CreateUserFromGitHub(gitHubLogin, email);
+                    Guid newUserId = await this.CreateUserFromGitHub(gitHubLogin, email);
                     if (newUserId != Guid.Empty)
                     {
-                        // Successfully inserted, so login is successful.
-                        Session session = sessionService.CreateSessionAsync(newUserId).Result;
+                        Session? session = await this.sessionService.CreateSessionAsync(newUserId);
+
+                        if (session == null)
+                        {
+                            throw new Exception("Failed to create session for new user.");
+                        }
+
                         return new AuthenticationResponse
                         {
                             AuthenticationSuccessful = true,
@@ -87,15 +58,31 @@ namespace DataAccess.AuthProviders.Github
                     }
                     else
                     {
-                        // Insertion failed.
-                        return new AuthenticationResponse
-                        {
-                            AuthenticationSuccessful = false,
-                            OAuthToken = token,
-                            SessionId = Guid.Empty,
-                            NewAccount = false
-                        };
+                        throw new Exception("Go to catch");
                     }
+                }
+                else
+                {
+                    if (user.EmailAddress != email)
+                    {
+                        user.EmailAddress = email;
+                        await this.userService.UpdateUser(user);
+                    }
+
+                    Session? session = await this.sessionService.CreateSessionAsync(user.UserId);
+
+                    if (session == null)
+                    {
+                        throw new Exception("Failed to create session for user.");
+                    }
+
+                    return new AuthenticationResponse
+                    {
+                        AuthenticationSuccessful = true,
+                        OAuthToken = token,
+                        SessionId = session.SessionId,
+                        NewAccount = false
+                    };
                 }
             }
             catch (Exception)
@@ -117,8 +104,7 @@ namespace DataAccess.AuthProviders.Github
                 client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
                 client.DefaultRequestHeaders.Add("User-Agent", "DrinkDb_Auth-App");
 
-                // First get the user info
-                var userResponse = await client.GetAsync("https://api.github.com/user");
+                HttpResponseMessage userResponse = await client.GetAsync("https://api.github.com/user");
                 if (!userResponse.IsSuccessStatusCode)
                 {
                     throw new Exception($"Failed to fetch user info from GitHub. Status code: {userResponse.StatusCode}");
@@ -127,12 +113,11 @@ namespace DataAccess.AuthProviders.Github
                 string userJson = await userResponse.Content.ReadAsStringAsync();
                 using (JsonDocument userDoc = JsonDocument.Parse(userJson))
                 {
-                    var root = userDoc.RootElement;
+                    JsonElement root = userDoc.RootElement;
                     string gitHubId = root.GetProperty("id").ToString();
                     string gitHubLogin = root.GetProperty("login").ToString();
 
-                    // Then get the user's email
-                    var emailResponse = await client.GetAsync("https://api.github.com/user/emails");
+                    HttpResponseMessage emailResponse = await client.GetAsync("https://api.github.com/user/emails");
                     if (!emailResponse.IsSuccessStatusCode)
                     {
                         throw new Exception($"Failed to fetch email from GitHub. Status code: {emailResponse.StatusCode}");
@@ -141,7 +126,7 @@ namespace DataAccess.AuthProviders.Github
                     string emailJson = await emailResponse.Content.ReadAsStringAsync();
                     using (JsonDocument emailDoc = JsonDocument.Parse(emailJson))
                     {
-                        var emails = emailDoc.RootElement.EnumerateArray();
+                        JsonElement.ArrayEnumerator emails = emailDoc.RootElement.EnumerateArray();
                         string primaryEmail = emails.FirstOrDefault(e => e.GetProperty("primary").GetBoolean()).GetProperty("email").GetString()
                             ?? throw new Exception("No primary email found for GitHub user");
 
@@ -151,28 +136,11 @@ namespace DataAccess.AuthProviders.Github
             }
         }
 
-        private async Task<bool> UserExists(string gitHubLogin)
+        private async Task<Guid> CreateUserFromGitHub(string gitHubLogin, string email)
         {
             try
             {
-                User? user = await userService.GetUserByUsername(gitHubLogin);
-                if (user != null)
-                {
-                    return true;
-                }
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine("Error verifying user: " + exception.Message);
-            }
-            return false;
-        }
-
-        private Guid CreateUserFromGitHub(string gitHubLogin, string email)
-        {
-            try
-            {
-                User newUser = new()
+                User newUser = new ()
                 {
                     UserId = Guid.NewGuid(),
                     Username = gitHubLogin.Trim(),
@@ -181,10 +149,10 @@ namespace DataAccess.AuthProviders.Github
                     EmailAddress = email,
                     NumberOfDeletedReviews = 0,
                     HasSubmittedAppeal = false,
-                    AssignedRole = RoleType.Manager,
+                    AssignedRole = RoleType.User,
                     FullName = gitHubLogin.Trim()
                 };
-                userService.CreateUser(newUser);
+                await this.userService.CreateUser(newUser);
                 return newUser.UserId;
             }
             catch (Exception exception)
@@ -193,6 +161,5 @@ namespace DataAccess.AuthProviders.Github
             }
             return Guid.Empty;
         }
-        
     }
 }
