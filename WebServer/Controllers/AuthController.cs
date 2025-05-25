@@ -1,4 +1,5 @@
-﻿using DataAccess.AuthProviders.Facebook;
+﻿using System.Diagnostics;
+using DataAccess.AuthProviders.Facebook;
 using DataAccess.AuthProviders.Github;
 using DataAccess.AuthProviders.LinkedIn;
 using DataAccess.AuthProviders.Twitter;
@@ -7,9 +8,11 @@ using DataAccess.OAuthProviders;
 using DataAccess.Service.AdminDashboard.Interfaces;
 using DataAccess.Service.Authentication;
 using DataAccess.Service.Authentication.Interfaces;
+using DrinkDb_Auth.AuthProviders.Google;
 using DrinkDb_Auth.Service.Authentication.Components;
 using Microsoft.AspNetCore.Mvc;
 using QRCoder;
+using static QRCoder.PayloadGenerator;
 
 namespace WebServer.Controllers
 {
@@ -22,11 +25,17 @@ namespace WebServer.Controllers
         private IFacebookOAuthHelper facebookOAuthHelper;
         private ILinkedInOAuthHelper linkedInOAuthHelper;
         private ITwitterOAuth2Provider twitterOAuth2Provider;
+        private IGoogleOAuth2Provider googleOAuth2Provider;
         private IUserService userService;
         public const int KEY_LENGTH = 20;
 
+        private const string GOOGLE_WEB_CLIENT_ID = "886406538781-ufhtu1f11p331ap2gbbj43mq70626jsb.apps.googleusercontent.com";
+        private const string GOOGLE_WEB_CLIENT_SECRET = "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";
+        private const string GOOGLE_URL = "http://127.0.0.1:5000/";
+
         public AuthController(IAuthenticationService authenticationService, ITwoFactorAuthenticationService twoFactorAuthenticationService, IUserService userService,
-                IGitHubOAuthHelper gitHubOAuthHelper, ILinkedInOAuthHelper linkedInOAuthHelper, IFacebookOAuthHelper facebookOAuthHelper, ITwitterOAuth2Provider twitterOAuth2Provider)
+                IGitHubOAuthHelper gitHubOAuthHelper, ILinkedInOAuthHelper linkedInOAuthHelper, IFacebookOAuthHelper facebookOAuthHelper,
+                ITwitterOAuth2Provider twitterOAuth2Provider, IGoogleOAuth2Provider googleOAuth2Provider)
         {
             this.authenticationService = authenticationService;
             this.twoFactorAuthenticationService = twoFactorAuthenticationService;
@@ -35,6 +44,7 @@ namespace WebServer.Controllers
             this.linkedInOAuthHelper = linkedInOAuthHelper;
             this.facebookOAuthHelper = facebookOAuthHelper;
             this.twitterOAuth2Provider = twitterOAuth2Provider;
+            this.googleOAuth2Provider = googleOAuth2Provider;
         }
 
         public IActionResult MainWindow()
@@ -166,6 +176,35 @@ namespace WebServer.Controllers
             string receivedAuthCode = this.twitterOAuth2Provider.ExtractQueryParameter(fullCallbackUrl, "code");
 
             AuthenticationResponse result = await this.twitterOAuth2Provider.ExchangeCodeForTokenAsync(receivedAuthCode);
+
+            return await this.AuthenticationComplete(result);
+        }
+
+        [HttpGet("google/login")]
+        public IActionResult GoogleLogin()
+        {
+            ((GoogleOAuth2Provider)this.googleOAuth2Provider).ClientId = AuthController.GOOGLE_WEB_CLIENT_ID;
+            ((GoogleOAuth2Provider)this.googleOAuth2Provider).ClientSecret = AuthController.GOOGLE_WEB_CLIENT_SECRET;
+            ((GoogleOAuth2Provider)this.googleOAuth2Provider).RedirectUniformResourceIdentifier = AuthController.GOOGLE_URL;
+
+            string authorizationUrl = ((GoogleOAuth2Provider)this.googleOAuth2Provider).GetAuthorizationUrl();
+
+            return Redirect(authorizationUrl);
+        }
+
+        [HttpGet("")]
+        public async Task<IActionResult> GoogleCallback([FromQuery] string code, [FromQuery] string state)
+        {
+            if (string.IsNullOrEmpty(code))
+            {
+                return View("MainWindow");
+            }
+
+            ((GoogleOAuth2Provider)this.googleOAuth2Provider).ClientId = AuthController.GOOGLE_WEB_CLIENT_ID;
+            ((GoogleOAuth2Provider)this.googleOAuth2Provider).ClientSecret = AuthController.GOOGLE_WEB_CLIENT_SECRET;
+            ((GoogleOAuth2Provider)this.googleOAuth2Provider).RedirectUniformResourceIdentifier = AuthController.GOOGLE_URL;
+
+            AuthenticationResponse result = await this.googleOAuth2Provider.ExchangeCodeForTokenAsync(code);
 
             return await this.AuthenticationComplete(result);
         }

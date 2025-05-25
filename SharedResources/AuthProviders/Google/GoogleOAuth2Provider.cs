@@ -20,10 +20,10 @@ namespace DrinkDb_Auth.AuthProviders.Google
             }
         }
 
-        private string ClientId { get; }
-        private string ClientSecret { get; }
+        public string ClientId { get; set; }
+        public string ClientSecret { get; set; }
 
-        private string RedirectUniformResourceIdentifier { get; }
+        public string RedirectUniformResourceIdentifier { get; set; }
         private string AuthorizationEndpoint { get; }
         private string TokenEndpoint { get; }
         private string UserInformationEndpoint { get; }
@@ -39,8 +39,8 @@ namespace DrinkDb_Auth.AuthProviders.Google
             this.sessionService = sessionService;
             this.userService = userService;
 
-            this.ClientId = "311954949107-k5agbsvuvrsuttupcu7av2lceuk4vlag.apps.googleusercontent.com";
-            this.ClientSecret = "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";
+            this.ClientId = "886406538781-bfrki6n55fc655p8i3vjertnr62jeg4g.apps.googleusercontent.com";
+            this.ClientSecret = "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";
             this.RedirectUniformResourceIdentifier = "urn:ietf:wg:oauth:2.0:oob";
             this.AuthorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth";
             this.TokenEndpoint = "https://oauth2.googleapis.com/token";
@@ -80,7 +80,8 @@ namespace DrinkDb_Auth.AuthProviders.Google
                 { "response_type", "code" },
                 { "scope", allowedResourcesScope },
                 { "access_type", "offline" },
-                { "state", Guid.NewGuid().ToString() }
+                { "state", Guid.NewGuid().ToString() },
+                { "prompt", "consent" }
             };
 
             string transformedURLData = string.Join("&", authorizationData.Select(row => $"{Uri.EscapeDataString(row.Key)}={Uri.EscapeDataString(row.Value)}"));
