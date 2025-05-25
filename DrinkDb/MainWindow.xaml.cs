@@ -60,8 +60,6 @@ namespace DrinkDb_Auth
             {
                 presenter.Maximize();
             }
-
-            this.twitterOAuth2Provider = twitterOAuth2Provider;
         }
 
         private async Task<bool> AuthenticationComplete(AuthenticationResponse response)
