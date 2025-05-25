@@ -9,7 +9,6 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     xmlns:models="using:DataAccess.Model.AdminDashboard" 
-    xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
     xmlns:converters="using:DrinkDb_Auth.Converters"
     xmlns:viewmodels="using:DrinkDb_Auth.ViewModel.AdminDashboard"
 >
@@ -216,7 +215,6 @@
                       Background="Transparent"
                       BorderThickness="0"
                       IsItemClickEnabled="True" 
-                      ItemClick="RequestList_ItemClick"
                       ItemsSource="{x:Bind ViewModel.UpgradeRequests, Mode=OneWay}">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">

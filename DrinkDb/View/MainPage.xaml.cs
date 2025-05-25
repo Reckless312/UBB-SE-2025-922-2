@@ -129,49 +129,6 @@ namespace DrinkDb_Auth.View
             flyout.Placement = FlyoutPlacementMode.Left;
             flyout.ShowAt((FrameworkElement)anchor);
         }
-
-        private void RequestList_ItemClick(object sender, ItemClickEventArgs e)
-        {
-            if (e.ClickedItem is UpgradeRequest selectedUpgradeRequest)
-            {
-                ViewModel.SelectedUpgradeRequest = selectedUpgradeRequest;
-                ShowUpgradeRequestDetailsUI(sender);
-            }
-        }
-
-        private void ShowUpgradeRequestDetailsUI(object anchor)
-        {
-            Flyout flyout = new Flyout();
-            StackPanel panel = new StackPanel { Padding = new Thickness(10) };
-
-            TextBlock userInfo = new TextBlock
-            {
-                Text = ViewModel.UserUpgradeInfo,
-                FontSize = 18,
-            };
-
-            TextBlock reviewsHeader = new TextBlock
-            {
-                Text = "User Reviews:",
-                FontWeight = FontWeights.Bold,
-                Margin = new Thickness(0, 10, 0, 5),
-            };
-
-            ListView reviewsList = new ListView
-            {
-                ItemsSource = ViewModel.UserReviewsWithFlags,
-                Height = 100,
-            };
-
-            panel.Children.Add(userInfo);
-            panel.Children.Add(reviewsHeader);
-            panel.Children.Add(reviewsList);
-
-            flyout.Content = panel;
-            flyout.Placement = FlyoutPlacementMode.Left;
-            flyout.ShowAt((FrameworkElement)anchor);
-        }
-
         private async void AcceptUpgradeRequestButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is int requestId)
