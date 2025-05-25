@@ -42,8 +42,8 @@
                     if (reviewIsOffensive)
                     {
                         checkingMessages.Add($"Review {currentReview.ReviewId} is offensive. Hiding the review.");
-                        this.reviewsService.HideReview(currentReview.ReviewId);
-                        this.reviewsService.ResetReviewFlags(currentReview.ReviewId);
+                        await this.reviewsService.HideReview(currentReview.ReviewId);
+                        await this.reviewsService.ResetReviewFlags(currentReview.ReviewId);
                     }
                     else
                     {

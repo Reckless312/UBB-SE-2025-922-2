@@ -119,7 +119,7 @@ namespace DataAccess.Service.Authentication
             }
             catch (UserNotFoundException)
             {
-                User user = new()
+                User user = new ()
                 {
                     Username = username,
                     PasswordHash = Convert.ToBase64String(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(password)) ?? throw new Exception("Hashing failed")),

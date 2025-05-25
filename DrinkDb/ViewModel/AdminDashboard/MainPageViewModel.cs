@@ -34,6 +34,7 @@ namespace DrinkDb_Auth.ViewModel.AdminDashboard
         private bool isAppealUserBanned = true;
         private bool isWordListVisible = false;
 
+        // Constructor of warnings
         public MainPageViewModel(IReviewService reviewsService, IUserService userService,
             IUpgradeRequestsService upgradeRequestsService,ICheckersService checkersService)
         {

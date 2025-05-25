@@ -14,16 +14,14 @@ namespace WebServer.Controllers
     {
         private IReviewService reviewService;
         private IUpgradeRequestsService upgradeRequestService;
-        private IOffensiveWordsRepository offensiveWordsService;
         private ICheckersService checkersService;
         private IUserService userService;
         private IAutoCheck autoCheckService;
         public AdminController(IReviewService newReviewService, IUpgradeRequestsService newUpgradeRequestService, IRolesService newRolesService,
-            IOffensiveWordsRepository newOffensiveWordsService, ICheckersService newCheckersService, IAutoCheck autoCheck, IUserService userService)
+            ICheckersService newCheckersService, IAutoCheck autoCheck, IUserService userService)
         {
             this.reviewService = newReviewService;
             this.upgradeRequestService = newUpgradeRequestService;
-            this.offensiveWordsService = newOffensiveWordsService;
             this.checkersService = newCheckersService;
             this.autoCheckService = autoCheck;
             this.userService = userService;
@@ -33,7 +31,7 @@ namespace WebServer.Controllers
         {
             IEnumerable<Review> reviews = await this.reviewService.GetFlaggedReviews();
             IEnumerable<UpgradeRequest> upgradeRequests = await this.upgradeRequestService.RetrieveAllUpgradeRequests();
-            IEnumerable<string> offensiveWords = await this.offensiveWordsService.LoadOffensiveWords();
+            IEnumerable<string> offensiveWords = await this.checkersService.GetOffensiveWordsList();
             List<User> users = await this.userService.GetAllUsers();
             IEnumerable<User> appealeadUsers = users.Where(user => user.HasSubmittedAppeal && user.AssignedRole == RoleType.Banned);
 
@@ -95,13 +93,8 @@ namespace WebServer.Controllers
         }
         public async Task<IActionResult> AutomaticallyCheckReviews()
         {
-            foreach (Review review in await reviewService.GetFlaggedReviews())
-            {
-                if (await this.autoCheckService.AutoCheckReview(review.Content))
-                {
-                    await this.reviewService.HideReview(review.ReviewId);
-                }
-            }
+            List<Review> reviews = await this.reviewService.GetFlaggedReviews();
+            List<string> messages = await Task.Run(() => this.checkersService.RunAutoCheck(reviews));
 
             return RedirectToAction("AdminDashboard");
         }
@@ -125,9 +118,9 @@ namespace WebServer.Controllers
         {
             if (!string.IsNullOrWhiteSpace(word))
             {
-                await this.offensiveWordsService.AddWord(word);
+                await this.checkersService.AddOffensiveWordAsync(word);
             }
-            return Json(await this.offensiveWordsService.LoadOffensiveWords());
+            return Json(await this.checkersService.GetOffensiveWordsList());
         }
 
         [HttpPost]
@@ -135,9 +128,9 @@ namespace WebServer.Controllers
         {
             if (!string.IsNullOrWhiteSpace(word))
             {
-                await this.offensiveWordsService.DeleteWord(word);
+                await this.checkersService.DeleteOffensiveWordAsync(word);
             }
-            return Json(await this.offensiveWordsService.LoadOffensiveWords());
+            return Json(await this.checkersService.GetOffensiveWordsList());
         }
 
         [HttpPost]

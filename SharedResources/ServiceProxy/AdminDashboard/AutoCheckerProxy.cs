@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text.Json;
-using System.Threading.Tasks;
 using DataAccess.AutoChecker;
 
 namespace DrinkDb_Auth.ServiceProxy.AdminDashboard
 {
-    internal class AutoCheckerProxy : IAutoCheck
+    public class AutoCheckerProxy : IAutoCheck
     {
         private readonly HttpClient httpClient;
         private readonly string baseUrl;
@@ -30,7 +26,7 @@ namespace DrinkDb_Auth.ServiceProxy.AdminDashboard
         public async Task<bool> AutoCheckReview(string reviewText)
         {
             HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{baseUrl}/{API_BASE_ROUTE}/review", reviewText);
-            response.EnsureSuccessStatusCode();
+            // response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<bool>();
         }
 
