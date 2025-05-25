@@ -49,7 +49,7 @@ namespace DrinkDb_Auth.AuthProviders.Google
 
         private async Task<Guid> EnsureUserExists(string identifier, string email, string name)
         {
-            User? user = await this.userService.GetUserByUsername(name);
+            User? user = await this.userService.GetUserByUsername(email);
             Guid userId;
             if (user == null)
             {
