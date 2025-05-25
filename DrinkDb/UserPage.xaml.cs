@@ -67,9 +67,8 @@ namespace DrinkDb_Auth
             RoleType userRole = this.currentUser?.AssignedRole ?? RoleType.User;
 
             bool isAdmin = userRole == RoleType.Admin;
-            bool isManager = userRole == RoleType.Admin;
 
-            if (!isAdmin && !isManager)
+            if (!isAdmin)
             {
                 this.AdminDashboardButton.Visibility = Visibility.Collapsed;
             }
